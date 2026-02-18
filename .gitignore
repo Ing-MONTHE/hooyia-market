@@ -1,0 +1,27 @@
+# Crée le fichier .gitignore à la racine
+touch .gitignore
+```
+
+**Contenu du `.gitignore` :**
+```
+# Environnement virtuel
+venv/
+
+# Fichier sensible
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+*.log
+media/
+staticfiles/
+db.sqlite3
+
+# IDE
+.vscode/
+.idea/
