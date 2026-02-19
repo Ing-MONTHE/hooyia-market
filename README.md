@@ -39,17 +39,19 @@ Elle implémente les concepts avancés du framework :
 
 | Technologie | Version | Rôle |
 |-------------|---------|------|
-| Django | 5.0.6 | Backend principal |
-| Django REST Framework | 3.15.2 | API JSON |
-| SimpleJWT | 5.3.1 | Authentification par token JWT |
-| Daphne | 4.1.2 | Serveur ASGI (HTTP + WebSocket) |
-| Django Channels | 4.1.0 | WebSockets (chat + notifications) |
-| Celery | 5.4.0 | Tâches asynchrones |
-| Redis | 7.x | Cache · Sessions · Broker Celery · Channels |
+| Django | 5.2.11 | Backend principal |
+| Django REST Framework | 3.16.1 | API JSON |
+| SimpleJWT | 5.5.1 | Authentification par token JWT |
+| Daphne | 4.2.1 | Serveur ASGI (HTTP + WebSocket) |
+| Django Channels | 4.3.2 | WebSockets (chat + notifications) |
+| Celery | 5.6.2 | Tâches asynchrones |
+| Redis | 7.2.0 | Cache · Sessions · Broker Celery · Channels |
 | PostgreSQL | 16.x | Base de données principale |
-| django-mptt | 0.16.0 | Catégories hiérarchiques |
-| django-fsm | 2.8.2 | Machine à états (statuts commande) |
-| Pillow | 10.3.0 | Traitement images produits |
+| django-mptt | 0.18.0 | Catégories hiérarchiques |
+| django-fsm | 3.0.1 | Machine à états (statuts commande) |
+| Pillow | 12.1.1 | Traitement images produits |
+| django-celery-beat | 2.8.1 | Tâches planifiées (Beat) |
+| flower | 2.0.1 | Monitoring Celery |
 | TailwindCSS | CDN | Framework CSS frontend |
 | JavaScript | ES6+ | Fetch API → rendu JSON dynamique |
 
@@ -58,166 +60,153 @@ Elle implémente les concepts avancés du framework :
 ## 3. Architecture complète
 
 ```
-hooYia_market/
+hooyia-market/
 │
-├── config/
-│   ├── __init__.py          ✅ charge Celery au démarrage
-│   ├── settings.py          ✅ configuration complète locale
-│   ├── urls.py              ✅ routes principales
-│   ├── asgi.py              ✅ Daphne (HTTP + WebSocket)
-│   ├── wsgi.py              ✅ généré par Django
-│   └── celery.py            ✅ configuration Celery
+├── config/                              ✅ Configuration centrale
+│   ├── __init__.py                      charge Celery au démarrage Django
+│   ├── settings.py                      configuration complète (DB, Redis, JWT, Celery, MPTT...)
+│   ├── urls.py                          routes principales (HTML + API + WebSocket)
+│   ├── asgi.py                          Daphne — HTTP + WebSocket (chat + notifications)
+│   ├── celery.py                        configuration Celery + Beat
+│   └── wsgi.py
 │
 ├── apps/
-│   ├── __init__.py
 │   │
-│   ├── users/               ✅ COMPLÈTE
-│   │   ├── migrations/
-│   │   ├── templates/users/
-│   │   │   ├── login.html         ⏳ Phase 5
-│   │   │   ├── register.html      ⏳ Phase 5
-│   │   │   └── profile.html       ⏳ Phase 5
-│   │   ├── models.py        ✅ CustomUser, AdresseLivraison, TokenVerificationEmail
-│   │   ├── admin.py         ✅
-│   │   ├── apps.py          ✅
-│   │   ├── forms.py         ✅
-│   │   ├── serializers.py   ✅
-│   │   ├── views.py         ✅
-│   │   ├── api_views.py     ✅
-│   │   ├── urls.py          ✅
-│   │   ├── api_urls.py      ✅
-│   │   ├── permissions.py   ✅
-│   │   ├── signals.py       ✅
-│   │   └── tests.py         ✅
-│   │
-│   ├── products/            ✅ COMPLÈTE
-│   │   ├── migrations/
-│   │   ├── templates/products/
-│   │   │   ├── list.html
-│   │   │   └── detail.html
-│   │   ├── models.py        ✅ Produit, Categorie, ImageProduit, MouvementStock
-│   │   ├── admin.py         ✅
-│   │   ├── apps.py          ✅
-│   │   ├── serializers.py   ✅
-│   │   ├── views.py         ✅
-│   │   ├── api_views.py     ✅
-│   │   ├── urls.py          ✅
-│   │   ├── api_urls.py      ✅
-│   │   ├── managers.py      ✅
-│   │   ├── filters.py       ✅
-│   │   ├── signals.py       ✅
-│   │   └── tests.py         ✅
-│   │
-│   ├── cart/                ✅ COMPLÈTE
-│   │   ├── migrations/
-│   │   ├── templates/cart/
-│   │   │   └── cart.html
-│   │   ├── models.py        ✅ Panier, PanierItem
-│   │   ├── admin.py         ✅
-│   │   ├── apps.py          ✅
-│   │   ├── serializers.py   ✅
-│   │   ├── views.py         ✅
-│   │   ├── api_views.py     ✅
-│   │   ├── urls.py          ✅
-│   │   ├── api_urls.py      ✅
-│   │   ├── services.py      ✅
-│   │   ├── context_processors.py ✅
-│   │   └── tests.py         ✅
-│   │
-│   ├── orders/              ✅ COMPLÈTE
-│   │   ├── migrations/
-│   │   ├── templates/orders/
-│   │   │   ├── checkout.html
-│   │   │   ├── confirm.html
-│   │   │   └── history.html
-│   │   ├── models.py        ✅ Commande (FSM), LigneCommande, Paiement
-│   │   ├── admin.py         ✅
-│   │   ├── apps.py          ✅
-│   │   ├── serializers.py   ✅
-│   │   ├── views.py         ✅
-│   │   ├── api_views.py     ✅
-│   │   ├── urls.py          ✅
-│   │   ├── api_urls.py      ✅
-│   │   ├── services.py      ✅
-│   │   ├── signals.py       ✅
-│   │   └── tests.py         ✅
-│   │
-│   ├── reviews/             ⏳ Phase 4
-│   │   ├── migrations/
-│   │   ├── models.py        ← Avis
+│   ├── audit/                           ✅ Traçabilité complète
+│   │   ├── models.py                    AuditLog — IP, user, method, path, status, body
+│   │   ├── middleware.py                AuditLogMiddleware — intercepte POST/PUT/PATCH/DELETE
 │   │   ├── admin.py
 │   │   ├── apps.py
-│   │   ├── serializers.py
-│   │   ├── api_views.py
-│   │   ├── api_urls.py
-│   │   └── signals.py
-│   │
-│   ├── chat/                ⏳ Phase 4
-│   │   ├── migrations/
-│   │   ├── templates/chat/
-│   │   │   └── chat.html
-│   │   ├── models.py        ← Conversation, MessageChat
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── consumers.py     ← ChatConsumer (WebSocket)
-│   │   ├── serializers.py
 │   │   ├── views.py
-│   │   ├── api_views.py
-│   │   ├── urls.py
-│   │   ├── api_urls.py
-│   │   └── routing.py
+│   │   └── tests.py
 │   │
-│   ├── notifications/       ⏳ Phase 4
-│   │   ├── migrations/
-│   │   ├── templates/notifications/emails/
-│   │   │   ├── order_confirm.html
-│   │   │   └── status_update.html
-│   │   ├── models.py        ← Notification, EmailAsynchrone
+│   ├── users/                           ✅ Authentification & profils
+│   │   ├── models.py                    CustomUser · AdresseLivraison · TokenVerificationEmail
+│   │   ├── signals.py                   token email + panier auto à l'inscription
+│   │   ├── forms.py                     Inscription · Connexion · Profil · Adresse
+│   │   ├── serializers.py               Inscription · Profil · Adresse · ChangerMDP
+│   │   ├── permissions.py               permissions custom DRF (IsOwner, IsVendeur...)
+│   │   ├── views.py                     vues HTML
+│   │   ├── api_views.py                 vues API JSON (JWT)
+│   │   ├── urls.py                      routes HTML  /users/
+│   │   ├── api_urls.py                  routes API   /api/auth/
 │   │   ├── admin.py
 │   │   ├── apps.py
-│   │   ├── consumers.py     ← NotificationConsumer (WebSocket)
-│   │   ├── tasks.py         ← tâches Celery
-│   │   ├── serializers.py
-│   │   ├── api_views.py
-│   │   ├── api_urls.py
-│   │   ├── routing.py
-│   │   └── context_processors.py
+│   │   └── tests.py
 │   │
-│   └── audit/               ✅ COMPLÈTE
-│       ├── migrations/
-│       ├── models.py        ✅ AuditLog
-│       ├── middleware.py    ✅ AuditLogMiddleware
-│       └── admin.py         ✅
+│   ├── products/                        ✅ Catalogue produits
+│   │   ├── models.py                    Produit · Categorie (mptt) · ImageProduit · MouvementStock
+│   │   ├── managers.py                  ProduitActifManager · EnVedetteManager · StockFaibleManager
+│   │   ├── signals.py                   resize Pillow (1200×1200) · invalidation cache Redis · update stock
+│   │   ├── filters.py                   filtres django-filter (prix, catégorie, stock, statut...)
+│   │   ├── serializers.py               6 serializers (liste, détail, créer, image, catégorie, stock)
+│   │   ├── views.py                     accueil · liste · détail (avec cache Redis)
+│   │   ├── api_views.py                 CategorieViewSet · ProduitViewSet
+│   │   ├── urls.py                      routes HTML  /products/
+│   │   ├── api_urls.py                  routes API   /api/produits/ · /api/categories/
+│   │   ├── admin.py                     inline images · actions masse · export CSV
+│   │   ├── apps.py
+│   │   └── tests.py                     30 tests
+│   │
+│   ├── cart/                            ✅ Panier d'achat
+│   │   ├── models.py                    Panier (OneToOne user) · PanierItem (prix_snapshot)
+│   │   ├── services.py                  CartService : add · remove · update · calculate_total
+│   │   ├── context_processors.py        cart_count → badge navbar
+│   │   ├── serializers.py
+│   │   ├── views.py                     vues HTML
+│   │   ├── api_views.py                 CRUD panier + items
+│   │   ├── urls.py                      routes HTML  /cart/
+│   │   ├── api_urls.py                  routes API   /api/panier/
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests.py                     17 tests
+│   │
+│   ├── orders/                          ✅ Commandes & paiements
+│   │   ├── models.py                    Commande (FSM) · LigneCommande · Paiement
+│   │   │                                EN_ATTENTE → CONFIRMEE → EN_PREPARATION → EXPEDIEE → LIVREE
+│   │   │                                Tout sauf LIVREE → ANNULEE (remet le stock)
+│   │   ├── services.py                  OrderService : create_from_cart · annuler
+│   │   ├── signals.py                   CONFIRMEE → email Celery · LIVREE → rappel avis Celery
+│   │   ├── serializers.py
+│   │   ├── views.py                     vues HTML
+│   │   ├── api_views.py                 CRUD commandes + actions FSM
+│   │   ├── urls.py                      routes HTML  /orders/
+│   │   ├── api_urls.py                  routes API   /api/commandes/
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests.py                     19 tests
+│   │
+│   ├── reviews/                         ✅ Avis clients
+│   │   ├── models.py                    Avis (note 1-5 · is_validated · unique_together user+produit)
+│   │   ├── signals.py                   recalcul note_moyenne + nombre_avis sur Produit
+│   │   ├── serializers.py
+│   │   ├── api_views.py                 AvisViewSet : liste · créer · valider · supprimer
+│   │   ├── api_urls.py                  routes API   /api/avis/
+│   │   ├── admin.py                     badges validation · actions masse
+│   │   ├── apps.py
+│   │   ├── views.py
+│   │   └── tests.py                     17 tests
+│   │
+│   ├── chat/                            ✅ Chat temps réel
+│   │   ├── models.py                    Conversation (normalisée ID1<ID2) · MessageChat (is_read)
+│   │   ├── consumers.py                 ChatConsumer — WebSocket async · broadcast Redis · marquage lu
+│   │   ├── routing.py                   ws://localhost:8000/ws/chat/<id>/
+│   │   ├── serializers.py
+│   │   ├── views.py                     vues HTML chat_liste · chat_detail
+│   │   ├── api_views.py                 liste · créer · détail · envoyer · marquer_lu
+│   │   ├── urls.py                      routes HTML  /chat/
+│   │   ├── api_urls.py                  routes API   /api/chat/
+│   │   ├── admin.py                     inline messages · badges statut lu
+│   │   ├── apps.py
+│   │   └── tests.py                     25 tests (dont WebSocket via TransactionTestCase)
+│   │
+│   ├── notifications/                   ✅ Notifications & emails async
+│   │   ├── models.py                    Notification (4 types) · EmailAsynchrone (log Celery)
+│   │   ├── tasks.py                     5 tâches Celery (bind · retry x3) :
+│   │   │                                  send_order_confirmation_email
+│   │   │                                  send_status_update_email
+│   │   │                                  send_review_reminder (countdown 3j)
+│   │   │                                  alert_low_stock (Beat quotidien 8h)
+│   │   │                                  cleanup_old_carts (Beat mensuel)
+│   │   ├── consumers.py                 NotificationConsumer — groupe Redis par user
+│   │   ├── routing.py                   ws://localhost:8000/ws/notifications/
+│   │   ├── context_processors.py        notif_count → badge navbar
+│   │   ├── serializers.py
+│   │   ├── api_views.py                 liste · marquer_lue · tout_lire
+│   │   ├── api_urls.py                  routes API   /api/notifications/
+│   │   ├── admin.py                     badges colorés · actions masse
+│   │   ├── apps.py
+│   │   ├── views.py
+│   │   └── tests.py                     19 tests (Celery mock + WebSocket)
+│   │
+│   └── __init__.py
 │
-├── templates/               ⏳ Phase 5
-│   ├── base.html
+├── templates/                           ⏳ Phase 5
+│   ├── base.html                        layout principal (badges cart_count + notif_count)
 │   ├── home.html
 │   └── partials/
-│       ├── navbar.html
+│       ├── navbar.html                  logo + badges + init WebSocket
 │       ├── footer.html
-│       └── toast.html
+│       └── toast.html                   notifications toast JS
+│   └── (users/ products/ cart/ orders/ chat/ notifications/emails/)
 │
 ├── static/
 │   ├── img/
-│   │   └── logo.svg         ✅ Logo HooYia Market
-│   ├── js/                  ⏳ Phase 5
-│   │   ├── api.js
-│   │   ├── products.js
-│   │   ├── cart.js
-│   │   ├── chat.js
-│   │   └── notifications.js
+│   │   └── logo.svg                     ✅ #1E3A8A bleu marine + #F97316 orange
+│   ├── js/                              ⏳ Phase 5
+│   │   ├── api.js                       wrapper fetch() + JWT refresh auto
+│   │   ├── products.js                  catalogue JSON + filtres + infinite scroll
+│   │   ├── cart.js                      panier AJAX + badge navbar
+│   │   ├── chat.js                      client WebSocket chat
+│   │   └── notifications.js             client WebSocket notifications + badge
 │   └── css/
-│       └── custom.css       ⏳ Phase 5
+│       └── custom.css                   ⏳ Phase 5
 │
-├── media/
-│   └── products/
-│
-├── venv/
+├── media/products/                      images uploadées (resize auto Pillow)
 ├── manage.py
-├── requirements.txt         ✅
-├── .env                     ✅
-├── .gitignore               ✅
-└── README.md                ✅
+├── requirements.txt                     ✅
+├── .env                                 ✅
+└── .gitignore                           ✅
 ```
 
 ---
@@ -234,7 +223,7 @@ hooYia_market/
 ```bash
 # 1. Cloner le projet
 git clone https://github.com/Ing-MONTHE/hooyia-market
-cd hooYia_market
+cd hooyia-market
 
 # 2. Créer et activer l'environnement virtuel
 python3 -m venv venv
@@ -293,7 +282,7 @@ celery -A config flower --port=5555
 | http://localhost:8000 | Site principal |
 | http://localhost:8000/admin | Administration Django |
 | http://localhost:8000/api/produits/ | API produits (JSON) |
-| http://localhost:5555 | Monitoring Celery |
+| http://localhost:5555 | Monitoring Celery (Flower) |
 | ws://localhost:8000/ws/chat/\<id\>/ | WebSocket chat |
 | ws://localhost:8000/ws/notifications/ | WebSocket notifications |
 
@@ -306,66 +295,71 @@ celery -A config flower --port=5555
 | **Phase 1** | Setup + config + `users` + `audit` | ✅ Complète |
 | **Phase 2** | `products` | ✅ Complète |
 | **Phase 3** | `cart` + `orders` | ✅ Complète |
-| **Phase 4** | `reviews` + `chat` + `notifications` | ⏳ À faire |
+| **Phase 4** | `reviews` + `chat` + `notifications` | ✅ Complète |
 | **Phase 5** | Frontend HTML + TailwindCSS + JS | ⏳ À faire |
 | **Phase 6** | Tests globaux + Lancement complet | ⏳ À faire |
 
-### Fichiers complétés ✅
+### Bilan tests (Phases 1–4)
 
-| App | Fichiers créés |
-|-----|---------------|
-| `config/` | `settings.py`, `urls.py`, `asgi.py`, `celery.py`, `__init__.py` |
-| `audit/` | `models.py`, `middleware.py`, `admin.py` |
-| `users/` | `models.py`, `admin.py`, `apps.py`, `forms.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `permissions.py`, `signals.py`, `tests.py` |
-| `products/` | `models.py`, `admin.py`, `apps.py`, `managers.py`, `filters.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `signals.py`, `tests.py` |
-| `cart/` | `models.py`, `admin.py`, `apps.py`, `services.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `context_processors.py`, `tests.py` |
-| `orders/` | `models.py`, `admin.py`, `apps.py`, `services.py`, `signals.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `tests.py` |
-| `notifications/` | `tasks.py` (stub — implémentation complète Phase 4) |
-| `static/img/` | `logo.svg` |
-| Racine | `.env`, `.gitignore`, `requirements.txt`, `README.md` |
+| App | Tests |
+|-----|-------|
+| `users` | ✅ |
+| `products` | ✅ 30 tests |
+| `cart` | ✅ 17 tests |
+| `orders` | ✅ 19 tests |
+| `reviews` | ✅ 17 tests |
+| `chat` | ✅ 25 tests |
+| `notifications` | ✅ 19 tests |
+| **Total** | **≥ 127 tests** |
 
 ---
 
 ## 7. Structure des apps
 
+### `apps.audit` ✅
+- **AuditLog** : enregistre toutes les actions POST/PUT/PATCH/DELETE avec IP, user, method, path, status
+- **AuditLogMiddleware** : s'exécute automatiquement à chaque requête HTTP
+
 ### `apps.users` ✅
-- **CustomUser** : modèle utilisateur personnalisé (email comme identifiant)
+- **CustomUser** : modèle utilisateur personnalisé (email comme identifiant unique)
 - **AdresseLivraison** : adresses multiples, une seule par défaut via `save()`
 - **TokenVerificationEmail** : token UUID, expire après 24h
 - **Signals** : création token + email vérification + panier auto à l'inscription
 - **JWT** : access token (1h) + refresh token (7 jours) avec blacklist
 
-### `apps.audit` ✅
-- **AuditLog** : enregistre toutes les actions POST/PUT/PATCH/DELETE
-- **AuditLogMiddleware** : s'exécute automatiquement à chaque requête
-
-### `apps.products` ⏳ Phase 2
-- **Produit** : nom, slug, description, prix, stock, catégorie, images
+### `apps.products` ✅
+- **Produit** : nom, slug auto-unique, description, prix, prix_promo, stock, statut
 - **Categorie** : arbre hiérarchique via django-mptt
-- **ImageProduit** : images multiples, resize automatique Pillow
-- **MouvementStock** : historique entrées/sorties stock
+- **ImageProduit** : images multiples, resize automatique Pillow (1200×1200)
+- **MouvementStock** : historique entrées/sorties, met à jour le stock via signal
+- **Cache** : invalidation automatique Redis via signal post_save/delete
 
-### `apps.cart` ⏳ Phase 3
-- **Panier** : lié à l'utilisateur (OneToOne)
-- **PanierItem** : produit + quantité + prix snapshot
+### `apps.cart` ✅
+- **Panier** : lié à l'utilisateur (OneToOne), créé automatiquement à l'inscription
+- **PanierItem** : produit + quantité + prix_snapshot (protège contre les changements de prix)
 - **CartService** : add, remove, update, calculate_total
 
-### `apps.orders` ⏳ Phase 3
-- **Commande** : statuts FSM (EN_ATTENTE → LIVREE)
-- **LigneCommande** : détail produit + prix snapshot
+### `apps.orders` ✅
+- **Commande** : FSM — `EN_ATTENTE → CONFIRMEE → EN_PREPARATION → EXPEDIEE → LIVREE`
+- **Annulation** : possible depuis tout état sauf LIVREE, remet le stock automatiquement
+- **LigneCommande** : détail produit + prix snapshot au moment de la commande
 - **Paiement** : mode, statut, référence
 
-### `apps.reviews` ⏳ Phase 4
-- **Avis** : note (1-5), commentaire
-- Signal → recalcul note_moyenne du produit
+### `apps.reviews` ✅
+- **Avis** : note 1–5, commentaire, modération admin (is_validated)
+- **Règle métier** : seuls les produits commandés et reçus peuvent être avisés (vérifié dans le serializer)
+- **Signal** : recalcul automatique de `note_moyenne` et `nombre_avis` sur le Produit
 
-### `apps.chat` ⏳ Phase 4
-- **Conversation** + **MessageChat**
-- **ChatConsumer** WebSocket
+### `apps.chat` ✅
+- **Conversation** : entre deux utilisateurs, normalisée (participant1.id < participant2.id pour éviter les doublons)
+- **MessageChat** : texte + horodatage + is_read
+- **ChatConsumer** : WebSocket async, diffusion via Redis channel layer, marquage lu automatique
 
-### `apps.notifications` ⏳ Phase 4
-- **Notification** + **EmailAsynchrone**
-- **Tâches Celery** : emails confirmation, rappels, alertes stock
+### `apps.notifications` ✅
+- **Notification** : 4 types (commande, livraison, avis, stock)
+- **EmailAsynchrone** : log de chaque tentative d'envoi email (statut en_attente/envoye/echec)
+- **5 tâches Celery** : toutes avec bind + retry x3 — emails affichés en console en local
+- **NotificationConsumer** : WebSocket par groupe Redis personnel à chaque utilisateur
 
 ---
 
@@ -383,19 +377,26 @@ celery -A config flower --port=5555
 | POST | `/api/auth/changer-password/` | Auth | Changer mot de passe |
 | GET/POST | `/api/auth/adresses/` | Auth | Adresses livraison |
 | DELETE | `/api/auth/adresses/<id>/` | Auth | Supprimer adresse |
-| GET | `/api/produits/` | Public | Liste produits paginée |
+| GET | `/api/produits/` | Public | Liste produits paginée + filtres |
 | POST | `/api/produits/` | Vendeur | Créer produit |
 | GET | `/api/produits/<id>/` | Public | Détail produit |
 | PUT/PATCH | `/api/produits/<id>/` | Owner | Modifier produit |
 | DELETE | `/api/produits/<id>/` | Admin | Supprimer produit |
+| GET | `/api/categories/` | Public | Arbre catégories (mptt) |
 | GET/POST | `/api/avis/` | GET: Public | Avis produits |
-| GET | `/api/categories/` | Public | Arbre catégories |
+| PATCH | `/api/avis/<id>/valider/` | Admin | Valider un avis |
 | GET/POST | `/api/panier/` | Auth | Voir/modifier panier |
-| PATCH/DELETE | `/api/panier/items/<id>/` | Auth | Modifier item |
+| PATCH/DELETE | `/api/panier/items/<id>/` | Auth | Modifier item panier |
 | GET/POST | `/api/commandes/` | Auth | Commandes utilisateur |
 | POST | `/api/commandes/<id>/annuler/` | Owner | Annuler commande |
-| GET | `/api/notifications/` | Auth | Notifications |
-| PATCH | `/api/notifications/<id>/lire/` | Auth | Marquer lu |
+| GET | `/api/chat/` | Auth | Liste conversations |
+| POST | `/api/chat/creer/` | Auth | Créer une conversation |
+| GET | `/api/chat/<id>/` | Auth | Détail + messages |
+| POST | `/api/chat/<id>/envoyer/` | Auth | Envoyer un message |
+| POST | `/api/chat/<id>/marquer_lu/` | Auth | Marquer messages lus |
+| GET | `/api/notifications/` | Auth | Notifications in-app |
+| PATCH | `/api/notifications/<id>/lire/` | Auth | Marquer une notif lue |
+| POST | `/api/notifications/tout_lire/` | Auth | Tout marquer comme lu |
 
 ---
 
@@ -428,15 +429,17 @@ notifSocket.onmessage = (e) => {
 
 | Tâche | Déclencheur | Description |
 |-------|-------------|-------------|
-| `send_order_confirmation_email` | Signal commande CONFIRMEE | Email HTML confirmation |
-| `send_status_update_email` | Transition FSM | Email mise à jour livraison |
-| `send_review_reminder` | 3j après livraison (Beat) | Rappel laisser un avis |
-| `alert_low_stock` | Tous les jours à 8h (Beat) | Email admin stock faible |
-| `cleanup_old_carts` | Tous les 30j (Beat) | Supprime paniers inactifs |
+| `send_order_confirmation_email` | Signal commande CONFIRMEE | Email HTML + Notification in-app |
+| `send_status_update_email` | Transition FSM statut | Email mise à jour livraison |
+| `send_review_reminder` | 3j après livraison (countdown) | Rappel laisser un avis |
+| `alert_low_stock` | Beat quotidien à 8h | Email admin stock faible |
+| `cleanup_old_carts` | Beat mensuel | Supprime paniers inactifs > 30j |
+
+Chaque tâche : crée un `EmailAsynchrone` en DB → envoie l'email → met à jour statut → crée une `Notification` → diffuse via WebSocket.
 
 ---
 
-## 11. Frontend — JavaScript & JSON
+## 11. Frontend — JavaScript & JSON (⏳ Phase 5)
 
 ```javascript
 // static/js/api.js — wrapper global fetch()
@@ -458,6 +461,9 @@ async function apiFetch(url, options = {}) {
   return response.json();
 }
 ```
+
+Fichiers à créer : `api.js` · `products.js` · `cart.js` · `chat.js` · `notifications.js`  
+Templates à créer : `base.html` · `home.html` · `partials/` · `users/` · `products/` · `cart/` · `orders/` · `chat/` · emails HTML
 
 ---
 
