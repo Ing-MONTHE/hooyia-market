@@ -14,15 +14,15 @@ urlpatterns = [
     # ── Pages HTML ──────────────────────────────────────────
     path('',          include('apps.products.urls')),
     path('compte/',    include('apps.users.urls')),
-    # ⏳ path('panier/',   include('apps.cart.urls')),
-    # ⏳ path('commandes/', include('apps.orders.urls')),
+    path('panier/',   include('apps.cart.urls')),
+    path('commandes/', include('apps.orders.urls')),
     # ⏳ path('chat/',     include('apps.chat.urls')),
 
     # ── API REST ─────────────────────────────────────────────
     path('api/auth/',  include('apps.users.api_urls')),
     path('api/produits/',      include('apps.products.api_urls')),
-    # ⏳ path('api/panier/',        include('apps.cart.api_urls')),
-    # ⏳ path('api/commandes/',     include('apps.orders.api_urls')),
+    path('api/panier/',        include('apps.cart.api_urls')),
+    path('api/commandes/',     include('apps.orders.api_urls')),
     # ⏳ path('api/avis/',          include('apps.reviews.api_urls')),
     # ⏳ path('api/notifications/', include('apps.notifications.api_urls')),
     # ⏳ path('api/chat/',          include('apps.chat.api_urls')),

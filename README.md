@@ -90,55 +90,57 @@ hooYia_market/
 │   │   ├── signals.py       ✅
 │   │   └── tests.py         ✅
 │   │
-│   ├── products/            ⏳ Phase 2
+│   ├── products/            ✅ COMPLÈTE
 │   │   ├── migrations/
 │   │   ├── templates/products/
 │   │   │   ├── list.html
 │   │   │   └── detail.html
-│   │   ├── models.py        ← Produit, Categorie, ImageProduit, MouvementStock
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── api_views.py
-│   │   ├── urls.py
-│   │   ├── api_urls.py
-│   │   ├── managers.py
-│   │   ├── filters.py
-│   │   ├── signals.py
-│   │   └── tests.py
+│   │   ├── models.py        ✅ Produit, Categorie, ImageProduit, MouvementStock
+│   │   ├── admin.py         ✅
+│   │   ├── apps.py          ✅
+│   │   ├── serializers.py   ✅
+│   │   ├── views.py         ✅
+│   │   ├── api_views.py     ✅
+│   │   ├── urls.py          ✅
+│   │   ├── api_urls.py      ✅
+│   │   ├── managers.py      ✅
+│   │   ├── filters.py       ✅
+│   │   ├── signals.py       ✅
+│   │   └── tests.py         ✅
 │   │
-│   ├── cart/                ⏳ Phase 3
+│   ├── cart/                ✅ COMPLÈTE
 │   │   ├── migrations/
 │   │   ├── templates/cart/
 │   │   │   └── cart.html
-│   │   ├── models.py        ← Panier, PanierItem
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── api_views.py
-│   │   ├── urls.py
-│   │   ├── api_urls.py
-│   │   ├── services.py
-│   │   └── context_processors.py
+│   │   ├── models.py        ✅ Panier, PanierItem
+│   │   ├── admin.py         ✅
+│   │   ├── apps.py          ✅
+│   │   ├── serializers.py   ✅
+│   │   ├── views.py         ✅
+│   │   ├── api_views.py     ✅
+│   │   ├── urls.py          ✅
+│   │   ├── api_urls.py      ✅
+│   │   ├── services.py      ✅
+│   │   ├── context_processors.py ✅
+│   │   └── tests.py         ✅
 │   │
-│   ├── orders/              ⏳ Phase 3
+│   ├── orders/              ✅ COMPLÈTE
 │   │   ├── migrations/
 │   │   ├── templates/orders/
 │   │   │   ├── checkout.html
 │   │   │   ├── confirm.html
 │   │   │   └── history.html
-│   │   ├── models.py        ← Commande (FSM), LigneCommande, Paiement
-│   │   ├── admin.py
-│   │   ├── apps.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── api_views.py
-│   │   ├── urls.py
-│   │   ├── api_urls.py
-│   │   ├── services.py
-│   │   └── signals.py
+│   │   ├── models.py        ✅ Commande (FSM), LigneCommande, Paiement
+│   │   ├── admin.py         ✅
+│   │   ├── apps.py          ✅
+│   │   ├── serializers.py   ✅
+│   │   ├── views.py         ✅
+│   │   ├── api_views.py     ✅
+│   │   ├── urls.py          ✅
+│   │   ├── api_urls.py      ✅
+│   │   ├── services.py      ✅
+│   │   ├── signals.py       ✅
+│   │   └── tests.py         ✅
 │   │
 │   ├── reviews/             ⏳ Phase 4
 │   │   ├── migrations/
@@ -302,8 +304,8 @@ celery -A config flower --port=5555
 | Phase | Contenu | Statut |
 |-------|---------|--------|
 | **Phase 1** | Setup + config + `users` + `audit` | ✅ Complète |
-| **Phase 2** | `products` | ⏳ À faire |
-| **Phase 3** | `cart` + `orders` | ⏳ À faire |
+| **Phase 2** | `products` | ✅ Complète |
+| **Phase 3** | `cart` + `orders` | ✅ Complète |
 | **Phase 4** | `reviews` + `chat` + `notifications` | ⏳ À faire |
 | **Phase 5** | Frontend HTML + TailwindCSS + JS | ⏳ À faire |
 | **Phase 6** | Tests globaux + Lancement complet | ⏳ À faire |
@@ -315,6 +317,10 @@ celery -A config flower --port=5555
 | `config/` | `settings.py`, `urls.py`, `asgi.py`, `celery.py`, `__init__.py` |
 | `audit/` | `models.py`, `middleware.py`, `admin.py` |
 | `users/` | `models.py`, `admin.py`, `apps.py`, `forms.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `permissions.py`, `signals.py`, `tests.py` |
+| `products/` | `models.py`, `admin.py`, `apps.py`, `managers.py`, `filters.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `signals.py`, `tests.py` |
+| `cart/` | `models.py`, `admin.py`, `apps.py`, `services.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `context_processors.py`, `tests.py` |
+| `orders/` | `models.py`, `admin.py`, `apps.py`, `services.py`, `signals.py`, `serializers.py`, `views.py`, `api_views.py`, `urls.py`, `api_urls.py`, `tests.py` |
+| `notifications/` | `tasks.py` (stub — implémentation complète Phase 4) |
 | `static/img/` | `logo.svg` |
 | Racine | `.env`, `.gitignore`, `requirements.txt`, `README.md` |
 

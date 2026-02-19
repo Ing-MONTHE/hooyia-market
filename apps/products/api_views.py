@@ -21,7 +21,7 @@ from .serializers import (
     MouvementStockSerializer
 )
 from .filters import ProduitFilter
-from apps.users.permissions import EstVendeur, EstProprietaire
+from apps.users.permissions import EstVendeur, EstProprietaire, EstAdminOuLectureSeule
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -130,7 +130,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         if self.action in ['update', 'partial_update']:
             return [permissions.IsAuthenticated()]
         if self.action == 'destroy':
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), EstAdminOuLectureSeule()]
         return [permissions.IsAuthenticated()]
 
     def retrieve(self, request, *args, **kwargs):

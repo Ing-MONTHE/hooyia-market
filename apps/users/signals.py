@@ -63,14 +63,14 @@ L'équipe HooYia Market
 # On le crée automatiquement dès l'inscription.
 # ═══════════════════════════════════════════════════════════════
 
-# @receiver(post_save, sender=CustomUser)
-# def creer_panier_utilisateur(sender, instance, created, **kwargs):
-#     """
-#     Dès qu'un utilisateur est créé, on lui crée un panier vide.
-#     Ainsi il n'y a jamais besoin de vérifier si le panier existe.
-#     """
-#     if created:
-#         # Import ici pour éviter les imports circulaires
-#         # (users importe cart, cart importe users → boucle infinie)
-#         from apps.cart.models import Panier
-#         Panier.objects.create(utilisateur=instance)
+@receiver(post_save, sender=CustomUser)
+def creer_panier_utilisateur(sender, instance, created, **kwargs):
+    """
+    Dès qu'un utilisateur est créé, on lui crée un panier vide.
+    Ainsi il n'y a jamais besoin de vérifier si le panier existe.
+    """
+    if created:
+        # Import ici pour éviter les imports circulaires
+        # (users importe cart, cart importe users → boucle infinie)
+        from apps.cart.models import Panier
+        Panier.objects.create(utilisateur=instance)

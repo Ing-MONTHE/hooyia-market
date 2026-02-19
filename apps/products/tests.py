@@ -70,7 +70,7 @@ class CategorieModelTest(TestCase):
         """Une catégorie doit être créée avec un slug automatique"""
         cat = Categorie.objects.create(nom='Téléphones')
         self.assertEqual(cat.nom, 'Téléphones')
-        self.assertEqual(cat.slug, 'tlphones')  # slugify retire les accents
+        self.assertEqual(cat.slug, 'telephones')  # slugify retire les accents
 
     def test_categorie_parent(self):
         """Une sous-catégorie doit avoir un parent"""
