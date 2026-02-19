@@ -233,7 +233,7 @@ hooYia_market/
 
 ```bash
 # 1. Cloner le projet
-git clone https://github.com/ton-compte/hooYia_market.git
+git clone https://github.com/Ing-MONTHE/hooyia-market
 cd hooYia_market
 
 # 2. Créer et activer l'environnement virtuel
