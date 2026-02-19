@@ -26,16 +26,29 @@ User = get_user_model()
 # ═══════════════════════════════════════════════════════════════
 
 def creer_utilisateur(username='testuser', email='test@test.com', password='testpass123'):
-    """Crée un utilisateur de test standard"""
+    """
+    Crée un utilisateur de test standard.
+    is_active=True est obligatoire : SimpleJWT refuse de générer un token
+    pour un utilisateur inactif, ce qui provoquerait des 401 dans tous les tests API.
+    """
     return User.objects.create_user(
         username=username,
         email=email,
-        password=password
+        password=password,
+        is_active=True,    # ← CRITIQUE : sans ça, JWT renvoie 401
     )
 
 def creer_produit(nom='Produit Test', prix=10000):
-    """Crée un produit de test actif avec un vendeur"""
-    vendeur   = creer_utilisateur('vendeur@test.com', 'vendeur')
+    """
+    Crée un produit de test actif avec un vendeur.
+    get_or_create sur le vendeur évite l'UniqueViolation quand plusieurs
+    tests appellent creer_produit() dans la même transaction de test.
+    """
+    # get_or_create → pas de doublon si le vendeur existe déjà dans ce test
+    vendeur, _ = User.objects.get_or_create(
+        username='vendeur_test',
+        defaults={'email': 'vendeur@test.com', 'is_active': True}
+    )
     categorie, _ = Categorie.objects.get_or_create(nom='Catégorie Test')
     return Produit.objects.create(
         nom=nom,
@@ -214,7 +227,8 @@ class AvisAPITest(APITestCase):
 
     def setUp(self):
         self.user    = creer_utilisateur()
-        self.admin   = User.objects.create_superuser('admin', 'admin@test.com', 'admin123')
+        # create_superuser force is_active=True par défaut dans Django
+        self.admin   = User.objects.create_superuser(username='admin', email='admin@test.com', password='admin123')
         self.produit = creer_produit()
 
         # Authentification JWT
@@ -238,16 +252,35 @@ class AvisAPITest(APITestCase):
 
     def test_liste_avis_filtre_par_produit(self):
         """GET /api/avis/?produit=<id> filtre les avis d'un produit"""
-        autre_produit = creer_produit('Autre produit')
+        # Deux produits distincts avec des vendeurs distincts pour éviter UniqueViolation
+        autre_user_vendeur = User.objects.create_user(
+            username='vendeur2', email='vendeur2@test.com', password='pass', is_active=True
+        )
+        categorie, _ = Categorie.objects.get_or_create(nom='Catégorie Test')
+        from decimal import Decimal
+        autre_produit = Produit.objects.create(
+            nom='Autre produit', description='desc', prix=Decimal('5000'),
+            stock=5, categorie=categorie, statut='actif', vendeur=autre_user_vendeur
+        )
+
+        # Un avis validé sur chaque produit
+        # Note : l'utilisateur ne peut pas avoir deux avis sur le MÊME produit (unique_together)
+        # Ici on crée un avis sur self.produit et un sur autre_produit → pas de conflit
         Avis.objects.create(
             utilisateur=self.user, produit=self.produit, note=4, is_validated=True
         )
-        Avis.objects.create(
-            utilisateur=self.user, produit=autre_produit, note=5, is_validated=True
+        # Pour l'autre produit, on utilise un utilisateur différent car self.user
+        # n'a pas de commande LIVREE sur autre_produit (et unique_together s'applique par user+produit)
+        autre_user = User.objects.create_user(
+            username='autreuser2', email='autreuser2@test.com', password='pass', is_active=True
         )
+        Avis.objects.create(
+            utilisateur=autre_user, produit=autre_produit, note=5, is_validated=True
+        )
+
         response = self.client.get(f'/api/avis/?produit={self.produit.id}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Seul l'avis du produit cible doit apparaître
+        # La pagination DRF retourne un dict avec 'results' et 'count'
         self.assertEqual(response.data['count'], 1)
 
     def test_creer_avis_sans_achat_refuse(self):
@@ -273,6 +306,8 @@ class AvisAPITest(APITestCase):
 
     def test_valider_avis_admin(self):
         """POST /api/avis/<id>/valider/ fonctionne pour un admin"""
+        # L'admin voit TOUS les avis (validés ou non) via get_queryset()
+        # Donc on peut créer un avis non validé et l'admin le trouvera
         avis = Avis.objects.create(
             utilisateur=self.user, produit=self.produit, note=4
         )
@@ -284,6 +319,8 @@ class AvisAPITest(APITestCase):
 
     def test_valider_avis_non_admin_refuse(self):
         """POST /api/avis/<id>/valider/ est refusé pour un utilisateur normal"""
+        # L'utilisateur voit ses propres avis (validés ou non) via get_queryset()
+        # Donc l'avis non validé est trouvé (200/403) mais l'action est refusée
         avis = Avis.objects.create(
             utilisateur=self.user, produit=self.produit, note=4
         )
@@ -292,6 +329,7 @@ class AvisAPITest(APITestCase):
 
     def test_supprimer_son_avis(self):
         """DELETE /api/avis/<id>/ fonctionne pour le propriétaire de l'avis"""
+        # L'utilisateur voit ses propres avis (même non validés) via get_queryset()
         avis = Avis.objects.create(
             utilisateur=self.user, produit=self.produit, note=3
         )
@@ -302,13 +340,11 @@ class AvisAPITest(APITestCase):
     def test_supprimer_avis_autre_utilisateur_refuse(self):
         """DELETE /api/avis/<id>/ est refusé si l'avis appartient à un autre utilisateur"""
         autre_user = creer_utilisateur('autre', 'autre@test.com')
+        # L'avis doit être is_validated=True pour être visible par self.user dans le queryset
+        # (self.user ne voit que ses propres avis + les avis validés des autres)
         avis = Avis.objects.create(
-            utilisateur=autre_user, produit=self.produit, note=5
+            utilisateur=autre_user, produit=self.produit, note=5, is_validated=True
         )
-        response = self.client.delete(f'/api/avis/{avis.id}/')
-        # L'avis validé n'est pas visible par défaut si non validé, mais testons le cas
-        # où l'avis est validé et appartient à un autre user
-        avis.is_validated = True
-        avis.save()
+        # self.user tente de supprimer l'avis d'un autre → 403
         response = self.client.delete(f'/api/avis/{avis.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

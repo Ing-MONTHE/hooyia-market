@@ -16,7 +16,7 @@ urlpatterns = [
     path('compte/',    include('apps.users.urls')),
     path('panier/',   include('apps.cart.urls')),
     path('commandes/', include('apps.orders.urls')),
-    # ⏳ path('chat/',     include('apps.chat.urls')),
+    path('chat/',     include('apps.chat.urls')),
 
     # ── API REST ─────────────────────────────────────────────
     path('api/auth/',  include('apps.users.api_urls')),
@@ -24,8 +24,8 @@ urlpatterns = [
     path('api/panier/',        include('apps.cart.api_urls')),
     path('api/commandes/',     include('apps.orders.api_urls')),
     path('api/avis/',          include('apps.reviews.api_urls')),
-    # ⏳ path('api/notifications/', include('apps.notifications.api_urls')),
-    # ⏳ path('api/chat/',          include('apps.chat.api_urls')),
+    path('api/notifications/', include('apps.notifications.api_urls')),
+    path('api/chat/',          include('apps.chat.api_urls')),
 ]
 
 if settings.DEBUG:

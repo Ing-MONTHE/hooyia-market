@@ -17,11 +17,6 @@ Lien avec products/Produit :
   (reviews/signals.py) recalcule automatiquement :
     - produit.note_moyenne  (moyenne de toutes les notes validées)
     - produit.nombre_avis   (nombre total d'avis validés)
-
-Note sur la migration :
-  La migration 0001_initial utilise le nom de champ 'is_validated' (avec 'd')
-  et PositiveSmallIntegerField pour la note.
-  On garde ces noms pour rester cohérent avec la migration existante.
 """
 from django.db import models
 from django.conf import settings
