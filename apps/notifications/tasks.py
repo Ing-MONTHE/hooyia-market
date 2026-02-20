@@ -389,7 +389,7 @@ def cleanup_old_carts():
     # (on garde les paniers vides : ils sont créés automatiquement à l'inscription)
     paniers_vieux = Panier.objects.filter(
         date_modification__lt=seuil,
-        articles__isnull=False    # Seulement les paniers avec des articles
+        items__isnull=False    # Seulement les paniers avec des articles
     ).distinct()
 
     nb = paniers_vieux.count()
