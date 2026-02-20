@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}HooYia Market{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}HooYia Market — Électronique & Informatique au meilleur prix{% endblock %}" />
+
+  <!-- ── Tailwind CSS CDN ── -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ── Tailwind Config ── -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#fff8f0',
+              100: '#ffecd6',
+              200: '#ffd5a8',
+              300: '#ffb870',
+              400: '#ff9633',
+              500: '#f97316',  /* orange principal */
+              600: '#ea6000',
+              700: '#c24d00',
+              800: '#9a3e06',
+              900: '#7c340b',
+            },
+            ink: {
+              DEFAULT: '#0f0e0c',
+              soft:    '#1c1a17',
+              muted:   '#3d3a35',
+            },
+            cream: {
+              DEFAULT: '#faf8f5',
+              warm:    '#f4f1eb',
+              border:  '#e8e3da',
+            },
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'Georgia', 'serif'],
+            body:    ['"DM Sans"', 'sans-serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'card':  '0 2px 12px 0 rgba(15,14,12,0.08)',
+            'card-hover': '0 8px 32px 0 rgba(15,14,12,0.14)',
+            'btn':   '0 2px 8px 0 rgba(249,115,22,0.35)',
+          },
+          borderRadius: {
+            'xl2': '1rem',
+            'xl3': '1.5rem',
+          },
+          animation: {
+            'fade-in':    'fadeIn 0.4s ease forwards',
+            'slide-up':   'slideUp 0.4s ease forwards',
+            'toast-in':   'toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'toast-out':  'toastOut 0.25s ease forwards',
+          },
+          keyframes: {
+            fadeIn:  { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+            toastIn:  { from: { opacity: '0', transform: 'translateX(110%)' }, to: { opacity: '1', transform: 'translateX(0)' } },
+            toastOut: { from: { opacity: '1', transform: 'translateX(0)' }, to: { opacity: '0', transform: 'translateX(110%)' } },
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- ── Google Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- ── Custom Base CSS ── -->
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="font-body bg-cream text-ink min-h-screen flex flex-col antialiased">
+
+  <!-- ════════════════════════════════════════
+       NAVBAR
+  ════════════════════════════════════════ -->
+  {% include 'partials/navbar.html' %}
+
+  <!-- ════════════════════════════════════════
+       MESSAGES DJANGO (Flash)
+  ════════════════════════════════════════ -->
+  {% if messages %}
+  <div id="django-messages" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    {% for message in messages %}
+    <div class="message-toast pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl2 shadow-card border animate-toast-in
+      {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800
+      {% elif message.tags == 'error'   %}bg-red-50   border-red-200   text-red-800
+      {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800
+      {% else %}bg-white border-cream-border text-ink{% endif %}">
+      <!-- Icône -->
+      <span class="mt-0.5 flex-shrink-0 text-lg leading-none">
+        {% if message.tags == 'success' %}✓
+        {% elif message.tags == 'error' %}✕
+        {% elif message.tags == 'warning' %}⚠
+        {% else %}ℹ{% endif %}
+      </span>
+      <p class="text-sm font-body font-medium leading-snug flex-1">{{ message }}</p>
+      <button onclick="this.closest('.message-toast').remove()" class="ml-1 opacity-40 hover:opacity-100 transition-opacity text-xs leading-none mt-0.5">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ════════════════════════════════════════
+       CONTENU PRINCIPAL
+  ════════════════════════════════════════ -->
+  <main class="flex-1 {% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+  {% include 'partials/footer.html' %}
+
+  <!-- ════════════════════════════════════════
+       TOAST CONTAINER (JS dynamique)
+  ════════════════════════════════════════ -->
+  {% include 'partials/toast.html' %}
+
+  <!-- ════════════════════════════════════════
+       SCRIPTS GLOBAUX
+  ════════════════════════════════════════ -->
+  <script src="{% static 'js/api.js' %}"></script>
+
+  <!-- Auto-dismiss Django messages après 5s -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.message-toast').forEach((el, i) => {
+        setTimeout(() => {
+          el.style.animation = 'toastOut 0.25s ease forwards';
+          setTimeout(() => el.remove(), 250);
+        }, 5000 + i * 300);
+      });
+    });
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

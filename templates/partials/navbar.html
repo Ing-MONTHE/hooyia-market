@@ -1,0 +1,151 @@
+{% load static %}
+<header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center h-[72px] gap-6">
+
+      <!-- LOGO -->
+      <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 flex-shrink-0">
+        <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-10 w-auto" />
+        <span class="font-display text-xl text-ink leading-none tracking-tight">HooYia</span>
+      </a>
+
+      <!-- LIENS CENTRÉS -->
+      <div class="hidden lg:flex items-center gap-1 flex-1 justify-center">
+        <div class="relative" id="catalogue-container">
+          <button onclick="toggleCatalogue()" class="flex items-center gap-1 px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">
+            Catalogue
+            <svg id="catalogue-arrow" class="h-3.5 w-3.5 opacity-50 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div id="catalogue-dropdown" class="absolute top-full left-0 mt-1 hidden z-50">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-card-hover p-2 min-w-[220px]">
+              <a href="{% url 'products:liste' %}" class="block px-3 py-2.5 text-sm text-ink hover:bg-cream-warm hover:text-brand-600 rounded-lg font-body transition-colors">Tous les produits</a>
+              <div class="my-1 border-t border-gray-100"></div>
+              {% for cat in categories %}
+              <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="block px-3 py-2 text-sm text-ink/70 hover:bg-cream-warm hover:text-brand-600 rounded-lg font-body transition-colors">{{ cat.nom }}</a>
+              {% endfor %}
+              <div class="my-1 border-t border-gray-100"></div>
+              <a href="{% url 'products:liste' %}?promo=true" class="block px-3 py-2 text-sm text-brand-600 font-medium hover:bg-brand-50 rounded-lg font-body transition-colors">Promotions</a>
+              <a href="{% url 'products:liste' %}?en_vedette=true" class="block px-3 py-2 text-sm text-ink/70 hover:bg-cream-warm rounded-lg font-body transition-colors">Produits vedette</a>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'products:liste' %}?ordering=-date_creation" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Nouveautés</a>
+        <a href="{% url 'cart:panier' %}" class="relative flex items-center p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Panier">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          {% if cart_count > 0 %}<span class="absolute -top-0.5 -right-0.5 bg-brand-500 text-white text-[10px] font-mono font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ cart_count }}</span>{% endif %}
+        </a>
+        <button class="relative flex items-center p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Notifications">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          {% if notif_count > 0 %}<span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-mono font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ notif_count }}</span>{% endif %}
+        </button>
+        {% if user.is_authenticated %}
+        <a href="{% url 'orders:historique' %}" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Mes commandes</a>
+        {% endif %}
+      </div>
+
+      <!-- ACTIONS DROITE -->
+      <div class="flex items-center gap-2 ml-auto lg:ml-0">
+        <!-- Recherche -->
+        <div class="hidden md:flex relative">
+          <input type="search" id="search-input" placeholder="Rechercher un produit…"
+            class="w-56 bg-gray-50 border border-gray-300 text-ink placeholder-gray-400 text-sm rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-brand-500 focus:bg-white transition-all font-body"
+            autocomplete="off"
+            onkeydown="if(event.key==='Enter') window.location.href='/produits/?search='+encodeURIComponent(this.value)" />
+          <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+
+        {% if user.is_authenticated %}
+          <!-- Panier -->
+          <a href="{% url 'cart:panier' %}" class="relative p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Panier">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            <span id="cart-badge" class="{% if cart_count == 0 %}hidden {% endif %}absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-brand-500 text-white text-[10px] font-mono font-semibold rounded-full flex items-center justify-center px-1">{% if cart_count > 0 %}{{ cart_count }}{% endif %}</span>
+          </a>
+          <!-- Notifications -->
+          <button class="relative p-2 text-ink/60 hover:text-brand-600 transition-colors">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span id="notif-badge" class="{% if notif_count == 0 %}hidden {% endif %}absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-mono font-semibold rounded-full flex items-center justify-center px-1">{% if notif_count > 0 %}{{ notif_count }}{% endif %}</span>
+          </button>
+          <!-- Profil -->
+          <div class="relative" id="profile-menu-container">
+            <button onclick="toggleProfileMenu()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 hover:border-brand-400 transition-all">
+              <span class="h-7 w-7 rounded-lg bg-brand-600 flex items-center justify-center text-xs font-semibold text-white">{{ user.prenom|first|upper }}{{ user.nom|first|upper }}</span>
+              <span class="hidden md:block text-sm font-body font-medium text-ink">{{ user.prenom }}</span>
+              <svg class="h-3.5 w-3.5 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="profile-dropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-card-hover py-1.5">
+              <div class="px-4 py-2.5 border-b border-gray-100">
+                <p class="text-xs text-ink/40 font-body">{{ user.prenom }} {{ user.nom }}</p>
+                <p class="text-sm text-ink font-body font-medium truncate">{{ user.email }}</p>
+              </div>
+              <a href="{% url 'users:profil' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mon profil</a>
+              <a href="{% url 'users:ajouter_adresse' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mes adresses</a>
+              <a href="{% url 'cart:panier' %}" class="flex items-center px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mon panier {% if cart_count > 0 %}<span class="ml-auto badge badge-orange">{{ cart_count }}</span>{% endif %}</a>
+              <a href="{% url 'orders:historique' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mes commandes</a>
+              <a href="/chat/" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Messages</a>
+              {% if user.is_staff %}
+              <div class="my-1 border-t border-gray-100"></div>
+              <a href="/admin/" class="block px-4 py-2.5 text-sm text-brand-600 hover:bg-brand-50 transition-colors font-body">Administration</a>
+              {% endif %}
+              <div class="my-1 border-t border-gray-100"></div>
+              <a href="{% url 'users:deconnexion' %}" class="block px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body">Déconnexion</a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'users:connexion' %}" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Connexion</a>
+          <a href="{% url 'users:inscription' %}" class="px-4 py-2 text-sm font-body font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all shadow-btn">S'inscrire</a>
+        {% endif %}
+
+        <!-- Burger -->
+        <button class="lg:hidden p-2 text-ink/60 hover:text-ink rounded-lg" onclick="toggleMobileMenu()">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-100 py-3 pb-4 space-y-1">
+      <div class="relative mb-3">
+        <input type="search" placeholder="Rechercher…"
+          class="w-full bg-gray-50 border border-gray-300 text-ink placeholder-gray-400 text-sm rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-brand-500 font-body"
+          onkeydown="if(event.key==='Enter') window.location.href='/produits/?search='+encodeURIComponent(this.value)" />
+        <svg class="absolute left-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+      <a href="{% url 'products:liste' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:text-brand-600 hover:bg-cream-warm rounded-xl">Catalogue</a>
+      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="block px-3 py-2.5 text-sm font-body text-ink hover:text-brand-600 hover:bg-cream-warm rounded-xl">Nouveautés</a>
+      <a href="{% url 'products:liste' %}?promo=true" class="block px-3 py-2.5 text-sm font-body text-brand-600 hover:bg-brand-50 rounded-xl">Promos</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'cart:panier' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
+      <a href="{% url 'orders:historique' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Mes commandes</a>
+      <a href="/chat/" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Messages</a>
+      <a href="{% url 'users:profil' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Mon profil</a>
+      {% if user.is_staff %}<a href="/admin/" class="block px-3 py-2.5 text-sm font-body text-brand-600 hover:bg-brand-50 rounded-xl">Administration</a>{% endif %}
+      <a href="{% url 'users:deconnexion' %}" class="block px-3 py-2.5 text-sm font-body text-red-500 hover:bg-red-50 rounded-xl">Déconnexion</a>
+      {% else %}
+      <a href="{% url 'users:connexion' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Connexion</a>
+      <a href="{% url 'users:inscription' %}" class="block px-3 py-2.5 text-sm font-body font-semibold text-brand-600 hover:bg-brand-50 rounded-xl">S'inscrire</a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<script>
+  function toggleCatalogue() {
+    const dd = document.getElementById('catalogue-dropdown');
+    const arrow = document.getElementById('catalogue-arrow');
+    const isHidden = dd.classList.toggle('hidden');
+    arrow.style.transform = isHidden ? '' : 'rotate(180deg)';
+  }
+  function toggleProfileMenu() { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
+  function toggleMobileMenu()  { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+  document.addEventListener('click', (e) => {
+    const cat = document.getElementById('catalogue-container');
+    if (cat && !cat.contains(e.target)) {
+      document.getElementById('catalogue-dropdown')?.classList.add('hidden');
+      document.getElementById('catalogue-arrow').style.transform = '';
+    }
+    const c = document.getElementById('profile-menu-container');
+    if (c && !c.contains(e.target)) document.getElementById('profile-dropdown')?.classList.add('hidden');
+  });
+</script>

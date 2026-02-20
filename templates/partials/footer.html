@@ -1,0 +1,72 @@
+{% load static %}
+<!-- ══════════════════════════════════════════════════
+     FOOTER — HooYia Market
+══════════════════════════════════════════════════ -->
+<footer class="bg-[#0d1b4b] text-white/60 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- ── Ligne principale ── -->
+    <div class="py-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-white/8">
+
+      <!-- Marque -->
+      <div class="md:col-span-1">
+        <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 mb-4">
+          <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-7 w-auto bg-white rounded-md p-1 opacity-100" />
+          <span class="font-display text-lg text-white leading-none">HooYia Market</span>
+        </a>
+        <p class="text-sm font-body leading-relaxed text-white/45">
+          La marketplace tech de référence.<br/>Produits soigneusement sélectionnés.
+        </p>
+      </div>
+
+      <!-- Catalogue -->
+      <div>
+        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Catalogue</h4>
+        <ul class="space-y-2.5">
+          <li><a href="{% url 'products:liste' %}" class="text-sm font-body hover:text-white transition-colors">Tous les produits</a></li>
+          <li><a href="{% url 'products:liste' %}?en_vedette=true" class="text-sm font-body hover:text-white transition-colors">Produits en vedette</a></li>
+          <li><a href="{% url 'products:liste' %}?promo=true" class="text-sm font-body hover:text-white transition-colors">Promotions</a></li>
+        </ul>
+      </div>
+
+      <!-- Compte -->
+      <div>
+        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Mon compte</h4>
+        <ul class="space-y-2.5">
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'users:profil' %}" class="text-sm font-body hover:text-white transition-colors">Mon profil</a></li>
+          <li><a href="{% url 'orders:historique' %}" class="text-sm font-body hover:text-white transition-colors">Mes commandes</a></li>
+          <li><a href="{% url 'cart:panier' %}" class="text-sm font-body hover:text-white transition-colors">Mon panier</a></li>
+          {% else %}
+          <li><a href="{% url 'users:connexion' %}" class="text-sm font-body hover:text-white transition-colors">Connexion</a></li>
+          <li><a href="{% url 'users:inscription' %}" class="text-sm font-body hover:text-white transition-colors">S'inscrire</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Support</h4>
+        <ul class="space-y-2.5">
+          {% if user.is_authenticated %}
+          <li><a href="/chat/" class="text-sm font-body hover:text-white transition-colors">Contacter le support</a></li>
+          {% endif %}
+          <li><span class="text-sm font-body text-white/30">contact@hooyia.market</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── Ligne copyright ── -->
+    <div class="py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-xs font-body text-white/30">
+        © {% now "Y" %} HooYia Market. Tous droits réservés.
+      </p>
+      <div class="flex items-center gap-1">
+        <span class="inline-flex items-center gap-1.5 text-xs font-body text-white/20">
+          <span class="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></span>
+          Tous systèmes opérationnels
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>

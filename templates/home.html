@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HooYia Market — Électronique & Informatique{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="relative bg-ink overflow-hidden">
+  <!-- Image de fond floutée -->
+  <div class="absolute inset-0 pointer-events-none">
+    <img src="{% static 'img/Image_de_fond.png' %}" alt="" class="w-full h-full object-cover object-center opacity-20 blur-sm scale-110" />
+    <div class="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/60"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+    <div class="max-w-2xl">
+      <!-- Pill badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/12 border border-brand-500/20 mb-6 animate-fade-in">
+        <span class="h-1.5 w-1.5 rounded-full bg-brand-400 animate-pulse"></span>
+        <span class="text-xs font-body font-medium text-brand-300 tracking-wide">Marketplace tech de confiance</span>
+      </div>
+
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-5 animate-slide-up" style="animation-delay:0.05s">
+        L'électronique<br/>
+        <span class="text-brand-400">à votre portée.</span>
+      </h1>
+
+      <p class="text-base md:text-lg text-white/55 font-body leading-relaxed mb-8 animate-slide-up" style="animation-delay:0.1s">
+        Des produits soigneusement sélectionnés, des prix transparents,
+        une livraison rapide. HooYia, c'est le commerce tech qui vous respecte.
+      </p>
+
+      <div class="flex flex-wrap gap-3 animate-slide-up" style="animation-delay:0.15s">
+        <a href="{% url 'products:liste' %}" class="btn-primary px-6 py-3 text-base">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Voir le catalogue
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'users:inscription' %}" class="btn-secondary px-6 py-3 text-base bg-white/15 border-white/30 text-white hover:bg-white/25">
+          Créer un compte
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Stats -->
+      <div class="flex flex-wrap gap-6 mt-12 animate-fade-in" style="animation-delay:0.25s">
+        <div>
+          <p class="text-2xl font-display text-white font-bold">500+</p>
+          <p class="text-xs text-white/40 font-body mt-0.5">Produits disponibles</p>
+        </div>
+        <div class="w-px bg-white/10"></div>
+        <div>
+          <p class="text-2xl font-display text-white font-bold">24h</p>
+          <p class="text-xs text-white/40 font-body mt-0.5">Expédition rapide</p>
+        </div>
+        <div class="w-px bg-white/10"></div>
+        <div>
+          <p class="text-2xl font-display text-white font-bold">4.8★</p>
+          <p class="text-xs text-white/40 font-body mt-0.5">Note moyenne</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CATÉGORIES RACINES
+══════════════════════════════════════════ -->
+{% if categories %}
+<section class="bg-cream-warm border-b border-cream-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <a href="{% url 'products:liste' %}"
+         class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-ink text-white text-sm font-body font-medium transition-all">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Tout voir
+      </a>
+      {% for cat in categories %}
+      <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
+         class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-cream-border text-sm font-body font-medium text-ink hover:border-brand-400 hover:text-brand-600 transition-all">
+        {{ cat.nom }}
+        {% if cat.nombre_produits %}
+        <span class="text-xs text-white/70 bg-ink/70 rounded-full px-1.5 py-0.5 leading-none">{{ cat.nombre_produits }}</span>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ══════════════════════════════════════════
+     PRODUITS EN VEDETTE
+══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-xs font-body font-semibold text-brand-500 uppercase tracking-widest mb-1">Sélection du moment</p>
+      <h2 class="font-display text-2xl md:text-3xl text-ink">Produits en vedette</h2>
+    </div>
+    <a href="{% url 'products:liste' %}?en_vedette=true" class="hidden sm:flex items-center gap-1.5 text-sm font-body font-medium text-brand-600 hover:text-brand-700 transition-colors">
+      Voir tout
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </a>
+  </div>
+
+  <!-- Grille produits — chargée via JS -->
+  <div id="featured-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <!-- Skeletons pendant le chargement -->
+    {% for i in "12345678" %}
+    <div class="card p-3">
+      <div class="skeleton aspect-square rounded-lg mb-3"></div>
+      <div class="skeleton h-3 rounded w-3/4 mb-2"></div>
+      <div class="skeleton h-3 rounded w-1/2 mb-3"></div>
+      <div class="skeleton h-5 rounded w-1/3"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Lien mobile -->
+  <div class="mt-6 text-center sm:hidden">
+    <a href="{% url 'products:liste' %}?en_vedette=true" class="btn-secondary px-6 py-2.5">
+      Voir tous les produits en vedette
+    </a>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     BANNIÈRE PROMO
+══════════════════════════════════════════ -->
+<section class="bg-ink mx-4 sm:mx-6 lg:mx-8 rounded-xl3 overflow-hidden mb-14 max-w-7xl lg:mx-auto">
+  <div class="relative px-8 md:px-12 py-10 md:py-14 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute right-0 top-0 w-72 h-72 bg-brand-500/10 rounded-full translate-x-1/3 -translate-y-1/3 blur-2xl"></div>
+    </div>
+    <div class="relative text-center md:text-left">
+      <p class="text-brand-400 text-sm font-body font-semibold uppercase tracking-widest mb-2">Offres limitées</p>
+      <h3 class="font-display text-2xl md:text-3xl text-white mb-2">Jusqu'à −40% sur les promos</h3>
+      <p class="text-white/50 font-body text-sm">Stocks limités · Renouvelés chaque semaine</p>
+    </div>
+    <a href="{% url 'products:liste' %}?promo=true" class="relative flex-shrink-0 btn-primary px-7 py-3 text-base">
+      Voir les promotions
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </a>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     NOUVEAUX PRODUITS
+══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-16">
+
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-xs font-body font-semibold text-brand-500 uppercase tracking-widest mb-1">Vient d'arriver</p>
+      <h2 class="font-display text-2xl md:text-3xl text-ink">Nouveautés</h2>
+    </div>
+    <a href="{% url 'products:liste' %}?ordering=-date_creation" class="hidden sm:flex items-center gap-1.5 text-sm font-body font-medium text-brand-600 hover:text-brand-700 transition-colors">
+      Voir tout
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    </a>
+  </div>
+
+  <div id="new-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for i in "1234" %}
+    <div class="card p-3">
+      <div class="skeleton aspect-square rounded-lg mb-3"></div>
+      <div class="skeleton h-3 rounded w-3/4 mb-2"></div>
+      <div class="skeleton h-3 rounded w-1/2 mb-3"></div>
+      <div class="skeleton h-5 rounded w-1/3"></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     AVANTAGES
+══════════════════════════════════════════ -->
+<section class="bg-cream-warm border-t border-cream-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div>
+          <h4 class="font-body font-semibold text-ink text-sm mb-1">Produits vérifiés</h4>
+          <p class="text-xs text-ink/50 font-body leading-relaxed">Chaque produit est contrôlé avant mise en ligne.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8 5-8-5V5l8 5 8-5v2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11v8h16v-8"/></svg>
+        </div>
+        <div>
+          <h4 class="font-body font-semibold text-ink text-sm mb-1">Livraison rapide</h4>
+          <p class="text-xs text-ink/50 font-body leading-relaxed">Expédition sous 24h pour les commandes confirmées.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+        </div>
+        <div>
+          <h4 class="font-body font-semibold text-ink text-sm mb-1">Support réactif</h4>
+          <p class="text-xs text-ink/50 font-body leading-relaxed">Chat en direct avec notre équipe, 7j/7.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+          <h4 class="font-body font-semibold text-ink text-sm mb-1">Paiement sécurisé</h4>
+          <p class="text-xs text-ink/50 font-body leading-relaxed">Transactions protégées, données chiffrées.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+/**
+ * home.js — Chargement produits en vedette + nouveautés
+ * Consomme GET /api/produits/?en_vedette=true
+ * et GET /api/produits/?ordering=-date_creation&page_size=4
+ */
+
+// ── Template carte produit ──
+function cardHTML(p) {
+  const img = p.image_principale
+    ? `<img src="${p.image_principale}" alt="${p.nom}" class="product-img w-full" loading="lazy" />`
+    : `<div class="product-img w-full bg-cream-warm flex items-center justify-center text-ink/20">
+        <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+       </div>`;
+
+  const prix = p.prix_promo
+    ? `<span class="price-promo">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} FCFA</span>
+       <span class="price-original ml-1">${parseFloat(p.prix).toLocaleString('fr-FR')}</span>`
+    : `<span class="price-main">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} FCFA</span>`;
+
+  const remise = p.pourcentage_remise > 0
+    ? `<span class="badge badge-orange absolute top-2 left-2">−${p.pourcentage_remise}%</span>`
+    : '';
+
+  const stock = !p.est_en_stock
+    ? `<span class="badge badge-gray absolute top-2 right-2">Épuisé</span>`
+    : '';
+
+  const etoiles = p.note_moyenne > 0
+    ? `<div class="flex items-center gap-1 mt-1">
+        <span class="text-yellow-400 text-xs">★</span>
+        <span class="text-xs font-body text-ink/50">${parseFloat(p.note_moyenne).toFixed(1)} (${p.nombre_avis || 0})</span>
+       </div>`
+    : '';
+
+  return `
+    <a href="/produits/${p.slug}/" class="card p-3 flex flex-col group block animate-slide-up">
+      <div class="relative mb-3 overflow-hidden rounded-lg">
+        ${img}
+        ${remise}
+        ${stock}
+      </div>
+      <p class="text-xs font-body text-ink/40 mb-0.5">${p.categorie_nom || ''}</p>
+      <h3 class="text-sm font-body font-medium text-ink leading-snug line-clamp-2 flex-1 group-hover:text-brand-600 transition-colors">${p.nom}</h3>
+      ${etoiles}
+      <div class="mt-2 flex items-center justify-between gap-2">
+        <div>${prix}</div>
+        ${p.est_en_stock ? `
+        <button onclick="ajouterPanier(event, ${p.id})"
+          class="flex-shrink-0 h-8 w-8 rounded-lg bg-brand-50 hover:bg-brand-500 text-brand-500 hover:text-white flex items-center justify-center transition-all duration-150">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>` : ''}
+      </div>
+    </a>`;
+}
+
+// ── Rendu dans une grille ──
+function renderGrid(gridId, produits) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  if (!produits.length) {
+    grid.innerHTML = `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Aucun produit disponible.</div>`;
+    return;
+  }
+  grid.innerHTML = produits.map(cardHTML).join('');
+}
+
+// ── Ajouter au panier ──
+async function ajouterPanier(e, produitId) {
+  e.preventDefault();
+  e.stopPropagation();
+  {% if user.is_authenticated %}
+  try {
+    await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
+    window.toast('Produit ajouté au panier !', 'success');
+    // Met à jour badge navbar
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+      const count = (parseInt(badge.textContent) || 0) + 1;
+      badge.textContent = count;
+      badge.classList.remove('hidden');
+    }
+  } catch {}
+  {% else %}
+  window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
+  {% endif %}
+}
+
+// ── Chargement au DOMContentLoaded ──
+document.addEventListener('DOMContentLoaded', async () => {
+  // Produits en vedette
+  try {
+    const data = await API.get('/api/produits/?en_vedette=true&page_size=8', { silentError: true });
+    renderGrid('featured-grid', data?.results || data || []);
+  } catch {
+    document.getElementById('featured-grid').innerHTML =
+      `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Impossible de charger les produits.</div>`;
+  }
+
+  // Nouveautés
+  try {
+    const data = await API.get('/api/produits/?ordering=-date_creation&page_size=4', { silentError: true });
+    renderGrid('new-grid', data?.results || data || []);
+  } catch {
+    document.getElementById('new-grid').innerHTML =
+      `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Impossible de charger les nouveautés.</div>`;
+  }
+});
+</script>
+{% endblock %}

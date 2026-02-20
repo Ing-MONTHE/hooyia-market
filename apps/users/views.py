@@ -33,7 +33,7 @@ def inscription(request):
     """
     # Si l'utilisateur est déjà connecté, on le redirige
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('products:accueil')
 
     if request.method == 'POST':
         form = InscriptionForm(request.POST)
@@ -63,7 +63,7 @@ def connexion(request):
     POST → vérifie les identifiants et connecte l'utilisateur
     """
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('products:accueil')
 
     if request.method == 'POST':
         form = ConnexionForm(request.POST)
@@ -116,7 +116,7 @@ def deconnexion(request):
     """
     logout(request)
     messages.info(request, "Vous êtes déconnecté.")
-    return redirect('home')
+    return redirect('products:accueil')
 
 
 # ═══════════════════════════════════════════════════════════════
