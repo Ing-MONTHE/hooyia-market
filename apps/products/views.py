@@ -4,9 +4,14 @@ Vues HTML pour le catalogue produits.
 Ces vues retournent des pages HTML qui chargent
 les données via JavaScript (fetch API → JSON).
 """
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.cache import cache
-from .models import Produit, Categorie
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from .models import Produit, Categorie, ImageProduit
+
+def est_admin(user):
+    return user.is_authenticated and user.is_staff
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -96,3 +101,154 @@ def detail_produit(request, slug):
         'titre'  : f'{produit.nom} — HooYia Market',
     }
     return render(request, 'products/detail.html', context)
+
+# ═══════════════════════════════════════════════════════════════
+# VUE — Ajouter un produit (admin uniquement)
+# ═══════════════════════════════════════════════════════════════
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
+def ajouter_produit(request):
+    categories = Categorie.objects.filter(est_active=True)
+
+    if request.method == 'POST':
+        nom = request.POST.get('nom', '').strip()
+        description = request.POST.get('description', '').strip()
+        description_courte = request.POST.get('description_courte', '').strip()
+        categorie_id = request.POST.get('categorie')
+        prix = request.POST.get('prix')
+        prix_promo = request.POST.get('prix_promo') or None
+        stock = request.POST.get('stock', 0)
+        stock_minimum = request.POST.get('stock_minimum', 5)
+        statut = request.POST.get('statut', 'actif')
+        en_vedette = 'en_vedette' in request.POST
+
+        if not nom or not description or not prix:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+        else:
+            try:
+                produit = Produit.objects.create(
+                    nom=nom,
+                    description=description,
+                    description_courte=description_courte,
+                    categorie_id=categorie_id if categorie_id else None,
+                    prix=prix,
+                    prix_promo=prix_promo,
+                    stock=stock,
+                    stock_minimum=stock_minimum,
+                    statut=statut,
+                    en_vedette=en_vedette,
+                    vendeur=request.user,
+                )
+
+                # Traitement des images
+                images = request.FILES.getlist('images')
+                for i, img_file in enumerate(images):
+                    ImageProduit.objects.create(
+                        produit=produit,
+                        image=img_file,
+                        ordre=i,
+                        est_principale=(i == 0),
+                    )
+
+                # Invalider le cache
+                cache.delete('categories_api')
+                cache.delete('categories_racines')
+
+                messages.success(request, f"Produit « {produit.nom} » créé avec succès !")
+                return redirect('products:detail', slug=produit.slug)
+
+            except Exception as e:
+                messages.error(request, f"Erreur lors de la création : {str(e)}")
+
+    context = {
+        'categories': categories,
+        'form': type('obj', (object,), {
+            'nom': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+            'description': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+            'description_courte': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+            'prix': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+            'prix_promo': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+            'stock': type('f', (object,), {'value': lambda s: 0, 'errors': []})(),
+            'stock_minimum': type('f', (object,), {'value': lambda s: 5, 'errors': []})(),
+            'statut': type('f', (object,), {'value': 'actif', 'errors': []})(),
+            'en_vedette': type('f', (object,), {'value': False, 'errors': []})(),
+            'categorie': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
+        })(),
+    }
+    return render(request, 'products/ajouter_produit.html', context)
+
+
+# ═══════════════════════════════════════════════════════════════
+# VUE — Modifier un produit (admin uniquement)
+# ═══════════════════════════════════════════════════════════════
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
+def modifier_produit(request, produit_id):
+    produit = get_object_or_404(Produit, id=produit_id)
+    categories = Categorie.objects.filter(est_active=True)
+
+    if request.method == 'POST':
+        produit.nom = request.POST.get('nom', produit.nom).strip()
+        produit.description = request.POST.get('description', produit.description).strip()
+        produit.description_courte = request.POST.get('description_courte', '').strip()
+        categorie_id = request.POST.get('categorie')
+        produit.categorie_id = categorie_id if categorie_id else None
+        produit.prix = request.POST.get('prix', produit.prix)
+        produit.prix_promo = request.POST.get('prix_promo') or None
+        produit.stock = request.POST.get('stock', produit.stock)
+        produit.stock_minimum = request.POST.get('stock_minimum', produit.stock_minimum)
+        produit.statut = request.POST.get('statut', produit.statut)
+        produit.en_vedette = 'en_vedette' in request.POST
+
+        try:
+            produit.save()
+
+            # Nouvelles images
+            images = request.FILES.getlist('images')
+            for i, img_file in enumerate(images):
+                ImageProduit.objects.create(
+                    produit=produit,
+                    image=img_file,
+                    ordre=produit.images.count() + i,
+                    est_principale=(produit.images.count() == 0 and i == 0),
+                )
+
+            cache.delete(f'produit_slug_{produit.slug}')
+            messages.success(request, "Produit modifié avec succès !")
+            return redirect('products:detail', slug=produit.slug)
+        except Exception as e:
+            messages.error(request, f"Erreur : {str(e)}")
+
+    context = {
+        'produit': produit,
+        'categories': categories,
+        'form': type('obj', (object,), {
+            'nom': type('f', (object,), {'value': produit.nom, 'errors': []})(),
+            'description': type('f', (object,), {'value': produit.description, 'errors': []})(),
+            'description_courte': type('f', (object,), {'value': produit.description_courte, 'errors': []})(),
+            'prix': type('f', (object,), {'value': str(produit.prix), 'errors': []})(),
+            'prix_promo': type('f', (object,), {'value': str(produit.prix_promo) if produit.prix_promo else '', 'errors': []})(),
+            'stock': type('f', (object,), {'value': produit.stock, 'errors': []})(),
+            'stock_minimum': type('f', (object,), {'value': produit.stock_minimum, 'errors': []})(),
+            'statut': type('f', (object,), {'value': produit.statut, 'errors': []})(),
+            'en_vedette': type('f', (object,), {'value': produit.en_vedette, 'errors': []})(),
+            'categorie': type('f', (object,), {'value': str(produit.categorie_id) if produit.categorie_id else '', 'errors': []})(),
+        })(),
+    }
+    return render(request, 'products/ajouter_produit.html', context)
+
+
+# ═══════════════════════════════════════════════════════════════
+# VUE — Supprimer un produit (admin uniquement)
+# ═══════════════════════════════════════════════════════════════
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
+def supprimer_produit(request, produit_id):
+    produit = get_object_or_404(Produit, id=produit_id)
+    if request.method == 'POST':
+        nom = produit.nom
+        cache.delete(f'produit_slug_{produit.slug}')
+        produit.delete()
+        messages.success(request, f"Produit « {nom} » supprimé.")
+        return redirect('products:liste')
+    return redirect('products:detail', slug=produit.slug)

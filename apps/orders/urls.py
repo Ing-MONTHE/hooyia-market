@@ -1,9 +1,5 @@
 """
 HooYia Market — orders/urls.py
-Routes HTML pour les pages commandes.
-
-Inclus dans config/urls.py via :
-  path('commandes/', include('apps.orders.urls'))
 """
 from django.urls import path
 from . import views
@@ -11,10 +7,11 @@ from . import views
 app_name = 'orders'
 
 urlpatterns = [
-    # Page de passage de commande (checkout)
-    path('',            views.checkout,     name='checkout'),
-    # Page de confirmation après commande
-    path('<int:pk>/',   views.confirmation, name='confirmation'),
-    # Historique des commandes
-    path('historique/', views.historique,   name='historique'),
+    # Checkout — passer_commande est un alias de checkout
+    path('',                views.checkout,     name='checkout'),
+    path('passer/',         views.checkout,     name='passer_commande'),
+    # Confirmation
+    path('<int:pk>/',       views.confirmation, name='confirmation'),
+    # Historique
+    path('historique/',     views.historique,   name='historique'),
 ]

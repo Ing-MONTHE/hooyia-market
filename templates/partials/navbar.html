@@ -30,17 +30,6 @@
           </div>
         </div>
         <a href="{% url 'products:liste' %}?ordering=-date_creation" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Nouveautés</a>
-        <a href="{% url 'cart:panier' %}" class="relative flex items-center p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Panier">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          {% if cart_count > 0 %}<span class="absolute -top-0.5 -right-0.5 bg-brand-500 text-white text-[10px] font-mono font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ cart_count }}</span>{% endif %}
-        </a>
-        <button class="relative flex items-center p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Notifications">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-          {% if notif_count > 0 %}<span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-mono font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ notif_count }}</span>{% endif %}
-        </button>
-        {% if user.is_authenticated %}
-        <a href="{% url 'orders:historique' %}" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Mes commandes</a>
-        {% endif %}
       </div>
 
       <!-- ACTIONS DROITE -->

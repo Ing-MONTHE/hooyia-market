@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes commandes — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="font-display text-3xl text-ink">Mes commandes</h1>
+  </div>
+
+  <!-- Skeleton -->
+  <div id="skeleton" class="space-y-4 animate-pulse">
+    {% for i in "1234" %}
+    <div class="card p-5 flex gap-4">
+      <div class="bg-cream-warm rounded-xl w-16 h-16 flex-shrink-0"></div>
+      <div class="flex-1 space-y-2">
+        <div class="h-3 bg-cream-warm rounded w-1/3"></div>
+        <div class="h-3 bg-cream-warm rounded w-1/2"></div>
+      </div>
+      <div class="h-8 bg-cream-warm rounded w-24"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Vide -->
+  <div id="empty" class="hidden text-center py-24">
+    <svg class="h-20 w-20 text-ink/10 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    </svg>
+    <p class="font-display text-2xl text-ink/30 mb-2">Aucune commande</p>
+    <p class="text-ink/40 font-body text-sm mb-6">Vous n'avez pas encore passé de commande.</p>
+    <a href="{% url 'products:liste' %}" class="btn-primary py-3 px-6">Voir le catalogue</a>
+  </div>
+
+  <!-- Liste commandes -->
+  <div id="commandes-list" class="hidden space-y-4"></div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const STATUTS_LABELS = {
+  en_attente: 'En attente', confirmee: 'Confirmée',
+  en_preparation: 'En préparation', expediee: 'Expédiée',
+  livree: 'Livrée', annulee: 'Annulée'
+};
+const STATUTS_COLORS = {
+  en_attente:     'bg-yellow-100 text-yellow-700',
+  confirmee:      'bg-blue-100 text-blue-700',
+  en_preparation: 'bg-purple-100 text-purple-700',
+  expediee:       'bg-orange-100 text-orange-700',
+  livree:         'bg-green-100 text-green-700',
+  annulee:        'bg-red-100 text-red-400',
+};
+
+async function loadCommandes() {
+  try {
+    const data = await API.get('/api/commandes/', { silentError: true });
+    const commandes = data.results || data;
+
+    document.getElementById('skeleton').classList.add('hidden');
+
+    if (!commandes.length) {
+      document.getElementById('empty').classList.remove('hidden');
+      return;
+    }
+
+    const list = document.getElementById('commandes-list');
+    list.classList.remove('hidden');
+    list.innerHTML = commandes.map(c => renderCommande(c)).join('');
+
+  } catch(e) {
+    window.location.href = '/compte/connexion/?next=/commandes/historique/';
+  }
+}
+
+function renderCommande(c) {
+  const lignes = c.lignes || [];
+  const premiereProduit = lignes[0] ? lignes[0].produit_nom : 'Commande';
+  const autreProduits = lignes.length > 1 ? ` + ${lignes.length - 1} autre${lignes.length > 2 ? 's' : ''}` : '';
+  const date = new Date(c.date_creation).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const peutAnnuler = ['en_attente', 'confirmee'].includes(c.statut);
+
+  return `
+  <div class="card p-5">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <p class="font-body font-semibold text-ink text-sm">Commande #${c.reference || c.id}</p>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-body font-semibold ${STATUTS_COLORS[c.statut] || 'bg-gray-100 text-gray-600'}">
+            ${STATUTS_LABELS[c.statut] || c.statut}
+          </span>
+        </div>
+        <p class="text-sm font-body text-ink/60 line-clamp-1">${premiereProduit}${autreProduits}</p>
+        <p class="text-xs font-body text-ink/30 mt-1">${date}</p>
+      </div>
+
+      <div class="text-right flex-shrink-0">
+        <p class="font-display font-bold text-ink">${parseInt(c.total).toLocaleString('fr-FR')} FCFA</p>
+        <p class="text-xs text-ink/40 font-body">${lignes.length} article${lignes.length > 1 ? 's' : ''}</p>
+      </div>
+
+    </div>
+
+    <div class="flex items-center gap-3 mt-4 pt-4 border-t border-cream-border">
+      <a href="/commandes/${c.id}/" class="btn-secondary py-1.5 px-4 text-xs">
+        Voir le détail
+      </a>
+      ${peutAnnuler ? `
+      <button onclick="annulerCommande(${c.id}, this)"
+        class="py-1.5 px-4 text-xs font-body font-medium text-red-400 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+        Annuler
+      </button>` : ''}
+    </div>
+  </div>`;
+}
+
+async function annulerCommande(commandeId, btn) {
+  if (!confirm('Annuler cette commande ?')) return;
+  btn.disabled = true;
+  try {
+    await API.post(`/api/commandes/${commandeId}/annuler/`, {});
+    window.toast && window.toast('Commande annulée.', 'success');
+    loadCommandes();
+  } catch(e) {
+    btn.disabled = false;
+  }
+}
+
+loadCommandes();
+</script>
+{% endblock %}

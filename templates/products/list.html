@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catalogue — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- En-tête -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="font-display text-3xl text-ink">Catalogue</h1>
+      <p class="text-ink/50 font-body text-sm mt-1" id="result-count">Chargement…</p>
+    </div>
+    {% if user.is_staff %}
+    <a href="{% url 'products:ajouter' %}" class="btn-primary gap-2">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Ajouter un produit
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="flex gap-8">
+
+    <!-- ── SIDEBAR FILTRES ── -->
+    <aside class="hidden lg:block w-60 flex-shrink-0">
+      <div class="card p-5 sticky top-24 space-y-6">
+
+        <div>
+          <label class="label">Recherche</label>
+          <div class="relative">
+            <input type="search" id="filter-search" placeholder="Nom du produit…" class="field pl-9 text-sm" />
+            <svg class="absolute left-3 top-2.5 h-4 w-4 text-ink/30 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Catégorie</label>
+          <div class="space-y-1" id="categories-list">
+            <button onclick="Catalogue.setFilter('categorie', '')" data-cat=""
+              class="cat-btn w-full text-left px-3 py-2 text-sm font-body rounded-lg text-brand-600 font-medium bg-brand-50">
+              Toutes les catégories
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Prix max (FCFA)</label>
+          <input type="range" id="filter-prix" min="0" max="2000000" step="10000" value="2000000"
+            class="w-full accent-brand-500"
+            oninput="Catalogue.updatePrix(this.value)" />
+          <div class="flex justify-between text-xs text-ink/40 font-body mt-1">
+            <span>0</span>
+            <span id="prix-label" class="text-brand-600 font-medium">2 000 000</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Trier par</label>
+          <select id="filter-ordering" class="field text-sm">
+            <option value="-date_creation">Plus récents</option>
+            <option value="prix">Prix croissant</option>
+            <option value="-prix">Prix décroissant</option>
+            <option value="-note_moyenne">Mieux notés</option>
+          </select>
+        </div>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" id="filter-promo" class="w-4 h-4 accent-brand-500 rounded" />
+          <span class="text-sm font-body text-ink/70">Promotions uniquement</span>
+        </label>
+
+        <button onclick="Catalogue.reset()" class="w-full py-2 text-sm font-body text-ink/40 hover:text-ink transition-colors underline underline-offset-2">
+          Réinitialiser les filtres
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── GRILLE PRODUITS ── -->
+    <div class="flex-1">
+      <div id="skeleton-grid" class="grid grid-cols-2 md:grid-cols-3 gap-5">
+        {% for i in "123456" %}
+        <div class="card p-4 animate-pulse">
+          <div class="bg-cream-warm rounded-xl h-44 mb-4"></div>
+          <div class="h-3 bg-cream-warm rounded w-3/4 mb-2"></div>
+          <div class="h-3 bg-cream-warm rounded w-1/2"></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 gap-5 hidden"></div>
+
+      <div id="empty-state" class="hidden text-center py-20">
+        <svg class="h-16 w-16 text-ink/10 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <p class="font-display text-xl text-ink/30">Aucun produit trouvé</p>
+        <button onclick="Catalogue.reset()" class="mt-4 text-brand-600 text-sm font-body underline">Réinitialiser</button>
+      </div>
+
+      <div id="pagination" class="flex justify-center gap-2 mt-10 hidden"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/products.js' %}"></script>
+{% endblock %}

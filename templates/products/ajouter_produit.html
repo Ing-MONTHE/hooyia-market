@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if produit %}Modifier — {% endif %}Ajouter un produit — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <!-- En-tête -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <a href="/produits/" class="text-xs font-body text-ink/40 hover:text-brand-600 transition-colors flex items-center gap-1 mb-2">
+        ← Retour au catalogue
+      </a>
+      <h1 class="font-display text-3xl text-ink">
+        {% if produit %}Modifier le produit{% else %}Nouveau produit{% endif %}
+      </h1>
+    </div>
+    {% if produit %}
+    <a href="/produits/{{ produit.slug }}/" class="btn-secondary py-2 px-4 text-sm">Voir la fiche</a>
+    {% endif %}
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+    <div class="mb-5 px-4 py-3 rounded-xl border text-sm font-body
+      {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800
+      {% else %}bg-red-50 border-red-200 text-red-800{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data" class="space-y-8" id="product-form">
+    {% csrf_token %}
+
+    <!-- ── INFORMATIONS DE BASE ── -->
+    <div class="card p-6">
+      <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Informations de base</h2>
+      <div class="space-y-5">
+
+        <!-- Nom -->
+        <div>
+          <label class="label" for="id_nom">Nom du produit *</label>
+          <input type="text" name="nom" id="id_nom"
+            value="{{ form.nom.value|default:'' }}"
+            placeholder="Ex: iPhone 15 Pro Max 256Go"
+            class="field {% if form.nom.errors %}error{% endif %}" required />
+          {% if form.nom.errors %}<p class="field-error">{{ form.nom.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Description courte -->
+        <div>
+          <label class="label" for="id_description_courte">
+            Description courte <span class="text-ink/30 font-normal">(max 500 caractères)</span>
+          </label>
+          <input type="text" name="description_courte" id="id_description_courte"
+            value="{{ form.description_courte.value|default:'' }}"
+            placeholder="Résumé court affiché dans la liste"
+            maxlength="500"
+            class="field {% if form.description_courte.errors %}error{% endif %}" />
+          {% if form.description_courte.errors %}<p class="field-error">{{ form.description_courte.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Description longue -->
+        <div>
+          <label class="label" for="id_description">Description complète *</label>
+          <textarea name="description" id="id_description" rows="5"
+            placeholder="Description détaillée du produit, caractéristiques, contenu de la boîte…"
+            class="field {% if form.description.errors %}error{% endif %}" required>{{ form.description.value|default:'' }}</textarea>
+          {% if form.description.errors %}<p class="field-error">{{ form.description.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Catégorie -->
+        <div>
+          <label class="label" for="id_categorie">Catégorie *</label>
+          <select name="categorie" id="id_categorie"
+            class="field {% if form.categorie.errors %}error{% endif %}" required>
+            <option value="">— Choisir une catégorie —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if form.categorie.value == cat.id|stringformat:"s" %}selected{% endif %}>
+              {{ cat.nom }}
+            </option>
+            {% for sous in cat.sous_categories.all %}
+            <option value="{{ sous.id }}" {% if form.categorie.value == sous.id|stringformat:"s" %}selected{% endif %}>
+              &nbsp;&nbsp;↳ {{ sous.nom }}
+            </option>
+            {% endfor %}
+            {% endfor %}
+          </select>
+          {% if form.categorie.errors %}<p class="field-error">{{ form.categorie.errors.0 }}</p>{% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PRIX & STOCK ── -->
+    <div class="card p-6">
+      <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Prix & Stock</h2>
+      <div class="grid grid-cols-2 gap-5">
+
+        <!-- Prix normal -->
+        <div>
+          <label class="label" for="id_prix">Prix (FCFA) *</label>
+          <div class="relative">
+            <input type="number" name="prix" id="id_prix"
+              value="{{ form.prix.value|default:'' }}"
+              placeholder="150000" min="0" step="500"
+              class="field pr-14 {% if form.prix.errors %}error{% endif %}" required />
+            <span class="absolute right-3 top-2.5 text-xs text-ink/30 font-body">FCFA</span>
+          </div>
+          {% if form.prix.errors %}<p class="field-error">{{ form.prix.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Prix promo -->
+        <div>
+          <label class="label" for="id_prix_promo">
+            Prix promo <span class="text-ink/30 font-normal">(optionnel)</span>
+          </label>
+          <div class="relative">
+            <input type="number" name="prix_promo" id="id_prix_promo"
+              value="{{ form.prix_promo.value|default:'' }}"
+              placeholder="120000" min="0" step="500"
+              class="field pr-14 {% if form.prix_promo.errors %}error{% endif %}" />
+            <span class="absolute right-3 top-2.5 text-xs text-ink/30 font-body">FCFA</span>
+          </div>
+          {% if form.prix_promo.errors %}<p class="field-error">{{ form.prix_promo.errors.0 }}</p>{% endif %}
+          <p id="remise-preview" class="text-xs text-green-600 font-body mt-1 hidden"></p>
+        </div>
+
+        <!-- Stock -->
+        <div>
+          <label class="label" for="id_stock">Quantité en stock *</label>
+          <input type="number" name="stock" id="id_stock"
+            value="{{ form.stock.value|default:0 }}"
+            min="0"
+            class="field {% if form.stock.errors %}error{% endif %}" required />
+          {% if form.stock.errors %}<p class="field-error">{{ form.stock.errors.0 }}</p>{% endif %}
+        </div>
+
+        <!-- Stock minimum -->
+        <div>
+          <label class="label" for="id_stock_minimum">Seuil d'alerte stock</label>
+          <input type="number" name="stock_minimum" id="id_stock_minimum"
+            value="{{ form.stock_minimum.value|default:5 }}"
+            min="0"
+            class="field {% if form.stock_minimum.errors %}error{% endif %}" />
+          <p class="text-xs text-ink/30 font-body mt-1">Alerte si stock ≤ cette valeur</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── STATUT & OPTIONS ── -->
+    <div class="card p-6">
+      <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Statut & Options</h2>
+      <div class="grid grid-cols-2 gap-5">
+
+        <!-- Statut -->
+        <div>
+          <label class="label" for="id_statut">Statut</label>
+          <select name="statut" id="id_statut" class="field">
+            <option value="actif" {% if form.statut.value == 'actif' or not form.statut.value %}selected{% endif %}>Actif</option>
+            <option value="inactif" {% if form.statut.value == 'inactif' %}selected{% endif %}>Inactif</option>
+            <option value="epuise" {% if form.statut.value == 'epuise' %}selected{% endif %}>Épuisé</option>
+            <option value="archive" {% if form.statut.value == 'archive' %}selected{% endif %}>Archivé</option>
+          </select>
+        </div>
+
+        <!-- En vedette -->
+        <div class="flex items-center gap-3 mt-6">
+          <input type="checkbox" name="en_vedette" id="id_en_vedette"
+            {% if form.en_vedette.value %}checked{% endif %}
+            class="w-5 h-5 accent-brand-500 rounded" />
+          <div>
+            <label for="id_en_vedette" class="font-body font-medium text-sm text-ink cursor-pointer">Produit en vedette</label>
+            <p class="text-xs text-ink/40 font-body">Affiché sur la page d'accueil</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── IMAGES ── -->
+    <div class="card p-6">
+      <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Images</h2>
+
+      <!-- Prévisualisation des images existantes -->
+      {% if produit and produit.images.all %}
+      <div class="grid grid-cols-4 gap-3 mb-5">
+        {% for img in produit.images.all %}
+        <div class="relative group">
+          <img src="{{ img.image.url }}" alt="{{ img.alt_text }}"
+            class="w-full h-24 object-cover rounded-xl border border-cream-border" />
+          {% if img.est_principale %}
+          <span class="absolute top-1 left-1 bg-brand-500 text-white text-[10px] px-1.5 py-0.5 rounded font-body">Principale</span>
+          {% endif %}
+          <button type="button" onclick="supprimerImage({{ img.id }}, this)"
+            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">✕</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Upload -->
+      <div id="drop-zone"
+        class="border-2 border-dashed border-cream-border rounded-xl p-8 text-center cursor-pointer hover:border-brand-400 transition-colors"
+        onclick="document.getElementById('id_images').click()"
+        ondragover="event.preventDefault(); this.classList.add('border-brand-500')"
+        ondragleave="this.classList.remove('border-brand-500')"
+        ondrop="handleDrop(event)">
+        <svg class="h-10 w-10 text-ink/20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <p class="font-body text-sm text-ink/40">Glissez vos images ici ou <span class="text-brand-600 underline">parcourir</span></p>
+        <p class="font-body text-xs text-ink/30 mt-1">PNG, JPG, WebP — max 5 Mo chacune</p>
+      </div>
+      <input type="file" name="images" id="id_images" multiple accept="image/*" class="hidden"
+        onchange="previewImages(this.files)" />
+
+      <!-- Prévisualisation nouvelles images -->
+      <div id="preview-grid" class="grid grid-cols-4 gap-3 mt-4"></div>
+    </div>
+
+    <!-- ── BOUTONS ── -->
+    <div class="flex items-center justify-between pt-2">
+      {% if produit %}
+      <button type="button" onclick="confirmerSuppression()"
+        class="px-4 py-2.5 text-sm font-body font-medium text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+        🗑 Supprimer le produit
+      </button>
+      {% else %}
+      <a href="/produits/" class="px-4 py-2.5 text-sm font-body text-ink/50 hover:text-ink transition-colors">Annuler</a>
+      {% endif %}
+      <div class="flex gap-3">
+        <button type="submit" name="action" value="draft"
+          class="btn-secondary py-2.5 px-5 text-sm">
+          Sauvegarder en brouillon
+        </button>
+        <button type="submit" name="action" value="publish"
+          class="btn-primary py-2.5 px-5 text-sm">
+          {% if produit %}Enregistrer les modifications{% else %}Publier le produit{% endif %}
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Modal suppression -->
+  <div id="modal-suppression" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+      <h3 class="font-display text-xl text-ink mb-2">Supprimer ce produit ?</h3>
+      <p class="text-ink/60 font-body text-sm mb-6">Cette action est irréversible. Le produit sera définitivement supprimé.</p>
+      <div class="flex gap-3">
+        <button onclick="document.getElementById('modal-suppression').classList.add('hidden')"
+          class="btn-secondary flex-1 py-2.5 text-sm">Annuler</button>
+        <form method="POST" action="{% if produit %}/produits/supprimer/{{ produit.id }}/{% endif %}" class="flex-1">
+          {% csrf_token %}
+          <button type="submit" class="w-full py-2.5 text-sm font-body font-semibold bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors">
+            Supprimer
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Prévisualisation images
+function previewImages(files) {
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = '';
+  Array.from(files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'relative';
+      div.innerHTML = `
+        <img src="${e.target.result}" class="w-full h-24 object-cover rounded-xl border border-cream-border" />
+        ${i === 0 ? '<span class="absolute top-1 left-1 bg-brand-500 text-white text-[10px] px-1.5 py-0.5 rounded font-body">Principale</span>' : ''}`;
+      grid.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('border-brand-500');
+  const files = e.dataTransfer.files;
+  const input = document.getElementById('id_images');
+  const dt = new DataTransfer();
+  Array.from(files).forEach(f => dt.items.add(f));
+  input.files = dt.files;
+  previewImages(files);
+}
+
+// Calcul remise en temps réel
+document.getElementById('id_prix_promo').addEventListener('input', function() {
+  const prix = parseFloat(document.getElementById('id_prix').value);
+  const promo = parseFloat(this.value);
+  const preview = document.getElementById('remise-preview');
+  if (prix && promo && promo < prix) {
+    const remise = Math.round(((prix - promo) / prix) * 100);
+    preview.textContent = `Remise : ${remise}%`;
+    preview.classList.remove('hidden');
+  } else {
+    preview.classList.add('hidden');
+  }
+});
+
+function confirmerSuppression() {
+  document.getElementById('modal-suppression').classList.remove('hidden');
+}
+
+async function supprimerImage(imageId, btn) {
+  try {
+    await API.delete(`/api/produits/images/${imageId}/`);
+    btn.closest('.relative').remove();
+    window.toast && window.toast('Image supprimée', 'success');
+  } catch(e) {}
+}
+</script>
+{% endblock %}

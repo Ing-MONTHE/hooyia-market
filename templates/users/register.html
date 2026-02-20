@@ -6,66 +6,12 @@
 {% block main_class %}flex{% endblock %}
 
 {% block content %}
-<div class="flex min-h-[calc(100vh-72px)] w-full">
-
-  <!-- ══ PANNEAU GAUCHE — Branding ══ -->
-  <div class="hidden lg:flex lg:w-5/12 xl:w-5/12 relative bg-[#0f172a] flex-col justify-between p-12 overflow-hidden">
-
-    <div class="absolute inset-0">
-      <img src="{% static 'img/Image_de_fond.png' %}" alt="" class="w-full h-full object-cover opacity-10 blur-sm scale-110" />
-      <div class="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#0f172a]/90 to-[#0f172a]/70"></div>
-    </div>
-
-    <div class="relative z-10">
-      <a href="{% url 'products:accueil' %}" class="flex items-center gap-3">
-        <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-10 w-auto bg-white rounded-lg p-1" />
-        <span class="font-display text-2xl text-white">HooYia Market</span>
-      </a>
-    </div>
-
-    <div class="relative z-10 space-y-5">
-      <h2 class="font-display text-4xl text-white leading-tight">
-        Rejoignez<br/>
-        <span class="text-brand-400">la communauté.</span>
-      </h2>
-      <p class="text-white/50 font-body text-base leading-relaxed max-w-xs">
-        Des milliers de clients font déjà confiance à HooYia pour leurs achats tech.
-      </p>
-
-      <!-- Avantages -->
-      <div class="space-y-3 mt-6">
-        {% for avantage in avantages|default:"" %}{% endfor %}
-        <div class="flex items-center gap-3">
-          <span class="h-6 w-6 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold">✓</span>
-          <span class="text-white/60 font-body text-sm">Compte gratuit, aucun engagement</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="h-6 w-6 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold">✓</span>
-          <span class="text-white/60 font-body text-sm">Suivi de commandes en temps réel</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="h-6 w-6 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold">✓</span>
-          <span class="text-white/60 font-body text-sm">Support client via chat intégré</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="h-6 w-6 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold">✓</span>
-          <span class="text-white/60 font-body text-sm">Produits vérifiés, prix transparents</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="relative z-10 text-white/20 font-body text-xs">
-      © {% now "Y" %} HooYia Market
-    </div>
-  </div>
-
-  <!-- ══ PANNEAU DROIT — Formulaire ══ -->
-  <div class="flex-1 flex items-center justify-center px-6 py-10 bg-cream overflow-y-auto">
-    <div class="w-full max-w-lg animate-slide-up">
+<div class="flex min-h-[calc(100vh-72px)] w-full items-center justify-center bg-cream">
+  <div class="w-full max-w-lg px-6 py-10 animate-slide-up">
 
       <!-- Header -->
       <div class="mb-7">
-        <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 mb-7 lg:hidden">
+        <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 mb-7">
           <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-9 w-auto" />
           <span class="font-display text-xl text-ink">HooYia Market</span>
         </a>
@@ -197,6 +143,20 @@
         <button type="submit" class="btn-primary w-full py-3 text-base">
           Créer mon compte
         </button>
+
+        <!-- Séparateur -->
+        <div class="flex items-center gap-3 my-2">
+          <div class="flex-1 h-px bg-cream-border"></div>
+          <span class="text-xs text-ink/30 font-body">ou</span>
+          <div class="flex-1 h-px bg-cream-border"></div>
+        </div>
+
+        <!-- Bouton Google -->
+        <button type="button" disabled
+          class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-all text-sm font-body font-medium text-ink/70 cursor-not-allowed opacity-60">
+          <svg class="h-5 w-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          S'inscrire avec Google
+        </button>
       </form>
 
       <!-- Info email -->
@@ -212,7 +172,6 @@
       <p class="text-center text-xs text-ink/30 font-body mt-5">
         En créant un compte, vous acceptez nos conditions d'utilisation.
       </p>
-    </div>
   </div>
 </div>
 {% endblock %}

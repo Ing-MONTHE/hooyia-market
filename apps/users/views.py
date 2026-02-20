@@ -174,23 +174,25 @@ def profil(request):
     POST → met à jour les informations
     """
     if request.method == 'POST':
-        form = ProfilForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
+        action = request.POST.get('action', 'update_profil')
+        if action == 'update_profil':
+            user = request.user
+            user.prenom    = request.POST.get('prenom', user.prenom).strip()
+            user.nom       = request.POST.get('nom', user.nom).strip()
+            user.telephone = request.POST.get('telephone', user.telephone).strip()
+            username = request.POST.get('username', user.username).strip()
+            from apps.users.models import CustomUser
+            if username and username != user.username:
+                if not CustomUser.objects.filter(username=username).exclude(pk=user.pk).exists():
+                    user.username = username
+            if request.FILES.get('photo_profil'):
+                user.photo_profil = request.FILES['photo_profil']
+            user.save()
             messages.success(request, "Profil mis à jour avec succès.")
             return redirect('users:profil')
-        else:
-            messages.error(request, "Veuillez corriger les erreurs.")
-    else:
-        form = ProfilForm(instance=request.user)
 
-    # Récupère toutes les adresses de l'utilisateur
     adresses = request.user.adresses.all()
-
-    context = {
-        'form'    : form,
-        'adresses': adresses,
-    }
+    context = { 'adresses': adresses }
     return render(request, 'users/profile.html', context)
 
 

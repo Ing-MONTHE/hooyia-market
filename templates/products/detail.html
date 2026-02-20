@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ produit.nom }} — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-body text-ink/40 mb-6">
+    <a href="/" class="hover:text-brand-600 transition-colors">Accueil</a>
+    <span>/</span>
+    <a href="/produits/" class="hover:text-brand-600 transition-colors">Catalogue</a>
+    <span>/</span>
+    <span class="text-ink/70">{{ produit.nom }}</span>
+  </nav>
+
+  <!-- Skeleton -->
+  <div id="skeleton-detail" class="grid lg:grid-cols-2 gap-12 animate-pulse">
+    <div class="bg-cream-warm rounded-2xl h-96"></div>
+    <div class="space-y-4">
+      <div class="h-4 bg-cream-warm rounded w-1/3"></div>
+      <div class="h-8 bg-cream-warm rounded w-3/4"></div>
+      <div class="h-4 bg-cream-warm rounded w-1/2"></div>
+      <div class="h-16 bg-cream-warm rounded"></div>
+      <div class="h-12 bg-cream-warm rounded"></div>
+    </div>
+  </div>
+
+  <!-- Contenu réel -->
+  <div id="product-detail" class="hidden">
+    <div class="grid lg:grid-cols-2 gap-12">
+
+      <!-- ── GALERIE ── -->
+      <div>
+        <div class="relative bg-cream-warm rounded-2xl overflow-hidden mb-3 aspect-square">
+          <img id="main-image" src="" alt="{{ produit.nom }}"
+            class="w-full h-full object-contain p-4 transition-opacity duration-200"
+            onerror="this.src='/static/img/logo.svg'" />
+          <span id="promo-badge" class="hidden absolute top-4 left-4 bg-brand-500 text-white text-sm font-mono font-bold px-3 py-1 rounded-xl"></span>
+          {% if user.is_staff %}
+          <div class="absolute top-4 right-4">
+            <a id="edit-link" href="#" class="bg-white/90 text-ink text-xs font-body font-medium px-3 py-1.5 rounded-lg shadow hover:bg-white transition-colors">
+              ✏️ Modifier
+            </a>
+          </div>
+          {% endif %}
+        </div>
+        <div id="thumbnails" class="flex gap-2 overflow-x-auto pb-1"></div>
+      </div>
+
+      <!-- ── INFOS PRODUIT ── -->
+      <div class="flex flex-col">
+        <p id="cat-nom" class="text-xs font-body text-ink/40 uppercase tracking-wider mb-2"></p>
+        <h1 id="prod-nom" class="font-display text-3xl text-ink leading-tight mb-3">{{ produit.nom }}</h1>
+
+        <div class="flex items-center gap-2 mb-4">
+          <div id="stars" class="text-amber-400 text-lg"></div>
+          <span id="nb-avis" class="text-sm text-ink/40 font-body"></span>
+        </div>
+
+        <div class="flex items-baseline gap-3 mb-6">
+          <span id="prix-actuel" class="font-display text-4xl font-bold text-ink"></span>
+          <span id="prix-barre" class="hidden text-xl text-ink/30 line-through font-body"></span>
+        </div>
+
+        <p id="desc-courte" class="text-ink/60 font-body text-sm leading-relaxed mb-6"></p>
+        <div id="stock-info" class="flex items-center gap-2 mb-6 text-sm font-body"></div>
+
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center border border-cream-border rounded-xl overflow-hidden">
+            <button onclick="changeQty(-1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">−</button>
+            <input type="number" id="qty" value="1" min="1" class="w-14 text-center border-none outline-none font-body text-sm bg-white py-3" />
+            <button onclick="changeQty(1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">+</button>
+          </div>
+          <button onclick="ajouterAuPanier()" id="btn-panier" class="btn-primary flex-1 py-3 text-base">
+            Ajouter au panier
+          </button>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-cream-border">
+          <h3 class="font-display text-lg text-ink mb-3">Description</h3>
+          <div id="description" class="text-ink/60 font-body text-sm leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AVIS ── -->
+    <section class="mt-16 pt-10 border-t border-cream-border">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-display text-2xl text-ink">Avis clients</h2>
+        {% if user.is_authenticated %}
+        <button onclick="toggleAvisForm()" class="btn-secondary py-2 px-4 text-sm">Laisser un avis</button>
+        {% endif %}
+      </div>
+
+      {% if user.is_authenticated %}
+      <div id="avis-form" class="hidden card p-6 mb-6">
+        <h3 class="font-body font-semibold text-ink mb-4">Votre avis</h3>
+        <div class="flex gap-2 mb-4" id="star-rating">
+          {% for i in "12345" %}
+          <button type="button" data-note="{{ forloop.counter }}" onclick="setNote({{ forloop.counter }})"
+            class="star-btn text-3xl text-cream-border hover:text-amber-400 transition-colors">★</button>
+          {% endfor %}
+        </div>
+        <textarea id="avis-commentaire" rows="3" placeholder="Partagez votre expérience…" class="field text-sm mb-4"></textarea>
+        <button onclick="soumettreAvis()" class="btn-primary py-2 px-6 text-sm">Publier l'avis</button>
+      </div>
+      {% endif %}
+
+      <div id="avis-list" class="space-y-4">
+        <p class="text-ink/30 font-body text-sm">Chargement des avis…</p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/products.js' %}"></script>
+<script>
+// ── Variables Django transmises au JS
+const SLUG = '{{ produit.slug }}';
+let produitData = null;
+let noteSelectionnee = 0;
+let maxStock = 999;
+
+// ── Chargement du produit
+async function loadProduit() {
+  try {
+    const data = await API.get(`/api/produits/?search=${SLUG}`, { silentError: true });
+    const produits = data.results || data;
+    const p = produits.find(x => x.slug === SLUG);
+    if (!p) throw new Error('not found');
+    const detail = await API.get(`/api/produits/${p.id}/`);
+    produitData = detail;
+    maxStock = detail.stock;
+    afficherProduit(detail);
+    loadAvis(detail.id);
+  } catch(e) {
+    document.getElementById('skeleton-detail').innerHTML = `
+      <div class="col-span-2 text-center py-20">
+        <p class="font-display text-xl text-ink/30">Produit introuvable</p>
+        <a href="/produits/" class="text-brand-600 text-sm font-body mt-2 inline-block">← Retour au catalogue</a>
+      </div>`;
+  }
+}
+
+function afficherProduit(p) {
+  document.getElementById('skeleton-detail').classList.add('hidden');
+  document.getElementById('product-detail').classList.remove('hidden');
+
+  const imgs = p.images || [];
+  document.getElementById('main-image').src = imgs.length ? imgs[0].image : '/static/img/logo.svg';
+
+  // Miniatures
+  const thumbs = document.getElementById('thumbnails');
+  if (imgs.length > 1) {
+    thumbs.innerHTML = imgs.map((img, i) => `
+      <button onclick="setImage('${img.image}')"
+        class="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 ${i===0?'border-brand-500':'border-cream-border'} hover:border-brand-400 transition-colors">
+        <img src="${img.image}" class="w-full h-full object-cover" onerror="this.src='/static/img/logo.svg'" />
+      </button>`).join('');
+  }
+
+  document.getElementById('cat-nom').textContent    = p.categorie_nom || '';
+  document.getElementById('prod-nom').textContent   = p.nom;
+  document.getElementById('desc-courte').textContent = p.description_courte || '';
+  document.getElementById('description').textContent = p.description || '';
+
+  const prix = p.prix_promo || p.prix;
+  document.getElementById('prix-actuel').textContent = formatPrix(prix) + ' CFA';
+  if (p.prix_promo) {
+    document.getElementById('prix-barre').textContent = formatPrix(p.prix) + ' CFA';
+    document.getElementById('prix-barre').classList.remove('hidden');
+    document.getElementById('promo-badge').textContent = `-${p.pourcentage_remise}%`;
+    document.getElementById('promo-badge').classList.remove('hidden');
+  }
+
+  const note = Math.round(parseFloat(p.note_moyenne) || 0);
+  document.getElementById('stars').textContent   = '★'.repeat(note) + '☆'.repeat(5 - note);
+  document.getElementById('nb-avis').textContent = `${p.nombre_avis} avis`;
+
+  const stockEl = document.getElementById('stock-info');
+  if (p.stock > 0) {
+    stockEl.innerHTML = `<span class="text-green-600">✓</span><span class="text-green-600 font-medium">En stock</span><span class="text-ink/30">(${p.stock} dispo)</span>`;
+  } else {
+    stockEl.innerHTML = `<span class="text-red-400 font-medium">Épuisé</span>`;
+    document.getElementById('btn-panier').disabled = true;
+    document.getElementById('btn-panier').classList.add('opacity-50', 'cursor-not-allowed');
+  }
+
+  const editLink = document.getElementById('edit-link');
+  if (editLink) editLink.href = `/produits/modifier/${p.id}/`;
+}
+
+function setImage(src) {
+  const img = document.getElementById('main-image');
+  img.style.opacity = '0.5';
+  setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 150);
+}
+
+function changeQty(delta) {
+  const input = document.getElementById('qty');
+  input.value = Math.max(1, Math.min(maxStock, parseInt(input.value) + delta));
+}
+
+async function ajouterAuPanier() {
+  if (!produitData) return;
+  try {
+    await API.post('/api/panier/ajouter/', { produit_id: produitData.id, quantite: parseInt(document.getElementById('qty').value) });
+    window.toast && window.toast('Produit ajouté au panier !', 'success');
+    const badge = document.getElementById('cart-badge');
+    if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent) || 0) + 1; }
+  } catch(e) {}
+}
+
+// ── Avis
+async function loadAvis(produitId) {
+  try {
+    const data = await API.get(`/api/avis/?produit=${produitId}`, { silentError: true });
+    const avis = data.results || data;
+    const container = document.getElementById('avis-list');
+    if (!avis.length) { container.innerHTML = `<p class="text-ink/30 font-body text-sm">Aucun avis pour le moment.</p>`; return; }
+    container.innerHTML = avis.map(a => `
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-600">${(a.auteur_nom||'?')[0].toUpperCase()}</span>
+            <span class="font-body font-medium text-sm text-ink">${a.auteur_nom || 'Anonyme'}</span>
+          </div>
+          <span class="text-amber-400">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</span>
+        </div>
+        <p class="text-ink/60 font-body text-sm">${a.commentaire || ''}</p>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+function toggleAvisForm() { document.getElementById('avis-form').classList.toggle('hidden'); }
+
+function setNote(n) {
+  noteSelectionnee = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.className = 'star-btn text-3xl transition-colors ' + (i < n ? 'text-amber-400' : 'text-cream-border hover:text-amber-400');
+  });
+}
+
+async function soumettreAvis() {
+  if (!noteSelectionnee || !produitData) return;
+  try {
+    await API.post('/api/avis/', { produit: produitData.id, note: noteSelectionnee, commentaire: document.getElementById('avis-commentaire').value });
+    window.toast && window.toast('Avis soumis, en attente de validation.', 'success');
+    toggleAvisForm();
+  } catch(e) {}
+}
+
+loadProduit();
+</script>
+{% endblock %}

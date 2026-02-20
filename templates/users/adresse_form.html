@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ajouter une adresse — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <div class="mb-6">
+    <a href="{% url 'users:profil' %}" class="text-xs font-body text-ink/40 hover:text-brand-600 transition-colors flex items-center gap-1 mb-2">
+      ← Retour au profil
+    </a>
+    <h1 class="font-display text-2xl text-ink">Nouvelle adresse</h1>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 px-4 py-3 rounded-xl border text-sm font-body
+      {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% else %}bg-red-50 border-red-200 text-red-800{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card p-6">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="space-y-4">
+
+        <div>
+          <label class="label" for="id_nom_complet">Nom complet du destinataire *</label>
+          <input type="text" name="nom_complet" id="id_nom_complet"
+            value="{{ form.nom_complet.value|default:'' }}"
+            placeholder="Jean Dupont"
+            class="field {% if form.nom_complet.errors %}error{% endif %}" required />
+          {% if form.nom_complet.errors %}<p class="field-error">{{ form.nom_complet.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="label" for="id_telephone">Téléphone *</label>
+          <input type="text" name="telephone" id="id_telephone"
+            value="{{ form.telephone.value|default:'' }}"
+            placeholder="+237 6XX XXX XXX"
+            class="field {% if form.telephone.errors %}error{% endif %}" required />
+          {% if form.telephone.errors %}<p class="field-error">{{ form.telephone.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="label" for="id_adresse">Adresse *</label>
+          <input type="text" name="adresse" id="id_adresse"
+            value="{{ form.adresse.value|default:'' }}"
+            placeholder="Quartier, rue, numéro…"
+            class="field {% if form.adresse.errors %}error{% endif %}" required />
+          {% if form.adresse.errors %}<p class="field-error">{{ form.adresse.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="id_ville">Ville *</label>
+            <input type="text" name="ville" id="id_ville"
+              value="{{ form.ville.value|default:'' }}"
+              placeholder="Yaoundé"
+              class="field {% if form.ville.errors %}error{% endif %}" required />
+            {% if form.ville.errors %}<p class="field-error">{{ form.ville.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="label" for="id_region">Région *</label>
+            <input type="text" name="region" id="id_region"
+              value="{{ form.region.value|default:'' }}"
+              placeholder="Centre"
+              class="field {% if form.region.errors %}error{% endif %}" required />
+            {% if form.region.errors %}<p class="field-error">{{ form.region.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="id_code_postal">Code postal <span class="text-ink/30 font-normal">(optionnel)</span></label>
+            <input type="text" name="code_postal" id="id_code_postal"
+              value="{{ form.code_postal.value|default:'' }}"
+              placeholder="237"
+              class="field" />
+          </div>
+          <div>
+            <label class="label" for="id_pays">Pays</label>
+            <input type="text" name="pays" id="id_pays"
+              value="{{ form.pays.value|default:'Cameroun' }}"
+              class="field" />
+          </div>
+        </div>
+
+        <label class="flex items-center gap-3 cursor-pointer pt-2">
+          <input type="checkbox" name="is_default" id="id_is_default"
+            {% if form.is_default.value %}checked{% endif %}
+            class="w-4 h-4 accent-brand-500 rounded" />
+          <div>
+            <span class="font-body font-medium text-sm text-ink">Définir comme adresse par défaut</span>
+            <p class="text-xs text-ink/40 font-body">Pré-remplie automatiquement lors du checkout</p>
+          </div>
+        </label>
+
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <a href="{% url 'users:profil' %}" class="btn-secondary flex-1 py-2.5 text-sm text-center">Annuler</a>
+        <button type="submit" class="btn-primary flex-1 py-2.5 text-sm">Enregistrer l'adresse</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

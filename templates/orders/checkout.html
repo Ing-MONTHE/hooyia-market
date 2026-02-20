@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Finaliser ma commande — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <h1 class="font-display text-3xl text-ink mb-8">Finaliser ma commande</h1>
+
+  <div class="grid lg:grid-cols-3 gap-8">
+
+    <!-- ── FORMULAIRE ── -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Adresse de livraison -->
+      <div class="card p-6">
+        <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Adresse de livraison</h2>
+        <div class="grid grid-cols-2 gap-4">
+
+          <div class="col-span-2">
+            <label class="label" for="nom">Nom complet du destinataire *</label>
+            <input type="text" id="nom" placeholder="Jean Dupont" class="field" required />
+          </div>
+
+          <div class="col-span-2">
+            <label class="label" for="telephone">Téléphone *</label>
+            <input type="text" id="telephone" placeholder="+237 6XX XXX XXX" class="field" required />
+          </div>
+
+          <div class="col-span-2">
+            <label class="label" for="adresse">Adresse *</label>
+            <input type="text" id="adresse" placeholder="Quartier, rue, N° de porte…" class="field" required />
+          </div>
+
+          <div>
+            <label class="label" for="ville">Ville *</label>
+            <input type="text" id="ville" placeholder="Yaoundé" class="field" required />
+          </div>
+
+          <div>
+            <label class="label" for="region">Région *</label>
+            <input type="text" id="region" placeholder="Centre" class="field" required />
+          </div>
+
+          <div class="col-span-2">
+            <label class="label" for="pays">Pays</label>
+            <input type="text" id="pays" value="Cameroun" class="field" />
+          </div>
+
+        </div>
+
+        <!-- Remplir depuis une adresse enregistrée -->
+        {% if user.adresses.all %}
+        <div class="mt-4 pt-4 border-t border-cream-border">
+          <label class="label">Utiliser une adresse enregistrée</label>
+          <select id="adresse-saved" onchange="remplirAdresse(this)" class="field text-sm">
+            <option value="">— Choisir —</option>
+            {% for adr in user.adresses.all %}
+            <option value="{{ adr.id }}"
+              data-nom="{{ user.prenom }} {{ user.nom }}"
+              data-telephone="{{ adr.telephone|default:user.telephone }}"
+              data-adresse="{{ adr.adresse }}"
+              data-ville="{{ adr.ville }}"
+              data-region="{{ adr.region }}"
+              data-pays="{{ adr.pays }}">
+              {{ adr.adresse }}, {{ adr.ville }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Note client -->
+      <div class="card p-6">
+        <h2 class="font-display text-lg text-ink mb-3">Note pour le vendeur</h2>
+        <textarea id="note-client" rows="3" placeholder="Instructions spéciales, précisions de livraison…" class="field text-sm"></textarea>
+      </div>
+
+      <!-- Paiement -->
+      <div class="card p-6">
+        <h2 class="font-display text-lg text-ink mb-4 pb-3 border-b border-cream-border">Mode de paiement</h2>
+        <label class="flex items-center gap-3 p-3 rounded-xl border border-brand-400 bg-brand-50 cursor-pointer">
+          <input type="radio" name="paiement" value="livraison" checked class="accent-brand-500 w-4 h-4" />
+          <div>
+            <p class="font-body font-medium text-sm text-ink">Paiement à la livraison</p>
+            <p class="font-body text-xs text-ink/40">Payez en cash à la réception de votre commande</p>
+          </div>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- ── RÉCAPITULATIF ── -->
+    <div>
+      <div class="card p-6 sticky top-24">
+        <h2 class="font-display text-lg text-ink mb-4">Récapitulatif</h2>
+
+        <!-- Items -->
+        <div id="recap-items" class="space-y-3 mb-4">
+          <p class="text-ink/30 font-body text-xs animate-pulse">Chargement…</p>
+        </div>
+
+        <div class="h-px bg-cream-border my-3"></div>
+
+        <div class="space-y-2 font-body text-sm">
+          <div class="flex justify-between text-ink/60">
+            <span>Sous-total</span>
+            <span id="recap-sous-total">—</span>
+          </div>
+          <div class="flex justify-between text-ink/60">
+            <span>Livraison</span>
+            <span class="text-green-600 font-medium">Gratuite</span>
+          </div>
+          <div class="h-px bg-cream-border my-2"></div>
+          <div class="flex justify-between font-semibold text-ink text-base">
+            <span>Total</span>
+            <span id="recap-total">—</span>
+          </div>
+        </div>
+
+        <button onclick="passerCommande()" id="btn-commande"
+          class="btn-primary w-full py-3 text-base mt-5">
+          Confirmer la commande
+        </button>
+
+        <p class="text-center text-xs text-ink/30 font-body mt-3">
+          En confirmant, vous acceptez nos conditions de vente.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Chargement du récapitulatif panier
+async function loadRecap() {
+  try {
+    const data = await API.get('/api/panier/');
+    if (data.est_vide) { window.location.href = '/panier/'; return; }
+
+    // Pré-remplir nom/téléphone depuis le profil
+    document.getElementById('nom').value = '{{ user.prenom }} {{ user.nom }}'.trim();
+    document.getElementById('telephone').value = '{{ user.telephone|default:"" }}';
+
+    const items = data.items || [];
+    document.getElementById('recap-items').innerHTML = items.map(item => `
+      <div class="flex justify-between items-start gap-2 text-sm font-body">
+        <span class="text-ink/70 line-clamp-1 flex-1">${item.produit_nom} <span class="text-ink/40">×${item.quantite}</span></span>
+        <span class="text-ink font-medium flex-shrink-0">${parseInt(item.sous_total).toLocaleString('fr-FR')} F</span>
+      </div>`).join('');
+
+    const total = parseFloat(data.total);
+    document.getElementById('recap-sous-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+    document.getElementById('recap-total').textContent      = total.toLocaleString('fr-FR') + ' FCFA';
+  } catch(e) {
+    window.location.href = '/compte/connexion/?next=/commandes/';
+  }
+}
+
+// ── Remplir depuis adresse enregistrée
+function remplirAdresse(select) {
+  const opt = select.options[select.selectedIndex];
+  if (!opt.value) return;
+  document.getElementById('nom').value       = opt.dataset.nom;
+  document.getElementById('telephone').value = opt.dataset.telephone;
+  document.getElementById('adresse').value   = opt.dataset.adresse;
+  document.getElementById('ville').value     = opt.dataset.ville;
+  document.getElementById('region').value    = opt.dataset.region;
+  document.getElementById('pays').value      = opt.dataset.pays;
+}
+
+// ── Valider et passer la commande
+async function passerCommande() {
+  const nom       = document.getElementById('nom').value.trim();
+  const telephone = document.getElementById('telephone').value.trim();
+  const adresse   = document.getElementById('adresse').value.trim();
+  const ville     = document.getElementById('ville').value.trim();
+  const region    = document.getElementById('region').value.trim();
+  const pays      = document.getElementById('pays').value.trim();
+  const note      = document.getElementById('note-client').value.trim();
+
+  if (!nom || !telephone || !adresse || !ville || !region) {
+    window.toast && window.toast('Veuillez remplir tous les champs obligatoires.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-commande');
+  btn.disabled = true;
+  btn.textContent = 'Traitement…';
+
+  try {
+    const data = await API.post('/api/commandes/creer/', {
+      adresse_livraison_nom      : nom,
+      adresse_livraison_telephone: telephone,
+      adresse_livraison_adresse  : adresse,
+      adresse_livraison_ville    : ville,
+      adresse_livraison_region   : region,
+      adresse_livraison_pays     : pays,
+      note_client                : note,
+      mode_paiement              : 'livraison',
+    });
+    window.location.href = `/commandes/${data.id}/`;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Confirmer la commande';
+  }
+}
+
+loadRecap();
+</script>
+{% endblock %}
