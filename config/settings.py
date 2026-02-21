@@ -209,9 +209,10 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # ═══════════════════════════════════════════════
 
 REST_FRAMEWORK = {
-    # Authentification par JWT token
+    # Authentification JWT + Session Django (pour les pages HTML)
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     # Par défaut : lecture publique, écriture authentifiée
     'DEFAULT_PERMISSION_CLASSES': [

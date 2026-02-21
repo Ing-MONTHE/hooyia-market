@@ -73,7 +73,7 @@ async function loadCommandes() {
     list.innerHTML = commandes.map(c => renderCommande(c)).join('');
 
   } catch(e) {
-    window.location.href = '/compte/connexion/?next=/commandes/historique/';
+    if (e && e.status === 401) { window.location.href = '/compte/connexion/?next=/commandes/historique/'; }
   }
 }
 

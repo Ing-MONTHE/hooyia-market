@@ -17,16 +17,21 @@
         extend: {
           colors: {
             brand: {
-              50:  '#fff8f0',
-              100: '#ffecd6',
-              200: '#ffd5a8',
-              300: '#ffb870',
-              400: '#ff9633',
-              500: '#f97316',  /* orange principal */
+              50:  '#eff4ff',
+              100: '#dce7fd',
+              200: '#b8d0fb',
+              300: '#7aaaf5',
+              400: '#2d52c4',
+              500: '#1E3A8A',  /* bleu marine principal */
+              600: '#0D1F5C',
+              700: '#091747',
+              800: '#060f30',
+              900: '#030921',
+            },
+            accent: {
+              400: '#fb923c',
+              500: '#F97316',  /* orange accent */
               600: '#ea6000',
-              700: '#c24d00',
-              800: '#9a3e06',
-              900: '#7c340b',
             },
             ink: {
               DEFAULT: '#0f0e0c',
@@ -81,7 +86,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="font-body bg-cream text-ink min-h-screen flex flex-col antialiased">
+<body class="font-body text-ink min-h-screen flex flex-col antialiased" style="background:#f6f8fc;">
 
   <!-- ════════════════════════════════════════
        NAVBAR
@@ -134,6 +139,9 @@
        SCRIPTS GLOBAUX
   ════════════════════════════════════════ -->
   <script src="{% static 'js/api.js' %}"></script>
+  {% if user.is_authenticated %}
+  <script src="{% static 'js/notifications.js' %}"></script>
+  {% endif %}
 
   <!-- Auto-dismiss Django messages après 5s -->
   <script>

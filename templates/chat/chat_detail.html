@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat — HooYia Market{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col" style="height: calc(100vh - 120px);">
+
+  <!-- ── En-tête conversation ── -->
+  <div class="card px-5 py-4 mb-4 flex items-center gap-4 flex-shrink-0">
+    <a href="/chat/" class="text-ink/40 hover:text-brand-600 transition-colors text-lg leading-none">←</a>
+
+    <!-- Avatar interlocuteur -->
+    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0">
+      {{ interlocuteur.username|first|upper }}
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <p class="font-body font-semibold text-ink text-sm truncate">{{ interlocuteur.username }}</p>
+      <p id="ws-status" class="text-xs font-mono text-ink/30 mt-0.5">Connexion…</p>
+    </div>
+
+    <!-- Indicateur connexion -->
+    <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-cream-border transition-colors duration-300"></div>
+  </div>
+
+  <!-- ── Zone messages ── -->
+  <div id="messages-container"
+       class="flex-1 overflow-y-auto space-y-2 px-1 scroll-smooth"
+       style="scroll-behavior: smooth;">
+
+    <!-- Skeleton -->
+    <div id="skeleton" class="space-y-3 pt-2">
+      {% for _ in "12345" %}
+      <div class="flex {% cycle '' 'justify-end' %}">
+        <div class="animate-pulse h-8 bg-cream-warm rounded-2xl {% cycle 'w-48' 'w-36' 'w-56' 'w-32' 'w-44' %}"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Messages injectés par JS -->
+    <div id="messages-list" class="hidden space-y-1.5 pt-2 pb-2"></div>
+
+    <!-- Ancre scroll bas -->
+    <div id="scroll-anchor"></div>
+  </div>
+
+  <!-- ── Zone saisie ── -->
+  <div class="card px-4 py-3 mt-4 flex-shrink-0">
+    <div class="flex items-end gap-3">
+      <textarea
+        id="message-input"
+        rows="1"
+        placeholder="Votre message…"
+        class="field flex-1 resize-none text-sm py-2.5 leading-snug"
+        style="max-height: 120px; overflow-y: auto;"
+        disabled></textarea>
+      <button
+        id="send-btn"
+        onclick="Chat.envoyer()"
+        disabled
+        class="btn-primary px-4 py-2.5 text-sm flex-shrink-0 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+        <span>Envoyer</span>
+        <span class="text-base leading-none">↑</span>
+      </button>
+    </div>
+    <p class="text-ink/25 font-mono text-xs mt-2">Entrée pour envoyer · Maj+Entrée pour nouvelle ligne</p>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/chat.js' %}"></script>
+<script>
+  Chat.init({
+    conversationId : {{ conversation_id }},
+    currentUserId  : {{ request.user.id }},
+    currentUsername: '{{ request.user.username|escapejs }}',
+  });
+</script>
+{% endblock %}

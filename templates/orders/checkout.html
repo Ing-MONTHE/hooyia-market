@@ -158,7 +158,7 @@ async function loadRecap() {
     document.getElementById('recap-sous-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
     document.getElementById('recap-total').textContent      = total.toLocaleString('fr-FR') + ' FCFA';
   } catch(e) {
-    window.location.href = '/compte/connexion/?next=/commandes/';
+    if (e && e.status === 401) { window.location.href = '/compte/connexion/?next=/commandes/'; }
   }
 }
 

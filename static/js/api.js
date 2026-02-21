@@ -90,16 +90,24 @@ const API = (() => {
     // Premier essai
     let res = await makeRequest(getAccess());
 
-    // 401 → on tente le refresh
+    // 401 → on tente le refresh si on a un refresh token
     if (res.status === 401) {
-      try {
-        const newToken = await refreshAccessToken();
-        res = await makeRequest(newToken);
-      } catch {
-        // Refresh échoué → redirection login
-        window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
-        return null;
+      const refreshToken = getRefresh();
+      if (refreshToken) {
+        try {
+          const newToken = await refreshAccessToken();
+          res = await makeRequest(newToken);
+        } catch {
+          clearTokens();
+          // Refresh échoué → redirection login seulement si pas de session Django
+          if (!options.silentError) {
+            window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
+          }
+          return null;
+        }
       }
+      // Pas de refresh token → on laisse passer (la session Django peut gérer)
+      // Si le serveur répond encore 401, l'appelant gère l'erreur
     }
 
     // Réponse 204 (No Content)

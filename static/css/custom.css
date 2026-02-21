@@ -6,15 +6,25 @@
 
 /* ── Variables globales ── */
 :root {
-  --brand-500: #f97316;
-  --brand-600: #ea6000;
-  --ink:       #0f0e0c;
-  --cream:     #faf8f5;
-  --cream-warm:#f4f1eb;
-  --cream-border: #e8e3da;
+  /* Bleu marine principal (logo) */
+  --brand-500:  #1E3A8A;
+  --brand-600:  #0D1F5C;
+  --brand-400:  #2d52c4;
+
+  /* Orange accent (logo) */
+  --accent-500: #F97316;
+  --accent-600: #ea6000;
+
+  /* Texte & fonds */
+  --ink:          #0f0e0c;
+  --cream:        #f6f8fc;
+  --cream-warm:   #edf0f8;
+  --cream-border: #d8dfef;
+
+  /* Cartes */
   --radius-card: 0.875rem;
-  --shadow-card: 0 2px 12px 0 rgba(15,14,12,0.08);
-  --shadow-card-hover: 0 8px 32px 0 rgba(15,14,12,0.14);
+  --shadow-card: 0 2px 12px 0 rgba(13,31,92,0.08);
+  --shadow-card-hover: 0 8px 32px 0 rgba(13,31,92,0.16);
 }
 
 
@@ -46,8 +56,8 @@ h1, h2, h3 {
    SÉLECTION DE TEXTE
 ══════════════════════════════════════════ */
 ::selection {
-  background: rgba(249, 115, 22, 0.18);
-  color: #7c340b;
+  background: rgba(30, 58, 138, 0.15);
+  color: #0D1F5C;
 }
 
 
@@ -75,7 +85,7 @@ h1, h2, h3 {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background: var(--brand-500);
+  background: var(--accent-500);
   color: #ffffff;
   font-family: 'DM Sans', sans-serif;
   font-size: 0.875rem;
@@ -87,7 +97,7 @@ h1, h2, h3 {
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 .btn-primary:hover {
-  background: #ea6000;
+  background: var(--accent-600);
   box-shadow: 0 4px 16px 0 rgba(249,115,22,0.45);
   transform: translateY(-1px);
 }
@@ -155,7 +165,7 @@ h1, h2, h3 {
 }
 .field:focus {
   border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.12);
 }
 .field::placeholder { color: #b0a898; }
 .field.error {

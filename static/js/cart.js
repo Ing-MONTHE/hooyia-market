@@ -21,7 +21,9 @@ const Cart = (() => {
       render(data);
     } catch(e) {
       // Non connecté → redirection login
-      window.location.href = '/compte/connexion/?next=/panier/';
+      if (e && e.status === 401) {
+        window.location.href = '/compte/connexion/?next=/panier/';
+      }
     }
   }
 

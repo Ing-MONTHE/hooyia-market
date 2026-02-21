@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commande confirmée — HooYia Market</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #f4f1eb;
+      font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+      color: #0f0e0c;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 16px 40px;
+    }
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #f97316 0%, #ea6000 100%);
+      border-radius: 16px 16px 0 0;
+      padding: 36px 40px;
+      text-align: center;
+    }
+    .header-logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+    .header-logo span { opacity: 0.75; }
+    .header-icon {
+      font-size: 48px;
+      margin: 16px 0 12px;
+      display: block;
+    }
+    .header h1 {
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .header p {
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    /* Corps */
+    .body {
+      background: #ffffff;
+      padding: 36px 40px;
+      border-left: 1px solid #e8e3da;
+      border-right: 1px solid #e8e3da;
+    }
+    .greeting {
+      font-size: 16px;
+      color: #0f0e0c;
+      margin-bottom: 16px;
+    }
+    .intro {
+      font-size: 14px;
+      color: #3d3a35;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    /* Récap commande */
+    .recap {
+      background: #faf8f5;
+      border: 1px solid #e8e3da;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .recap-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #b0a898;
+      margin-bottom: 16px;
+    }
+    .recap-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e8e3da;
+      font-size: 14px;
+    }
+    .recap-row:last-child { border-bottom: none; }
+    .recap-row .label { color: #3d3a35; }
+    .recap-row .value { font-weight: 600; color: #0f0e0c; }
+    .recap-row.total .label,
+    .recap-row.total .value { font-size: 16px; color: #f97316; font-weight: 700; }
+    /* Étapes */
+    .steps {
+      margin-bottom: 28px;
+    }
+    .steps-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f0e0c;
+      margin-bottom: 14px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f97316;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-num.done { background: #22c55e; }
+    .step-text { font-size: 13px; color: #3d3a35; line-height: 1.5; padding-top: 3px; }
+    .step-text strong { color: #0f0e0c; }
+    /* CTA */
+    .cta-block { text-align: center; margin-bottom: 28px; }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #f97316, #ea6000);
+      color: white !important;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    /* Footer */
+    .footer {
+      background: #faf8f5;
+      border: 1px solid #e8e3da;
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 24px 40px;
+      text-align: center;
+    }
+    .footer p { font-size: 12px; color: #b0a898; line-height: 1.6; }
+    .footer a { color: #f97316; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-logo">HooYia<span> Market</span></div>
+    <span class="header-icon">✅</span>
+    <h1>Commande confirmée !</h1>
+    <p>Merci pour votre confiance, nous préparons votre colis.</p>
+  </div>
+
+  <!-- ── Corps ── -->
+  <div class="body">
+
+    <p class="greeting">Bonjour <strong>{{ client_username }}</strong>,</p>
+    <p class="intro">
+      Votre commande a bien été reçue et confirmée. Voici le récapitulatif de votre achat.
+      Vous recevrez un nouvel email dès l'expédition de votre colis.
+    </p>
+
+    <!-- Récap -->
+    <div class="recap">
+      <div class="recap-title">Récapitulatif de commande</div>
+      <div class="recap-row">
+        <span class="label">Référence</span>
+        <span class="value">#{{ reference }}</span>
+      </div>
+      <div class="recap-row">
+        <span class="label">Date</span>
+        <span class="value">{{ date }}</span>
+      </div>
+      {% if adresse_livraison %}
+      <div class="recap-row">
+        <span class="label">Livraison</span>
+        <span class="value">{{ adresse_livraison }}</span>
+      </div>
+      {% endif %}
+      {% if lignes %}
+      {% for ligne in lignes %}
+      <div class="recap-row">
+        <span class="label">{{ ligne.nom }} × {{ ligne.quantite }}</span>
+        <span class="value">{{ ligne.total }} FCFA</span>
+      </div>
+      {% endfor %}
+      {% endif %}
+      <div class="recap-row total">
+        <span class="label">Total</span>
+        <span class="value">{{ montant_total }} FCFA</span>
+      </div>
+    </div>
+
+    <!-- Étapes -->
+    <div class="steps">
+      <p class="steps-title">Que se passe-t-il maintenant ?</p>
+      <div class="step">
+        <div class="step-num done">✓</div>
+        <div class="step-text"><strong>Commande confirmée</strong> — Votre paiement a bien été enregistré.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Préparation en cours</strong> — Notre équipe prépare votre colis avec soin.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Expédition</strong> — Vous recevrez un email avec le suivi dès l'envoi.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Livraison</strong> — Votre colis arrive à l'adresse indiquée.</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <a href="{{ lien_commande }}" class="cta-btn">Suivre ma commande →</a>
+    </div>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <p>
+      Des questions ? Contactez-nous via <a href="{{ lien_chat }}">notre messagerie</a>.<br>
+      Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y répondre.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

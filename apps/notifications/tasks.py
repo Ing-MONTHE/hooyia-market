@@ -97,24 +97,21 @@ def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien='
 
 # ── Utilitaire : créer et envoyer un email loggué ─────────────────────────────
 
-def _envoyer_email(destinataire, sujet, corps):
+def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=None):
     """
     Envoie un email et crée un log EmailAsynchrone en DB.
 
-    En local : EMAIL_BACKEND=console → l'email s'affiche dans le terminal.
-    En production : remplacer par SMTP ou SendGrid.
-
     Args:
-        destinataire : instance CustomUser
-        sujet        : sujet de l'email
-        corps        : corps texte de l'email
-
-    Returns:
-        EmailAsynchrone : instance créée
+        destinataire   : instance CustomUser
+        sujet          : sujet de l'email
+        corps          : corps texte de l'email (fallback si pas de HTML)
+        html_template  : chemin du template HTML (optionnel)
+        html_context   : contexte pour le template HTML (optionnel)
     """
     from apps.notifications.models import EmailAsynchrone
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
 
-    # Création du log en attente
     log_email = EmailAsynchrone.objects.create(
         destinataire=destinataire,
         sujet=sujet,
@@ -124,21 +121,23 @@ def _envoyer_email(destinataire, sujet, corps):
     )
 
     try:
-        send_mail(
-            subject      = sujet,
-            message      = corps,
-            from_email   = settings.DEFAULT_FROM_EMAIL,
-            recipient_list = [destinataire.email],
-            fail_silently = False,
+        email = EmailMultiAlternatives(
+            subject=sujet,
+            body=corps,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[destinataire.email],
         )
-        # Mise à jour du statut si succès
-        log_email.statut    = EmailAsynchrone.STATUT_ENVOYE
+        if html_template and html_context:
+            html_content = render_to_string(html_template, html_context)
+            email.attach_alternative(html_content, 'text/html')
+        email.send(fail_silently=False)
+
+        log_email.statut     = EmailAsynchrone.STATUT_ENVOYE
         log_email.date_envoi = timezone.now()
         log_email.save(update_fields=['statut', 'date_envoi'])
         logger.info(f"Email envoyé à {destinataire.email} : {sujet}")
 
     except Exception as e:
-        # Enregistrement de l'erreur pour débogage
         log_email.statut = EmailAsynchrone.STATUT_ECHEC
         log_email.erreur = str(e)
         log_email.save(update_fields=['statut', 'erreur'])
@@ -181,7 +180,22 @@ def send_order_confirmation_email(self, commande_id):
         )
 
         # Envoi email + log DB
-        _envoyer_email(client, sujet, corps)
+        _envoyer_email(
+            client, sujet, corps,
+            html_template='notifications/emails/order_confirm.html',
+            html_context={
+                'client_username' : client.username,
+                'reference'       : commande.reference_courte,
+                'date'            : commande.date_creation.strftime('%d/%m/%Y'),
+                'montant_total'   : commande.montant_total,
+                'lignes'          : [
+                    {'nom': l.produit_nom, 'quantite': l.quantite, 'total': l.prix_unitaire * l.quantite}
+                    for l in commande.lignes.all()
+                ],
+                'lien_commande'   : f"http://localhost:8000/commandes/{commande.id}/",
+                'lien_chat'       : "http://localhost:8000/chat/",
+            }
+        )
 
         # Notification in-app + WebSocket
         _diffuser_notification_ws(
@@ -240,7 +254,9 @@ def send_status_update_email(self, commande_id):
             f"L'équipe HooYia Market"
         )
 
-        _envoyer_email(client, sujet, corps)
+        LABELS_STATUT = {Commande.EN_PREPARATION: "En préparation 📦", Commande.EXPEDIEE: "Expédiée 🚚", Commande.LIVREE: "Livrée ✅", Commande.ANNULEE: "Annulée ❌"}
+        ICONES_STATUT = {Commande.EN_PREPARATION: "📦", Commande.EXPEDIEE: "🚚", Commande.LIVREE: "✅", Commande.ANNULEE: "❌"}
+        _envoyer_email(client, sujet, corps, html_template="notifications/emails/status_update.html", html_context={"client_username": client.username, "reference": commande.reference_courte, "date": commande.date_creation.strftime("%d/%m/%Y"), "montant_total": commande.montant_total, "statut": commande.statut, "titre_statut": titre_statut, "label_statut": LABELS_STATUT.get(commande.statut, commande.statut), "icone": ICONES_STATUT.get(commande.statut, "📋"), "message_intro": msg_statut, "lien_commande": f"http://localhost:8000/commandes/{commande.id}/", "lien_chat": "http://localhost:8000/chat/"})
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,

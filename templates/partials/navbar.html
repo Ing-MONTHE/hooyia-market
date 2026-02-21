@@ -1,140 +1,340 @@
 {% load static %}
-<header class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center h-[72px] gap-6">
+<!-- ═══════════════════════════════════════════════
+     NAVBAR HooYia — Style Amazon (version propre)
+     Barre 1 (#0D1F5C) : logo cadré | recherche | compte + panier
+     Barre 2 (#1E3A8A) : Accueil + catégories + liens rapides
+═══════════════════════════════════════════════ -->
+<header class="sticky top-0 z-40">
 
-      <!-- LOGO -->
-      <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 flex-shrink-0">
-        <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-10 w-auto" />
-        <span class="font-display text-xl text-ink leading-none tracking-tight">HooYia</span>
+  <!-- ══ BARRE 1 ══ -->
+  <div style="background:#0D1F5C;">
+    <div class="max-w-[1400px] mx-auto px-3 sm:px-5 flex items-center gap-3 h-[62px]">
+
+      <!-- Logo dans cadre blanc -->
+      <a href="{% url 'products:accueil' %}"
+         style="display:flex;align-items:center;flex-shrink:0;background:white;border-radius:8px;padding:4px 10px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:box-shadow .15s;"
+         onmouseover="this.style.boxShadow='0 4px 16px rgba(249,115,22,.4)'"
+         onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.2)'">
+        <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:38px;width:auto;" />
       </a>
 
-      <!-- LIENS CENTRÉS -->
-      <div class="hidden lg:flex items-center gap-1 flex-1 justify-center">
-        <div class="relative" id="catalogue-container">
-          <button onclick="toggleCatalogue()" class="flex items-center gap-1 px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">
-            Catalogue
-            <svg id="catalogue-arrow" class="h-3.5 w-3.5 opacity-50 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-          </button>
-          <div id="catalogue-dropdown" class="absolute top-full left-0 mt-1 hidden z-50">
-            <div class="bg-white border border-gray-200 rounded-xl shadow-card-hover p-2 min-w-[220px]">
-              <a href="{% url 'products:liste' %}" class="block px-3 py-2.5 text-sm text-ink hover:bg-cream-warm hover:text-brand-600 rounded-lg font-body transition-colors">Tous les produits</a>
-              <div class="my-1 border-t border-gray-100"></div>
-              {% for cat in categories %}
-              <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="block px-3 py-2 text-sm text-ink/70 hover:bg-cream-warm hover:text-brand-600 rounded-lg font-body transition-colors">{{ cat.nom }}</a>
-              {% endfor %}
-              <div class="my-1 border-t border-gray-100"></div>
-              <a href="{% url 'products:liste' %}?promo=true" class="block px-3 py-2 text-sm text-brand-600 font-medium hover:bg-brand-50 rounded-lg font-body transition-colors">Promotions</a>
-              <a href="{% url 'products:liste' %}?en_vedette=true" class="block px-3 py-2 text-sm text-ink/70 hover:bg-cream-warm rounded-lg font-body transition-colors">Produits vedette</a>
-            </div>
-          </div>
-        </div>
-        <a href="{% url 'products:liste' %}?ordering=-date_creation" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Nouveautés</a>
-      </div>
-
-      <!-- ACTIONS DROITE -->
-      <div class="flex items-center gap-2 ml-auto lg:ml-0">
-        <!-- Recherche -->
-        <div class="hidden md:flex relative">
-          <input type="search" id="search-input" placeholder="Rechercher un produit…"
-            class="w-56 bg-gray-50 border border-gray-300 text-ink placeholder-gray-400 text-sm rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-brand-500 focus:bg-white transition-all font-body"
-            autocomplete="off"
-            onkeydown="if(event.key==='Enter') window.location.href='/produits/?search='+encodeURIComponent(this.value)" />
-          <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      <!-- Recherche (une seule, visible partout) -->
+      <div style="display:flex;flex:1;max-width:700px;height:38px;border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.2);">
+        <!-- Dropdown catégorie (masqué sous sm) -->
+        <select id="search-cat"
+          style="padding:0 8px;font-size:12px;font-weight:600;background:#e8e3da;color:#3d3a35;border:none;cursor:pointer;min-width:110px;font-family:'DM Sans',sans-serif;display:none;"
+          class="nv-sm-show">
+          <option value="">Toutes catég.</option>
+          {% for cat in categories %}<option value="{{ cat.slug }}">{{ cat.nom }}</option>{% endfor %}
+        </select>
+        <div class="nv-sm-show" style="width:1px;background:#d1d5db;display:none;"></div>
+        <input type="search" id="search-input"
+          placeholder="Rechercher sur HooYia Market…"
+          style="flex:1;padding:0 14px;font-size:14px;color:#111;background:white;border:none;outline:none;font-family:'DM Sans',sans-serif;"
+          onkeydown="if(event.key==='Enter')doSearch()" />
+        <button onclick="doSearch()"
+          style="padding:0 16px;background:#F97316;border:none;cursor:pointer;transition:background .15s;"
+          onmouseover="this.style.background='#ea6000'" onmouseout="this.style.background='#F97316'">
+          <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
-        </div>
-
-        {% if user.is_authenticated %}
-          <!-- Panier -->
-          <a href="{% url 'cart:panier' %}" class="relative p-2 text-ink/60 hover:text-brand-600 transition-colors" title="Panier">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            <span id="cart-badge" class="{% if cart_count == 0 %}hidden {% endif %}absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-brand-500 text-white text-[10px] font-mono font-semibold rounded-full flex items-center justify-center px-1">{% if cart_count > 0 %}{{ cart_count }}{% endif %}</span>
-          </a>
-          <!-- Notifications -->
-          <button class="relative p-2 text-ink/60 hover:text-brand-600 transition-colors">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            <span id="notif-badge" class="{% if notif_count == 0 %}hidden {% endif %}absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-mono font-semibold rounded-full flex items-center justify-center px-1">{% if notif_count > 0 %}{{ notif_count }}{% endif %}</span>
-          </button>
-          <!-- Profil -->
-          <div class="relative" id="profile-menu-container">
-            <button onclick="toggleProfileMenu()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 hover:border-brand-400 transition-all">
-              <span class="h-7 w-7 rounded-lg bg-brand-600 flex items-center justify-center text-xs font-semibold text-white">{{ user.prenom|first|upper }}{{ user.nom|first|upper }}</span>
-              <span class="hidden md:block text-sm font-body font-medium text-ink">{{ user.prenom }}</span>
-              <svg class="h-3.5 w-3.5 text-ink/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </button>
-            <div id="profile-dropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-card-hover py-1.5">
-              <div class="px-4 py-2.5 border-b border-gray-100">
-                <p class="text-xs text-ink/40 font-body">{{ user.prenom }} {{ user.nom }}</p>
-                <p class="text-sm text-ink font-body font-medium truncate">{{ user.email }}</p>
-              </div>
-              <a href="{% url 'users:profil' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mon profil</a>
-              <a href="{% url 'users:ajouter_adresse' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mes adresses</a>
-              <a href="{% url 'cart:panier' %}" class="flex items-center px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mon panier {% if cart_count > 0 %}<span class="ml-auto badge badge-orange">{{ cart_count }}</span>{% endif %}</a>
-              <a href="{% url 'orders:historique' %}" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Mes commandes</a>
-              <a href="/chat/" class="block px-4 py-2.5 text-sm text-ink/70 hover:text-brand-600 hover:bg-cream-warm transition-colors font-body">Messages</a>
-              {% if user.is_staff %}
-              <div class="my-1 border-t border-gray-100"></div>
-              <a href="/admin/" class="block px-4 py-2.5 text-sm text-brand-600 hover:bg-brand-50 transition-colors font-body">Administration</a>
-              {% endif %}
-              <div class="my-1 border-t border-gray-100"></div>
-              <a href="{% url 'users:deconnexion' %}" class="block px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body">Déconnexion</a>
-            </div>
-          </div>
-        {% else %}
-          <a href="{% url 'users:connexion' %}" class="px-4 py-2 text-sm font-body font-medium text-ink hover:text-brand-600 transition-colors">Connexion</a>
-          <a href="{% url 'users:inscription' %}" class="px-4 py-2 text-sm font-body font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-xl transition-all shadow-btn">S'inscrire</a>
-        {% endif %}
-
-        <!-- Burger -->
-        <button class="lg:hidden p-2 text-ink/60 hover:text-ink rounded-lg" onclick="toggleMobileMenu()">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
       </div>
-    </div>
 
-    <!-- Mobile -->
-    <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-100 py-3 pb-4 space-y-1">
-      <div class="relative mb-3">
-        <input type="search" placeholder="Rechercher…"
-          class="w-full bg-gray-50 border border-gray-300 text-ink placeholder-gray-400 text-sm rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-brand-500 font-body"
-          onkeydown="if(event.key==='Enter') window.location.href='/produits/?search='+encodeURIComponent(this.value)" />
-        <svg class="absolute left-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <!-- Actions droite -->
+      <div style="display:flex;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;">
+
+        {% if user.is_authenticated %}
+
+        <!-- Compte -->
+        <div style="position:relative;" id="profile-menu-container">
+          <button onclick="toggleProfileMenu()" class="nv-btn">
+            <span class="nv-label nv-sm-show" style="display:none;">Bonjour, {{ user.prenom|default:user.username }}</span>
+            <span class="nv-main">Compte &amp; Profil ▾</span>
+          </button>
+          <div id="profile-dropdown" class="nv-dropdown" style="display:none;">
+            <div style="padding:10px 16px;border-bottom:1px solid #f3f4f6;">
+              <p style="font-size:11px;color:#9ca3af;font-family:'DM Sans',sans-serif;">{{ user.email }}</p>
+            </div>
+            <a href="{% url 'users:profil' %}"          class="nv-dd-item">👤 Mon profil</a>
+            <a href="{% url 'orders:historique' %}"      class="nv-dd-item">📦 Mes commandes</a>
+            <a href="{% url 'users:ajouter_adresse' %}" class="nv-dd-item">📍 Mes adresses</a>
+            <a href="/chat/"                             class="nv-dd-item">💬 Messages</a>
+            {% if user.is_staff %}
+            <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
+            <a href="/admin/" class="nv-dd-item" style="color:#1E3A8A;">⚙️ Administration</a>
+            {% endif %}
+            <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
+            <a href="{% url 'users:deconnexion' %}" class="nv-dd-item" style="color:#ef4444;"
+               onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">🚪 Déconnexion</a>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div style="position:relative;" id="notif-menu-container">
+          <button onclick="toggleNotifMenu()" class="nv-btn">
+            <span style="position:relative;display:flex;align-items:center;">
+              <svg style="width:22px;height:22px;" fill="none" stroke="white" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              {% if notif_count > 0 %}
+              <span id="notif-badge"
+                style="position:absolute;top:-8px;right:-6px;min-width:16px;height:16px;background:#ef4444;color:white;font-size:9px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;font-family:monospace;">
+                {{ notif_count }}
+              </span>
+              {% else %}
+              <span id="notif-badge" style="display:none;position:absolute;top:-8px;right:-6px;min-width:16px;height:16px;background:#ef4444;color:white;font-size:9px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;font-family:monospace;"></span>
+              {% endif %}
+            </span>
+          </button>
+          <div id="notif-dropdown" class="nv-dropdown" style="display:none;width:300px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #f3f4f6;">
+              <span style="font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:#111;">Notifications</span>
+              <button onclick="Notifications&&Notifications.toutMarquerLu()" style="font-size:11px;color:#1E3A8A;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Tout lire</button>
+            </div>
+            <div id="notif-list" style="max-height:240px;overflow-y:auto;">
+              <p style="font-size:12px;text-align:center;color:#9ca3af;padding:24px 0;font-family:'DM Sans',sans-serif;">Chargement…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panier style Amazon -->
+        <a href="{% url 'cart:panier' %}" class="nv-btn" style="text-decoration:none;flex-direction:row;align-items:flex-end;gap:4px;">
+          <span style="position:relative;display:flex;flex-direction:column;align-items:center;">
+            <span id="cart-badge"
+              style="font-size:18px;font-weight:700;color:#F97316;font-family:'DM Sans',sans-serif;line-height:1;min-width:20px;text-align:center;">
+              {{ cart_count|default:"0" }}
+            </span>
+            <svg style="width:28px;height:28px;" fill="none" stroke="white" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+          </span>
+          <span style="font-size:13px;font-weight:700;color:white;padding-bottom:2px;font-family:'DM Sans',sans-serif;">Panier</span>
+        </a>
+
+        {% else %}
+
+        <!-- Non connecté -->
+        <a href="{% url 'users:connexion' %}" class="nv-btn" style="text-decoration:none;">
+          <span class="nv-label nv-sm-show" style="display:none;">Bonjour, visiteur</span>
+          <span class="nv-main">Connexion</span>
+        </a>
+        <a href="{% url 'users:inscription' %}"
+          style="padding:5px 10px;border-radius:4px;font-size:12px;font-weight:600;color:white;border:1px solid rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;text-decoration:none;margin-left:4px;transition:border-color .15s;"
+          onmouseover="this.style.borderColor='white'" onmouseout="this.style.borderColor='rgba(255,255,255,.4)'">S'inscrire</a>
+
+        {% endif %}
+
+        <!-- Burger (mobile uniquement) -->
+        <button onclick="toggleMobileMenu()"
+          style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer;color:white;margin-left:4px;transition:border-color .15s;"
+          onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='transparent'"
+          class="nv-burger">
+          <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+
       </div>
-      <a href="{% url 'products:liste' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:text-brand-600 hover:bg-cream-warm rounded-xl">Catalogue</a>
-      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="block px-3 py-2.5 text-sm font-body text-ink hover:text-brand-600 hover:bg-cream-warm rounded-xl">Nouveautés</a>
-      <a href="{% url 'products:liste' %}?promo=true" class="block px-3 py-2.5 text-sm font-body text-brand-600 hover:bg-brand-50 rounded-xl">Promos</a>
-      {% if user.is_authenticated %}
-      <a href="{% url 'cart:panier' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
-      <a href="{% url 'orders:historique' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Mes commandes</a>
-      <a href="/chat/" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Messages</a>
-      <a href="{% url 'users:profil' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Mon profil</a>
-      {% if user.is_staff %}<a href="/admin/" class="block px-3 py-2.5 text-sm font-body text-brand-600 hover:bg-brand-50 rounded-xl">Administration</a>{% endif %}
-      <a href="{% url 'users:deconnexion' %}" class="block px-3 py-2.5 text-sm font-body text-red-500 hover:bg-red-50 rounded-xl">Déconnexion</a>
-      {% else %}
-      <a href="{% url 'users:connexion' %}" class="block px-3 py-2.5 text-sm font-body text-ink hover:bg-cream-warm rounded-xl">Connexion</a>
-      <a href="{% url 'users:inscription' %}" class="block px-3 py-2.5 text-sm font-body font-semibold text-brand-600 hover:bg-brand-50 rounded-xl">S'inscrire</a>
-      {% endif %}
     </div>
-  </nav>
+  </div>
+
+  <!-- ══ BARRE 2 — LIENS DE NAVIGATION ══ -->
+  <div style="background:#1E3A8A;" class="nv-bar2">
+    <div class="max-w-[1400px] mx-auto px-3 sm:px-5 flex items-center" style="height:42px;">
+
+      <!-- Accueil -->
+      <a href="{% url 'products:accueil' %}" class="nv-navlink" style="font-weight:600;">🏠 Accueil</a>
+
+      <!-- Toutes catégories -->
+      <div style="position:relative;" id="catalogue-container">
+        <button onclick="toggleCatalogue()" class="nv-navlink" style="font-weight:700;display:flex;align-items:center;gap:6px;background:none;border:1px solid transparent;cursor:pointer;border-radius:4px;height:42px;padding:0 12px;color:rgba(255,255,255,.88);font-family:'DM Sans',sans-serif;font-size:13px;white-space:nowrap;transition:color .15s,border-color .15s;"
+          onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.color='white'"
+          onmouseout="this.style.borderColor='transparent';this.style.color='rgba(255,255,255,.88)'">
+          <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          Toutes catégories
+        </button>
+        <div id="catalogue-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:2px;background:white;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:8px;min-width:220px;z-index:50;">
+          <a href="{% url 'products:liste' %}" style="display:block;padding:8px 12px;font-size:13px;font-weight:600;color:#111;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">Tous les produits</a>
+          <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
+          {% for cat in categories %}
+          <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" style="display:block;padding:7px 12px;font-size:13px;color:#374151;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">{{ cat.nom }}</a>
+          {% endfor %}
+          <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
+          <a href="{% url 'products:liste' %}?promo=true" style="display:block;padding:7px 12px;font-size:13px;color:#F97316;font-weight:600;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background='white'">🔥 Promotions</a>
+        </div>
+      </div>
+
+      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nv-navlink">Nouveautés</a>
+      <a href="{% url 'products:liste' %}?promo=true" class="nv-navlink" style="color:#FCD34D;font-weight:600;">🔥 Promos</a>
+      <a href="{% url 'products:liste' %}?en_vedette=true" class="nv-navlink">En vedette</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'orders:historique' %}" class="nv-navlink">Mes commandes</a>
+      <a href="/chat/" class="nv-navlink">Messages</a>
+      {% endif %}
+      {% if user.is_staff %}
+      <a href="{% url 'products:ajouter' %}" class="nv-navlink" style="margin-left:auto;color:#FCD34D;font-weight:600;">+ Ajouter produit</a>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- ══ MENU MOBILE (burger) ══ -->
+  <div id="mobile-menu" style="display:none;background:#0D1F5C;padding:12px 12px 16px;border-top:1px solid rgba(255,255,255,.1);">
+    <a href="{% url 'products:accueil' %}"                       class="nv-mobile" style="font-weight:600;">🏠 Accueil</a>
+    <a href="{% url 'products:liste' %}"                         class="nv-mobile">📦 Catalogue</a>
+    <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nv-mobile">🆕 Nouveautés</a>
+    <a href="{% url 'products:liste' %}?promo=true"              class="nv-mobile" style="color:#FCD34D;">🔥 Promos</a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'users:profil' %}"      class="nv-mobile">👤 Mon profil</a>
+    <a href="{% url 'cart:panier' %}"       class="nv-mobile">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
+    <a href="{% url 'orders:historique' %}" class="nv-mobile">📋 Mes commandes</a>
+    <a href="/chat/"                        class="nv-mobile">💬 Messages</a>
+    {% if user.is_staff %}
+    <a href="/admin/"                       class="nv-mobile" style="color:#FCD34D;">⚙️ Administration</a>
+    {% endif %}
+    <a href="{% url 'users:deconnexion' %}" class="nv-mobile" style="color:#fca5a5;">🚪 Déconnexion</a>
+    {% else %}
+    <a href="{% url 'users:connexion' %}"   class="nv-mobile">🔑 Connexion</a>
+    <a href="{% url 'users:inscription' %}" class="nv-mobile" style="color:#F97316;font-weight:600;">S'inscrire</a>
+    {% endif %}
+  </div>
+
 </header>
 
+<style>
+/* Action buttons barre 1 */
+.nv-btn {
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 4px 10px; background: transparent;
+  border: 1px solid transparent; border-radius: 4px;
+  cursor: pointer; color: white; text-decoration: none;
+  font-family: 'DM Sans', sans-serif; transition: border-color .15s; line-height: 1.25;
+}
+.nv-btn:hover { border-color: rgba(255,255,255,.4); }
+.nv-label { font-size: 11px; color: rgba(255,255,255,.72); }
+.nv-main  { font-size: 13px; font-weight: 700; color: white; }
+
+/* Liens barre 2 */
+.nv-navlink {
+  display: flex; align-items: center; height: 42px;
+  padding: 0 12px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,.88); text-decoration: none; white-space: nowrap;
+  border: 1px solid transparent; border-radius: 4px;
+  transition: color .15s, border-color .15s;
+}
+.nv-navlink:hover { color: white; border-color: rgba(255,255,255,.4); }
+
+/* Dropdown */
+.nv-dropdown {
+  position: absolute; right: 0; top: calc(100% + 4px);
+  min-width: 220px; background: white;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18); z-index: 50;
+}
+.nv-dd-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; font-size: 13px; color: #374151;
+  font-family: 'DM Sans', sans-serif; text-decoration: none;
+  transition: background .1s;
+}
+.nv-dd-item:hover { background: #f9fafb; }
+
+/* Mobile links */
+.nv-mobile {
+  display: block; padding: 9px 12px; border-radius: 6px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,.8); text-decoration: none;
+  transition: background .1s, color .1s;
+}
+.nv-mobile:hover { background: rgba(255,255,255,.1); color: white; }
+
+/* Burger visible seulement en mobile */
+.nv-burger { display: none; }
+
+/* Barre 2 : desktop uniquement */
+.nv-bar2 { display: none; }
+
+@media (min-width: 1024px) {
+  .nv-bar2 { display: block; }
+  .nv-burger { display: none !important; }
+}
+@media (max-width: 1023px) {
+  .nv-burger { display: flex !important; }
+}
+@media (min-width: 640px) {
+  .nv-sm-show { display: block !important; }
+  select.nv-sm-show { display: block !important; }
+  span.nv-sm-show  { display: inline !important; }
+}
+</style>
+
 <script>
-  function toggleCatalogue() {
-    const dd = document.getElementById('catalogue-dropdown');
-    const arrow = document.getElementById('catalogue-arrow');
-    const isHidden = dd.classList.toggle('hidden');
-    arrow.style.transform = isHidden ? '' : 'rotate(180deg)';
-  }
-  function toggleProfileMenu() { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
-  function toggleMobileMenu()  { document.getElementById('mobile-menu').classList.toggle('hidden'); }
-  document.addEventListener('click', (e) => {
-    const cat = document.getElementById('catalogue-container');
-    if (cat && !cat.contains(e.target)) {
-      document.getElementById('catalogue-dropdown')?.classList.add('hidden');
-      document.getElementById('catalogue-arrow').style.transform = '';
+function doSearch() {
+  const q   = (document.getElementById('search-input')?.value || '').trim();
+  const cat = document.getElementById('search-cat')?.value || '';
+  let url = '/produits/?search=' + encodeURIComponent(q);
+  if (cat) url += '&categorie=' + encodeURIComponent(cat);
+  if (q || cat) window.location.href = url;
+}
+
+function toggleCatalogue() {
+  const dd = document.getElementById('catalogue-dropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+function toggleProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('notif-dropdown').style.display = 'none';
+}
+function toggleMobileMenu() {
+  const m = document.getElementById('mobile-menu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+async function toggleNotifMenu() {
+  const dd   = document.getElementById('notif-dropdown');
+  const open = dd.style.display !== 'none';
+  dd.style.display = open ? 'none' : 'block';
+  document.getElementById('profile-dropdown').style.display = 'none';
+  if (open) return;
+
+  const list   = document.getElementById('notif-list');
+  const icones = { commande:'📦', avis:'⭐', stock:'⚠️', systeme:'ℹ️' };
+  try {
+    const raw  = await API.get('/api/notifications/?page_size=8', { silentError: true });
+    const data = raw?.results || raw || [];
+    if (!data.length) {
+      list.innerHTML = '<p style="font-size:12px;text-align:center;color:#9ca3af;padding:24px 0;font-family:\'DM Sans\',sans-serif;">Aucune notification</p>';
+      return;
     }
-    const c = document.getElementById('profile-menu-container');
-    if (c && !c.contains(e.target)) document.getElementById('profile-dropdown')?.classList.add('hidden');
+    list.innerHTML = data.map(n => `
+      <div onclick="Notifications&&Notifications.marquerLue(${n.id});${n.lien?`window.location.href='${n.lien}'`:''}"
+        style="display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid #f9fafb;cursor:pointer;background:${!n.is_read?'#eff6ff':'white'};"
+        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='${!n.is_read?'#eff6ff':'white'}'">
+        <span style="font-size:16px;flex-shrink:0;margin-top:2px;">${icones[n.type_notif]||'ℹ️'}</span>
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:12px;font-weight:600;color:#111;font-family:'DM Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.titre}</p>
+          <p style="font-size:11px;color:#6b7280;font-family:'DM Sans',sans-serif;margin-top:2px;line-height:1.4;">${n.message}</p>
+        </div>
+        ${!n.is_read?'<div style="width:7px;height:7px;border-radius:50%;background:#F97316;flex-shrink:0;margin-top:4px;"></div>':''}
+      </div>`).join('');
+  } catch(e) {
+    list.innerHTML = '<p style="font-size:12px;text-align:center;color:#9ca3af;padding:16px;font-family:\'DM Sans\',sans-serif;">Erreur de chargement</p>';
+  }
+}
+
+// Fermeture dropdowns au clic extérieur
+document.addEventListener('click', e => {
+  [
+    ['catalogue-container', 'catalogue-dropdown'],
+    ['profile-menu-container', 'profile-dropdown'],
+    ['notif-menu-container', 'notif-dropdown'],
+  ].forEach(([cid, did]) => {
+    const c = document.getElementById(cid);
+    const d = document.getElementById(did);
+    if (c && d && !c.contains(e.target)) d.style.display = 'none';
   });
+});
 </script>
