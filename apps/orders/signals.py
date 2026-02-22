@@ -77,3 +77,33 @@ def planifier_rappel_avis(sender, instance, created, **kwargs):
             logger.info(f"Rappel avis planifié pour commande #{instance.reference_courte}")
         except Exception as e:
             logger.error(f"Erreur planification rappel avis : {e}")
+
+# ═══════════════════════════════════════════════════════════════
+# SIGNAL 3 — Paiement automatique à la livraison
+# Quand une commande "paiement à la livraison" passe en LIVREE,
+# on marque automatiquement le paiement comme REUSSI.
+# Logique : si c'est livré, le cash a été remis en main propre.
+# ═══════════════════════════════════════════════════════════════
+
+@receiver(post_save, sender=Commande)
+def marquer_paiement_livraison(sender, instance, created, **kwargs):
+    """
+    Quand une commande passe en LIVREE ET que le mode de paiement
+    est LIVRAISON, on marque automatiquement le paiement comme REUSSI.
+    """
+    if created or instance.statut != Commande.LIVREE:
+        return
+    try:
+        from .models import Paiement
+        paiement = instance.paiement
+        if (paiement.mode == Paiement.ModePaiement.LIVRAISON
+                and paiement.statut == Paiement.StatutPaiement.EN_ATTENTE):
+            paiement.statut       = Paiement.StatutPaiement.REUSSI
+            paiement.date_paiement = instance.date_modification
+            paiement.save(update_fields=['statut', 'date_paiement'])
+            logger.info(
+                f"Paiement livraison marqué REUSSI pour commande "
+                f"#{instance.reference_courte}"
+            )
+    except Exception as e:
+        logger.error(f"Erreur mise à jour statut paiement : {e}")

@@ -22,26 +22,37 @@ from apps.orders.models import Commande
 class AvisListSerializer(serializers.ModelSerializer):
     """
     Sérialise un avis pour l'affichage en liste.
-    Version allégée : pas besoin de toutes les infos du produit
-    (on est déjà sur la page du produit).
-    Seuls les avis validés sont exposés via la vue API.
+    Utilisé pour la fiche produit (clients) et le tableau de modération (admin).
     """
 
-    # Nom d'utilisateur affiché (pas l'email — respect de la vie privée)
-    # source='utilisateur.username' → accès à la FK en lecture seule
-    nom_utilisateur = serializers.CharField(
-        source='utilisateur.username',
-        read_only=True
-    )
+    nom_utilisateur = serializers.CharField(source='utilisateur.username', read_only=True)
+    auteur          = serializers.CharField(source='utilisateur.username', read_only=True)
+    auteur_nom      = serializers.CharField(source='utilisateur.username', read_only=True)
+    produit_nom     = serializers.CharField(source='produit.nom', read_only=True)
+
+    # Photo de profil : URL complète si elle existe, sinon None
+    auteur_photo = serializers.SerializerMethodField()
+
+    def get_auteur_photo(self, obj):
+        request = self.context.get('request')
+        photo = obj.utilisateur.photo_profil
+        if photo and request:
+            return request.build_absolute_uri(photo.url)
+        return None
 
     class Meta:
         model  = Avis
         fields = [
             'id',
-            'nom_utilisateur',  # Ex: "jean_dupont"
-            'note',             # 1 à 5
-            'commentaire',      # Texte libre (peut être vide)
-            'date_creation',    # Affiché sous l'avis
+            'nom_utilisateur',  # Pour la fiche produit (frontend client)
+            'auteur',           # Pour le dashboard admin
+            'auteur_nom',       # Pour la carte avis (fiche produit)
+            'auteur_photo',     # URL photo de profil (None si absente)
+            'produit_nom',      # Pour le dashboard admin
+            'note',
+            'commentaire',
+            'is_validated',
+            'date_creation',
         ]
         read_only_fields = fields
 
@@ -128,20 +139,32 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         utilisateur = self.context['request'].user
         produit     = data['produit']
 
-        # ── Vérification : l'utilisateur a-t-il reçu ce produit ? ─────────────
-        # On cherche une commande LIVREE du client contenant le produit visé.
-        # LigneCommande est la table pivot entre Commande et Produit.
-        # exists() est plus performant que count() ou first() : s'arrête au premier résultat.
-        a_commande = Commande.objects.filter(
-            client=utilisateur,
-            statut=Commande.LIVREE,
-            lignes__produit=produit     # JOIN sur LigneCommande
-        ).exists()
-
-        if not a_commande:
+        # ── Vérification : l'utilisateur n'est pas admin/staff/vendeur ────────
+        # Couche de sécurité supplémentaire côté serializer (la permission EstClient
+        # bloque déjà en amont, mais on double-protège au cas où l'API serait
+        # appelée directement sans passer par la vue standard).
+        if utilisateur.is_staff or utilisateur.is_admin or utilisateur.is_vendeur:
             raise serializers.ValidationError(
-                "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+                "Les administrateurs et vendeurs ne peuvent pas laisser d'avis. "
+                "Cette fonctionnalité est réservée aux clients."
             )
+
+        # ── Vérification : l'utilisateur a-t-il reçu ce produit ? ─────────────
+        # Contrôlé par le flag AVIS_ACHAT_REQUIS dans settings.py.
+        # En production : True → seuls les vrais acheteurs peuvent noter.
+        # En développement : False → n'importe quel client peut laisser un avis.
+        from django.conf import settings
+        if getattr(settings, 'AVIS_ACHAT_REQUIS', False):
+            a_commande = Commande.objects.filter(
+                client=utilisateur,
+                statut=Commande.LIVREE,
+                lignes__produit=produit
+            ).exists()
+
+            if not a_commande:
+                raise serializers.ValidationError(
+                    "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+                )
 
         # ── Vérification : l'utilisateur n'a-t-il pas déjà noté ce produit ? ──
         # Double sécurité : la DB lève IntegrityError (unique_together),

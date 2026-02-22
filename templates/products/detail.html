@@ -68,7 +68,7 @@
         <div id="stock-info" class="flex items-center gap-2 mb-6 text-sm font-body"></div>
 
         <div class="flex items-center gap-3 mb-4">
-          {% if not user.is_staff %}
+          {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
           <div class="flex items-center border border-cream-border rounded-xl overflow-hidden">
             <button onclick="changeQty(-1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">−</button>
             <input type="number" id="qty" value="1" min="1" class="w-14 text-center border-none outline-none font-body text-sm bg-white py-3" />
@@ -79,6 +79,20 @@
           </button>
           {% endif %}
         </div>
+
+        <!-- ── Bouton Contacter le vendeur ── -->
+        {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
+        {% if admin_id %}
+        <button onclick="contacterVendeur()" id="btn-contact"
+          class="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-brand-300 text-brand-600 font-body font-medium text-sm hover:bg-brand-50 transition-colors">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          Contacter le vendeur
+        </button>
+        {% endif %}
+        {% endif %}
 
         <div class="mt-6 pt-6 border-t border-cream-border">
           <h3 class="font-display text-lg text-ink mb-3">Description</h3>
@@ -91,12 +105,12 @@
     <section class="mt-16 pt-10 border-t border-cream-border">
       <div class="flex items-center justify-between mb-6">
         <h2 class="font-display text-2xl text-ink">Avis clients</h2>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
         <button onclick="toggleAvisForm()" class="btn-secondary py-2 px-4 text-sm">Laisser un avis</button>
         {% endif %}
       </div>
 
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
       <div id="avis-form" class="hidden card p-6 mb-6">
         <h3 class="font-body font-semibold text-ink mb-4">Votre avis</h3>
         <div class="flex gap-2 mb-4" id="star-rating">
@@ -123,6 +137,7 @@
 <script>
 // ── Variables Django transmises au JS
 const SLUG = '{{ produit.slug }}';
+const ADMIN_ID = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
 let produitData = null;
 let noteSelectionnee = 0;
 let maxStock = 999;
@@ -203,8 +218,11 @@ function afficherProduit(p) {
     stockEl.innerHTML = `<span class="text-green-600">✓</span><span class="text-green-600 font-medium">En stock</span><span class="text-ink/30">(${p.stock} dispo)</span>`;
   } else {
     stockEl.innerHTML = `<span class="text-red-400 font-medium">Épuisé</span>`;
-    document.getElementById('btn-panier').disabled = true;
-    document.getElementById('btn-panier').classList.add('opacity-50', 'cursor-not-allowed');
+    const btnPanier = document.getElementById('btn-panier');
+    if (btnPanier) {
+      btnPanier.disabled = true;
+      btnPanier.classList.add('opacity-50', 'cursor-not-allowed');
+    }
   }
 
   const editLink = document.getElementById('edit-link');
@@ -239,17 +257,28 @@ async function loadAvis(produitId) {
     const avis = data.results || data;
     const container = document.getElementById('avis-list');
     if (!avis.length) { container.innerHTML = `<p class="text-ink/30 font-body text-sm">Aucun avis pour le moment.</p>`; return; }
-    container.innerHTML = avis.map(a => `
+    container.innerHTML = avis.map(a => {
+      const nom = a.auteur_nom || a.nom_utilisateur || 'Anonyme';
+      const initiale = nom[0].toUpperCase();
+      const avatar = a.auteur_photo
+        ? `<img src="${a.auteur_photo}" alt="${nom}" class="h-9 w-9 rounded-full object-cover border border-cream-border">`
+        : `<span class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-sm font-semibold text-brand-600">${initiale}</span>`;
+      const date = a.date_creation ? new Date(a.date_creation).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}) : '';
+      return `
       <div class="card p-5">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-600">${(a.auteur_nom||'?')[0].toUpperCase()}</span>
-            <span class="font-body font-medium text-sm text-ink">${a.auteur_nom || 'Anonyme'}</span>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            ${avatar}
+            <div>
+              <span class="font-body font-semibold text-sm text-ink">${nom}</span>
+              ${date ? `<p class="text-xs text-ink/40 font-body mt-0.5">${date}</p>` : ''}
+            </div>
           </div>
-          <span class="text-amber-400">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</span>
+          <span class="text-amber-400 text-base">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</span>
         </div>
-        <p class="text-ink/60 font-body text-sm">${a.commentaire || ''}</p>
-      </div>`).join('');
+        <p class="text-ink/60 font-body text-sm leading-relaxed">${a.commentaire || ''}</p>
+      </div>`;
+    }).join('');
   } catch(e) {}
 }
 
@@ -263,12 +292,43 @@ function setNote(n) {
 }
 
 async function soumettreAvis() {
-  if (!noteSelectionnee || !produitData) return;
+  if (!noteSelectionnee) {
+    window.toast && window.toast('Veuillez sélectionner une note (1 à 5 étoiles).', 'error');
+    return;
+  }
+  if (!produitData) return;
   try {
-    await API.post('/api/avis/', { produit: produitData.id, note: noteSelectionnee, commentaire: document.getElementById('avis-commentaire').value });
+    await API.post('/api/avis/', {
+      produit: produitData.id,
+      note: noteSelectionnee,
+      commentaire: document.getElementById('avis-commentaire').value
+    }, { silentError: true });
     window.toast && window.toast('Avis soumis, en attente de validation.', 'success');
     toggleAvisForm();
-  } catch(e) {}
+    // Recharge les avis pour refléter le nouvel avis
+    chargerAvis();
+  } catch(e) {
+    // API.js enrichit l'erreur avec .message (déjà extrait via extractErrorMessage)
+    const msg = (e && e.message) ? e.message : 'Une erreur est survenue.';
+    window.toast && window.toast(msg, 'error');
+  }
+}
+
+async function contacterVendeur() {
+  if (!ADMIN_ID) return;
+  const btn = document.getElementById('btn-contact');
+  if (btn) { btn.disabled = true; btn.textContent = 'Connexion…'; }
+  try {
+    const conv = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID }, { silentError: true });
+    window.location.href = '/chat/' + conv.id + '/';
+  } catch(e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Contacter le vendeur';
+    }
+    const msg = (e && e.message) ? e.message : 'Impossible d\u2019ouvrir la conversation.';
+    window.toast && window.toast(msg, 'error');
+  }
 }
 
 loadProduit();

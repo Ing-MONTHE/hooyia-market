@@ -135,8 +135,9 @@ function afficherCommande(c) {
 
   // Paiement
   const p = c.paiement;
+  const statutColor = p && p.statut === 'reussi' ? 'text-green-600 font-medium' : 'text-ink/40';
   document.getElementById('paiement-info').innerHTML = p
-    ? `<p class="font-medium text-ink">${p.mode_affiche || p.mode}</p><p class="text-ink/40">${p.statut_affiche || p.statut}</p>`
+    ? `<p class="font-medium text-ink">${p.mode_affiche || p.mode}</p><p class="${statutColor}">${p.statut_affiche || p.statut}</p>`
     : `<p>Paiement à la livraison</p>`;
 
   // Lignes commande
@@ -144,11 +145,11 @@ function afficherCommande(c) {
   document.getElementById('lignes-commande').innerHTML = lignes.map(l => `
     <div class="flex justify-between items-center text-sm font-body">
       <span class="text-ink/70">${l.produit_nom} <span class="text-ink/40">×${l.quantite}</span></span>
-      <span class="text-ink font-medium">${parseInt(l.sous_total).toLocaleString('fr-FR')} FCFA</span>
+      <span class="text-ink font-medium">${parseInt(l.sous_total || l.prix_unitaire * l.quantite || 0).toLocaleString('fr-FR')} FCFA</span>
     </div>`).join('') || '<p class="text-ink/30 text-sm">Aucune ligne.</p>';
 
   // Total
-  document.getElementById('total-commande').textContent = parseInt(c.total).toLocaleString('fr-FR') + ' FCFA';
+  document.getElementById('total-commande').textContent = parseInt(c.montant_total || c.total || 0).toLocaleString('fr-FR') + ' FCFA';
 }
 
 loadCommande();

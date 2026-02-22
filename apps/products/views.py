@@ -85,6 +85,8 @@ def detail_produit(request, slug):
     via JavaScript depuis /api/produits/<id>/
     On récupère juste le produit pour le titre et les meta tags.
     """
+    from apps.users.models import CustomUser
+
     # Mise en cache du produit 10 minutes
     cache_key = f'produit_slug_{slug}'
     produit   = cache.get(cache_key)
@@ -96,9 +98,13 @@ def detail_produit(request, slug):
         )
         cache.set(cache_key, produit, 600)
 
+    # Récupère le premier admin actif (= vendeur) pour le bouton "Contacter le vendeur"
+    admin = CustomUser.objects.filter(is_admin=True, is_active=True).first()
+
     context = {
-        'produit': produit,
-        'titre'  : f'{produit.nom} — HooYia Market',
+        'produit'  : produit,
+        'titre'    : f'{produit.nom} — HooYia Market',
+        'admin_id' : admin.id if admin else None,
     }
     return render(request, 'products/detail.html', context)
 

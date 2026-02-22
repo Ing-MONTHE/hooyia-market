@@ -313,3 +313,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Redirige vers cette page après connexion
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/compte/connexion/'
+
+# ═══════════════════════════════════════════════
+# AVIS CLIENTS
+# ═══════════════════════════════════════════════
+
+# En production (DEBUG=False), mettre True pour exiger une commande LIVREE.
+# En développement, False permet de tester les avis sans avoir passé commande.
+AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)

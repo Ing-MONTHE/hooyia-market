@@ -40,3 +40,22 @@ class EstVendeur(BasePermission):
             request.user.is_authenticated and
             (request.user.is_vendeur or request.user.is_admin)
         )
+
+
+class EstClient(BasePermission):
+    """
+    Vérifie que l'utilisateur est un client (ni admin, ni staff, ni vendeur).
+    Utilisé pour restreindre certaines actions aux seuls clients :
+    - Ajouter au panier
+    - Laisser un avis
+    - Envoyer un message (chat)
+    Un administrateur gère les produits mais ne peut pas acheter ni commenter.
+    """
+    def has_permission(self, request, view):
+        return (
+            request.user and
+            request.user.is_authenticated and
+            not request.user.is_staff and
+            not request.user.is_admin and
+            not request.user.is_vendeur
+        )

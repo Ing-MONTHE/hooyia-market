@@ -285,7 +285,7 @@ function cardHTML(p) {
       ${etoiles}
       <div class="mt-2 flex items-center justify-between gap-2">
         <div>${prix}</div>
-        ${p.est_en_stock ? `
+        ${p.est_en_stock && !CURRENT_USER_IS_ADMIN ? `
         <button onclick="ajouterPanier(event, ${p.id})"
           class="flex-shrink-0 h-8 w-8 rounded-lg bg-brand-50 hover:bg-brand-500 text-brand-500 hover:text-white flex items-center justify-center transition-all duration-150">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -305,11 +305,14 @@ function renderGrid(gridId, produits) {
   grid.innerHTML = produits.map(cardHTML).join('');
 }
 
+// Constante exposée depuis Django pour contrôle des droits côté JS
+const CURRENT_USER_IS_ADMIN = {% if user.is_staff or user.is_admin or user.is_vendeur %}true{% else %}false{% endif %};
+
 // ── Ajouter au panier ──
 async function ajouterPanier(e, produitId) {
   e.preventDefault();
   e.stopPropagation();
-  {% if user.is_authenticated %}
+  {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
   try {
     await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
     window.toast('Produit ajouté au panier !', 'success');

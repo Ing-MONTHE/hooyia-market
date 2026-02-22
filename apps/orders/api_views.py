@@ -32,7 +32,7 @@ from .serializers import (
 )
 from .services import OrderService
 from apps.users.models import AdresseLivraison
-from apps.users.permissions import EstAdminOuLectureSeule
+from apps.users.permissions import EstAdminOuLectureSeule, EstClient
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -73,38 +73,57 @@ class CommandeCreerAPIView(APIView):
     Crée une commande depuis le panier de l'utilisateur connecté.
     Délègue toute la logique à OrderService.create_from_cart().
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [EstClient]  # Seuls les clients peuvent passer commande
 
     def post(self, request):
         """
-        Body attendu :
-          { "adresse_id": 1, "mode_paiement": "livraison", "note_client": "..." }
+        Accepte deux formats :
+          Format 1 : { "adresse_id": 1, "mode_paiement": "livraison" }
+          Format 2 : { "adresse_livraison_nom": "...", "adresse_livraison_ville": "...", ... }
         """
         serializer = CreerCommandeSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Vérifie que l'adresse appartient bien à l'utilisateur connecté
-        try:
-            adresse = AdresseLivraison.objects.get(
-                pk          = serializer.validated_data['adresse_id'],
-                utilisateur = request.user   # Sécurité : adresse de CET utilisateur uniquement
-            )
-        except AdresseLivraison.DoesNotExist:
-            return Response(
-                {'erreur': "Adresse de livraison introuvable."},
-                status=status.HTTP_400_BAD_REQUEST
+        data = serializer.validated_data
+
+        # ── Résolution de l'adresse ──────────────────────────────────────────
+        if data.get('adresse_id'):
+            # Format 1 : adresse sauvegardée
+            try:
+                adresse = AdresseLivraison.objects.get(
+                    pk=data['adresse_id'],
+                    utilisateur=request.user
+                )
+            except AdresseLivraison.DoesNotExist:
+                return Response(
+                    {'erreur': "Adresse de livraison introuvable."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            # Format 2 : adresse inline → on crée un objet temporaire non sauvegardé
+            # (la commande fait un snapshot des champs, pas besoin de persister)
+            adresse = AdresseLivraison(
+                utilisateur = request.user,
+                nom_complet = data.get('adresse_livraison_nom', ''),
+                telephone   = data.get('adresse_livraison_telephone', ''),
+                adresse     = data.get('adresse_livraison_adresse', ''),
+                ville       = data.get('adresse_livraison_ville', ''),
+                region      = data.get('adresse_livraison_region', ''),
+                pays        = data.get('adresse_livraison_pays', 'Cameroun'),
             )
 
+        # ── Création de la commande ──────────────────────────────────────────
         try:
             commande = OrderService.create_from_cart(
                 utilisateur   = request.user,
                 adresse       = adresse,
-                mode_paiement = serializer.validated_data['mode_paiement'],
-                note_client   = serializer.validated_data.get('note_client', ''),
+                mode_paiement = data.get('mode_paiement', 'livraison'),
+                note_client   = data.get('note_client', ''),
             )
         except ValidationError as e:
-            return Response({'erreur': e.message}, status=status.HTTP_400_BAD_REQUEST)
+            msg = e.message if hasattr(e, 'message') else str(e)
+            return Response({'erreur': msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(
             CommandeDetailSerializer(commande).data,

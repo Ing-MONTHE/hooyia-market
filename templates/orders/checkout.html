@@ -203,11 +203,13 @@ async function passerCommande() {
       adresse_livraison_pays     : pays,
       note_client                : note,
       mode_paiement              : 'livraison',
-    });
+    }, { silentError: true });
     window.location.href = `/commandes/${data.id}/`;
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Confirmer la commande';
+    const msg = (e && e.message) ? e.message : 'Une erreur est survenue. Veuillez réessayer.';
+    window.toast && window.toast(msg, 'error');
   }
 }
 

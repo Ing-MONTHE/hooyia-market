@@ -104,7 +104,7 @@
         </div>
 
         <!-- Panier style Amazon -->
-        {% if not user.is_staff %}
+        {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
         <a href="{% url 'cart:panier' %}" class="nv-btn" style="text-decoration:none;flex-direction:row;align-items:flex-end;gap:4px;">
           <span style="position:relative;display:flex;flex-direction:column;align-items:center;">
             <span id="cart-badge"
@@ -206,11 +206,13 @@
     <a href="{% url 'products:admin_dashboard' %}" class="nv-mobile" style="color:#FCD34D;font-weight:600;">⚙️ Administration</a>
     <a href="{% url 'products:ajouter' %}"          class="nv-mobile" style="color:#FCD34D;">➕ Ajouter un produit</a>
     <a href="{% url 'products:gestion_categories' %}" class="nv-mobile" style="color:#FCD34D;">🗂️ Catégories</a>
-    {% else %}
+    {% elif not user.is_admin and not user.is_vendeur %}
     <a href="{% url 'users:profil' %}"      class="nv-mobile">👤 Mon profil</a>
     <a href="{% url 'cart:panier' %}"       class="nv-mobile">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
     <a href="{% url 'orders:historique' %}" class="nv-mobile">📋 Mes commandes</a>
     <a href="/chat/"                        class="nv-mobile">💬 Messages</a>
+    {% else %}
+    <a href="{% url 'users:profil' %}"      class="nv-mobile">👤 Mon profil</a>
     {% endif %}
     <a href="{% url 'users:deconnexion' %}" class="nv-mobile" style="color:#fca5a5;">🚪 Déconnexion</a>
     {% else %}

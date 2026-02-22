@@ -71,11 +71,21 @@ class CommandeListSerializer(serializers.ModelSerializer):
     Affiche uniquement les informations essentielles pour la liste.
     """
 
-    # Libellé lisible du statut
-    statut_affiche = serializers.CharField(source='get_statut_display', read_only=True)
-
-    # Référence courte (8 premiers caractères du UUID) pour affichage
+    statut_affiche   = serializers.CharField(source='get_statut_display', read_only=True)
     reference_courte = serializers.ReadOnlyField()
+
+    # Nom du client — utilisé dans le dashboard admin
+    client_nom = serializers.SerializerMethodField()
+
+    def get_client_nom(self, obj):
+        u = obj.client
+        if not u:
+            return '—'
+        full = f"{u.prenom} {u.nom}".strip()
+        return full if full else u.username
+
+    # Lignes légères pour l'historique client (nom produit + qté uniquement)
+    lignes = LigneCommandeSerializer(many=True, read_only=True)
 
     class Meta:
         model  = Commande
@@ -83,6 +93,8 @@ class CommandeListSerializer(serializers.ModelSerializer):
             'id', 'reference', 'reference_courte',
             'statut', 'statut_affiche',
             'montant_total',
+            'client_nom',
+            'lignes',
             'adresse_livraison_ville', 'adresse_livraison_pays',
             'date_creation',
         ]
@@ -134,23 +146,43 @@ class CreerCommandeSerializer(serializers.Serializer):
     """
     Valide les données pour créer une commande depuis le panier.
 
-    Body JSON attendu :
+    Accepte deux formats :
+
+    Format 1 — adresse sauvegardée (FK) :
+      { "adresse_id": 1, "mode_paiement": "livraison", "note_client": "..." }
+
+    Format 2 — adresse inline (saisie directe depuis le checkout) :
       {
-        "adresse_id"    : 1,           ← ID de l'adresse de livraison
-        "mode_paiement" : "livraison", ← mode de paiement
-        "note_client"   : "..."        ← optionnel
+        "adresse_livraison_nom"      : "Jean Dupont",
+        "adresse_livraison_telephone": "+237 600 000 000",
+        "adresse_livraison_adresse"  : "Rue 123",
+        "adresse_livraison_ville"    : "Yaoundé",
+        "adresse_livraison_region"   : "Centre",
+        "adresse_livraison_pays"     : "Cameroun",
+        "mode_paiement"              : "livraison",
+        "note_client"                : "..."
       }
     """
 
+    # ── Format 1 : adresse sauvegardée ─────────────────────
     adresse_id = serializers.IntegerField(
+        required=False,
         min_value=1,
-        help_text="ID de l'adresse de livraison choisie"
+        help_text="ID d'une adresse de livraison enregistrée"
     )
 
+    # ── Format 2 : champs adresse inline ───────────────────
+    adresse_livraison_nom       = serializers.CharField(required=False, max_length=150)
+    adresse_livraison_telephone = serializers.CharField(required=False, max_length=20)
+    adresse_livraison_adresse   = serializers.CharField(required=False, max_length=255)
+    adresse_livraison_ville     = serializers.CharField(required=False, max_length=100)
+    adresse_livraison_region    = serializers.CharField(required=False, max_length=100)
+    adresse_livraison_pays      = serializers.CharField(required=False, max_length=100, default='Cameroun')
+
+    # ── Commun ──────────────────────────────────────────────
     mode_paiement = serializers.ChoiceField(
         choices=Paiement.ModePaiement.choices,
         default=Paiement.ModePaiement.LIVRAISON,
-        help_text="Mode de paiement"
     )
 
     note_client = serializers.CharField(
@@ -158,5 +190,29 @@ class CreerCommandeSerializer(serializers.Serializer):
         allow_blank=True,
         max_length=500,
         default='',
-        help_text="Instructions de livraison (optionnel)"
     )
+
+    def validate(self, data):
+        """
+        Vérifie qu'on a soit adresse_id, soit les champs inline obligatoires.
+        """
+        adresse_id = data.get('adresse_id')
+        nom        = data.get('adresse_livraison_nom', '').strip()
+        telephone  = data.get('adresse_livraison_telephone', '').strip()
+        adresse    = data.get('adresse_livraison_adresse', '').strip()
+        ville      = data.get('adresse_livraison_ville', '').strip()
+        region     = data.get('adresse_livraison_region', '').strip()
+
+        if not adresse_id:
+            # Format inline : champs obligatoires
+            manquants = []
+            if not nom:       manquants.append('adresse_livraison_nom')
+            if not telephone: manquants.append('adresse_livraison_telephone')
+            if not adresse:   manquants.append('adresse_livraison_adresse')
+            if not ville:     manquants.append('adresse_livraison_ville')
+            if not region:    manquants.append('adresse_livraison_region')
+            if manquants:
+                raise serializers.ValidationError(
+                    f"Champs obligatoires manquants : {', '.join(manquants)}"
+                )
+        return data

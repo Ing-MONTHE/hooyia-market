@@ -100,7 +100,7 @@ function renderCommande(c) {
       </div>
 
       <div class="text-right flex-shrink-0">
-        <p class="font-display font-bold text-ink">${parseInt(c.total).toLocaleString('fr-FR')} FCFA</p>
+        <p class="font-display font-bold text-ink">${parseInt(c.montant_total || c.total || 0).toLocaleString('fr-FR')} FCFA</p>
         <p class="text-xs text-ink/40 font-body">${lignes.length} article${lignes.length > 1 ? 's' : ''}</p>
       </div>
 

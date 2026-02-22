@@ -19,6 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Avis
 from .serializers import AvisListSerializer, AvisDetailSerializer, AvisCreerSerializer
+from apps.users.permissions import EstClient
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -83,7 +84,7 @@ class AvisViewSet(viewsets.ModelViewSet):
         """
         Permissions différentes selon l'action :
           - list / retrieve      : tout le monde (public)
-          - create               : authentifié (vérification achat dans le serializer)
+          - create               : clients uniquement (admins/vendeurs exclus)
           - destroy              : authentifié (propriétaire ou admin vérifié dans perform_destroy)
           - valider / invalider  : admin seulement
         """
@@ -91,7 +92,11 @@ class AvisViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         if self.action in ['valider', 'invalider']:
             return [permissions.IsAdminUser()]
-        # create, destroy → authentifié
+        if self.action == 'create':
+            # Seuls les clients peuvent laisser un avis
+            # Les admins/vendeurs gèrent les produits mais ne peuvent pas les noter
+            return [EstClient()]
+        # destroy → authentifié (propriétaire ou admin géré dans perform_destroy)
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):

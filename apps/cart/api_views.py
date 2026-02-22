@@ -27,6 +27,7 @@ from .serializers import (
     ModifierQuantiteSerializer,
 )
 from .services import CartService
+from apps.users.permissions import EstClient
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -66,7 +67,7 @@ class AjouterItemAPIView(APIView):
     Si le produit est déjà dans le panier, la quantité est augmentée.
     Toute la logique métier est dans CartService.add_item().
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [EstClient]
 
     def post(self, request):
         """
@@ -116,7 +117,7 @@ class PanierItemAPIView(APIView):
     Modifie la quantité ou supprime une ligne du panier.
     Vérifie toujours que la ligne appartient au panier de l'utilisateur connecté.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [EstClient]
 
     def patch(self, request, pk):
         """
@@ -196,7 +197,7 @@ class ViderPanierAPIView(APIView):
     Supprime tous les articles du panier en une seule opération.
     Le panier lui-même est conservé (prêt pour la prochaine commande).
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [EstClient]
 
     def delete(self, request):
         """
