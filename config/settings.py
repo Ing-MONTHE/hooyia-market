@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
 
     # Débogage en développement
-    'debug_toolbar',
+    #'debug_toolbar',
 
     # Nos applications HooYia Market
     'apps.users',
@@ -75,7 +75,7 @@ INSTALLED_APPS = [
 # ═══════════════════════════════════════════════
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware', # Barre debug (dev)
+    #'debug_toolbar.middleware.DebugToolbarMiddleware', # Barre debug (dev)
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',           # CORS pour les appels JS
     'django.contrib.sessions.middleware.SessionMiddleware',

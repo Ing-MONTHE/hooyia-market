@@ -10,7 +10,7 @@ from apps.products.api_views import CategorieViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('__debug__/', include('debug_toolbar.urls')),
+    #path('__debug__/', include('debug_toolbar.urls')),
 
     # ── Pages HTML ──────────────────────────────────────────
     path('',          include('apps.products.urls')),
