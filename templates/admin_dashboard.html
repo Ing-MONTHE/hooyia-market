@@ -38,8 +38,8 @@ body { background: var(--bg) !important; }
 .da-sidebar {
   width: var(--sidebar); flex-shrink: 0;
   background: var(--navy);
-  position: sticky; top: 104px;
-  height: calc(100vh - 104px);
+  position: relative;
+  min-height: calc(100vh - 104px);
   display: flex; flex-direction: column;
   overflow-y: auto; overflow-x: hidden;
 }
@@ -233,6 +233,26 @@ body { background: var(--bg) !important; }
 ════════════════════════════════════════ */
 .sk-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid #f1f5fd; }
 .sk-bar-bg { flex: 1; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+.view-toggle { display:flex; gap:4px; }
+.vt-btn { padding:5px 8px; border-radius:6px; border:1.5px solid var(--border); background:white; cursor:pointer; color:#94a3b8; transition:.15s; font-size:14px; }
+.vt-btn.active { border-color:var(--blue); background:var(--blue); color:white; }
+.st-filter-btn { padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:12px; font-weight:600; color:#64748b; transition:.15s; font-family:'DM Sans',sans-serif; }
+.st-filter-btn:hover { border-color:var(--blue); color:var(--blue); }
+.st-filter-btn.active { border-color:var(--blue); background:var(--blue); color:white; }
+.card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; padding:16px; }
+.prod-card { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; transition:box-shadow .15s; }
+.prod-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.1); }
+.prod-card-img { width:100%; aspect-ratio:1; object-fit:cover; background:#f8fafc; }
+.prod-card-body { padding:10px; }
+.prod-card-name { font-size:12.5px; font-weight:700; color:var(--navy); line-height:1.3; margin-bottom:4px; }
+.prod-card-meta { font-size:11px; color:#94a3b8; margin-bottom:6px; }
+.prod-card-price { font-size:13px; font-weight:700; color:var(--blue); font-family:monospace; }
+.cat-card { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; transition:box-shadow .15s; }
+.cat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.1); }
+.cat-card-img { width:100%; aspect-ratio:1; object-fit:cover; background:#f8fafc; display:flex; align-items:center; justify-content:center; font-size:32px; }
+.cat-card-body { padding:10px; }
+.cat-card-name { font-size:13px; font-weight:700; color:var(--navy); }
+.cat-card-meta { font-size:11px; color:#94a3b8; margin-top:3px; }
 .sk-bar { height: 100%; border-radius: 99px; transition: width .4s ease; }
 .sk-ok  { background: var(--green); }
 .sk-lo  { background: var(--orange); }
@@ -494,11 +514,21 @@ body { background: var(--bg) !important; }
         <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Tous les produits</h3><a href="/produits/ajouter/">Ajouter →</a></div>
-        <table class="da-table">
+        <div class="da-card-hd">
+          <h3>Tous les produits</h3>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="view-toggle">
+              <button class="vt-btn active" id="vt-prod-table" onclick="setView('produits','table')" title="Tableau">☰</button>
+              <button class="vt-btn" id="vt-prod-card" onclick="setView('produits','card')" title="Cartes">⊞</button>
+            </div>
+            <a href="/produits/ajouter/">Ajouter →</a>
+          </div>
+        </div>
+        <table class="da-table" id="view-produits-table">
           <thead><tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th></th></tr></thead>
           <tbody id="tbl-produits"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
+        <div id="view-produits-card" class="card-grid" style="display:none;"></div>
       </div>
     </div>
 
@@ -509,22 +539,45 @@ body { background: var(--bg) !important; }
         <a href="/administration/categories/" class="da-btn-primary">＋ Ajouter</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Toutes les catégories</h3><a href="/administration/categories/">Gérer →</a></div>
-        <table class="da-table">
+        <div class="da-card-hd">
+          <h3>Toutes les catégories</h3>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="view-toggle">
+              <button class="vt-btn active" id="vt-cat-table" onclick="setView('categories','table')" title="Tableau">☰</button>
+              <button class="vt-btn" id="vt-cat-card" onclick="setView('categories','card')" title="Cartes">⊞</button>
+            </div>
+            <a href="/administration/categories/">Gérer →</a>
+          </div>
+        </div>
+        <table class="da-table" id="view-categories-table">
           <thead><tr><th>Nom</th><th>Slug</th><th>Niveau</th><th>Produits</th></tr></thead>
           <tbody id="tbl-categories"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
         </table>
+        <div id="view-categories-card" class="card-grid" style="display:none;"></div>
       </div>
     </div>
 
     <!-- ──────── STOCKS ──────── -->
     <div id="sec-stocks" class="da-section">
       <div class="da-ph">
-        <div><h1>Stocks</h1><div class="da-ph-sub">Produits sous seuil d'alerte</div></div>
+        <div><h1>Stocks</h1><div class="da-ph-sub">Gestion des stocks</div></div>
         <a href="/produits/ajouter/" class="da-btn-primary">＋ Nouveau produit</a>
       </div>
+      <!-- KPIs stocks -->
+      <div class="da-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+        <div class="da-kpi"><div class="da-kpi-accent" style="background:var(--blue);"></div><div class="da-kpi-icon" style="background:#eff4ff;">📦</div><div class="da-kpi-val" id="kpi-stock-total">—</div><div class="da-kpi-lbl">Produits total</div></div>
+        <div class="da-kpi"><div class="da-kpi-accent" style="background:var(--orange);"></div><div class="da-kpi-icon" style="background:#fff7ed;">⚠️</div><div class="da-kpi-val" id="kpi-stock-faible">—</div><div class="da-kpi-lbl">Stock faible</div></div>
+        <div class="da-kpi"><div class="da-kpi-accent" style="background:var(--red);"></div><div class="da-kpi-icon" style="background:#fff5f5;">🔴</div><div class="da-kpi-val" id="kpi-stock-zero">—</div><div class="da-kpi-lbl">Épuisés</div></div>
+      </div>
+      <!-- Filtres -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="st-filter-btn active" onclick="filtreStock('tous',this)">Tous</button>
+        <button class="st-filter-btn" onclick="filtreStock('faible',this)">⚠️ Stock faible</button>
+        <button class="st-filter-btn" onclick="filtreStock('epuise',this)">🔴 Épuisés</button>
+        <button class="st-filter-btn" onclick="filtreStock('ok',this)">✅ Stock OK</button>
+      </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Alertes stock faible</h3><span style="font-size:11.5px;color:#94a3b8;">Cliquez sur "Réappro" pour ajuster le stock</span></div>
+        <div class="da-card-hd"><h3 id="stocks-title">Tous les produits</h3><span style="font-size:11.5px;color:#94a3b8;">Cliquez sur "Réappro" pour ajuster le stock</span></div>
         <table class="da-table">
           <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock actuel</th><th>Seuil</th><th>Niveau</th><th>Action</th></tr></thead>
           <tbody id="tbl-stocks"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
@@ -649,6 +702,8 @@ body { background: var(--bg) !important; }
 </div>
 {% endblock %}
 
+{% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+
 {% block extra_scripts %}
 <script>
 /* ─── Helpers ─── */
@@ -685,6 +740,20 @@ function nav(btn) {
     if (el) el.className = 'da-section' + (s === name ? ' shown' : '');
   });
   if (!loaded.has(name)) { loadSection(name); loaded.add(name); }
+  // Save current section in URL hash (persists on refresh)
+  history.replaceState(null, '', '#' + name);
+}
+
+// Restore section from URL hash on page load
+function restoreSection() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && ALL_SECTIONS.includes(hash)) {
+    const btn = document.querySelector('[data-section="' + hash + '"]');
+    if (btn) { nav(btn); return; }
+  }
+  // Default: load overview
+  const btn = document.querySelector('[data-section="overview"]');
+  if (btn) nav(btn);
 }
 
 /* ─── API Calls ─── */
@@ -782,17 +851,103 @@ async function loadOverview() {
   $('ms-paniers').textContent = '{{ paniers_count|default:"—" }}';
 }
 
+/* ─── STOCK RENDER & FILTER ─── */
+function renderStockRow(p) {
+  const min = p.stock_minimum || 5;
+  const s   = p.stock;
+  const pct = s === 0 ? 0 : Math.min(100, Math.round(s / Math.max(min * 2, 1) * 100));
+  const col = s === 0 ? 'var(--red)' : s <= min ? 'var(--orange)' : 'var(--green)';
+  const cls = s === 0 ? 'sk-cr'      : s <= min ? 'sk-lo'         : 'sk-ok';
+  const badge = s === 0
+    ? '<span class="st" style="background:#fee2e2;color:var(--red);border:none;">Épuisé</span>'
+    : s <= min
+      ? '<span class="st" style="background:#fff7ed;color:var(--orange);border:none;">⚠ Faible</span>'
+      : '<span class="st st-active">OK</span>';
+  const imgSrc = p.image_principale || '';
+  return `<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${imgSrc ? `<img src="${imgSrc}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0;">` : `<div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📦</div>`}
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</div>
+          ${badge}
+        </div>
+      </div>
+    </td>
+    <td style="color:#64748b;">${p.categorie_nom||'—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:${col};font-size:14px;">${s}</td>
+    <td style="color:#94a3b8;font-family:monospace;">${min}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="sk-bar-bg" style="width:90px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div>
+        <span style="font-size:11px;color:${col};font-weight:700;min-width:30px;">${pct}%</span>
+      </div>
+    </td>
+    <td><button onclick="openStockModal(${p.id},'${p.nom.replace(/'/g,"\'")}',${p.stock})" style="padding:5px 12px;border-radius:6px;border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--blue-l);font-size:11.5px;font-weight:600;cursor:pointer;">📦 Réappro</button></td>
+  </tr>`;
+}
+
+function renderStocks(data) {
+  const tbl = $('tbl-stocks');
+  if (!tbl) return;
+  tbl.innerHTML = data.length
+    ? data.map(renderStockRow).join('')
+    : `<tr><td colspan="6" class="da-empty">Aucun produit trouvé</td></tr>`;
+}
+
+function filtreStock(type, btn) {
+  document.querySelectorAll('.st-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const all = window._stocksData || [];
+  const titleEl = $('stocks-title');
+  let data;
+  if (type === 'faible') {
+    data = all.filter(p => p.stock > 0 && p.stock <= (p.stock_minimum || 5));
+    if (titleEl) titleEl.textContent = '⚠️ Produits stock faible';
+  } else if (type === 'epuise') {
+    data = all.filter(p => p.stock === 0);
+    if (titleEl) titleEl.textContent = '🔴 Produits épuisés';
+  } else if (type === 'ok') {
+    data = all.filter(p => p.stock > (p.stock_minimum || 5));
+    if (titleEl) titleEl.textContent = '✅ Produits stock OK';
+  } else {
+    data = all;
+    if (titleEl) titleEl.textContent = 'Tous les produits';
+  }
+  renderStocks(data);
+}
+
+/* ─── VIEW TOGGLE ─── */
+const viewState = {};
+function setView(section, mode) {
+  viewState[section] = mode;
+  const tableEl = document.getElementById('view-' + section + '-table');
+  const cardEl  = document.getElementById('view-' + section + '-card');
+  const btnT    = document.getElementById('vt-' + section.replace('categories','cat').replace('produits','prod') + '-table');
+  const btnC    = document.getElementById('vt-' + section.replace('categories','cat').replace('produits','prod') + '-card');
+  if (tableEl) tableEl.style.display = mode === 'table' ? '' : 'none';
+  if (cardEl)  cardEl.style.display  = mode === 'card'  ? '' : 'none';
+  if (btnT) { btnT.classList.toggle('active', mode==='table'); }
+  if (btnC) { btnC.classList.toggle('active', mode==='card'); }
+}
+
 /* ─── SECTIONS ─── */
 async function loadSection(name) {
-  if (name === 'overview') { loadOverview(); return; }
+  if (name === 'overview') { restoreSection(); return; }
 
   if (name === 'produits') {
     const d = await apiFetch('/api/produits/?page_size=100');
     $('tbl-produits').innerHTML = d.length ? d.map(p=>{
       const s=p.stock; const min=p.stock_minimum||5;
       const sCol = s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
+      const imgSrc = p.image_principale || (p.images&&p.images[0]?.image) || '';
       return `<tr>
-        <td>${bold(p.nom)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${imgSrc ? `<img src="${imgSrc}" alt="${p.nom}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid #e2e8f0;">` : `<div style="width:40px;height:40px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>`}
+            <span style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</span>
+          </div>
+        </td>
         <td style="color:#64748b;">${p.categorie_nom||'—'}</td>
         <td>${mono(fmtPrice(p.prix))}</td>
         <td style="font-family:'DM Mono',monospace;font-weight:700;color:${sCol};">${s}</td>
@@ -800,35 +955,80 @@ async function loadSection(name) {
         <td><a href="/produits/modifier/${p.id}/" style="font-size:11.5px;color:var(--blue-l);text-decoration:none;font-weight:600;">Modifier →</a></td>
       </tr>`;
     }).join('') : empty(6);
+
+    // Card view
+    const cardGrid = $('view-produits-card');
+    if (cardGrid) {
+      cardGrid.innerHTML = d.length ? d.map(p => {
+        const imgSrc = p.image_principale || (p.images&&p.images[0]?.image) || '';
+        const s=p.stock; const min=p.stock_minimum||5;
+        const sCol = s===0?'#ef4444':s<=min?'#f97316':'#22c55e';
+        return `<div class="prod-card">
+          ${imgSrc ? `<img src="${imgSrc}" class="prod-card-img" onerror="this.src='/static/img/logo.svg'">` : `<div class="prod-card-img" style="display:flex;align-items:center;justify-content:center;font-size:40px;">📦</div>`}
+          <div class="prod-card-body">
+            <div class="prod-card-name">${p.nom}</div>
+            <div class="prod-card-meta">${p.categorie_nom||'—'} · <span style="color:${sCol};font-weight:700;">${s} en stock</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+              <span class="prod-card-price">${fmtPrice(p.prix_promo||p.prix)} FCFA</span>
+              <a href="/produits/modifier/${p.id}/" style="font-size:11px;color:var(--blue-l);font-weight:600;text-decoration:none;">Modifier →</a>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : '<p style="padding:20px;color:#94a3b8;text-align:center;">Aucun produit</p>';
+    }
   }
 
   if (name === 'categories') {
-    const d = await apiFetch('/api/categories/');
+    const raw = await apiFetch('/api/categories/');
+    // Flatten nested tree into flat list with level
+    function flattenCats(cats, level=0) {
+      let result = [];
+      for (const cat of cats) {
+        result.push({...cat, _level: level});
+        if (cat.sous_categories?.length) result = result.concat(flattenCats(cat.sous_categories, level+1));
+      }
+      return result;
+    }
+    const d = flattenCats(Array.isArray(raw) ? raw : []);
     $('tbl-categories').innerHTML = d.length ? d.map(c=>`<tr>
-      <td style="padding-left:${(c.level||0)*20+16}px;">${'└ '.repeat(c.level||0)}${bold(c.nom)}</td>
+      <td style="padding-left:${(c._level||0)*20+16}px;">${'└ '.repeat(c._level||0)}${bold(c.nom)}</td>
       <td>${mono(c.slug)}</td>
-      <td><span class="st st-off">Niveau ${c.level||0}</span></td>
-      <td style="color:#64748b;">${c.nb_produits||'—'}</td>
+      <td><span class="st st-off">Niveau ${c._level||0}</span></td>
+      <td style="color:#64748b;">${c.nombre_produits||'—'}</td>
     </tr>`).join('') : empty(4);
+
+    // Card view
+    const catGrid = $('view-categories-card');
+    if (catGrid) {
+      catGrid.innerHTML = d.length ? d.map(cat => {
+        const imgSrc = cat.image || '';
+        const indent = cat._level > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-right:4px;">${'└ '.repeat(cat._level)}</span>` : '';
+        return `<div class="cat-card">
+          ${imgSrc ? `<img src="${imgSrc}" class="prod-card-img" style="aspect-ratio:1;object-fit:cover;width:100%;" onerror="this.style.display='none'">` : `<div class="cat-card-img">🗂️</div>`}
+          <div class="cat-card-body">
+            <div class="cat-card-name">${indent}${cat.nom}</div>
+            <div class="cat-card-meta">${cat._level===0?'Catégorie principale':'Sous-catégorie'} · ${cat.nombre_produits||0} produit(s)</div>
+            <div style="margin-top:6px;">
+              <a href="/administration/categories/?modifier=${cat.id}" style="font-size:11px;color:var(--blue-l);font-weight:600;text-decoration:none;">Modifier →</a>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : '<p style="padding:20px;color:#94a3b8;text-align:center;">Aucune catégorie</p>';
+    }
   }
 
   if (name === 'stocks') {
-    const d = await apiFetch('/api/produits/?page_size=100');
-    const low = d.filter(p=>p.stock<=(p.stock_minimum||5));
-    $('tbl-stocks').innerHTML = low.length ? low.map(p=>{
-      const pct = Math.min(100, Math.round(p.stock/Math.max((p.stock_minimum||5)*2,1)*100));
-      const cls = pct<20?'sk-cr':pct<50?'sk-lo':'sk-ok';
-      const col = pct<20?'var(--red)':pct<50?'var(--orange)':'var(--green)';
-      return `<tr>
-        <td>${bold(p.nom)}</td>
-        <td style="color:#64748b;">${p.categorie_nom||'—'}</td>
-        <td style="font-family:'DM Mono',monospace;font-weight:700;color:${col};">${p.stock}</td>
-        <td style="color:#94a3b8;">${p.stock_minimum||5}</td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><div class="sk-bar-bg" style="width:80px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div><span style="font-size:11px;color:${col};font-weight:700;">${pct}%</span></div></td>
-        <td><button onclick="openStockModal(${p.id},'${p.nom.replace(/'/g,"\\'")}',${p.stock})" style="padding:4px 10px;border-radius:6px;border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--blue-l);font-size:11.5px;font-weight:600;cursor:pointer;">📦 Réappro</button></td>
-      </tr>`;
-    }).join('') : `<tr><td colspan="6" class="da-empty">✓ Aucun produit sous le seuil d\'alerte</td></tr>`;
+    window._stocksData = await apiFetch('/api/produits/?page_size=200');
+    const all = window._stocksData;
+    // KPIs
+    const faible = all.filter(p=>p.stock>0 && p.stock<=(p.stock_minimum||5));
+    const zero   = all.filter(p=>p.stock===0);
+    if($('kpi-stock-total'))  $('kpi-stock-total').textContent  = all.length;
+    if($('kpi-stock-faible')) $('kpi-stock-faible').textContent = faible.length;
+    if($('kpi-stock-zero'))   $('kpi-stock-zero').textContent   = zero.length;
+    renderStocks(all);
   }
+
 
   if (name === 'commandes') {
     const d = await apiFetch('/api/commandes/');

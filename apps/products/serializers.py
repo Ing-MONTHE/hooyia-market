@@ -96,7 +96,7 @@ class ProduitListSerializer(serializers.ModelSerializer):
             'id', 'nom', 'slug',
             'prix', 'prix_promo', 'prix_actuel',
             'pourcentage_remise',
-            'stock', 'est_en_stock',
+            'stock', 'stock_minimum', 'est_en_stock',
             'note_moyenne', 'nombre_avis',
             'categorie_nom',
             'en_vedette', 'statut',

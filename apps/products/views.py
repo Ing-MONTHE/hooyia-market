@@ -91,7 +91,7 @@ def detail_produit(request, slug):
 
     if not produit:
         produit = get_object_or_404(
-            Produit.actifs,
+            Produit.objects.select_related('categorie', 'vendeur').prefetch_related('images'),
             slug=slug
         )
         cache.set(cache_key, produit, 600)

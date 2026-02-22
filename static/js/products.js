@@ -118,7 +118,9 @@ const Catalogue = (() => {
   // ── Rendu d'une carte produit
   function renderCard(p) {
     const imgs = p.images || [];
-    const img  = imgs.length ? imgs[0].image : '/static/img/logo.svg';
+    const img  = p.image_principale
+                 || (imgs.length ? imgs[0].image : null)
+                 || '/static/img/logo.svg';
     const prix = p.prix_promo || p.prix;
     const note = Math.round(parseFloat(p.note_moyenne) || 0);
 
@@ -350,4 +352,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Exposer pour les templates inline
 window.Catalogue = Catalogue;
 window.ajouterRapide = ajouterRapide;
-window.loadCategories = loadCategories;
+window.loadCategories = loadCategories; 

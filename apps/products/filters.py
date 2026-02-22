@@ -44,6 +44,14 @@ class ProduitFilter(django_filters.FilterSet):
         label="Catégorie"
     )
 
+    # Filtre par slug exact du produit
+    # ?slug=samsung-galaxy-s24
+    slug = django_filters.CharFilter(
+        field_name='slug',
+        lookup_expr='exact',
+        label="Slug produit"
+    )
+
     # Filtre par slug de catégorie
     # ?categorie_slug=telephonie
     categorie_slug = django_filters.CharFilter(

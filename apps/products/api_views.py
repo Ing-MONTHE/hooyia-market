@@ -74,7 +74,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
     # Filtres, recherche et tri
     filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class  = ProduitFilter
-    search_fields    = ['nom', 'description', 'categorie__nom']
+    search_fields    = ['nom', 'description', 'categorie__nom', 'slug']
     ordering_fields  = ['prix', 'date_creation', 'note_moyenne', 'stock']
     ordering         = ['-date_creation']  # Tri par défaut
 
@@ -87,13 +87,13 @@ class ProduitViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
 
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and (getattr(user, 'is_admin', False) or user.is_staff):
             # Admin voit tout
             return Produit.objects.all().select_related(
                 'categorie', 'vendeur'
             ).prefetch_related('images')
 
-        if user.is_authenticated and user.is_vendeur:
+        if user.is_authenticated and getattr(user, 'is_vendeur', False):
             # Vendeur voit ses propres produits
             return Produit.objects.filter(
                 vendeur=user

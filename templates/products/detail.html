@@ -68,6 +68,7 @@
         <div id="stock-info" class="flex items-center gap-2 mb-6 text-sm font-body"></div>
 
         <div class="flex items-center gap-3 mb-4">
+          {% if not user.is_staff %}
           <div class="flex items-center border border-cream-border rounded-xl overflow-hidden">
             <button onclick="changeQty(-1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">−</button>
             <input type="number" id="qty" value="1" min="1" class="w-14 text-center border-none outline-none font-body text-sm bg-white py-3" />
@@ -76,6 +77,7 @@
           <button onclick="ajouterAuPanier()" id="btn-panier" class="btn-primary flex-1 py-3 text-base">
             Ajouter au panier
           </button>
+          {% endif %}
         </div>
 
         <div class="mt-6 pt-6 border-t border-cream-border">
@@ -128,11 +130,26 @@ let maxStock = 999;
 // ── Chargement du produit
 async function loadProduit() {
   try {
-    const data = await API.get(`/api/produits/?search=${SLUG}`, { silentError: true });
-    const produits = data.results || data;
-    const p = produits.find(x => x.slug === SLUG);
+    // 1. Cherche par slug exact (filtre dédié)
+    let p = null;
+    const bySlug = await API.get(`/api/produits/?slug=${encodeURIComponent(SLUG)}`, { silentError: true });
+    const slugResults = bySlug?.results ?? bySlug;
+    if (Array.isArray(slugResults) && slugResults.length > 0) {
+      p = slugResults[0];
+    }
+    // 2. Fallback: recherche textuelle dans le nom/slug
+    if (!p) {
+      const bySearch = await API.get(`/api/produits/?search=${encodeURIComponent(SLUG)}`, { silentError: true });
+      const searchResults = bySearch?.results ?? bySearch;
+      if (Array.isArray(searchResults)) {
+        p = searchResults.find(x => x.slug === SLUG);
+      }
+    }
     if (!p) throw new Error('not found');
+
+    // 3. Charge le détail complet via l'ID
     const detail = await API.get(`/api/produits/${p.id}/`);
+    if (!detail || detail.detail) throw new Error('not found');
     produitData = detail;
     maxStock = detail.stock;
     afficherProduit(detail);

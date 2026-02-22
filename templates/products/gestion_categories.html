@@ -200,6 +200,8 @@ body { background: var(--bg) !important; }
 
 /* ── IMAGE PREVIEW ── */
 .img-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+.drop-zone { border: 2px dashed #d1d5db; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: border .15s, background .15s; background: #fafbff; }
+.drop-zone:hover, .drop-zone.drag-over { border-color: #1E3A8A; background: #f0f4ff; }
 .img-placeholder { width: 60px; height: 60px; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
 /* ── FILE INPUT ── */
@@ -329,14 +331,19 @@ body { background: var(--bg) !important; }
                 <span style="font-size:12px;color:rgba(13,31,92,.4);">Image actuelle — déposer une nouvelle pour remplacer</span>
               </div>
               {% endif %}
-              <label class="file-zone" for="id_image">
-                <input type="file" name="image" id="id_image" accept="image/*" onchange="previewImage(this)">
-                <div class="file-zone-label" id="file-label">
-                  📸 <strong>Choisir une image</strong> ou glisser-déposer<br>
-                  <span style="font-size:11px;">JPG, PNG, WebP — recommandé 400×400px</span>
+              <div class="drop-zone" id="drop-zone-cat"
+                onclick="document.getElementById('id_image').click()"
+                ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                ondragleave="this.classList.remove('drag-over')"
+                ondrop="handleDropCat(event)">
+                <div id="img-preview-new-wrap">
+                  <div style="font-size:32px;margin-bottom:8px;">&#128247;</div>
+                  <p style="font-size:13px;color:rgba(13,31,92,.5);"><strong style="color:#F97316;">Cliquez</strong> ou glissez votre image ici</p>
+                  <p style="font-size:12px;color:rgba(13,31,92,.35);">JPG, PNG, WebP — recommandé 400×400px</p>
                 </div>
-                <img id="img-preview-new" style="display:none;width:80px;height:80px;border-radius:8px;object-fit:cover;margin-top:10px;" />
-              </label>
+                <img id="img-preview-new" style="display:none;width:100px;height:100px;border-radius:8px;object-fit:cover;" />
+              </div>
+              <input type="file" name="image" id="id_image" accept="image/*" onchange="previewImage(this)" style="display:none;" />
             </div>
 
             <!-- Est active -->
@@ -447,17 +454,46 @@ body { background: var(--bg) !important; }
 </div><!-- /page-root -->
 
 <script>
+// Confirmation suppression catégorie
+function confirmSupprimerCat(url, nom) {
+  if (confirm(`Supprimer la catégorie "${nom}" ? Cette action est irréversible.`)) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    form.appendChild(csrf);
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
 function previewImage(input) {
   const preview = document.getElementById('img-preview-new');
-  const label = document.getElementById('file-label');
+  const wrap = document.getElementById('img-preview-new-wrap');
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = e => {
       preview.src = e.target.result;
       preview.style.display = 'block';
-      label.style.display = 'none';
+      if (wrap) wrap.style.display = 'none';
     };
     reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function handleDropCat(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const input = document.getElementById('id_image');
+    const dt = new DataTransfer();
+    dt.items.add(files[0]);
+    input.files = dt.files;
+    previewImage(input);
   }
 }
 

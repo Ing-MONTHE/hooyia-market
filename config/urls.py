@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from apps.products.api_views import CategorieViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,6 +22,8 @@ urlpatterns = [
     # ── API REST ─────────────────────────────────────────────
     path('api/auth/',  include('apps.users.api_urls')),
     path('api/produits/',      include('apps.products.api_urls')),
+    path('api/categories/',    CategorieViewSet.as_view({'get': 'list'})),
+    path('api/categories/<int:pk>/', CategorieViewSet.as_view({'get': 'retrieve'})),
     path('api/panier/',        include('apps.cart.api_urls')),
     path('api/commandes/',     include('apps.orders.api_urls')),
     path('api/avis/',          include('apps.reviews.api_urls')),

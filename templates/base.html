@@ -128,7 +128,7 @@
   <!-- ════════════════════════════════════════
        FOOTER
   ════════════════════════════════════════ -->
-  {% include 'partials/footer.html' %}
+  {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
 
   <!-- ════════════════════════════════════════
        TOAST CONTAINER (JS dynamique)
