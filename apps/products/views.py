@@ -6,7 +6,7 @@ les données via JavaScript (fetch API → JSON).
 """
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.cache import cache
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from .models import Produit, Categorie, ImageProduit
 

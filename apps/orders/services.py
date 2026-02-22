@@ -22,7 +22,6 @@ Flux de création d'une commande :
 """
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 from .models import Commande, LigneCommande, Paiement
 from apps.cart.models import Panier

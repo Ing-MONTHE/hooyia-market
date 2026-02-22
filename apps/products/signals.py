@@ -29,7 +29,6 @@ def resize_image_produit(sender, instance, created, **kwargs):
     if created and instance.image:
         try:
             from PIL import Image
-            import os
 
             img_path = instance.image.path
 

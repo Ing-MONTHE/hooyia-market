@@ -17,7 +17,7 @@ qu'en cas d'erreur, aucun changement partiel n'est sauvegardé en base.
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from .models import Panier, PanierItem
+from .models import PanierItem
 from apps.products.models import Produit
 
 

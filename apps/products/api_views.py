@@ -11,17 +11,16 @@ from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from .models import Produit, Categorie, ImageProduit, MouvementStock
+from .models import Produit, Categorie, MouvementStock
 from .serializers import (
     ProduitListSerializer,
     ProduitDetailSerializer,
     ProduitCreateUpdateSerializer,
     CategorieSerializer,
-    ImageProduitSerializer,
-    MouvementStockSerializer
+    ImageProduitSerializer
 )
 from .filters import ProduitFilter
-from apps.users.permissions import EstVendeur, EstProprietaire, EstAdminOuLectureSeule
+from apps.users.permissions import EstVendeur, EstAdminOuLectureSeule
 
 
 # ═══════════════════════════════════════════════════════════════

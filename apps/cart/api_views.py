@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
 
-from .models import Panier, PanierItem
+from .models import Panier
 from .serializers import (
     PanierSerializer,
     PanierItemSerializer,

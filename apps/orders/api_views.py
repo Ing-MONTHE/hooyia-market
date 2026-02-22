@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from django.core.exceptions import ValidationError
 from django_fsm import TransitionNotAllowed
 
-from .models import Commande, Paiement
+from .models import Commande
 from .serializers import (
     CommandeListSerializer,
     CommandeDetailSerializer,

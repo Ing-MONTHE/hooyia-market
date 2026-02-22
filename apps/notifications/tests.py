@@ -10,7 +10,7 @@ Couverture :
   - Tests WebSocket : connexion, réception notification, rejet non authentifié
 """
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from django.test import TestCase, TransactionTestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
@@ -224,7 +224,7 @@ class NotificationTasksTest(TestCase):
 
         # Crée une commande LIVREE pour les tests
         from apps.products.models import Produit, Categorie
-        from apps.orders.models import Commande, LigneCommande, Paiement
+        from apps.orders.models import Commande, LigneCommande
 
         categorie, _ = Categorie.objects.get_or_create(nom='Test')
         self.produit = Produit.objects.create(

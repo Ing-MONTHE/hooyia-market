@@ -72,7 +72,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         Actuellement pas utilisé (les notifications sont push-only),
         mais on pourrait l'utiliser pour marquer des notifs comme lues.
         """
-        pass
 
     async def notif_message(self, event):
         """

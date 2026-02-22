@@ -18,8 +18,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 
-from .models import CustomUser, AdresseLivraison, TokenVerificationEmail
-from .forms import InscriptionForm, ConnexionForm, ProfilForm
+from .models import AdresseLivraison, TokenVerificationEmail
+from .forms import InscriptionForm, ConnexionForm
 
 
 # ═══════════════════════════════════════════════════════════════

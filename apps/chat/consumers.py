@@ -137,7 +137,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         un utilisateur d'accéder à une conversation dont il n'est pas membre.
         """
         from apps.chat.models import Conversation
-        from django.db.models import Q
         try:
             return Conversation.objects.get(
                 id=self.conversation_id,

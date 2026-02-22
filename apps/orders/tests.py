@@ -15,11 +15,10 @@ from django.urls import reverse
 from decimal import Decimal
 from unittest.mock import patch
 
-from .models import Commande, LigneCommande, Paiement
+from .models import Commande
 from .services import OrderService
 from apps.users.models import CustomUser, AdresseLivraison
 from apps.products.models import Produit, Categorie
-from apps.cart.models import Panier, PanierItem
 from apps.cart.services import CartService
 
 

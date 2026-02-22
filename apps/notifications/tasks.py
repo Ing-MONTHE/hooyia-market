@@ -23,7 +23,6 @@ En local : les emails s'affichent dans le terminal du worker Celery.
 """
 import logging
 from django.utils import timezone
-from django.core.mail import send_mail
 from django.conf import settings
 
 from config.celery import app

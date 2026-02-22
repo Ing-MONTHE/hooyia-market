@@ -52,13 +52,20 @@ class ProduitFilter(django_filters.FilterSet):
         label="Slug produit"
     )
 
-    # Filtre par slug de catégorie
+    # Filtre par slug de catégorie (inclut sous-catégories via MPTT)
     # ?categorie_slug=telephonie
     categorie_slug = django_filters.CharFilter(
-        field_name='categorie__slug',
-        lookup_expr='exact',
+        method='filter_categorie_slug',
         label="Slug catégorie"
     )
+
+    def filter_categorie_slug(self, queryset, name, value):
+        try:
+            cat = Categorie.objects.get(slug=value, est_active=True)
+            descendants = cat.get_descendants(include_self=True)
+            return queryset.filter(categorie__in=descendants)
+        except Categorie.DoesNotExist:
+            return queryset.none()
 
     # Filtre produits en stock uniquement
     # ?en_stock=true

@@ -12,7 +12,7 @@ from rest_framework import status
 from django.urls import reverse
 from decimal import Decimal
 
-from .models import Produit, Categorie, ImageProduit, MouvementStock
+from .models import Produit, Categorie, MouvementStock
 from apps.users.models import CustomUser
 
 

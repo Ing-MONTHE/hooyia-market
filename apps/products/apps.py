@@ -10,4 +10,4 @@ class ProductsConfig(AppConfig):
     verbose_name = 'Produits'
 
     def ready(self):
-        import apps.products.signals
+        pass

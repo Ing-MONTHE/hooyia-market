@@ -10,7 +10,6 @@ from django.utils.text import slugify
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from mptt.models import MPTTModel, TreeForeignKey
-import uuid
 from .managers import ProduitActifManager, ProduitEnVedetteManager, ProduitStockFaibleManager
 
 

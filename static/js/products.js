@@ -47,7 +47,7 @@ const Catalogue = (() => {
   function buildParams() {
     const p = new URLSearchParams();
     if (state.search)     p.set('search',    state.search);
-    if (state.categorie)  p.set('categorie', state.categorie);
+    if (state.categorie)  p.set('categorie_slug', state.categorie);
     if (state.ordering)   p.set('ordering',  state.ordering);
     if (state.promo)      p.set('promo',     'true');
     if (state.en_vedette) p.set('en_vedette','true');
@@ -352,4 +352,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Exposer pour les templates inline
 window.Catalogue = Catalogue;
 window.ajouterRapide = ajouterRapide;
-window.loadCategories = loadCategories; 
+window.loadCategories = loadCategories;

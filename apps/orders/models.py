@@ -182,12 +182,10 @@ class Commande(models.Model):
     @transition(field=statut, source=CONFIRMEE, target=EN_PREPARATION)
     def mettre_en_preparation(self):
         """Passe la commande en cours de préparation"""
-        pass
 
     @transition(field=statut, source=EN_PREPARATION, target=EXPEDIEE)
     def expedier(self):
         """Marque la commande comme expédiée"""
-        pass
 
     @transition(field=statut, source=EXPEDIEE, target=LIVREE)
     def livrer(self):

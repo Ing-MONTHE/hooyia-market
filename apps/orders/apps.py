@@ -15,4 +15,4 @@ class OrdersConfig(AppConfig):
         # Importe les signals → Django les enregistre au démarrage
         # Les signals écoutent les changements de statut des commandes
         # pour déclencher les emails Celery
-        import apps.orders.signals
+        pass
