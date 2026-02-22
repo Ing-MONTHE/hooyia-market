@@ -1,0 +1,903 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administration — HooYia Market{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════════════
+   VARIABLES & RESET
+════════════════════════════════════════ */
+:root {
+  --navy:     #0D1F5C;
+  --blue:     #1E3A8A;
+  --blue-l:   #2d52c4;
+  --orange:   #F97316;
+  --orange-d: #ea6000;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --yellow:   #f59e0b;
+  --bg:       #f0f3fa;
+  --sidebar:  240px;
+  --card-r:   12px;
+  --border:   #e2e8f8;
+  --shadow:   0 1px 4px rgba(13,31,92,.07);
+  --shadow-h: 0 6px 24px rgba(13,31,92,.13);
+}
+body { background: var(--bg) !important; }
+
+/* ════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════ */
+.da-root { display: flex; min-height: calc(100vh - 104px); }
+
+/* ════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════ */
+.da-sidebar {
+  width: var(--sidebar); flex-shrink: 0;
+  background: var(--navy);
+  position: sticky; top: 104px;
+  height: calc(100vh - 104px);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+}
+/* scrollbar sidebar */
+.da-sidebar::-webkit-scrollbar { width: 3px; }
+.da-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+
+.da-sb-head {
+  padding: 18px 16px; border-bottom: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.da-sb-avatar {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--orange), var(--orange-d));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; color: white;
+}
+.da-sb-name { font-size: 13px; font-weight: 600; color: white; line-height: 1.2; }
+.da-sb-role { font-size: 11px; color: rgba(255,255,255,.35); }
+
+.da-sb-group { padding: 6px 0; }
+.da-sb-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.28); padding: 10px 16px 3px;
+}
+.da-sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 16px; font-size: 12.5px; font-weight: 500;
+  color: rgba(255,255,255,.58); text-decoration: none;
+  border-left: 3px solid transparent; cursor: pointer;
+  background: transparent; border-top: none; border-right: none; border-bottom: none;
+  width: 100%; text-align: left; font-family: 'DM Sans', sans-serif;
+  transition: color .12s, background .12s, border-color .12s;
+}
+.da-sb-item:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.05); border-left-color: rgba(255,255,255,.15); }
+.da-sb-item.active { color: white; background: rgba(249,115,22,.18); border-left-color: var(--orange); font-weight: 600; }
+.da-sb-item .ic { width: 17px; text-align: center; font-size: 14px; }
+.da-sb-chip {
+  margin-left: auto; min-width: 18px; height: 18px; padding: 0 4px;
+  background: var(--orange); color: white; font-size: 9.5px; font-weight: 700;
+  border-radius: 50px; display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+}
+.da-sb-chip.blue { background: var(--blue-l); }
+.da-sb-divider { border: none; border-top: 1px solid rgba(255,255,255,.06); margin: 2px 0; }
+
+.da-sb-footer {
+  margin-top: auto; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+}
+.da-sb-footer a {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,.45); text-decoration: none;
+  padding: 6px 0; transition: color .15s;
+}
+.da-sb-footer a:hover { color: rgba(255,255,255,.8); }
+
+/* ════════════════════════════════════════
+   MAIN
+════════════════════════════════════════ */
+.da-main { flex: 1; min-width: 0; padding: 28px 30px; }
+
+/* ════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════ */
+.da-ph { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; }
+.da-ph h1 {
+  font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+  color: var(--navy); letter-spacing: -.4px; margin: 0; line-height: 1;
+}
+.da-ph-sub { font-size: 12px; color: #94a3b8; margin-top: 5px; font-family: 'DM Mono', monospace; }
+.da-btn-primary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; background: var(--orange); color: white;
+  font-size: 12.5px; font-weight: 700; border-radius: 8px;
+  text-decoration: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background .15s, box-shadow .15s;
+}
+.da-btn-primary:hover { background: var(--orange-d); box-shadow: 0 4px 14px rgba(249,115,22,.35); }
+
+/* ════════════════════════════════════════
+   KPI GRID
+════════════════════════════════════════ */
+.da-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.da-kpi {
+  background: white; border-radius: var(--card-r); padding: 18px 20px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  position: relative; overflow: hidden; transition: box-shadow .2s, transform .15s;
+}
+.da-kpi:hover { box-shadow: var(--shadow-h); transform: translateY(-1px); }
+.da-kpi-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--card-r) var(--card-r) 0 0;
+}
+.da-kpi-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 12px;
+}
+.da-kpi-val {
+  font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800;
+  color: var(--navy); line-height: 1;
+}
+.da-kpi-lbl { font-size: 12px; color: #94a3b8; margin-top: 3px; font-weight: 500; }
+.da-kpi-trend { display: flex; align-items: center; gap: 4px; font-size: 11px; margin-top: 8px; }
+
+/* ════════════════════════════════════════
+   CARDS
+════════════════════════════════════════ */
+.da-card {
+  background: white; border-radius: var(--card-r);
+  box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden;
+}
+.da-card-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid #f1f5fd;
+}
+.da-card-hd h3 {
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--navy); margin: 0;
+}
+.da-card-hd a, .da-card-hd button.link {
+  font-size: 12px; color: var(--blue-l); text-decoration: none; font-weight: 600;
+  background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+.da-card-hd a:hover, .da-card-hd button.link:hover { color: var(--orange); }
+
+/* ════════════════════════════════════════
+   TABLES
+════════════════════════════════════════ */
+.da-table { width: 100%; border-collapse: collapse; }
+.da-table th {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+  color: #94a3b8; padding: 9px 16px; text-align: left; background: #f8faff; white-space: nowrap;
+}
+.da-table td {
+  padding: 11px 16px; font-size: 13px; color: #334155;
+  border-top: 1px solid #f1f5fd; vertical-align: middle;
+}
+.da-table tr:hover td { background: #fafbff; }
+.da-table .mono { font-family: 'DM Mono', monospace; font-size: 11.5px; color: #64748b; }
+.da-table .bold { font-weight: 600; color: var(--navy); }
+
+/* ════════════════════════════════════════
+   STATUS BADGES
+════════════════════════════════════════ */
+.st {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px; border-radius: 50px; font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+.st::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.st-wait   { background: #fef3c7; color: #92400e; }        .st-wait::before   { background: #f59e0b; }
+.st-conf   { background: #dbeafe; color: #1e40af; }        .st-conf::before   { background: #3b82f6; }
+.st-prep   { background: #ede9fe; color: #5b21b6; }        .st-prep::before   { background: #8b5cf6; }
+.st-ship   { background: #cffafe; color: #164e63; }        .st-ship::before   { background: #06b6d4; }
+.st-done   { background: #dcfce7; color: #14532d; }        .st-done::before   { background: #16a34a; }
+.st-cancel { background: #fee2e2; color: #7f1d1d; }        .st-cancel::before { background: #dc2626; }
+.st-active { background: #dcfce7; color: #14532d; }        .st-active::before { background: #16a34a; }
+.st-off    { background: #f1f5f9; color: #475569; }        .st-off::before    { background: #94a3b8; }
+.st-valid  { background: #dcfce7; color: #14532d; }        .st-valid::before  { background: #16a34a; }
+.st-pend   { background: #fef3c7; color: #92400e; }        .st-pend::before   { background: #f59e0b; }
+
+/* ════════════════════════════════════════
+   LAYOUT GRIDS
+════════════════════════════════════════ */
+.da-row { display: grid; gap: 16px; margin-bottom: 16px; }
+.da-row-3-1 { grid-template-columns: 3fr 1.2fr; }
+.da-row-2   { grid-template-columns: 1fr 1fr; }
+
+/* ════════════════════════════════════════
+   QUICK ACTIONS
+════════════════════════════════════════ */
+.qa-list { padding: 14px; display: flex; flex-direction: column; gap: 7px; }
+.qa {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 600;
+  text-decoration: none; border: 1px solid transparent;
+  font-family: 'DM Sans', sans-serif; transition: all .13s; cursor: pointer;
+}
+.qa-ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.qa.or { background: var(--orange); color: white; }
+.qa.or:hover { background: var(--orange-d); box-shadow: 0 3px 12px rgba(249,115,22,.3); }
+.qa.or .qa-ico { background: rgba(255,255,255,.22); }
+.qa.bl { background: #eff4ff; color: var(--blue); border-color: #dce7fd; }
+.qa.bl:hover { background: #dce7fd; }
+.qa.bl .qa-ico { background: #dce7fd; }
+.qa.gr { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+.qa.gr:hover { background: #d1fae5; }
+.qa.gr .qa-ico { background: #a7f3d0; }
+
+/* ════════════════════════════════════════
+   STOCK BARS
+════════════════════════════════════════ */
+.sk-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid #f1f5fd; }
+.sk-bar-bg { flex: 1; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+.sk-bar { height: 100%; border-radius: 99px; transition: width .4s ease; }
+.sk-ok  { background: var(--green); }
+.sk-lo  { background: var(--orange); }
+.sk-cr  { background: var(--red); }
+
+/* ════════════════════════════════════════
+   ACTIVITY FEED
+════════════════════════════════════════ */
+.af-item { display: flex; gap: 12px; padding: 11px 16px; border-top: 1px solid #f1f5fd; }
+.af-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.af-text { font-size: 12.5px; color: #334155; line-height: 1.5; }
+.af-time { font-size: 10.5px; color: #94a3b8; font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+/* ════════════════════════════════════════
+   MINI STATS ROW
+════════════════════════════════════════ */
+.da-mini { display: grid; grid-template-columns: repeat(3,1fr); }
+.da-mini-cell { padding: 16px; text-align: center; border-right: 1px solid #f1f5fd; }
+.da-mini-cell:last-child { border-right: none; }
+.da-mini-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--navy); }
+.da-mini-lbl { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+/* ════════════════════════════════════════
+   EMPTY / LOADER
+════════════════════════════════════════ */
+.da-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
+.da-loading { text-align: center; padding: 20px; color: #94a3b8; font-size: 12px; }
+
+/* ════════════════════════════════════════
+   SECTION VISIBILITY
+════════════════════════════════════════ */
+.da-section { display: none; }
+.da-section.shown { display: block; animation: da-in .25s ease both; }
+@keyframes da-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ════════════════════════════════════════
+   ANIMATIONS
+════════════════════════════════════════ */
+.da-kpi { animation: da-in .3s ease both; }
+.da-kpi:nth-child(1) { animation-delay: .04s; }
+.da-kpi:nth-child(2) { animation-delay: .08s; }
+.da-kpi:nth-child(3) { animation-delay: .12s; }
+.da-kpi:nth-child(4) { animation-delay: .16s; }
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media (max-width: 1100px) { .da-kpi-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 960px)  { .da-row-3-1, .da-row-2 { grid-template-columns: 1fr; } }
+@media (max-width: 800px)  { .da-sidebar { display: none; } }
+@media (max-width: 540px)  { .da-kpi-grid { grid-template-columns: 1fr; } .da-main { padding: 16px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="da-root">
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="da-sidebar">
+    <div class="da-sb-head">
+      <div class="da-sb-avatar">{{ user.prenom|first|default:"A"|upper }}{{ user.nom|first|default:""|upper }}</div>
+      <div>
+        <div class="da-sb-name">{{ user.get_full_name|default:user.username }}</div>
+        <div class="da-sb-role">Administrateur</div>
+      </div>
+    </div>
+
+    <div class="da-sb-group">
+      <div class="da-sb-lbl">Vue d'ensemble</div>
+      <button class="da-sb-item active" data-section="overview" onclick="nav(this)">
+        <span class="ic">📊</span> Dashboard
+      </button>
+    </div>
+
+    <hr class="da-sb-divider"/>
+
+    <div class="da-sb-group">
+      <div class="da-sb-lbl">Catalogue</div>
+      <button class="da-sb-item" data-section="produits" onclick="nav(this)">
+        <span class="ic">📦</span> Produits
+      </button>
+      <button class="da-sb-item" data-section="categories" onclick="nav(this)">
+        <span class="ic">🏷️</span> Catégories
+      </button>
+      <button class="da-sb-item" data-section="stocks" onclick="nav(this)">
+        <span class="ic">⚠️</span> Stocks
+        <span class="da-sb-chip" id="chip-stocks" style="display:none;">!</span>
+      </button>
+    </div>
+
+    <hr class="da-sb-divider"/>
+
+    <div class="da-sb-group">
+      <div class="da-sb-lbl">Commerce</div>
+      <button class="da-sb-item" data-section="commandes" onclick="nav(this)">
+        <span class="ic">🛒</span> Commandes
+        <span class="da-sb-chip" id="chip-commandes" style="display:none;"></span>
+      </button>
+      <button class="da-sb-item" data-section="avis" onclick="nav(this)">
+        <span class="ic">⭐</span> Avis
+        <span class="da-sb-chip blue" id="chip-avis" style="display:none;"></span>
+      </button>
+      <button class="da-sb-item" data-section="paniers" onclick="nav(this)">
+        <span class="ic">🛍️</span> Paniers actifs
+      </button>
+    </div>
+
+    <hr class="da-sb-divider"/>
+
+    <div class="da-sb-group">
+      <div class="da-sb-lbl">Utilisateurs</div>
+      <button class="da-sb-item" data-section="utilisateurs" onclick="nav(this)">
+        <span class="ic">👤</span> Utilisateurs
+      </button>
+      <button class="da-sb-item" data-section="messages" onclick="nav(this)">
+        <span class="ic">💬</span> Conversations
+      </button>
+    </div>
+
+    <hr class="da-sb-divider"/>
+
+    <div class="da-sb-group">
+      <div class="da-sb-lbl">Système</div>
+      <button class="da-sb-item" data-section="notifications" onclick="nav(this)">
+        <span class="ic">🔔</span> Notifications
+      </button>
+      <button class="da-sb-item" data-section="audit" onclick="nav(this)">
+        <span class="ic">🔍</span> Audit
+      </button>
+    </div>
+
+    <div class="da-sb-footer">
+      <a href="/admin/">⚙️ &nbsp;Django Admin</a>
+      <a href="{% url 'products:accueil' %}">🏠 &nbsp;Retour au site</a>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <main class="da-main">
+
+    <!-- ──────── OVERVIEW ──────── -->
+    <div id="sec-overview" class="da-section shown">
+      <div class="da-ph">
+        <div>
+          <h1>Tableau de bord</h1>
+          <div class="da-ph-sub" id="date-now"></div>
+        </div>
+        <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter produit</a>
+      </div>
+
+      <!-- KPIs -->
+      <div class="da-kpi-grid">
+        <div class="da-kpi">
+          <div class="da-kpi-accent" style="background:var(--orange);"></div>
+          <div class="da-kpi-icon" style="background:#fff3e8;">📦</div>
+          <div class="da-kpi-val" id="kpi-produits">—</div>
+          <div class="da-kpi-lbl">Produits actifs</div>
+          <div class="da-kpi-trend" id="kpi-produits-t" style="color:#94a3b8;"></div>
+        </div>
+        <div class="da-kpi">
+          <div class="da-kpi-accent" style="background:var(--blue);"></div>
+          <div class="da-kpi-icon" style="background:#eff4ff;">🛒</div>
+          <div class="da-kpi-val" id="kpi-commandes">—</div>
+          <div class="da-kpi-lbl">Commandes totales</div>
+          <div class="da-kpi-trend" id="kpi-commandes-t" style="color:#94a3b8;"></div>
+        </div>
+        <div class="da-kpi">
+          <div class="da-kpi-accent" style="background:var(--green);"></div>
+          <div class="da-kpi-icon" style="background:#ecfdf5;">👤</div>
+          <div class="da-kpi-val" id="kpi-users">—</div>
+          <div class="da-kpi-lbl">Utilisateurs inscrits</div>
+          <div class="da-kpi-trend" id="kpi-users-t" style="color:#94a3b8;"></div>
+        </div>
+        <div class="da-kpi">
+          <div class="da-kpi-accent" style="background:var(--yellow);"></div>
+          <div class="da-kpi-icon" style="background:#fffbeb;">⭐</div>
+          <div class="da-kpi-val" id="kpi-avis">—</div>
+          <div class="da-kpi-lbl">Avis clients</div>
+          <div class="da-kpi-trend" id="kpi-avis-t" style="color:#94a3b8;"></div>
+        </div>
+      </div>
+
+      <!-- Row : Commandes récentes + Actions rapides -->
+      <div class="da-row da-row-3-1">
+        <div class="da-card">
+          <div class="da-card-hd">
+            <h3>🛒 Commandes récentes</h3>
+            <button class="link" onclick="nav(document.querySelector('[data-section=commandes]'))">Voir tout →</button>
+          </div>
+          <table class="da-table">
+            <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
+            <tbody id="ov-commandes"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="da-card">
+          <div class="da-card-hd"><h3>⚡ Actions rapides</h3></div>
+          <div class="qa-list">
+            <a href="{% url 'products:ajouter' %}" class="qa or">
+              <span class="qa-ico">➕</span> Ajouter un produit
+            </a>
+            <a href="/admin/orders/commande/?statut__exact=en_attente" class="qa bl">
+              <span class="qa-ico">🛒</span> Commandes en attente
+            </a>
+            <a href="/admin/reviews/avis/?is_validated__exact=0" class="qa bl">
+              <span class="qa-ico">⭐</span> Avis à modérer
+            </a>
+            <button class="qa gr" onclick="nav(document.querySelector('[data-section=stocks]'))">
+              <span class="qa-ico">⚠️</span> Vérifier les stocks
+            </button>
+            <a href="/admin/users/customuser/" class="qa bl">
+              <span class="qa-ico">👤</span> Gérer utilisateurs
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row : Stocks faibles + Activité récente -->
+      <div class="da-row da-row-2">
+        <div class="da-card">
+          <div class="da-card-hd">
+            <h3>⚠️ Alertes stocks</h3>
+            <a href="/admin/products/produit/">Gérer →</a>
+          </div>
+          <div id="ov-stocks"><div class="da-loading">Chargement…</div></div>
+        </div>
+        <div class="da-card">
+          <div class="da-card-hd">
+            <h3>🔍 Activité récente</h3>
+            <button class="link" onclick="nav(document.querySelector('[data-section=audit]'))">Tout voir →</button>
+          </div>
+          <div id="ov-activity"><div class="da-loading">Chargement…</div></div>
+        </div>
+      </div>
+
+      <!-- Vue système -->
+      <div class="da-card">
+        <div class="da-card-hd"><h3>📡 Vue système</h3></div>
+        <div class="da-mini">
+          <div class="da-mini-cell">
+            <div class="da-mini-val" id="ms-convs">—</div>
+            <div class="da-mini-lbl">Conversations chat</div>
+          </div>
+          <div class="da-mini-cell">
+            <div class="da-mini-val" id="ms-notifs">—</div>
+            <div class="da-mini-lbl">Notifications envoyées</div>
+          </div>
+          <div class="da-mini-cell">
+            <div class="da-mini-val" id="ms-paniers">—</div>
+            <div class="da-mini-lbl">Paniers non vides</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────── PRODUITS ──────── -->
+    <div id="sec-produits" class="da-section">
+      <div class="da-ph">
+        <div><h1>Produits</h1><div class="da-ph-sub">Gestion du catalogue</div></div>
+        <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter</a>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Tous les produits</h3><a href="/admin/products/produit/">Admin Django →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="tbl-produits"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── CATÉGORIES ──────── -->
+    <div id="sec-categories" class="da-section">
+      <div class="da-ph">
+        <div><h1>Catégories</h1><div class="da-ph-sub">Arborescence du catalogue</div></div>
+        <a href="/admin/products/categorie/add/" class="da-btn-primary">＋ Ajouter</a>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Toutes les catégories</h3><a href="/admin/products/categorie/">Admin Django →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Nom</th><th>Slug</th><th>Niveau</th><th>Produits</th></tr></thead>
+          <tbody id="tbl-categories"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── STOCKS ──────── -->
+    <div id="sec-stocks" class="da-section">
+      <div class="da-ph">
+        <div><h1>Stocks</h1><div class="da-ph-sub">Produits sous seuil d'alerte</div></div>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Alertes stock faible</h3><a href="/admin/products/mouvementstock/">Mouvements →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock</th><th>Seuil</th><th>Niveau</th><th></th></tr></thead>
+          <tbody id="tbl-stocks"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── COMMANDES ──────── -->
+    <div id="sec-commandes" class="da-section">
+      <div class="da-ph">
+        <div><h1>Commandes</h1><div class="da-ph-sub">Suivi des commandes clients</div></div>
+        <a href="/admin/orders/commande/" class="da-btn-primary">Admin Django →</a>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Toutes les commandes</h3></div>
+        <table class="da-table">
+          <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Paiement</th></tr></thead>
+          <tbody id="tbl-commandes"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── AVIS ──────── -->
+    <div id="sec-avis" class="da-section">
+      <div class="da-ph">
+        <div><h1>Avis clients</h1><div class="da-ph-sub">Modération des avis</div></div>
+        <a href="/admin/reviews/avis/" class="da-btn-primary">Admin Django →</a>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Tous les avis</h3></div>
+        <table class="da-table">
+          <thead><tr><th>Produit</th><th>Client</th><th>Note</th><th>Commentaire</th><th>Statut</th></tr></thead>
+          <tbody id="tbl-avis"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── PANIERS ──────── -->
+    <div id="sec-paniers" class="da-section">
+      <div class="da-ph"><div><h1>Paniers actifs</h1><div class="da-ph-sub">Paniers non finalisés</div></div></div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Paniers en cours</h3><a href="/admin/cart/panier/">Admin Django →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Utilisateur</th><th>Articles</th><th>Montant estimé</th><th>Dernière activité</th></tr></thead>
+          <tbody id="tbl-paniers"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── UTILISATEURS ──────── -->
+    <div id="sec-utilisateurs" class="da-section">
+      <div class="da-ph"><div><h1>Utilisateurs</h1><div class="da-ph-sub">Gestion des comptes</div></div>
+        <a href="/admin/users/customuser/" class="da-btn-primary">Admin Django →</a>
+      </div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Tous les comptes</h3></div>
+        <table class="da-table">
+          <thead><tr><th>Nom</th><th>Email</th><th>Inscription</th><th>Email vérifié</th><th>Statut</th></tr></thead>
+          <tbody id="tbl-users"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── MESSAGES ──────── -->
+    <div id="sec-messages" class="da-section">
+      <div class="da-ph"><div><h1>Conversations</h1><div class="da-ph-sub">Messages entre utilisateurs</div></div></div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Toutes les conversations</h3><a href="/admin/chat/conversation/">Admin Django →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Participants</th><th>Dernier message</th><th>Messages non lus</th><th>Date</th></tr></thead>
+          <tbody id="tbl-messages"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── NOTIFICATIONS ──────── -->
+    <div id="sec-notifications" class="da-section">
+      <div class="da-ph"><div><h1>Notifications</h1><div class="da-ph-sub">Historique des notifications</div></div></div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Notifications récentes</h3><a href="/admin/notifications/notification/">Admin Django →</a></div>
+        <table class="da-table">
+          <thead><tr><th>Type</th><th>Destinataire</th><th>Titre</th><th>Date</th><th>Lu</th></tr></thead>
+          <tbody id="tbl-notifs"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ──────── AUDIT ──────── -->
+    <div id="sec-audit" class="da-section">
+      <div class="da-ph"><div><h1>Journal d'audit</h1><div class="da-ph-sub">Traçabilité des actions</div></div></div>
+      <div class="da-card">
+        <div class="da-card-hd"><h3>Activité du système</h3><a href="/admin/audit/auditlog/">Admin Django →</a></div>
+        <div id="tbl-audit"><div class="da-loading">Chargement…</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* ─── Helpers ─── */
+const $ = id => document.getElementById(id);
+const fmtDate = d => new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+const fmtPrice = p => parseFloat(p||0).toLocaleString('fr-FR') + ' FCFA';
+const mono = t => `<span class="mono">${t}</span>`;
+const bold = t => `<span class="bold">${t}</span>`;
+const empty = (cols, msg='Aucune donnée') => `<tr><td colspan="${cols}" class="da-empty">${msg}</td></tr>`;
+const loading = cols => `<tr><td colspan="${cols}" class="da-loading">Chargement…</td></tr>`;
+
+const STATUTS = {
+  en_attente:'<span class="st st-wait">En attente</span>',
+  confirmee:'<span class="st st-conf">Confirmée</span>',
+  en_preparation:'<span class="st st-prep">En préparation</span>',
+  expediee:'<span class="st st-ship">Expédiée</span>',
+  livree:'<span class="st st-done">Livrée</span>',
+  annulee:'<span class="st st-cancel">Annulée</span>',
+};
+const statut = s => STATUTS[s] || `<span class="st st-off">${s}</span>`;
+
+const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+
+/* ─── Navigation ─── */
+const ALL_SECTIONS = ['overview','produits','categories','stocks','commandes','avis','paniers','utilisateurs','messages','notifications','audit'];
+const loaded = new Set();
+
+function nav(btn) {
+  const name = btn.dataset.section;
+  document.querySelectorAll('.da-sb-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ALL_SECTIONS.forEach(s => {
+    const el = $('sec-'+s);
+    if (el) el.className = 'da-section' + (s === name ? ' shown' : '');
+  });
+  if (!loaded.has(name)) { loadSection(name); loaded.add(name); }
+}
+
+/* ─── API Calls ─── */
+async function apiFetch(url) {
+  try {
+    const r = await API.get(url, { silentError: true });
+    return r?.results ?? r ?? [];
+  } catch { return []; }
+}
+
+/* ─── OVERVIEW ─── */
+async function loadOverview() {
+  $('date-now').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const [produits, commandes, avis, cats] = await Promise.all([
+    apiFetch('/api/produits/?page_size=100'),
+    apiFetch('/api/commandes/'),
+    apiFetch('/api/avis/'),
+    apiFetch('/api/categories/'),
+  ]);
+
+  /* KPIs */
+  $('kpi-produits').textContent = produits.length || '—';
+  $('kpi-produits-t').innerHTML = `<span style="color:var(--green);">▲</span> ${cats.length} catégorie${cats.length>1?'s':''}`;
+
+  $('kpi-commandes').textContent = commandes.length || '—';
+  const pending = commandes.filter(c=>c.statut==='en_attente').length;
+  $('kpi-commandes-t').innerHTML = pending ? `<span style="color:var(--orange);">▲ ${pending} en attente</span>` : `<span style="color:var(--green);">✓ Aucune en attente</span>`;
+  if (pending) { $('chip-commandes').textContent = pending; $('chip-commandes').style.display='flex'; }
+
+  $('kpi-avis').textContent = avis.length || '—';
+  const nonVal = avis.filter(a=>!a.is_validated).length;
+  $('kpi-avis-t').innerHTML = nonVal ? `<span style="color:var(--yellow);">▲ ${nonVal} à valider</span>` : `<span style="color:var(--green);">✓ Tous validés</span>`;
+  if (nonVal) { $('chip-avis').textContent = nonVal; $('chip-avis').style.display='flex'; }
+
+  /* Stock alertes */
+  const stockFaible = produits.filter(p => p.stock <= (p.stock_minimum || 5));
+  if (stockFaible.length) { $('chip-stocks').textContent = stockFaible.length; $('chip-stocks').style.display='flex'; }
+
+  /* users count via context or placeholder */
+  $('kpi-users').textContent = '{{ users_count|default:"—" }}';
+  $('kpi-users-t').innerHTML = '<span style="color:var(--green);">▲ Actifs</span>';
+
+  /* Commandes récentes */
+  const recent = commandes.slice(0,7);
+  $('ov-commandes').innerHTML = recent.length ? recent.map(c=>`
+    <tr>
+      <td>${mono('#' + (c.reference_courte || String(c.id).slice(-6)))}</td>
+      <td>${bold(c.client_nom || c.client || '—')}</td>
+      <td>${mono(fmtPrice(c.montant_total))}</td>
+      <td>${mono(fmtDate(c.date_creation))}</td>
+      <td>${statut(c.statut)}</td>
+    </tr>`).join('') : empty(5,'Aucune commande');
+
+  /* Stocks faibles */
+  if (!stockFaible.length) {
+    $('ov-stocks').innerHTML = '<div style="padding:20px;text-align:center;color:var(--green);font-size:13px;font-weight:600;">✓ Tous les stocks sont suffisants</div>';
+  } else {
+    $('ov-stocks').innerHTML = stockFaible.slice(0,6).map(p => {
+      const pct = Math.min(100, Math.round(p.stock/Math.max((p.stock_minimum||5)*2,1)*100));
+      const cls = pct<20?'sk-cr':pct<50?'sk-lo':'sk-ok';
+      const col = pct<20?'var(--red)':pct<50?'var(--orange)':'var(--green)';
+      return `<div class="sk-row">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12.5px;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nom}</div>
+          <div style="font-size:11px;color:#94a3b8;">${p.categorie_nom||'—'}</div>
+        </div>
+        <div class="sk-bar-bg" style="width:80px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:11.5px;color:${col};font-weight:700;min-width:30px;text-align:right;">${p.stock}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* Activité (commandes récentes feed) */
+  $('ov-activity').innerHTML = commandes.slice(0,8).map(c => {
+    const col = c.statut==='annulee'?'var(--red)':c.statut==='en_attente'?'var(--orange)':'var(--blue-l)';
+    return `<div class="af-item">
+      <div class="af-dot" style="background:${col};"></div>
+      <div>
+        <div class="af-text">Commande <strong>#${c.reference_courte||c.id}</strong> · ${c.client_nom||'client'} ${statut(c.statut)}</div>
+        <div class="af-time">${fmtDate(c.date_creation)}</div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="da-empty">Aucune activité</div>';
+
+  /* Mini stats */
+  try {
+    const chats = await apiFetch('/api/chat/');
+    $('ms-convs').textContent = Array.isArray(chats) ? chats.length : '—';
+  } catch {}
+  try {
+    const notifs = await apiFetch('/api/notifications/?page_size=1');
+    $('ms-notifs').textContent = notifs?.count ?? (Array.isArray(notifs)?notifs.length:'—');
+  } catch {}
+  $('ms-paniers').textContent = '{{ paniers_count|default:"—" }}';
+}
+
+/* ─── SECTIONS ─── */
+async function loadSection(name) {
+  if (name === 'overview') { loadOverview(); return; }
+
+  if (name === 'produits') {
+    const d = await apiFetch('/api/produits/?page_size=100');
+    $('tbl-produits').innerHTML = d.length ? d.map(p=>{
+      const s=p.stock; const min=p.stock_minimum||5;
+      const sCol = s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
+      return `<tr>
+        <td>${bold(p.nom)}</td>
+        <td style="color:#64748b;">${p.categorie_nom||'—'}</td>
+        <td>${mono(fmtPrice(p.prix))}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:700;color:${sCol};">${s}</td>
+        <td>${p.statut==='actif'?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
+        <td><a href="/produits/modifier/${p.id}/" style="font-size:11.5px;color:var(--blue-l);text-decoration:none;font-weight:600;">Modifier →</a></td>
+      </tr>`;
+    }).join('') : empty(6);
+  }
+
+  if (name === 'categories') {
+    const d = await apiFetch('/api/categories/');
+    $('tbl-categories').innerHTML = d.length ? d.map(c=>`<tr>
+      <td style="padding-left:${(c.level||0)*20+16}px;">${'└ '.repeat(c.level||0)}${bold(c.nom)}</td>
+      <td>${mono(c.slug)}</td>
+      <td><span class="st st-off">Niveau ${c.level||0}</span></td>
+      <td style="color:#64748b;">${c.nb_produits||'—'}</td>
+    </tr>`).join('') : empty(4);
+  }
+
+  if (name === 'stocks') {
+    const d = await apiFetch('/api/produits/?page_size=100');
+    const low = d.filter(p=>p.stock<=(p.stock_minimum||5));
+    $('tbl-stocks').innerHTML = low.length ? low.map(p=>{
+      const pct = Math.min(100, Math.round(p.stock/Math.max((p.stock_minimum||5)*2,1)*100));
+      const cls = pct<20?'sk-cr':pct<50?'sk-lo':'sk-ok';
+      const col = pct<20?'var(--red)':pct<50?'var(--orange)':'var(--green)';
+      return `<tr>
+        <td>${bold(p.nom)}</td>
+        <td style="color:#64748b;">${p.categorie_nom||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:700;color:${col};">${p.stock}</td>
+        <td style="color:#94a3b8;">${p.stock_minimum||5}</td>
+        <td><div style="display:flex;align-items:center;gap:8px;"><div class="sk-bar-bg" style="width:80px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div><span style="font-size:11px;color:${col};font-weight:700;">${pct}%</span></div></td>
+        <td><a href="/produits/modifier/${p.id}/" style="font-size:11.5px;color:var(--blue-l);text-decoration:none;font-weight:600;">Réappro →</a></td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="6" class="da-empty" style="color:var(--green);">✓ Tous les stocks sont suffisants</td></tr>`;
+  }
+
+  if (name === 'commandes') {
+    const d = await apiFetch('/api/commandes/');
+    $('tbl-commandes').innerHTML = d.length ? d.map(c=>`<tr>
+      <td>${mono('#'+(c.reference_courte||String(c.id).slice(-6)))}</td>
+      <td>${bold(c.client_nom||c.client||'—')}</td>
+      <td>${mono(fmtPrice(c.montant_total))}</td>
+      <td>${mono(fmtDate(c.date_creation))}</td>
+      <td>${statut(c.statut)}</td>
+      <td>${c.paiement_statut==='paye'?'<span class="st st-done">Payé</span>':'<span class="st st-pend">En attente</span>'}</td>
+    </tr>`).join('') : empty(6);
+  }
+
+  if (name === 'avis') {
+    const d = await apiFetch('/api/avis/');
+    $('tbl-avis').innerHTML = d.length ? d.map(a=>`<tr>
+      <td>${bold(a.produit_nom||'—')}</td>
+      <td>${a.auteur||'—'}</td>
+      <td style="color:var(--yellow);letter-spacing:1px;">${stars(a.note)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;">${a.commentaire||'—'}</td>
+      <td>${a.is_validated?'<span class="st st-valid">Validé</span>':'<span class="st st-pend">À valider</span>'}</td>
+    </tr>`).join('') : empty(5);
+  }
+
+  if (name === 'paniers') {
+    const d = await apiFetch('/api/panier/');
+    if (Array.isArray(d) && d.length) {
+      $('tbl-paniers').innerHTML = d.map(p=>`<tr>
+        <td>${bold(p.utilisateur||p.user||'—')}</td>
+        <td>${p.nb_articles||p.lignes?.length||'—'} article(s)</td>
+        <td>${mono(fmtPrice(p.montant_total||p.total||0))}</td>
+        <td>${mono(fmtDate(p.date_modification||p.updated_at||new Date()))}</td>
+      </tr>`).join('');
+    } else {
+      $('tbl-paniers').innerHTML = empty(4,'Aucun panier actif ou données non disponibles via API');
+    }
+  }
+
+  if (name === 'utilisateurs') {
+    try {
+      const d = await apiFetch('/api/auth/utilisateurs/');
+      $('tbl-users').innerHTML = d.length ? d.map(u=>`<tr>
+        <td>${bold((u.prenom||'')+' '+(u.nom||''))}</td>
+        <td>${mono(u.email)}</td>
+        <td>${mono(fmtDate(u.date_inscription||u.date_joined||new Date()))}</td>
+        <td>${u.email_verifie?'<span class="st st-done">✓ Vérifié</span>':'<span class="st st-pend">Non vérifié</span>'}</td>
+        <td>${u.is_active?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
+      </tr>`).join('') : empty(5);
+    } catch {
+      $('tbl-users').innerHTML = `<tr><td colspan="5" class="da-empty">Accès via <a href="/admin/users/customuser/" style="color:var(--blue-l);">Django Admin</a></td></tr>`;
+    }
+  }
+
+  if (name === 'messages') {
+    const d = await apiFetch('/api/chat/');
+    $('tbl-messages').innerHTML = Array.isArray(d) && d.length ? d.map(c=>`<tr>
+      <td>${bold(c.interlocuteur?.username||c.participants?.join(' · ')||'—')}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;">${c.dernier_message?.contenu||'—'}</td>
+      <td>${c.messages_non_lus>0?`<span class="st st-pend">${c.messages_non_lus} non lu${c.messages_non_lus>1?'s':''}</span>`:'<span style="color:#94a3b8;">0</span>'}</td>
+      <td>${mono(fmtDate(c.derniere_activite||new Date()))}</td>
+    </tr>`).join('') : empty(4,'Aucune conversation');
+  }
+
+  if (name === 'notifications') {
+    const d = await apiFetch('/api/notifications/?page_size=30');
+    const icones={commande:'📦',avis:'⭐',stock:'⚠️',systeme:'ℹ️'};
+    $('tbl-notifs').innerHTML = Array.isArray(d) && d.length ? d.map(n=>`<tr>
+      <td>${icones[n.type_notif]||'ℹ️'} <span style="color:#64748b;">${n.type_notif||'—'}</span></td>
+      <td>${n.utilisateur_nom||'—'}</td>
+      <td>${bold(n.titre)}</td>
+      <td>${mono(fmtDate(n.date_creation))}</td>
+      <td>${n.is_read?'<span class="st st-done">Lu</span>':'<span class="st st-pend">Non lu</span>'}</td>
+    </tr>`).join('') : empty(5);
+  }
+
+  if (name === 'audit') {
+    const d = await apiFetch('/api/commandes/?page_size=25');
+    $('tbl-audit').innerHTML = Array.isArray(d) && d.length ? d.map(c=>{
+      const col = c.statut==='annulee'?'var(--red)':c.statut==='en_attente'?'var(--orange)':'var(--blue-l)';
+      return `<div class="af-item">
+        <div class="af-dot" style="background:${col};"></div>
+        <div>
+          <div class="af-text"><strong>#${c.reference_courte||c.id}</strong> — ${c.client_nom||'client'} ${statut(c.statut)} · ${mono(fmtPrice(c.montant_total))}</div>
+          <div class="af-time">${fmtDate(c.date_creation)}</div>
+        </div>
+      </div>`;
+    }).join('') : '<div class="da-empty">Aucune activité</div>';
+  }
+}
+
+/* ─── Init ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  loaded.add('overview');
+  loadOverview();
+});
+</script>
+{% endblock %}

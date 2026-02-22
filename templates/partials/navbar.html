@@ -62,7 +62,7 @@
             <a href="/chat/"                             class="nv-dd-item">💬 Messages</a>
             {% if user.is_staff %}
             <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
-            <a href="/admin/" class="nv-dd-item" style="color:#1E3A8A;">⚙️ Administration</a>
+            <a href="{% url 'products:admin_dashboard' %}" class="nv-dd-item" style="color:#1E3A8A;">⚙️ Administration</a>
             {% endif %}
             <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
             <a href="{% url 'users:deconnexion' %}" class="nv-dd-item" style="color:#ef4444;"
@@ -175,7 +175,10 @@
       <a href="/chat/" class="nv-navlink">Messages</a>
       {% endif %}
       {% if user.is_staff %}
-      <a href="{% url 'products:ajouter' %}" class="nv-navlink" style="margin-left:auto;color:#FCD34D;font-weight:600;">+ Ajouter produit</a>
+      <div style="margin-left:auto;display:flex;align-items:center;">
+        <a href="{% url 'products:admin_dashboard' %}" class="nv-navlink" style="color:#FCD34D;font-weight:600;">⚙️ Dashboard Admin</a>
+        <a href="{% url 'products:ajouter' %}" class="nv-navlink" style="color:#FCD34D;font-weight:600;">+ Ajouter produit</a>
+      </div>
       {% endif %}
 
     </div>
@@ -193,7 +196,7 @@
     <a href="{% url 'orders:historique' %}" class="nv-mobile">📋 Mes commandes</a>
     <a href="/chat/"                        class="nv-mobile">💬 Messages</a>
     {% if user.is_staff %}
-    <a href="/admin/"                       class="nv-mobile" style="color:#FCD34D;">⚙️ Administration</a>
+    <a href="{% url 'products:admin_dashboard' %}" class="nv-mobile" style="color:#FCD34D;">⚙️ Administration</a>
     {% endif %}
     <a href="{% url 'users:deconnexion' %}" class="nv-mobile" style="color:#fca5a5;">🚪 Déconnexion</a>
     {% else %}

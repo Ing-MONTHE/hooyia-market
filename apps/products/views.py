@@ -252,3 +252,18 @@ def supprimer_produit(request, produit_id):
         messages.success(request, f"Produit « {nom} » supprimé.")
         return redirect('products:liste')
     return redirect('products:detail', slug=produit.slug)
+
+# ──────────────────────────────────────────────────────────────
+# DASHBOARD ADMIN PERSONNALISÉ
+# ──────────────────────────────────────────────────────────────
+@user_passes_test(lambda u: u.is_staff)
+def admin_dashboard(request):
+    """Dashboard d'administration HooYia — remplace l'admin Django natif."""
+    from apps.users.models import CustomUser
+    from apps.cart.models import Panier
+
+    context = {
+        'users_count':  CustomUser.objects.filter(is_active=True).count(),
+        'paniers_count': Panier.objects.filter(lignes__isnull=False).distinct().count(),
+    }
+    return render(request, 'admin_dashboard.html', context)
