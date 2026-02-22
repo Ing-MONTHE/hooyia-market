@@ -1,18 +1,23 @@
 """
 HooYia Market — reviews/tests.py
-Tests unitaires et d'intégration pour l'app reviews.
+Tests pour l'app reviews.
 
 Couverture :
-  - Tests modèle Avis (création, unicité, __str__)
-  - Tests signal (recalcul note_moyenne après create/update/delete)
-  - Tests serializer (validation achat obligatoire, double avis interdit)
-  - Tests API (liste, créer, supprimer, actions admin valider/invalider)
+  - Modèle Avis (création, unicité, __str__, commentaire facultatif)
+  - Signal post_save/post_delete (recalcul note_moyenne du produit)
+  - API Avis (liste publique, créer sans achat refusé, créer après achat,
+    double avis refusé, valider admin, supprimer propriétaire/autre)
+
+Note sur creer_commande_livree :
+  On crée directement en DB (sans OrderService) pour éviter de dépendre
+  des tâches Celery dans les tests reviews.
 """
 from decimal import Decimal
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.reviews.models import Avis
 from apps.products.models import Produit, Categorie
@@ -22,49 +27,35 @@ User = get_user_model()
 
 
 # ═══════════════════════════════════════════════════════════════
-# UTILITAIRES — Création d'objets de test
+# HELPERS
 # ═══════════════════════════════════════════════════════════════
 
-def creer_utilisateur(username='testuser', email='test@test.com', password='testpass123'):
-    """
-    Crée un utilisateur de test standard.
-    is_active=True est obligatoire : SimpleJWT refuse de générer un token
-    pour un utilisateur inactif, ce qui provoquerait des 401 dans tous les tests API.
-    """
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+def creer_user(username='testuser', email='test@test.com', password='testpass123', **kwargs):
+    """Crée un utilisateur actif. is_active=True obligatoire pour JWT."""
     return User.objects.create_user(
-        username=username,
-        email=email,
-        password=password,
-        is_active=True,    # ← CRITIQUE : sans ça, JWT renvoie 401
+        username=username, email=email, password=password,
+        is_active=True, **kwargs
     )
 
 def creer_produit(nom='Produit Test', prix=10000):
-    """
-    Crée un produit de test actif avec un vendeur.
-    get_or_create sur le vendeur évite l'UniqueViolation quand plusieurs
-    tests appellent creer_produit() dans la même transaction de test.
-    """
-    # get_or_create → pas de doublon si le vendeur existe déjà dans ce test
+    """Crée un produit actif avec un vendeur dédié."""
     vendeur, _ = User.objects.get_or_create(
-        username='vendeur_test',
-        defaults={'email': 'vendeur@test.com', 'is_active': True}
+        username='vendeur_reviews',
+        defaults={'email': 'vendeur_reviews@test.com', 'is_active': True}
     )
     categorie, _ = Categorie.objects.get_or_create(nom='Catégorie Test')
     return Produit.objects.create(
-        nom=nom,
-        description='Description test',
-        prix=Decimal(str(prix)),
-        stock=10,
-        categorie=categorie,
-        statut='actif',
-        vendeur=vendeur    # ← champ manquant
+        nom=nom, description='Description',
+        prix=Decimal(str(prix)), stock=10,
+        categorie=categorie, statut='actif', vendeur=vendeur,
     )
 
 def creer_commande_livree(client, produit):
     """
-    Crée une commande LIVREE contenant le produit donné.
-    Simule qu'un client a acheté et reçu le produit.
-    On utilise django-fsm pour parcourir les transitions légitimes.
+    Crée une commande LIVREE contenant le produit.
+    Création directe en DB (sans OrderService) pour éviter les dépendances Celery.
+    On utilise les transitions FSM légitimes pour atteindre LIVREE.
     """
     commande = Commande.objects.create(
         client=client,
@@ -73,21 +64,16 @@ def creer_commande_livree(client, produit):
         adresse_livraison_adresse='1 rue test',
         adresse_livraison_ville='Yaoundé',
         adresse_livraison_region='Centre',
-        montant_total=Decimal(str(produit.prix))
+        montant_total=Decimal(str(produit.prix)),
     )
     LigneCommande.objects.create(
-        commande=commande,
-        produit=produit,
-        produit_nom=produit.nom,
-        quantite=1,
-        prix_unitaire=produit.prix
+        commande=commande, produit=produit,
+        produit_nom=produit.nom, quantite=1,
+        prix_unitaire=produit.prix,
     )
     Paiement.objects.create(
-        commande=commande,
-        mode='livraison',
-        montant=commande.montant_total
+        commande=commande, mode='livraison', montant=commande.montant_total,
     )
-    # Parcourir les transitions FSM pour atteindre LIVREE
     commande.confirmer()
     commande.mettre_en_preparation()
     commande.expedier()
@@ -95,222 +81,218 @@ def creer_commande_livree(client, produit):
     commande.save()
     return commande
 
+def get_auth_header(user):
+    """Retourne le header Authorization JWT."""
+    refresh = RefreshToken.for_user(user)
+    return f'Bearer {refresh.access_token}'
+
 
 # ═══════════════════════════════════════════════════════════════
-# TESTS MODÈLE
+# TESTS — Modèle Avis
 # ═══════════════════════════════════════════════════════════════
 
 class AvisModelTest(TestCase):
-    """Tests du modèle Avis : champs, contraintes, propriétés"""
 
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def setUp(self):
-        self.user    = creer_utilisateur()
+        self.user    = creer_user()
         self.produit = creer_produit()
 
     def test_creation_avis(self):
-        """Un avis est créé correctement avec les valeurs par défaut"""
+        """Un avis est créé avec les valeurs par défaut correctes."""
         avis = Avis.objects.create(
-            utilisateur=self.user,
-            produit=self.produit,
-            note=4,
-            commentaire="Très bon produit"
+            utilisateur=self.user, produit=self.produit,
+            note=4, commentaire='Très bon produit'
         )
         self.assertEqual(avis.note, 4)
-        self.assertEqual(avis.commentaire, "Très bon produit")
-        self.assertFalse(avis.is_validated)  # False par défaut
+        self.assertEqual(avis.commentaire, 'Très bon produit')
+        self.assertFalse(avis.is_validated)   # Non validé par défaut
 
     def test_str_avis(self):
-        """__str__ affiche le bon format"""
+        """__str__ contient username, nom produit et note/5."""
         avis = Avis.objects.create(
-            utilisateur=self.user,
-            produit=self.produit,
-            note=5
+            utilisateur=self.user, produit=self.produit, note=5
         )
         self.assertIn(self.user.username, str(avis))
         self.assertIn('5/5', str(avis))
 
+    def test_commentaire_facultatif(self):
+        """Un avis sans commentaire est valide (commentaire='' par défaut)."""
+        avis = Avis.objects.create(
+            utilisateur=self.user, produit=self.produit, note=3
+        )
+        self.assertEqual(avis.commentaire, '')
+
     def test_unicite_utilisateur_produit(self):
-        """Un utilisateur ne peut pas laisser deux avis sur le même produit"""
+        """Un utilisateur ne peut pas laisser deux avis sur le même produit."""
         from django.db import IntegrityError
         Avis.objects.create(utilisateur=self.user, produit=self.produit, note=3)
         with self.assertRaises(IntegrityError):
             Avis.objects.create(utilisateur=self.user, produit=self.produit, note=4)
 
-    def test_commentaire_facultatif(self):
-        """Un avis sans commentaire est valide"""
-        avis = Avis.objects.create(
-            utilisateur=self.user,
-            produit=self.produit,
-            note=3
-            # commentaire absent → vide par défaut
-        )
-        self.assertEqual(avis.commentaire, '')
+    def test_deux_users_peuvent_noter_meme_produit(self):
+        """Deux utilisateurs différents peuvent noter le même produit."""
+        user2 = creer_user('user2', 'u2@test.com')
+        Avis.objects.create(utilisateur=self.user,  produit=self.produit, note=4)
+        Avis.objects.create(utilisateur=user2, produit=self.produit, note=5)
+        self.assertEqual(Avis.objects.filter(produit=self.produit).count(), 2)
+
+    def test_meme_user_peut_noter_deux_produits(self):
+        """Un utilisateur peut noter deux produits différents."""
+        produit2 = creer_produit(nom='Autre Produit')
+        Avis.objects.create(utilisateur=self.user, produit=self.produit, note=4)
+        Avis.objects.create(utilisateur=self.user, produit=produit2,     note=3)
+        self.assertEqual(Avis.objects.filter(utilisateur=self.user).count(), 2)
 
 
 # ═══════════════════════════════════════════════════════════════
-# TESTS SIGNAL — Recalcul note_moyenne
+# TESTS — Signal : recalcul note_moyenne du produit
 # ═══════════════════════════════════════════════════════════════
 
 class AvisSignalTest(TestCase):
-    """Tests du signal post_save/post_delete qui recalcule note_moyenne"""
 
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def setUp(self):
-        self.user1   = creer_utilisateur('user1', 'u1@test.com')
-        self.user2   = creer_utilisateur('user2', 'u2@test.com')
+        self.user1   = creer_user('user1', 'u1@test.com')
+        self.user2   = creer_user('user2', 'u2@test.com')
         self.produit = creer_produit()
 
-    def test_note_moyenne_apres_creation_avis_validated(self):
-        """La note_moyenne du produit est recalculée après validation d'un avis"""
-        avis = Avis.objects.create(
-            utilisateur=self.user1, produit=self.produit, note=4
-        )
-        # Pas encore validé → note_moyenne reste 0
+    def test_avis_non_valide_ne_change_pas_note(self):
+        """Un avis non validé ne doit pas modifier note_moyenne."""
+        Avis.objects.create(utilisateur=self.user1, produit=self.produit, note=5)
         self.produit.refresh_from_db()
         self.assertEqual(self.produit.note_moyenne, Decimal('0.00'))
 
-        # Validation → le signal recalcule
+    def test_validation_avis_recalcule_note(self):
+        """Valider un avis recalcule note_moyenne du produit."""
+        avis = Avis.objects.create(utilisateur=self.user1, produit=self.produit, note=4)
         avis.is_validated = True
         avis.save(update_fields=['is_validated'])
         self.produit.refresh_from_db()
         self.assertEqual(self.produit.note_moyenne, Decimal('4.00'))
-        self.assertEqual(self.produit.nombre_avis, 1)
+        self.assertEqual(self.produit.nombre_avis,  1)
 
     def test_note_moyenne_plusieurs_avis(self):
-        """La moyenne est correcte avec plusieurs avis validés"""
-        avis1 = Avis.objects.create(
-            utilisateur=self.user1, produit=self.produit, note=4, is_validated=True
-        )
-        avis2 = Avis.objects.create(
-            utilisateur=self.user2, produit=self.produit, note=2, is_validated=True
-        )
+        """La note_moyenne est la moyenne de tous les avis validés."""
+        Avis.objects.create(utilisateur=self.user1, produit=self.produit, note=4, is_validated=True)
+        Avis.objects.create(utilisateur=self.user2, produit=self.produit, note=2, is_validated=True)
         self.produit.refresh_from_db()
         # (4 + 2) / 2 = 3.00
         self.assertEqual(self.produit.note_moyenne, Decimal('3.00'))
-        self.assertEqual(self.produit.nombre_avis, 2)
+        self.assertEqual(self.produit.nombre_avis,  2)
 
-    def test_note_moyenne_apres_suppression(self):
-        """La note_moyenne est mise à jour après suppression d'un avis"""
-        avis1 = Avis.objects.create(
-            utilisateur=self.user1, produit=self.produit, note=5, is_validated=True
-        )
-        avis2 = Avis.objects.create(
-            utilisateur=self.user2, produit=self.produit, note=3, is_validated=True
-        )
-        # Suppression du premier avis
+    def test_suppression_avis_recalcule_note(self):
+        """Supprimer un avis validé recalcule note_moyenne."""
+        avis1 = Avis.objects.create(utilisateur=self.user1, produit=self.produit, note=5, is_validated=True)
+        Avis.objects.create(utilisateur=self.user2, produit=self.produit, note=3, is_validated=True)
         avis1.delete()
         self.produit.refresh_from_db()
-        # Ne reste que la note 3
         self.assertEqual(self.produit.note_moyenne, Decimal('3.00'))
-        self.assertEqual(self.produit.nombre_avis, 1)
+        self.assertEqual(self.produit.nombre_avis,  1)
 
-    def test_note_moyenne_zero_si_aucun_avis_validated(self):
-        """note_moyenne revient à 0 si tous les avis sont invalidés"""
-        avis = Avis.objects.create(
-            utilisateur=self.user1, produit=self.produit, note=5, is_validated=True
-        )
+    def test_invalidation_avis_recalcule_note(self):
+        """Invalider un avis validé retire sa contribution à la note."""
+        avis = Avis.objects.create(utilisateur=self.user1, produit=self.produit, note=5, is_validated=True)
         self.produit.refresh_from_db()
         self.assertEqual(self.produit.note_moyenne, Decimal('5.00'))
 
-        # Invalidation → note_moyenne revient à 0
         avis.is_validated = False
         avis.save(update_fields=['is_validated'])
+        self.produit.refresh_from_db()
+        self.assertEqual(self.produit.note_moyenne, Decimal('0.00'))
+        self.assertEqual(self.produit.nombre_avis,  0)
+
+    def test_note_zero_si_aucun_avis_valide(self):
+        """note_moyenne est 0 si aucun avis validé."""
         self.produit.refresh_from_db()
         self.assertEqual(self.produit.note_moyenne, Decimal('0.00'))
 
 
 # ═══════════════════════════════════════════════════════════════
-# TESTS API
+# TESTS — API Avis
 # ═══════════════════════════════════════════════════════════════
 
 class AvisAPITest(APITestCase):
-    """Tests des endpoints API des avis"""
 
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def setUp(self):
-        self.user    = creer_utilisateur()
-        # create_superuser force is_active=True par défaut dans Django
-        self.admin   = User.objects.create_superuser(username='admin', email='admin@test.com', password='admin123')
+        self.user    = creer_user()
+        self.admin   = User.objects.create_superuser(
+            username='admin', email='admin@test.com', password='admin123'
+        )
         self.produit = creer_produit()
-
-        # Authentification JWT
-        from rest_framework_simplejwt.tokens import RefreshToken
-        refresh = RefreshToken.for_user(self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        self.client.credentials(HTTP_AUTHORIZATION=get_auth_header(self.user))
 
     def _auth_admin(self):
-        from rest_framework_simplejwt.tokens import RefreshToken
-        refresh = RefreshToken.for_user(self.admin)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        self.client.credentials(HTTP_AUTHORIZATION=get_auth_header(self.admin))
 
-    def test_liste_avis_publique(self):
-        """GET /api/avis/ est accessible sans authentification"""
-        Avis.objects.create(
-            utilisateur=self.user, produit=self.produit, note=4, is_validated=True
-        )
-        self.client.credentials()  # Supprime l'auth
+    # ── Lecture ───────────────────────────────────────────────
+
+    def test_liste_avis_accessible_sans_auth(self):
+        """GET /api/avis/ est accessible sans authentification."""
+        Avis.objects.create(utilisateur=self.user, produit=self.produit, note=4, is_validated=True)
+        self.client.credentials()
         response = self.client.get('/api/avis/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_liste_avis_filtre_par_produit(self):
-        """GET /api/avis/?produit=<id> filtre les avis d'un produit"""
-        # Deux produits distincts avec des vendeurs distincts pour éviter UniqueViolation
-        autre_user_vendeur = User.objects.create_user(
-            username='vendeur2', email='vendeur2@test.com', password='pass', is_active=True
+        """GET /api/avis/?produit=<id> retourne seulement les avis de ce produit."""
+        vendeur2, _ = User.objects.get_or_create(
+            username='vendeur2', defaults={'email': 'v2@test.com', 'is_active': True}
         )
         categorie, _ = Categorie.objects.get_or_create(nom='Catégorie Test')
-        from decimal import Decimal
         autre_produit = Produit.objects.create(
-            nom='Autre produit', description='desc', prix=Decimal('5000'),
-            stock=5, categorie=categorie, statut='actif', vendeur=autre_user_vendeur
+            nom='Autre', description='desc', prix=Decimal('5000'),
+            stock=5, categorie=categorie, statut='actif', vendeur=vendeur2
         )
+        autre_user = creer_user('autre', 'autre@test.com')
 
-        # Un avis validé sur chaque produit
-        # Note : l'utilisateur ne peut pas avoir deux avis sur le MÊME produit (unique_together)
-        # Ici on crée un avis sur self.produit et un sur autre_produit → pas de conflit
-        Avis.objects.create(
-            utilisateur=self.user, produit=self.produit, note=4, is_validated=True
-        )
-        # Pour l'autre produit, on utilise un utilisateur différent car self.user
-        # n'a pas de commande LIVREE sur autre_produit (et unique_together s'applique par user+produit)
-        autre_user = User.objects.create_user(
-            username='autreuser2', email='autreuser2@test.com', password='pass', is_active=True
-        )
-        Avis.objects.create(
-            utilisateur=autre_user, produit=autre_produit, note=5, is_validated=True
-        )
+        Avis.objects.create(utilisateur=self.user,  produit=self.produit,  note=4, is_validated=True)
+        Avis.objects.create(utilisateur=autre_user, produit=autre_produit, note=5, is_validated=True)
 
         response = self.client.get(f'/api/avis/?produit={self.produit.id}')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # La pagination DRF retourne un dict avec 'results' et 'count'
         self.assertEqual(response.data['count'], 1)
 
+    # ── Création ──────────────────────────────────────────────
+
     def test_creer_avis_sans_achat_refuse(self):
-        """POST /api/avis/ est refusé si l'utilisateur n'a pas acheté le produit"""
-        data = {'produit': self.produit.id, 'note': 5, 'commentaire': 'Super'}
-        response = self.client.post('/api/avis/', data)
+        """POST /api/avis/ est refusé si l'utilisateur n'a pas acheté le produit → 400."""
+        response = self.client.post('/api/avis/', {
+            'produit': self.produit.id, 'note': 5, 'commentaire': 'Super'
+        })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_creer_avis_apres_achat(self):
-        """POST /api/avis/ est accepté si l'utilisateur a une commande LIVREE"""
+    def test_creer_avis_apres_achat_accepte(self):
+        """POST /api/avis/ est accepté si l'utilisateur a une commande LIVREE."""
         creer_commande_livree(self.user, self.produit)
-        data = {'produit': self.produit.id, 'note': 5, 'commentaire': 'Excellent !'}
-        response = self.client.post('/api/avis/', data)
+        response = self.client.post('/api/avis/', {
+            'produit': self.produit.id, 'note': 5, 'commentaire': 'Excellent !'
+        })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_double_avis_refuse(self):
-        """POST /api/avis/ est refusé si l'utilisateur a déjà noté le produit"""
+        """POST /api/avis/ est refusé si l'utilisateur a déjà noté le produit → 400."""
         creer_commande_livree(self.user, self.produit)
         Avis.objects.create(utilisateur=self.user, produit=self.produit, note=3)
-        data = {'produit': self.produit.id, 'note': 5}
-        response = self.client.post('/api/avis/', data)
+        response = self.client.post('/api/avis/', {
+            'produit': self.produit.id, 'note': 5
+        })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_avis_non_authentifie_refuse(self):
+        """POST /api/avis/ sans token → 401."""
+        self.client.credentials()
+        response = self.client.post('/api/avis/', {
+            'produit': self.produit.id, 'note': 4
+        })
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    # ── Actions admin ─────────────────────────────────────────
+
     def test_valider_avis_admin(self):
-        """POST /api/avis/<id>/valider/ fonctionne pour un admin"""
-        # L'admin voit TOUS les avis (validés ou non) via get_queryset()
-        # Donc on peut créer un avis non validé et l'admin le trouvera
-        avis = Avis.objects.create(
-            utilisateur=self.user, produit=self.produit, note=4
-        )
+        """POST /api/avis/<id>/valider/ fonctionne pour un admin → 200."""
+        avis = Avis.objects.create(utilisateur=self.user, produit=self.produit, note=4)
         self._auth_admin()
         response = self.client.post(f'/api/avis/{avis.id}/valider/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -318,33 +300,25 @@ class AvisAPITest(APITestCase):
         self.assertTrue(avis.is_validated)
 
     def test_valider_avis_non_admin_refuse(self):
-        """POST /api/avis/<id>/valider/ est refusé pour un utilisateur normal"""
-        # L'utilisateur voit ses propres avis (validés ou non) via get_queryset()
-        # Donc l'avis non validé est trouvé (200/403) mais l'action est refusée
-        avis = Avis.objects.create(
-            utilisateur=self.user, produit=self.produit, note=4
-        )
+        """POST /api/avis/<id>/valider/ refusé pour un utilisateur normal → 403."""
+        avis = Avis.objects.create(utilisateur=self.user, produit=self.produit, note=4)
         response = self.client.post(f'/api/avis/{avis.id}/valider/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    # ── Suppression ───────────────────────────────────────────
+
     def test_supprimer_son_avis(self):
-        """DELETE /api/avis/<id>/ fonctionne pour le propriétaire de l'avis"""
-        # L'utilisateur voit ses propres avis (même non validés) via get_queryset()
-        avis = Avis.objects.create(
-            utilisateur=self.user, produit=self.produit, note=3
-        )
+        """DELETE /api/avis/<id>/ fonctionne pour le propriétaire → 204."""
+        avis = Avis.objects.create(utilisateur=self.user, produit=self.produit, note=3)
         response = self.client.delete(f'/api/avis/{avis.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Avis.objects.filter(id=avis.id).exists())
 
-    def test_supprimer_avis_autre_utilisateur_refuse(self):
-        """DELETE /api/avis/<id>/ est refusé si l'avis appartient à un autre utilisateur"""
-        autre_user = creer_utilisateur('autre', 'autre@test.com')
-        # L'avis doit être is_validated=True pour être visible par self.user dans le queryset
-        # (self.user ne voit que ses propres avis + les avis validés des autres)
+    def test_supprimer_avis_autre_refuse(self):
+        """DELETE /api/avis/<id>/ refusé si l'avis appartient à un autre → 403."""
+        autre_user = creer_user('autre2', 'autre2@test.com')
         avis = Avis.objects.create(
             utilisateur=autre_user, produit=self.produit, note=5, is_validated=True
         )
-        # self.user tente de supprimer l'avis d'un autre → 403
         response = self.client.delete(f'/api/avis/{avis.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

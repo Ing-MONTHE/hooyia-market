@@ -17,3 +17,4 @@ class ReviewsConfig(AppConfig):
         Sans cet import, les signals ne se déclenchent jamais —
         Django ne les "découvre" pas automatiquement.
         """
+        import apps.users.signals

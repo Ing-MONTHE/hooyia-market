@@ -13,4 +13,4 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         # Importe les signals → Django les enregistre au démarrage
-        pass
+        import apps.users.signals
