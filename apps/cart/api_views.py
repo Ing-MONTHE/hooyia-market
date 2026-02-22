@@ -217,3 +217,32 @@ class ViderPanierAPIView(APIView):
             {'message': 'Panier vidé avec succès.'},
             status=status.HTTP_200_OK
         )
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API ADMIN — Liste tous les paniers actifs
+# GET /api/panier/admin/ → réservé aux admins
+# ═══════════════════════════════════════════════════════════════
+
+class PaniersAdminAPIView(APIView):
+    """Liste tous les paniers avec articles — admin seulement."""
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        from apps.cart.models import Panier
+        paniers = Panier.objects.filter(
+            items__isnull=False
+        ).distinct().select_related('utilisateur').prefetch_related('items__produit')
+
+        data = []
+        for p in paniers:
+            items = p.items.all()
+            total = sum(i.prix_snapshot * i.quantite for i in items)
+            data.append({
+                'id': p.id,
+                'utilisateur': p.utilisateur.username if p.utilisateur else '—',
+                'utilisateur_email': p.utilisateur.email if p.utilisateur else '—',
+                'nb_articles': sum(i.quantite for i in items),
+                'montant_total': float(total),
+                'date_modification': p.date_modification.isoformat() if p.date_modification else None,
+            })
+        return Response(data)

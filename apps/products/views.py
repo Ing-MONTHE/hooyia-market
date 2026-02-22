@@ -254,6 +254,81 @@ def supprimer_produit(request, produit_id):
     return redirect('products:detail', slug=produit.slug)
 
 # ──────────────────────────────────────────────────────────────
+# GESTION DES CATÉGORIES (admin uniquement)
+# ──────────────────────────────────────────────────────────────
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
+def gestion_categories(request):
+    """Liste + formulaire d'ajout/modification de catégories."""
+    categories_racines = Categorie.objects.filter(parent=None, est_active=True)
+    toutes_categories = Categorie.objects.filter(est_active=True)
+
+    modifier_id = request.GET.get('modifier')
+    categorie_edit = None
+    if modifier_id:
+        categorie_edit = get_object_or_404(Categorie, id=modifier_id)
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'creer')
+        nom = request.POST.get('nom', '').strip()
+        description = request.POST.get('description', '').strip()
+        parent_id = request.POST.get('parent') or None
+        est_active = 'est_active' in request.POST
+
+        if not nom:
+            messages.error(request, "Le nom est obligatoire.")
+        else:
+            try:
+                if action == 'modifier' and request.POST.get('categorie_id'):
+                    cat = get_object_or_404(Categorie, id=request.POST.get('categorie_id'))
+                    cat.nom = nom
+                    cat.description = description
+                    cat.parent_id = parent_id
+                    cat.est_active = est_active
+                    if 'image' in request.FILES:
+                        cat.image = request.FILES['image']
+                    cat.save()
+                    cache.delete('categories_api')
+                    cache.delete('categories_racines')
+                    messages.success(request, f"Catégorie « {cat.nom} » modifiée avec succès !")
+                else:
+                    cat = Categorie.objects.create(
+                        nom=nom,
+                        description=description,
+                        parent_id=parent_id,
+                        est_active=est_active,
+                    )
+                    if 'image' in request.FILES:
+                        cat.image = request.FILES['image']
+                        cat.save()
+                    cache.delete('categories_api')
+                    cache.delete('categories_racines')
+                    messages.success(request, f"Catégorie « {cat.nom} » créée avec succès !")
+                return redirect('products:gestion_categories')
+            except Exception as e:
+                messages.error(request, f"Erreur : {str(e)}")
+
+    return render(request, 'products/gestion_categories.html', {
+        'categories_racines': categories_racines,
+        'toutes_categories': toutes_categories,
+        'categorie_edit': categorie_edit,
+    })
+
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
+def supprimer_categorie(request, cat_id):
+    """Suppression (désactivation) d'une catégorie."""
+    cat = get_object_or_404(Categorie, id=cat_id)
+    nom = cat.nom
+    cat.est_active = False
+    cat.save()
+    cache.delete('categories_api')
+    cache.delete('categories_racines')
+    messages.success(request, f"Catégorie « {nom} » supprimée.")
+    return redirect('products:gestion_categories')
+
+
+# ──────────────────────────────────────────────────────────────
 # DASHBOARD ADMIN PERSONNALISÉ
 # ──────────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_staff)
@@ -264,6 +339,6 @@ def admin_dashboard(request):
 
     context = {
         'users_count':  CustomUser.objects.filter(is_active=True).count(),
-        'paniers_count': Panier.objects.filter(lignes__isnull=False).distinct().count(),
+        'paniers_count': Panier.objects.filter(items__isnull=False).distinct().count(),
     }
     return render(request, 'admin_dashboard.html', context)

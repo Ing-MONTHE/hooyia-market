@@ -30,4 +30,8 @@ urlpatterns = [
     # ── Adresses ─────────────────────────────────────────────
     path('adresses/',          api_views.AdresseListeAPIView.as_view(),    name='api_adresses'),
     path('adresses/<int:pk>/', api_views.AdresseDetailAPIView.as_view(),   name='api_adresse_detail'),
+
+    # ── Admin ────────────────────────────────────────────────
+    path('utilisateurs/',             api_views.ListeUtilisateursAdminAPIView.as_view(), name='api_liste_users'),
+    path('utilisateurs/<int:pk>/toggle_actif/', api_views.ToggleUtilisateurAPIView.as_view(), name='api_toggle_user'),
 ]

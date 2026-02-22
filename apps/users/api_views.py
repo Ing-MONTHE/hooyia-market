@@ -169,3 +169,49 @@ class AdresseDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         # Sécurité : on ne peut accéder qu'à ses propres adresses
         return AdresseLivraison.objects.filter(utilisateur=self.request.user)
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API ADMIN — Liste tous les utilisateurs
+# GET  /api/auth/utilisateurs/        → liste (admin seulement)
+# POST /api/auth/utilisateurs/<id>/toggle_actif/ → activer/désactiver
+# ═══════════════════════════════════════════════════════════════
+
+class ListeUtilisateursAdminAPIView(generics.ListAPIView):
+    """Liste tous les utilisateurs — réservée aux admins."""
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        from apps.users.models import CustomUser
+        return CustomUser.objects.all().order_by('-date_inscription')
+
+    def list(self, request, *args, **kwargs):
+        from apps.users.models import CustomUser
+        users = CustomUser.objects.all().order_by('-date_inscription')
+        data = [{
+            'id': u.id,
+            'nom': u.nom,
+            'prenom': u.prenom,
+            'username': u.username,
+            'email': u.email,
+            'telephone': u.telephone or '',
+            'is_active': u.is_active,
+            'is_staff': u.is_staff,
+            'email_verifie': u.email_verifie,
+            'date_inscription': u.date_inscription.isoformat() if u.date_inscription else None,
+        } for u in users]
+        return Response(data)
+
+
+class ToggleUtilisateurAPIView(APIView):
+    """Activer ou désactiver un compte utilisateur — admin seulement."""
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        from apps.users.models import CustomUser
+        try:
+            user = CustomUser.objects.get(pk=pk)
+            user.is_active = not user.is_active
+            user.save(update_fields=['is_active'])
+            return Response({'status': 'ok', 'is_active': user.is_active})
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'Utilisateur introuvable'}, status=404)

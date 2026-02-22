@@ -365,7 +365,7 @@ body { background: var(--bg) !important; }
     </div>
 
     <div class="da-sb-footer">
-      <a href="/admin/">⚙️ &nbsp;Django Admin</a>
+      
       <a href="{% url 'products:accueil' %}">🏠 &nbsp;Retour au site</a>
     </div>
   </aside>
@@ -433,16 +433,16 @@ body { background: var(--bg) !important; }
             <a href="{% url 'products:ajouter' %}" class="qa or">
               <span class="qa-ico">➕</span> Ajouter un produit
             </a>
-            <a href="/admin/orders/commande/?statut__exact=en_attente" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=commandes]'))" class="qa bl">
               <span class="qa-ico">🛒</span> Commandes en attente
             </a>
-            <a href="/admin/reviews/avis/?is_validated__exact=0" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=avis]'))" class="qa bl">
               <span class="qa-ico">⭐</span> Avis à modérer
             </a>
             <button class="qa gr" onclick="nav(document.querySelector('[data-section=stocks]'))">
               <span class="qa-ico">⚠️</span> Vérifier les stocks
             </button>
-            <a href="/admin/users/customuser/" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=utilisateurs]'))" class="qa bl">
               <span class="qa-ico">👤</span> Gérer utilisateurs
             </a>
           </div>
@@ -454,7 +454,7 @@ body { background: var(--bg) !important; }
         <div class="da-card">
           <div class="da-card-hd">
             <h3>⚠️ Alertes stocks</h3>
-            <a href="/admin/products/produit/">Gérer →</a>
+            <a href="/produits/">Gérer →</a>
           </div>
           <div id="ov-stocks"><div class="da-loading">Chargement…</div></div>
         </div>
@@ -494,7 +494,7 @@ body { background: var(--bg) !important; }
         <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Tous les produits</h3><a href="/admin/products/produit/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Tous les produits</h3><a href="/produits/ajouter/">Ajouter →</a></div>
         <table class="da-table">
           <thead><tr><th>Produit</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th></th></tr></thead>
           <tbody id="tbl-produits"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
@@ -506,10 +506,10 @@ body { background: var(--bg) !important; }
     <div id="sec-categories" class="da-section">
       <div class="da-ph">
         <div><h1>Catégories</h1><div class="da-ph-sub">Arborescence du catalogue</div></div>
-        <a href="/admin/products/categorie/add/" class="da-btn-primary">＋ Ajouter</a>
+        <a href="/administration/categories/" class="da-btn-primary">＋ Ajouter</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Toutes les catégories</h3><a href="/admin/products/categorie/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Toutes les catégories</h3><a href="/administration/categories/">Gérer →</a></div>
         <table class="da-table">
           <thead><tr><th>Nom</th><th>Slug</th><th>Niveau</th><th>Produits</th></tr></thead>
           <tbody id="tbl-categories"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
@@ -521,26 +521,54 @@ body { background: var(--bg) !important; }
     <div id="sec-stocks" class="da-section">
       <div class="da-ph">
         <div><h1>Stocks</h1><div class="da-ph-sub">Produits sous seuil d'alerte</div></div>
+        <a href="/produits/ajouter/" class="da-btn-primary">＋ Nouveau produit</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Alertes stock faible</h3><a href="/admin/products/mouvementstock/">Mouvements →</a></div>
+        <div class="da-card-hd"><h3>Alertes stock faible</h3><span style="font-size:11.5px;color:#94a3b8;">Cliquez sur "Réappro" pour ajuster le stock</span></div>
         <table class="da-table">
-          <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock</th><th>Seuil</th><th>Niveau</th><th></th></tr></thead>
+          <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock actuel</th><th>Seuil</th><th>Niveau</th><th>Action</th></tr></thead>
           <tbody id="tbl-stocks"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- MODAL RÉAPPROVISIONNEMENT STOCK -->
+    <div id="modal-stock" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:white;border-radius:14px;padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <div style="font-size:16px;font-weight:700;color:#0D1F5C;margin-bottom:4px;" id="modal-stock-nom">Ajustement stock</div>
+        <div style="font-size:12px;color:#94a3b8;margin-bottom:20px;">Stock actuel : <strong id="modal-stock-current">—</strong></div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;font-weight:700;color:#0D1F5C;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Type de mouvement</label>
+          <select id="modal-stock-type" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #e2e8f8;font-size:13px;font-family:'DM Sans',sans-serif;">
+            <option value="entree">📥 Entrée (réapprovisionnement)</option>
+            <option value="sortie">📤 Sortie (retrait)</option>
+            <option value="ajustement">🔧 Ajustement (valeur exacte)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;font-weight:700;color:#0D1F5C;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Quantité</label>
+          <input type="number" id="modal-stock-qty" min="1" value="10" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #e2e8f8;font-size:13px;font-family:'DM Sans',sans-serif;box-sizing:border-box;" />
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="font-size:11px;font-weight:700;color:#0D1F5C;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;">Note (optionnel)</label>
+          <input type="text" id="modal-stock-note" placeholder="Ex: Livraison fournisseur, retour client…" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #e2e8f8;font-size:13px;font-family:'DM Sans',sans-serif;box-sizing:border-box;" />
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="closeStockModal()" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e2e8f8;background:white;font-weight:600;font-size:13px;cursor:pointer;">Annuler</button>
+          <button onclick="submitStock()" style="flex:1;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#F97316,#ea6000);color:white;font-weight:600;font-size:13px;cursor:pointer;">✓ Valider</button>
+        </div>
       </div>
     </div>
 
     <!-- ──────── COMMANDES ──────── -->
     <div id="sec-commandes" class="da-section">
       <div class="da-ph">
-        <div><h1>Commandes</h1><div class="da-ph-sub">Suivi des commandes clients</div></div>
-        <a href="/admin/orders/commande/" class="da-btn-primary">Admin Django →</a>
+        <div><h1>Commandes</h1><div class="da-ph-sub">Suivi et gestion des commandes clients</div></div>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Toutes les commandes</h3></div>
+        <div class="da-card-hd"><h3>Toutes les commandes</h3><span style="font-size:11.5px;color:#94a3b8;">Cliquez sur une action pour changer le statut</span></div>
         <table class="da-table">
-          <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Paiement</th></tr></thead>
+          <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
           <tbody id="tbl-commandes"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
       </div>
@@ -550,39 +578,36 @@ body { background: var(--bg) !important; }
     <div id="sec-avis" class="da-section">
       <div class="da-ph">
         <div><h1>Avis clients</h1><div class="da-ph-sub">Modération des avis</div></div>
-        <a href="/admin/reviews/avis/" class="da-btn-primary">Admin Django →</a>
       </div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Tous les avis</h3></div>
+        <div class="da-card-hd"><h3>Tous les avis</h3><span style="font-size:11.5px;color:#94a3b8;">Valider ou supprimer les avis depuis ce tableau</span></div>
         <table class="da-table">
-          <thead><tr><th>Produit</th><th>Client</th><th>Note</th><th>Commentaire</th><th>Statut</th></tr></thead>
-          <tbody id="tbl-avis"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+          <thead><tr><th>Produit</th><th>Client</th><th>Note</th><th>Commentaire</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="tbl-avis"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
       </div>
     </div>
 
     <!-- ──────── PANIERS ──────── -->
     <div id="sec-paniers" class="da-section">
-      <div class="da-ph"><div><h1>Paniers actifs</h1><div class="da-ph-sub">Paniers non finalisés</div></div></div>
+      <div class="da-ph"><div><h1>Paniers actifs</h1><div class="da-ph-sub">Paniers non finalisés par les clients</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Paniers en cours</h3><a href="/admin/cart/panier/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Paniers en cours</h3></div>
         <table class="da-table">
-          <thead><tr><th>Utilisateur</th><th>Articles</th><th>Montant estimé</th><th>Dernière activité</th></tr></thead>
-          <tbody id="tbl-paniers"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
+          <thead><tr><th>Utilisateur</th><th>Email</th><th>Articles</th><th>Montant estimé</th><th>Dernière activité</th></tr></thead>
+          <tbody id="tbl-paniers"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
         </table>
       </div>
     </div>
 
     <!-- ──────── UTILISATEURS ──────── -->
     <div id="sec-utilisateurs" class="da-section">
-      <div class="da-ph"><div><h1>Utilisateurs</h1><div class="da-ph-sub">Gestion des comptes</div></div>
-        <a href="/admin/users/customuser/" class="da-btn-primary">Admin Django →</a>
-      </div>
+      <div class="da-ph"><div><h1>Utilisateurs</h1><div class="da-ph-sub">Gestion des comptes clients</div></div></div>
       <div class="da-card">
         <div class="da-card-hd"><h3>Tous les comptes</h3></div>
         <table class="da-table">
-          <thead><tr><th>Nom</th><th>Email</th><th>Inscription</th><th>Email vérifié</th><th>Statut</th></tr></thead>
-          <tbody id="tbl-users"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
+          <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Inscription</th><th>Email vérifié</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody id="tbl-users"><tr><td colspan="7" class="da-loading">Chargement…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -591,7 +616,7 @@ body { background: var(--bg) !important; }
     <div id="sec-messages" class="da-section">
       <div class="da-ph"><div><h1>Conversations</h1><div class="da-ph-sub">Messages entre utilisateurs</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Toutes les conversations</h3><a href="/admin/chat/conversation/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Toutes les conversations</h3><a href="#" onclick="nav(document.querySelector('[data-section=messages]'))"></span></div>
         <table class="da-table">
           <thead><tr><th>Participants</th><th>Dernier message</th><th>Messages non lus</th><th>Date</th></tr></thead>
           <tbody id="tbl-messages"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
@@ -603,7 +628,7 @@ body { background: var(--bg) !important; }
     <div id="sec-notifications" class="da-section">
       <div class="da-ph"><div><h1>Notifications</h1><div class="da-ph-sub">Historique des notifications</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Notifications récentes</h3><a href="/admin/notifications/notification/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Notifications récentes</h3><a href="#" onclick="nav(document.querySelector('[data-section=notifications]'))"></span></div>
         <table class="da-table">
           <thead><tr><th>Type</th><th>Destinataire</th><th>Titre</th><th>Date</th><th>Lu</th></tr></thead>
           <tbody id="tbl-notifs"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
@@ -615,7 +640,7 @@ body { background: var(--bg) !important; }
     <div id="sec-audit" class="da-section">
       <div class="da-ph"><div><h1>Journal d'audit</h1><div class="da-ph-sub">Traçabilité des actions</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Activité du système</h3><a href="/admin/audit/auditlog/">Admin Django →</a></div>
+        <div class="da-card-hd"><h3>Activité du système</h3><a href="#" onclick="nav(document.querySelector('[data-section=audit]'))"></span></div>
         <div id="tbl-audit"><div class="da-loading">Chargement…</div></div>
       </div>
     </div>
@@ -716,7 +741,7 @@ async function loadOverview() {
 
   /* Stocks faibles */
   if (!stockFaible.length) {
-    $('ov-stocks').innerHTML = '<div style="padding:20px;text-align:center;color:var(--green);font-size:13px;font-weight:600;">✓ Tous les stocks sont suffisants</div>';
+    $('ov-stocks').innerHTML = '<div style="padding:20px;text-align:center;color:var(--green);font-size:13px;font-weight:600;">Aucun produit en stock pour le moment</div>';
   } else {
     $('ov-stocks').innerHTML = stockFaible.slice(0,6).map(p => {
       const pct = Math.min(100, Math.round(p.stock/Math.max((p.stock_minimum||5)*2,1)*100));
@@ -800,45 +825,55 @@ async function loadSection(name) {
         <td style="font-family:'DM Mono',monospace;font-weight:700;color:${col};">${p.stock}</td>
         <td style="color:#94a3b8;">${p.stock_minimum||5}</td>
         <td><div style="display:flex;align-items:center;gap:8px;"><div class="sk-bar-bg" style="width:80px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div><span style="font-size:11px;color:${col};font-weight:700;">${pct}%</span></div></td>
-        <td><a href="/produits/modifier/${p.id}/" style="font-size:11.5px;color:var(--blue-l);text-decoration:none;font-weight:600;">Réappro →</a></td>
+        <td><button onclick="openStockModal(${p.id},'${p.nom.replace(/'/g,"\\'")}',${p.stock})" style="padding:4px 10px;border-radius:6px;border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--blue-l);font-size:11.5px;font-weight:600;cursor:pointer;">📦 Réappro</button></td>
       </tr>`;
-    }).join('') : `<tr><td colspan="6" class="da-empty" style="color:var(--green);">✓ Tous les stocks sont suffisants</td></tr>`;
+    }).join('') : `<tr><td colspan="6" class="da-empty">✓ Aucun produit sous le seuil d\'alerte</td></tr>`;
   }
 
   if (name === 'commandes') {
     const d = await apiFetch('/api/commandes/');
+    const nextStatut = {en_attente:'confirmer',confirmee:'mettre_en_preparation',en_preparation:'expedier',expediee:'livrer'};
+    const nextLabel  = {en_attente:'✓ Confirmer',confirmee:'🔧 Préparer',en_preparation:'🚚 Expédier',expediee:'📬 Livrer'};
     $('tbl-commandes').innerHTML = d.length ? d.map(c=>`<tr>
       <td>${mono('#'+(c.reference_courte||String(c.id).slice(-6)))}</td>
       <td>${bold(c.client_nom||c.client||'—')}</td>
       <td>${mono(fmtPrice(c.montant_total))}</td>
       <td>${mono(fmtDate(c.date_creation))}</td>
       <td>${statut(c.statut)}</td>
-      <td>${c.paiement_statut==='paye'?'<span class="st st-done">Payé</span>':'<span class="st st-pend">En attente</span>'}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap;">
+        ${nextStatut[c.statut]?`<button onclick="changerStatutCommande(${c.id},'${nextStatut[c.statut]}',this)" style="padding:4px 8px;border-radius:5px;border:none;background:var(--blue);color:white;font-size:11px;font-weight:600;cursor:pointer;">${nextLabel[c.statut]}</button>`:''}
+        ${c.statut!=='livree'&&c.statut!=='annulee'?`<button onclick="annulerCommande(${c.id},this)" style="padding:4px 8px;border-radius:5px;border:1.5px solid #fecaca;background:#fff5f5;color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">✕ Annuler</button>`:'<span style="color:#94a3b8;font-size:11px;">—</span>'}
+      </td>
     </tr>`).join('') : empty(6);
   }
 
   if (name === 'avis') {
-    const d = await apiFetch('/api/avis/');
+    const d = await apiFetch('/api/avis/?all=1');
     $('tbl-avis').innerHTML = d.length ? d.map(a=>`<tr>
       <td>${bold(a.produit_nom||'—')}</td>
       <td>${a.auteur||'—'}</td>
       <td style="color:var(--yellow);letter-spacing:1px;">${stars(a.note)}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;">${a.commentaire||'—'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b;">${a.commentaire||'—'}</td>
       <td>${a.is_validated?'<span class="st st-valid">Validé</span>':'<span class="st st-pend">À valider</span>'}</td>
-    </tr>`).join('') : empty(5);
+      <td style="display:flex;gap:4px;">
+        ${!a.is_validated?`<button onclick="validerAvis(${a.id},true,this)" style="padding:4px 8px;border-radius:5px;border:none;background:var(--green);color:white;font-size:11px;font-weight:600;cursor:pointer;">✓ Valider</button>`:`<button onclick="validerAvis(${a.id},false,this)" style="padding:4px 8px;border-radius:5px;border:1.5px solid #d1d5e8;background:white;color:#64748b;font-size:11px;cursor:pointer;">↩ Invalider</button>`}
+        <button onclick="supprimerAvis(${a.id},this)" style="padding:4px 8px;border-radius:5px;border:1.5px solid #fecaca;background:#fff5f5;color:var(--red);font-size:11px;cursor:pointer;">🗑</button>
+      </td>
+    </tr>`).join('') : empty(6);
   }
 
   if (name === 'paniers') {
-    const d = await apiFetch('/api/panier/');
+    const d = await apiFetch('/api/panier/admin/');
     if (Array.isArray(d) && d.length) {
       $('tbl-paniers').innerHTML = d.map(p=>`<tr>
-        <td>${bold(p.utilisateur||p.user||'—')}</td>
-        <td>${p.nb_articles||p.lignes?.length||'—'} article(s)</td>
-        <td>${mono(fmtPrice(p.montant_total||p.total||0))}</td>
-        <td>${mono(fmtDate(p.date_modification||p.updated_at||new Date()))}</td>
+        <td>${bold(p.utilisateur||'—')}</td>
+        <td style="color:#64748b;font-size:12px;">${p.utilisateur_email||'—'}</td>
+        <td>${p.nb_articles||0} article(s)</td>
+        <td>${mono(fmtPrice(p.montant_total||0))}</td>
+        <td>${mono(fmtDate(p.date_modification||new Date()))}</td>
       </tr>`).join('');
     } else {
-      $('tbl-paniers').innerHTML = empty(4,'Aucun panier actif ou données non disponibles via API');
+      $('tbl-paniers').innerHTML = empty(5,'Aucun panier actif pour le moment');
     }
   }
 
@@ -846,14 +881,16 @@ async function loadSection(name) {
     try {
       const d = await apiFetch('/api/auth/utilisateurs/');
       $('tbl-users').innerHTML = d.length ? d.map(u=>`<tr>
-        <td>${bold((u.prenom||'')+' '+(u.nom||''))}</td>
+        <td>${bold((u.prenom||'')+' '+(u.nom||u.username||''))}</td>
         <td>${mono(u.email)}</td>
-        <td>${mono(fmtDate(u.date_inscription||u.date_joined||new Date()))}</td>
+        <td style="color:#64748b;">${u.telephone||'—'}</td>
+        <td>${mono(fmtDate(u.date_inscription||new Date()))}</td>
         <td>${u.email_verifie?'<span class="st st-done">✓ Vérifié</span>':'<span class="st st-pend">Non vérifié</span>'}</td>
         <td>${u.is_active?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
-      </tr>`).join('') : empty(5);
+        <td><button onclick="toggleUser(${u.id},${u.is_active},this)" style="padding:4px 10px;border-radius:5px;border:1.5px solid ${u.is_active?'#fecaca':'#d1fae5'};background:${u.is_active?'#fff5f5':'#f0fdf4'};color:${u.is_active?'var(--red)':'var(--green)'};font-size:11px;font-weight:600;cursor:pointer;">${u.is_active?'🚫 Désactiver':'✓ Activer'}</button></td>
+      </tr>`).join('') : empty(7);
     } catch {
-      $('tbl-users').innerHTML = `<tr><td colspan="5" class="da-empty">Accès via <a href="/admin/users/customuser/" style="color:var(--blue-l);">Django Admin</a></td></tr>`;
+      $('tbl-users').innerHTML = `<tr><td colspan="7" class="da-empty">Aucun utilisateur trouvé</td></tr>`;
     }
   }
 
@@ -899,5 +936,122 @@ document.addEventListener('DOMContentLoaded', () => {
   loaded.add('overview');
   loadOverview();
 });
+
+/* ─── ACTIONS ADMIN ─── */
+
+// Variables modal stock
+let stockProduitId = null;
+
+function openStockModal(produitId, nom, stockActuel) {
+  stockProduitId = produitId;
+  document.getElementById('modal-stock-nom').textContent = '📦 ' + nom;
+  document.getElementById('modal-stock-current').textContent = stockActuel + ' unités';
+  document.getElementById('modal-stock-qty').value = 10;
+  document.getElementById('modal-stock-note').value = '';
+  document.getElementById('modal-stock').style.display = 'flex';
+}
+
+function closeStockModal() {
+  document.getElementById('modal-stock').style.display = 'none';
+  stockProduitId = null;
+}
+
+async function submitStock() {
+  if (!stockProduitId) return;
+  const type_mouvement = document.getElementById('modal-stock-type').value;
+  const quantite = parseInt(document.getElementById('modal-stock-qty').value);
+  const note = document.getElementById('modal-stock-note').value;
+  if (!quantite || quantite <= 0) { alert('Quantité invalide'); return; }
+  try {
+    await API.post(`/api/produits/${stockProduitId}/gerer_stock/`, { type_mouvement, quantite, note });
+    closeStockModal();
+    // Rafraîchir la section stocks
+    loaded.delete('stocks');
+    loadSection('stocks');
+    showToast('Stock mis à jour avec succès', 'success');
+  } catch(e) {
+    showToast('Erreur lors de la mise à jour du stock', 'error');
+  }
+}
+
+async function changerStatutCommande(id, action, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await API.post(`/api/commandes/${id}/${action}/`, {});
+    loaded.delete('commandes');
+    loadSection('commandes');
+    showToast('Statut commande mis à jour', 'success');
+  } catch(e) {
+    showToast('Erreur : ' + (e.message||'impossible'), 'error');
+    btn.disabled = false;
+  }
+}
+
+async function annulerCommande(id, btn) {
+  if (!confirm('Annuler cette commande ? Le stock sera remis à jour.')) return;
+  btn.disabled = true;
+  try {
+    await API.post(`/api/commandes/${id}/annuler/`, {});
+    loaded.delete('commandes');
+    loadSection('commandes');
+    showToast('Commande annulée', 'success');
+  } catch(e) {
+    showToast('Erreur annulation', 'error');
+    btn.disabled = false;
+  }
+}
+
+async function validerAvis(id, valider, btn) {
+  btn.disabled = true;
+  try {
+    const endpoint = valider ? 'valider' : 'invalider';
+    await API.post(`/api/avis/${id}/${endpoint}/`, {});
+    loaded.delete('avis');
+    loadSection('avis');
+    showToast(valider ? 'Avis validé' : 'Avis invalidé', 'success');
+  } catch(e) {
+    showToast('Erreur modération avis', 'error');
+    btn.disabled = false;
+  }
+}
+
+async function supprimerAvis(id, btn) {
+  if (!confirm('Supprimer définitivement cet avis ?')) return;
+  btn.disabled = true;
+  try {
+    await API.delete(`/api/avis/${id}/`);
+    loaded.delete('avis');
+    loadSection('avis');
+    showToast('Avis supprimé', 'success');
+  } catch(e) {
+    showToast('Erreur suppression avis', 'error');
+    btn.disabled = false;
+  }
+}
+
+async function toggleUser(id, isActive, btn) {
+  const action = isActive ? 'désactiver' : 'activer';
+  if (!confirm(`Voulez-vous ${action} ce compte utilisateur ?`)) return;
+  btn.disabled = true;
+  try {
+    await API.post(`/api/auth/utilisateurs/${id}/toggle_actif/`, {});
+    loaded.delete('utilisateurs');
+    loadSection('utilisateurs');
+    showToast(`Compte ${action === 'activer' ? 'activé' : 'désactivé'}`, 'success');
+  } catch(e) {
+    showToast('Erreur modification compte', 'error');
+    btn.disabled = false;
+  }
+}
+
+function showToast(msg, type) {
+  const colors = { success: '#10b981', error: '#ef4444' };
+  const div = document.createElement('div');
+  div.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:999;padding:12px 20px;border-radius:10px;background:${colors[type]||'#1E3A8A'};color:white;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:fadeIn .2s ease;`;
+  div.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 3000);
+}
+
 </script>
 {% endblock %}

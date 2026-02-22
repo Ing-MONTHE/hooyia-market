@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Catégories — HooYia Market{% endblock %}
+
+{% block extra_head %}
+<style>
+:root {
+  --navy:     #0D1F5C;
+  --blue:     #1E3A8A;
+  --orange:   #F97316;
+  --orange-d: #ea6000;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --bg:       #f0f3fa;
+  --border:   #e2e8f8;
+  --shadow:   0 1px 4px rgba(13,31,92,.07);
+  --shadow-h: 0 6px 24px rgba(13,31,92,.13);
+}
+body { background: var(--bg) !important; }
+
+/* ── LAYOUT ── */
+.page-root { display: flex; min-height: calc(100vh - 104px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--navy);
+  position: sticky; top: 0;
+  height: 100vh;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.sb-head {
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sb-logo { font-weight: 800; font-size: 16px; color: var(--orange); letter-spacing: .5px; }
+.sb-sub { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.sb-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(255,255,255,.28);
+  padding: 12px 16px 3px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 16px; font-size: 12.5px; font-weight: 500;
+  color: rgba(255,255,255,.58); text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all .12s;
+}
+.sb-item:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.05); border-left-color: rgba(255,255,255,.15); }
+.sb-item.active { color: white; background: rgba(249,115,22,.18); border-left-color: var(--orange); font-weight: 600; }
+
+/* ── MAIN ── */
+.main-content { flex: 1; padding: 28px 32px; overflow-x: auto; }
+
+/* ── PAGE HEADER ── */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--navy); }
+.page-back { font-size: 12px; color: rgba(13,31,92,.4); text-decoration: none; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.page-back:hover { color: var(--orange); }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start; }
+
+/* ── CARD ── */
+.card {
+  background: white; border-radius: 12px;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.card-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-head-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--orange), var(--orange-d));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.card-head-title { font-size: 14px; font-weight: 700; color: var(--navy); }
+.card-head-sub { font-size: 11.5px; color: rgba(13,31,92,.4); }
+.card-body { padding: 20px; }
+
+/* ── FORM ── */
+.field-group { margin-bottom: 16px; }
+.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.field-label span { font-weight: 400; color: rgba(13,31,92,.35); text-transform: none; letter-spacing: 0; margin-left: 4px; }
+.field-input {
+  width: 100%; padding: 9px 12px; border-radius: 8px;
+  border: 1.5px solid var(--border); font-size: 13.5px;
+  color: #111; font-family: 'DM Sans', sans-serif;
+  background: #fafbff;
+  transition: border .15s, box-shadow .15s;
+  box-sizing: border-box;
+}
+.field-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,58,138,.1); background: white; }
+.field-textarea { resize: vertical; min-height: 80px; }
+.field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230D1F5C' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+
+/* ── TOGGLE ── */
+.toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; border-radius: 24px;
+  background: #d1d5e8; cursor: pointer; transition: .2s;
+}
+.toggle-slider:before {
+  content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: white; left: 3px; top: 3px; transition: .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+.toggle-lbl { font-size: 13px; color: #555; }
+
+/* ── BOUTONS ── */
+.btn-primary {
+  padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  background: linear-gradient(135deg, var(--orange), var(--orange-d));
+  color: white; box-shadow: 0 2px 8px rgba(249,115,22,.3);
+  transition: all .15s; display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(249,115,22,.4); }
+.btn-secondary {
+  padding: 10px 20px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  background: white; color: var(--navy);
+  border: 1.5px solid var(--border);
+  transition: all .15s; display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+}
+.btn-secondary:hover { border-color: var(--blue); background: #f0f3fa; }
+.btn-cancel {
+  padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  background: #f0f3fa; color: #666;
+  transition: all .15s; display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+}
+.btn-cancel:hover { background: var(--border); }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+/* ── TABLE CATÉGORIES ── */
+.cat-table { width: 100%; border-collapse: collapse; }
+.cat-table th {
+  text-align: left; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: rgba(13,31,92,.4); padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+}
+.cat-table td { padding: 11px 14px; border-bottom: 1px solid #f0f3fa; font-size: 13px; vertical-align: middle; }
+.cat-table tr:last-child td { border-bottom: none; }
+.cat-table tr:hover td { background: #f9fafff0; }
+
+.cat-nom { font-weight: 600; color: var(--navy); }
+.cat-slug { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: rgba(13,31,92,.4); margin-top: 2px; }
+.cat-parent-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 600;
+  background: #eff4ff; color: var(--blue);
+}
+.cat-sous-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 600;
+  background: #f0fdf4; color: #16a34a;
+}
+.badge-active { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: #d1fae5; color: #065f46; }
+.badge-active::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+.action-btn {
+  padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+  transition: all .12s;
+}
+.action-edit { color: var(--blue); border-color: #bfdbfe; background: #eff6ff; }
+.action-edit:hover { background: #dbeafe; border-color: var(--blue); }
+.action-del { color: var(--red); border-color: #fecaca; background: #fff5f5; }
+.action-del:hover { background: #fee2e2; border-color: var(--red); }
+
+/* ── EDIT MODE ── */
+.edit-banner {
+  background: linear-gradient(135deg, rgba(30,58,138,.08), rgba(249,115,22,.06));
+  border: 1.5px solid rgba(30,58,138,.2); border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px; font-size: 13px;
+}
+.edit-banner strong { color: var(--navy); }
+
+/* ── FLASH MESSAGES ── */
+.flash { padding: 11px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.flash-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.flash-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 40px 20px; color: rgba(13,31,92,.3); }
+.empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state p { font-size: 14px; }
+
+/* ── IMAGE PREVIEW ── */
+.img-preview { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+.img-placeholder { width: 60px; height: 60px; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+
+/* ── FILE INPUT ── */
+.file-zone {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 18px; text-align: center; cursor: pointer;
+  transition: border .15s; background: #fafbff;
+}
+.file-zone:hover { border-color: var(--blue); background: #f0f4ff; }
+.file-zone input { display: none; }
+.file-zone-label { font-size: 13px; color: rgba(13,31,92,.5); cursor: pointer; }
+.file-zone-label strong { color: var(--orange); }
+
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main-content { padding: 20px 16px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-root">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">⚙ Admin</div>
+      <div class="sb-sub">HooYia Market</div>
+    </div>
+    <div class="sb-lbl">Navigation</div>
+    <a href="{% url 'products:admin_dashboard' %}" class="sb-item">📊 Dashboard</a>
+    <div class="sb-lbl">Catalogue</div>
+    <a href="{% url 'products:gestion_categories' %}" class="sb-item active">🗂 Catégories</a>
+    <a href="{% url 'products:liste' %}" class="sb-item">📦 Produits</a>
+    <a href="{% url 'products:ajouter' %}" class="sb-item">➕ Ajouter produit</a>
+    <div class="sb-lbl">Site</div>
+    <a href="{% url 'products:accueil' %}" class="sb-item">🏠 Voir le site</a>
+  </aside>
+
+  <!-- ═══ CONTENU ═══ -->
+  <div class="main-content">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <a href="{% url 'products:admin_dashboard' %}" class="page-back">← Dashboard</a>
+        <div class="page-title">🗂 Gestion des catégories</div>
+      </div>
+      <div style="font-size:13px;color:rgba(13,31,92,.4);">
+        {{ toutes_categories.count }} catégorie{{ toutes_categories.count|pluralize }} active{{ toutes_categories.count|pluralize }}
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    {% for message in messages %}
+    <div class="flash {% if message.tags == 'success' %}flash-success{% else %}flash-error{% endif %}">
+      {% if message.tags == 'success' %}✓{% else %}✕{% endif %} {{ message }}
+    </div>
+    {% endfor %}
+
+    <div class="grid-2">
+
+      <!-- ══ FORMULAIRE ══ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon">{% if categorie_edit %}✏️{% else %}➕{% endif %}</div>
+          <div>
+            <div class="card-head-title">{% if categorie_edit %}Modifier la catégorie{% else %}Nouvelle catégorie{% endif %}</div>
+            <div class="card-head-sub">{% if categorie_edit %}Mise à jour des informations{% else %}Remplissez les champs ci-dessous{% endif %}</div>
+          </div>
+        </div>
+        <div class="card-body">
+
+          {% if categorie_edit %}
+          <div class="edit-banner">
+            ✏️ Vous modifiez : <strong>{{ categorie_edit.nom }}</strong>
+          </div>
+          {% endif %}
+
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="{% if categorie_edit %}modifier{% else %}creer{% endif %}">
+            {% if categorie_edit %}
+            <input type="hidden" name="categorie_id" value="{{ categorie_edit.id }}">
+            {% endif %}
+
+            <!-- Nom -->
+            <div class="field-group">
+              <label class="field-label" for="id_nom">Nom <span>(obligatoire)</span></label>
+              <input type="text" name="nom" id="id_nom"
+                value="{% if categorie_edit %}{{ categorie_edit.nom }}{% endif %}"
+                placeholder="Ex: Smartphones, Ordinateurs portables…"
+                class="field-input" required />
+            </div>
+
+            <!-- Description -->
+            <div class="field-group">
+              <label class="field-label" for="id_description">Description <span>(optionnel)</span></label>
+              <textarea name="description" id="id_description" rows="3"
+                placeholder="Courte description de la catégorie…"
+                class="field-input field-textarea">{% if categorie_edit %}{{ categorie_edit.description }}{% endif %}</textarea>
+            </div>
+
+            <!-- Catégorie parente -->
+            <div class="field-group">
+              <label class="field-label" for="id_parent">Catégorie parente <span>(optionnel — laisser vide si catégorie principale)</span></label>
+              <select name="parent" id="id_parent" class="field-input field-select">
+                <option value="">— Aucun parent (catégorie racine) —</option>
+                {% for cat in toutes_categories %}
+                  {% if not categorie_edit or cat.id != categorie_edit.id %}
+                  <option value="{{ cat.id }}"
+                    {% if categorie_edit and categorie_edit.parent_id == cat.id %}selected{% endif %}>
+                    {% if cat.parent %}↳ {% endif %}{{ cat.nom }}
+                  </option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Image -->
+            <div class="field-group">
+              <label class="field-label">Image <span>(optionnel)</span></label>
+              {% if categorie_edit and categorie_edit.image %}
+              <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+                <img src="{{ categorie_edit.image.url }}" alt="" class="img-preview">
+                <span style="font-size:12px;color:rgba(13,31,92,.4);">Image actuelle — déposer une nouvelle pour remplacer</span>
+              </div>
+              {% endif %}
+              <label class="file-zone" for="id_image">
+                <input type="file" name="image" id="id_image" accept="image/*" onchange="previewImage(this)">
+                <div class="file-zone-label" id="file-label">
+                  📸 <strong>Choisir une image</strong> ou glisser-déposer<br>
+                  <span style="font-size:11px;">JPG, PNG, WebP — recommandé 400×400px</span>
+                </div>
+                <img id="img-preview-new" style="display:none;width:80px;height:80px;border-radius:8px;object-fit:cover;margin-top:10px;" />
+              </label>
+            </div>
+
+            <!-- Est active -->
+            <div class="field-group">
+              <label class="field-label">Statut</label>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" name="est_active"
+                    {% if not categorie_edit or categorie_edit.est_active %}checked{% endif %}>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-lbl">Catégorie active (visible sur le site)</span>
+              </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="btn-row">
+              <button type="submit" class="btn-primary">
+                {% if categorie_edit %}✓ Enregistrer les modifications{% else %}➕ Créer la catégorie{% endif %}
+              </button>
+              {% if categorie_edit %}
+              <a href="{% url 'products:gestion_categories' %}" class="btn-cancel">✕ Annuler</a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ══ LISTE DES CATÉGORIES ══ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon">📋</div>
+          <div>
+            <div class="card-head-title">Catégories existantes</div>
+            <div class="card-head-sub">Cliquez sur Modifier pour éditer</div>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          {% if toutes_categories %}
+          <table class="cat-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cat in categories_racines %}
+              <!-- Catégorie principale -->
+              <tr>
+                <td>
+                  {% if cat.image %}
+                  <img src="{{ cat.image.url }}" alt="" class="img-preview">
+                  {% else %}
+                  <div class="img-placeholder">🗂</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="cat-nom">{{ cat.nom }}</div>
+                  <div class="cat-slug">/{{ cat.slug }}</div>
+                </td>
+                <td><span class="cat-parent-badge">🏷 Principale</span></td>
+                <td><span class="badge-active">Active</span></td>
+                <td style="display:flex;gap:6px;align-items:center;">
+                  <a href="?modifier={{ cat.id }}" class="action-btn action-edit">✏️ Modifier</a>
+                  <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' cat.id %}', '{{ cat.nom }}')" class="action-btn action-del">🗑 Supprimer</button>
+                </td>
+              </tr>
+              <!-- Sous-catégories -->
+              {% for sous in cat.sous_categories.all %}
+              <tr style="background:#fafbff;">
+                <td>
+                  {% if sous.image %}
+                  <img src="{{ sous.image.url }}" alt="" class="img-preview">
+                  {% else %}
+                  <div class="img-placeholder" style="font-size:16px;">📁</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="cat-nom" style="padding-left:14px;">↳ {{ sous.nom }}</div>
+                  <div class="cat-slug" style="padding-left:14px;">/{{ sous.slug }}</div>
+                </td>
+                <td><span class="cat-sous-badge">📂 Sous-cat.</span></td>
+                <td><span class="badge-active">Active</span></td>
+                <td style="display:flex;gap:6px;align-items:center;">
+                  <a href="?modifier={{ sous.id }}" class="action-btn action-edit">✏️ Modifier</a>
+                  <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' sous.id %}', '{{ sous.nom }}')" class="action-btn action-del">🗑 Supprimer</button>
+                </td>
+              </tr>
+              {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <div class="icon">🗂</div>
+            <p>Aucune catégorie créée pour l'instant.<br>Utilisez le formulaire pour commencer.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div><!-- /grid-2 -->
+  </div><!-- /main-content -->
+</div><!-- /page-root -->
+
+<script>
+function previewImage(input) {
+  const preview = document.getElementById('img-preview-new');
+  const label = document.getElementById('file-label');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      label.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// Scroll vers le formulaire si mode modification
+{% if categorie_edit %}
+document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+{% endif %}
+</script>
+{% endblock %}

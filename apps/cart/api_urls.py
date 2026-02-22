@@ -20,4 +20,5 @@ urlpatterns = [
 
     # Vider tout le panier
     path('vider/',         api_views.ViderPanierAPIView.as_view(), name='api_panier_vider'),
+    path('admin/', api_views.PaniersAdminAPIView.as_view(), name='api_paniers_admin'),
 ]

@@ -29,7 +29,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 # ═══════════════════════════════════════════════
 
 INSTALLED_APPS = [
-    'grappelli',  # Interface d'administration améliorée
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -97,11 +96,6 @@ ROOT_URLCONF = 'config.urls'
 
 # ASGI = Daphne gère HTTP + WebSocket
 ASGI_APPLICATION = 'config.asgi.application'
-
-# Configuration Grappelli
-GRAPPELLI_ADMIN_TITLE = "Système de e-commerce HooYia Market"
-GRAPPELLI_INDEX_DASHBOARD = 'config.dashboard.CustomIndexDashboard'
-
 
 # ═══════════════════════════════════════════════
 # TEMPLATES (HTML)
