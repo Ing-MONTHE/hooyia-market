@@ -1,358 +1,596 @@
 {% load static %}
-<!-- ═══════════════════════════════════════════════
-     NAVBAR HooYia — Style Amazon (version propre)
-     Barre 1 (#0D1F5C) : logo cadré | recherche | compte + panier
-     Barre 2 (#1E3A8A) : Accueil + catégories + liens rapides
-═══════════════════════════════════════════════ -->
-<header class="sticky top-0 z-40">
+<!-- ═══════════════════════════════════════════
+     NAVBAR HooYia Market v2
+     Dark mode + Responsive + Modern
+═══════════════════════════════════════════ -->
 
-  <!-- ══ BARRE 1 ══ -->
-  <div style="background:#0D1F5C;">
-    <div class="max-w-[1400px] mx-auto px-3 sm:px-5 flex items-center gap-3 h-[62px]">
+<style>
+/* ── Navbar base ── */
+.navbar-top {
+  background: #0D1F5C;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background 200ms;
+}
+[data-theme="dark"] .navbar-top { background: #080f1f; }
 
-      <!-- Logo dans cadre blanc -->
-      <a href="{% url 'products:accueil' %}"
-         style="display:flex;align-items:center;flex-shrink:0;background:white;border-radius:8px;padding:4px 10px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:box-shadow .15s;"
-         onmouseover="this.style.boxShadow='0 4px 16px rgba(249,115,22,.4)'"
-         onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.2)'">
-        <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:38px;width:auto;" />
+.navbar-bottom {
+  background: #1E3A8A;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+[data-theme="dark"] .navbar-bottom { background: #0d1d3d; border-color: rgba(255,255,255,.05); }
+
+/* ── Search ── */
+.nav-search-wrap {
+  display: flex;
+  flex: 1;
+  max-width: 640px;
+  height: 40px;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,.12);
+  transition: border-color 200ms;
+}
+.nav-search-wrap:focus-within { border-color: #F97316; box-shadow: 0 0 0 3px rgba(249,115,22,.18); }
+
+.nav-search-select {
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.8);
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.12);
+  cursor: pointer;
+  min-width: 100px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  outline: none;
+}
+.nav-search-select option { background: #1E3A8A; color: white; }
+
+.nav-search-input {
+  flex: 1;
+  padding: 0 14px;
+  font-size: 0.875rem;
+  color: #111;
+  background: white;
+  border: none;
+  outline: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+[data-theme="dark"] .nav-search-input { background: #1a2235; color: #e8edf5; }
+[data-theme="dark"] .nav-search-input::placeholder { color: #5a7090; }
+
+.nav-search-btn {
+  padding: 0 16px;
+  background: #F97316;
+  border: none;
+  cursor: pointer;
+  transition: background 150ms;
+  display: flex;
+  align-items: center;
+}
+.nav-search-btn:hover { background: #ea6000; }
+
+/* ── Nav action button ── */
+.nav-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: border-color 150ms;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.nav-action:hover { border-color: rgba(255,255,255,.35); }
+.nav-action-label { font-size: 0.6875rem; color: rgba(255,255,255,.65); }
+.nav-action-main  { font-size: 0.8125rem; font-weight: 700; color: white; }
+
+/* ── Cart button ── */
+.nav-cart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: border-color 150ms;
+}
+.nav-cart:hover { border-color: rgba(255,255,255,.35); }
+.nav-cart-count { font-size: 1.125rem; font-weight: 800; color: #F97316; font-family: 'Sora', sans-serif; line-height: 1; min-width: 20px; text-align: center; }
+.nav-cart-label { font-size: 0.8125rem; font-weight: 700; color: white; padding-bottom: 2px; }
+
+/* ── Bottom nav links ── */
+.nav-link {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  color: rgba(255,255,255,.8);
+  text-decoration: none;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+.nav-link:hover { color: white; border-color: rgba(255,255,255,.3); }
+.nav-link.active { color: #F97316; font-weight: 700; }
+.nav-link.highlight { color: #FCD34D; font-weight: 700; }
+
+/* ── Dropdown ── */
+.nav-dropdown {
+  position: absolute;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 0.875rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,.16);
+  padding: 0.5rem;
+  z-index: 60;
+  animation: dropdown-in 0.15s ease;
+}
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.nav-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary, #4a5568);
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background 100ms, color 100ms;
+  cursor: pointer;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.nav-dd-item:hover { background: var(--surface-2, #f9fafb); color: var(--text-primary, #0f1923); }
+.nav-dd-item.danger:hover { background: rgba(239,68,68,.06); color: #ef4444; }
+.nav-dd-item.highlight { color: #F97316; font-weight: 600; }
+.nav-dd-item.highlight:hover { background: rgba(249,115,22,.06); }
+.nav-dd-divider { height: 1px; background: var(--border, #e2e8f0); margin: 0.375rem 0; }
+.nav-dd-header { padding: 0.625rem 0.875rem 0.375rem; border-bottom: 1px solid var(--border, #e2e8f0); margin-bottom: 0.25rem; }
+
+/* ── Notification badge ── */
+.notif-badge {
+  position: absolute; top: -7px; right: -5px;
+  min-width: 17px; height: 17px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  font-family: 'Sora', sans-serif;
+  border: 2px solid #0D1F5C;
+}
+[data-theme="dark"] .notif-badge { border-color: #080f1f; }
+
+/* ── Mobile menu ── */
+.mobile-menu {
+  background: #0D1F5C;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 0.75rem;
+}
+[data-theme="dark"] .mobile-menu { background: #080f1f; }
+
+.mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  transition: background 100ms, color 100ms;
+}
+.mobile-link:hover { background: rgba(255,255,255,.08); color: white; }
+.mobile-link.danger { color: rgba(252,165,165,.85); }
+.mobile-link.danger:hover { background: rgba(239,68,68,.12); color: #fca5a5; }
+.mobile-link.special { color: #FCD34D; font-weight: 600; }
+
+/* ── Burger button ── */
+.burger-btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  transition: border-color 150ms, background 150ms;
+}
+.burger-btn:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.06); }
+
+/* ── Theme toggle button ── */
+.theme-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 1rem;
+  transition: all 150ms;
+  flex-shrink: 0;
+}
+.theme-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
+
+/* ── Catalogue dropdown in nav bar ── */
+#catalogue-dropdown { top: calc(100% + 4px); left: 0; min-width: 230px; }
+#profile-dropdown   { top: calc(100% + 4px); right: 0; min-width: 230px; }
+#notif-dropdown     { top: calc(100% + 4px); right: 0; width: 300px; }
+
+/* Responsive */
+.nav-bar2 { display: none; }
+.burger-btn { display: none; }
+.nav-cat-select { display: none; }
+
+@media (min-width: 1024px) {
+  .nav-bar2 { display: block; }
+  .burger-btn { display: none !important; }
+  .nav-cat-select { display: block !important; }
+}
+@media (max-width: 1023px) {
+  .burger-btn { display: flex !important; }
+}
+@media (min-width: 640px) {
+  .nav-cat-select { display: block; }
+}
+</style>
+
+<header class="navbar-top">
+
+  <!-- ══ BARRE PRINCIPALE ══ -->
+  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;">
+
+    <!-- Logo -->
+    <a href="{% url 'products:accueil' %}"
+       style="display:flex;align-items:center;flex-shrink:0;background:white;border-radius:10px;padding:5px 12px;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all 200ms;text-decoration:none;"
+       onmouseover="this.style.boxShadow='0 4px 16px rgba(249,115,22,.4)'"
+       onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.2)'">
+      <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:36px;width:auto;" />
+    </a>
+
+    <!-- Search bar -->
+    <div class="nav-search-wrap" style="flex:1;margin:0 0.5rem;">
+      <select class="nav-search-select nav-cat-select" id="search-cat" style="display:none;">
+        <option value="">Tout</option>
+        {% for cat in categories %}<option value="{{ cat.slug }}">{{ cat.nom }}</option>{% endfor %}
+      </select>
+      <input type="search" id="search-input" class="nav-search-input"
+        placeholder="Rechercher des produits…"
+        onkeydown="if(event.key==='Enter')doSearch()" />
+      <button class="nav-search-btn" onclick="doSearch()" aria-label="Rechercher">
+        <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Actions droite -->
+    <div style="display:flex;align-items:center;gap:0.25rem;flex-shrink:0;">
+
+      <!-- Theme toggle -->
+      <button class="theme-btn" onclick="toggleTheme()" title="Basculer le thème" aria-label="Thème">
+        <span data-theme-icon>🌙</span>
+      </button>
+      <script>
+        // Init theme icon
+        document.addEventListener('DOMContentLoaded', function() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          document.querySelectorAll('[data-theme-icon]').forEach(el => {
+            el.textContent = isDark ? '☀️' : '🌙';
+          });
+        });
+      </script>
+
+      {% if user.is_authenticated %}
+
+      <!-- Compte dropdown -->
+      <div style="position:relative;" id="profile-menu-container">
+        <button onclick="toggleMenu('profile-dropdown')" class="nav-action">
+          <span class="nav-action-label">Bonjour, {{ user.prenom|default:user.username }}</span>
+          <span class="nav-action-main">Compte ▾</span>
+        </button>
+        <div id="profile-dropdown" class="nav-dropdown" style="display:none;">
+          <div class="nav-dd-header">
+            <p style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">{{ user.prenom|default:user.username }} {{ user.nom|default:'' }}</p>
+            <p style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">{{ user.email }}</p>
+          </div>
+          {% if user.is_staff %}
+          <a href="{% url 'users:profil' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Mon profil
+          </a>
+          <a href="/chat/" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Messages
+          </a>
+          <div class="nav-dd-divider"></div>
+          <a href="{% url 'products:admin_dashboard' %}" class="nav-dd-item highlight">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+            Administration
+          </a>
+          <a href="{% url 'products:ajouter' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Ajouter un produit
+          </a>
+          <a href="{% url 'products:gestion_categories' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+            Catégories
+          </a>
+          {% else %}
+          <a href="{% url 'users:profil' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Mon profil
+          </a>
+          <a href="{% url 'orders:historique' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3H8l-2 4h12l-2-4z"/></svg>
+            Mes commandes
+          </a>
+          <a href="{% url 'users:ajouter_adresse' %}" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Mes adresses
+          </a>
+          <a href="/chat/" class="nav-dd-item">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Messages
+          </a>
+          {% endif %}
+          <div class="nav-dd-divider"></div>
+          <a href="{% url 'users:deconnexion' %}" class="nav-dd-item danger">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Déconnexion
+          </a>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div style="position:relative;" id="notif-menu-container">
+        <button onclick="toggleMenu('notif-dropdown')" class="nav-action" style="padding:5px 9px;">
+          <span style="position:relative;display:flex;align-items:center;justify-content:center;">
+            <svg width="22" height="22" fill="none" stroke="white" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            {% if notif_count > 0 %}
+            <span id="notif-badge" class="notif-badge">{{ notif_count }}</span>
+            {% else %}
+            <span id="notif-badge" class="notif-badge" style="display:none;"></span>
+            {% endif %}
+          </span>
+        </button>
+        <div id="notif-dropdown" class="nav-dropdown" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;" class="nav-dd-header">
+            <span style="font-size:0.875rem;font-weight:700;color:var(--text-primary);">Notifications</span>
+            <button onclick="Notifications&&Notifications.toutMarquerLu()" style="font-size:0.75rem;color:var(--brand-500);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;">Tout lire</button>
+          </div>
+          <div id="notif-list" style="max-height:260px;overflow-y:auto;">
+            <p style="font-size:0.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;font-family:'Plus Jakarta Sans',sans-serif;">Chargement…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panier -->
+      {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
+      <a href="{% url 'cart:panier' %}" class="nav-cart">
+        <span style="position:relative;display:flex;flex-direction:column;align-items:center;">
+          <span id="cart-badge" class="nav-cart-count">{{ cart_count|default:"0" }}</span>
+          <svg width="26" height="26" fill="none" stroke="white" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+        </span>
+        <span class="nav-cart-label">Panier</span>
+      </a>
+      {% endif %}
+
+      {% else %}
+
+      <!-- Non connecté -->
+      <a href="{% url 'users:connexion' %}" class="nav-action">
+        <span class="nav-action-label">Bonjour, visiteur</span>
+        <span class="nav-action-main">Connexion</span>
+      </a>
+      <a href="{% url 'users:inscription' %}"
+        style="padding:6px 14px;border-radius:8px;font-size:0.8125rem;font-weight:700;color:white;border:1.5px solid rgba(255,255,255,.4);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;margin-left:4px;transition:all 150ms;background:rgba(255,255,255,.06);"
+        onmouseover="this.style.borderColor='white';this.style.background='rgba(255,255,255,.12)'"
+        onmouseout="this.style.borderColor='rgba(255,255,255,.4)';this.style.background='rgba(255,255,255,.06)'">
+        S'inscrire
       </a>
 
-      <!-- Recherche (une seule, visible partout) -->
-      <div style="display:flex;flex:1;max-width:700px;height:38px;border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.2);">
-        <!-- Dropdown catégorie (masqué sous sm) -->
-        <select id="search-cat"
-          style="padding:0 8px;font-size:12px;font-weight:600;background:#e8e3da;color:#3d3a35;border:none;cursor:pointer;min-width:110px;font-family:'DM Sans',sans-serif;display:none;"
-          class="nv-sm-show">
-          <option value="">Toutes catég.</option>
-          {% for cat in categories %}<option value="{{ cat.slug }}">{{ cat.nom }}</option>{% endfor %}
-        </select>
-        <div class="nv-sm-show" style="width:1px;background:#d1d5db;display:none;"></div>
-        <input type="search" id="search-input"
-          placeholder="Rechercher sur HooYia Market…"
-          style="flex:1;padding:0 14px;font-size:14px;color:#111;background:white;border:none;outline:none;font-family:'DM Sans',sans-serif;"
-          onkeydown="if(event.key==='Enter')doSearch()" />
-        <button onclick="doSearch()"
-          style="padding:0 16px;background:#F97316;border:none;cursor:pointer;transition:background .15s;"
-          onmouseover="this.style.background='#ea6000'" onmouseout="this.style.background='#F97316'">
-          <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-        </button>
-      </div>
+      {% endif %}
 
-      <!-- Actions droite -->
-      <div style="display:flex;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;">
-
-        {% if user.is_authenticated %}
-
-        <!-- Compte -->
-        <div style="position:relative;" id="profile-menu-container">
-          <button onclick="toggleProfileMenu()" class="nv-btn">
-            <span class="nv-label nv-sm-show" style="display:none;">Bonjour, {{ user.prenom|default:user.username }}</span>
-            <span class="nv-main">Compte &amp; Profil ▾</span>
-          </button>
-          <div id="profile-dropdown" class="nv-dropdown" style="display:none;">
-            <div style="padding:10px 16px;border-bottom:1px solid #f3f4f6;">
-              <p style="font-size:11px;color:#9ca3af;font-family:'DM Sans',sans-serif;">{{ user.email }}</p>
-            </div>
-            {% if user.is_staff %}
-            <a href="{% url 'users:profil' %}"             class="nv-dd-item">👤 Mon profil</a>
-            <a href="/chat/"                                class="nv-dd-item">💬 Messages</a>
-            <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
-            <a href="{% url 'products:admin_dashboard' %}" class="nv-dd-item" style="color:#1E3A8A;font-weight:600;">⚙️ Administration</a>
-            <a href="{% url 'products:ajouter' %}"          class="nv-dd-item" style="color:#1E3A8A;">➕ Ajouter un produit</a>
-            <a href="{% url 'products:gestion_categories' %}" class="nv-dd-item" style="color:#1E3A8A;">🗂️ Catégories</a>
-            {% else %}
-            <a href="{% url 'users:profil' %}"             class="nv-dd-item">👤 Mon profil</a>
-            <a href="{% url 'orders:historique' %}"        class="nv-dd-item">📦 Mes commandes</a>
-            <a href="{% url 'users:ajouter_adresse' %}"    class="nv-dd-item">📍 Mes adresses</a>
-            <a href="/chat/"                               class="nv-dd-item">💬 Messages</a>
-            {% endif %}
-            <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
-            <a href="{% url 'users:deconnexion' %}" class="nv-dd-item" style="color:#ef4444;"
-               onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'">🚪 Déconnexion</a>
-          </div>
-        </div>
-
-        <!-- Notifications -->
-        <div style="position:relative;" id="notif-menu-container">
-          <button onclick="toggleNotifMenu()" class="nv-btn">
-            <span style="position:relative;display:flex;align-items:center;">
-              <svg style="width:22px;height:22px;" fill="none" stroke="white" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
-              {% if notif_count > 0 %}
-              <span id="notif-badge"
-                style="position:absolute;top:-8px;right:-6px;min-width:16px;height:16px;background:#ef4444;color:white;font-size:9px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;font-family:monospace;">
-                {{ notif_count }}
-              </span>
-              {% else %}
-              <span id="notif-badge" style="display:none;position:absolute;top:-8px;right:-6px;min-width:16px;height:16px;background:#ef4444;color:white;font-size:9px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;font-family:monospace;"></span>
-              {% endif %}
-            </span>
-          </button>
-          <div id="notif-dropdown" class="nv-dropdown" style="display:none;width:300px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #f3f4f6;">
-              <span style="font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;color:#111;">Notifications</span>
-              <button onclick="Notifications&&Notifications.toutMarquerLu()" style="font-size:11px;color:#1E3A8A;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Tout lire</button>
-            </div>
-            <div id="notif-list" style="max-height:240px;overflow-y:auto;">
-              <p style="font-size:12px;text-align:center;color:#9ca3af;padding:24px 0;font-family:'DM Sans',sans-serif;">Chargement…</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Panier style Amazon -->
-        {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
-        <a href="{% url 'cart:panier' %}" class="nv-btn" style="text-decoration:none;flex-direction:row;align-items:flex-end;gap:4px;">
-          <span style="position:relative;display:flex;flex-direction:column;align-items:center;">
-            <span id="cart-badge"
-              style="font-size:18px;font-weight:700;color:#F97316;font-family:'DM Sans',sans-serif;line-height:1;min-width:20px;text-align:center;">
-              {{ cart_count|default:"0" }}
-            </span>
-            <svg style="width:28px;height:28px;" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-          </span>
-          <span style="font-size:13px;font-weight:700;color:white;padding-bottom:2px;font-family:'DM Sans',sans-serif;">Panier</span>
-        </a>
-        {% endif %}
-
-        {% else %}
-
-        <!-- Non connecté -->
-        <a href="{% url 'users:connexion' %}" class="nv-btn" style="text-decoration:none;">
-          <span class="nv-label nv-sm-show" style="display:none;">Bonjour, visiteur</span>
-          <span class="nv-main">Connexion</span>
-        </a>
-        <a href="{% url 'users:inscription' %}"
-          style="padding:5px 10px;border-radius:4px;font-size:12px;font-weight:600;color:white;border:1px solid rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;text-decoration:none;margin-left:4px;transition:border-color .15s;"
-          onmouseover="this.style.borderColor='white'" onmouseout="this.style.borderColor='rgba(255,255,255,.4)'">S'inscrire</a>
-
-        {% endif %}
-
-        <!-- Burger (mobile uniquement) -->
-        <button onclick="toggleMobileMenu()"
-          style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;background:transparent;border:1px solid transparent;border-radius:4px;cursor:pointer;color:white;margin-left:4px;transition:border-color .15s;"
-          onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='transparent'"
-          class="nv-burger">
-          <svg style="width:20px;height:20px;" fill="none" stroke="white" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-
-      </div>
+      <!-- Burger (mobile) -->
+      <button onclick="toggleMobileMenu()" class="burger-btn" aria-label="Menu" style="display:none;">
+        <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
     </div>
   </div>
 
-  <!-- ══ BARRE 2 — LIENS DE NAVIGATION ══ -->
-  <div style="background:#1E3A8A;" class="nv-bar2">
-    <div class="max-w-[1400px] mx-auto px-3 sm:px-5 flex items-center" style="height:42px;">
+  <!-- ══ BARRE SECONDAIRE (desktop) ══ -->
+  <nav class="navbar-bottom nav-bar2">
+    <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;height:42px;gap:0.25rem;">
 
-      <!-- Accueil -->
-      <a href="{% url 'products:accueil' %}" class="nv-navlink" style="font-weight:600;">🏠 Accueil</a>
+      <a href="{% url 'products:accueil' %}" class="nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Accueil
+      </a>
 
-      <!-- Toutes catégories -->
+      <!-- Catalogue dropdown -->
       <div style="position:relative;" id="catalogue-container">
-        <button onclick="toggleCatalogue()" class="nv-navlink" style="font-weight:700;display:flex;align-items:center;gap:6px;background:none;border:1px solid transparent;cursor:pointer;border-radius:4px;height:42px;padding:0 12px;color:rgba(255,255,255,.88);font-family:'DM Sans',sans-serif;font-size:13px;white-space:nowrap;transition:color .15s,border-color .15s;"
-          onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.color='white'"
-          onmouseout="this.style.borderColor='transparent';this.style.color='rgba(255,255,255,.88)'">
-          <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-          Toutes catégories
+        <button onclick="toggleMenu('catalogue-dropdown')" class="nav-link" style="gap:6px;background:none;border:1px solid transparent;cursor:pointer;"
+          onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='white'"
+          onmouseout="this.style.borderColor='transparent';this.style.color='rgba(255,255,255,.8)'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Catalogue ▾
         </button>
-        <div id="catalogue-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:2px;background:white;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:8px;min-width:220px;z-index:50;">
-          <a href="{% url 'products:liste' %}" style="display:block;padding:8px 12px;font-size:13px;font-weight:600;color:#111;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">Tous les produits</a>
-          <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
+        <div id="catalogue-dropdown" class="nav-dropdown" style="display:none;">
+          <a href="{% url 'products:liste' %}" class="nav-dd-item" style="font-weight:700;color:var(--text-primary);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Tous les produits
+          </a>
+          <div class="nav-dd-divider"></div>
           {% for cat in categories %}
-          <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" style="display:block;padding:7px 12px;font-size:13px;color:#374151;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">{{ cat.nom }}</a>
+          <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="nav-dd-item">{{ cat.nom }}</a>
           {% endfor %}
-          <div style="margin:4px 0;border-top:1px solid #f3f4f6;"></div>
-          <a href="{% url 'products:liste' %}?promo=true" style="display:block;padding:7px 12px;font-size:13px;color:#F97316;font-weight:600;border-radius:4px;font-family:'DM Sans',sans-serif;text-decoration:none;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background='white'">🔥 Promotions</a>
+          <div class="nav-dd-divider"></div>
+          <a href="{% url 'products:liste' %}?promo=true" class="nav-dd-item highlight">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
+            Promotions
+          </a>
         </div>
       </div>
 
-      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nv-navlink">Nouveautés</a>
-      <a href="{% url 'products:liste' %}?promo=true" class="nv-navlink" style="color:#FCD34D;font-weight:600;">🔥 Promos</a>
-      <a href="{% url 'products:liste' %}?en_vedette=true" class="nv-navlink">En vedette</a>
+      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nav-link">Nouveautés</a>
+      <a href="{% url 'products:liste' %}?promo=true" class="nav-link highlight">🔥 Promos</a>
+      <a href="{% url 'products:liste' %}?en_vedette=true" class="nav-link">En vedette</a>
+
       {% if user.is_authenticated and not user.is_staff %}
-      <a href="{% url 'orders:historique' %}" class="nv-navlink">Mes commandes</a>
-      <a href="/chat/" class="nv-navlink">Messages</a>
+      <a href="{% url 'orders:historique' %}" class="nav-link">Mes commandes</a>
+      <a href="/chat/" class="nav-link">Messages</a>
       {% elif user.is_staff %}
-      <a href="/chat/" class="nv-navlink">💬 Messages</a>
+      <a href="/chat/" class="nav-link">Messages</a>
       {% endif %}
+
       {% if user.is_staff %}
-      <div style="margin-left:auto;display:flex;align-items:center;">
-        <a href="{% url 'products:admin_dashboard' %}" class="nv-navlink" style="color:#FCD34D;font-weight:600;">⚙️ Dashboard Admin</a>
+      <div style="margin-left:auto;">
+        <a href="{% url 'products:admin_dashboard' %}" class="nav-link highlight">⚙ Dashboard Admin</a>
       </div>
       {% endif %}
-
     </div>
-  </div>
+  </nav>
 
-  <!-- ══ MENU MOBILE (burger) ══ -->
-  <div id="mobile-menu" style="display:none;background:#0D1F5C;padding:12px 12px 16px;border-top:1px solid rgba(255,255,255,.1);">
-    <a href="{% url 'products:accueil' %}"                       class="nv-mobile" style="font-weight:600;">🏠 Accueil</a>
-    <a href="{% url 'products:liste' %}"                         class="nv-mobile">📦 Catalogue</a>
-    <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nv-mobile">🆕 Nouveautés</a>
-    <a href="{% url 'products:liste' %}?promo=true"              class="nv-mobile" style="color:#FCD34D;">🔥 Promos</a>
+  <!-- ══ MENU MOBILE ══ -->
+  <div id="mobile-menu" class="mobile-menu" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.25rem;margin-bottom:0.5rem;">
+      <a href="{% url 'products:accueil' %}" class="mobile-link">🏠 Accueil</a>
+      <a href="{% url 'products:liste' %}" class="mobile-link">📦 Catalogue</a>
+      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="mobile-link">🆕 Nouveautés</a>
+      <a href="{% url 'products:liste' %}?promo=true" class="mobile-link special">🔥 Promos</a>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.08);margin:0.5rem 0;"></div>
     {% if user.is_authenticated %}
     {% if user.is_staff %}
-    <a href="{% url 'users:profil' %}"              class="nv-mobile">👤 Mon profil</a>
-    <a href="/chat/"                                class="nv-mobile">💬 Messages</a>
-    <a href="{% url 'products:admin_dashboard' %}" class="nv-mobile" style="color:#FCD34D;font-weight:600;">⚙️ Administration</a>
-    <a href="{% url 'products:ajouter' %}"          class="nv-mobile" style="color:#FCD34D;">➕ Ajouter un produit</a>
-    <a href="{% url 'products:gestion_categories' %}" class="nv-mobile" style="color:#FCD34D;">🗂️ Catégories</a>
+    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
+    <a href="/chat/" class="mobile-link">💬 Messages</a>
+    <a href="{% url 'products:admin_dashboard' %}" class="mobile-link special">⚙️ Administration</a>
+    <a href="{% url 'products:ajouter' %}" class="mobile-link special">➕ Ajouter un produit</a>
     {% elif not user.is_admin and not user.is_vendeur %}
-    <a href="{% url 'users:profil' %}"      class="nv-mobile">👤 Mon profil</a>
-    <a href="{% url 'cart:panier' %}"       class="nv-mobile">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
-    <a href="{% url 'orders:historique' %}" class="nv-mobile">📋 Mes commandes</a>
-    <a href="/chat/"                        class="nv-mobile">💬 Messages</a>
+    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
+    <a href="{% url 'cart:panier' %}" class="mobile-link">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
+    <a href="{% url 'orders:historique' %}" class="mobile-link">📋 Mes commandes</a>
+    <a href="/chat/" class="mobile-link">💬 Messages</a>
     {% else %}
-    <a href="{% url 'users:profil' %}"      class="nv-mobile">👤 Mon profil</a>
+    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
     {% endif %}
-    <a href="{% url 'users:deconnexion' %}" class="nv-mobile" style="color:#fca5a5;">🚪 Déconnexion</a>
+    <div style="height:1px;background:rgba(255,255,255,.08);margin:0.5rem 0;"></div>
+    <a href="{% url 'users:deconnexion' %}" class="mobile-link danger">🚪 Déconnexion</a>
     {% else %}
-    <a href="{% url 'users:connexion' %}"   class="nv-mobile">🔑 Connexion</a>
-    <a href="{% url 'users:inscription' %}" class="nv-mobile" style="color:#F97316;font-weight:600;">S'inscrire</a>
+    <a href="{% url 'users:connexion' %}" class="mobile-link">🔑 Connexion</a>
+    <a href="{% url 'users:inscription' %}" class="mobile-link" style="color:#F97316;font-weight:600;">✨ Créer un compte</a>
     {% endif %}
   </div>
 
 </header>
 
-<style>
-/* Action buttons barre 1 */
-.nv-btn {
-  display: flex; flex-direction: column; align-items: flex-start;
-  padding: 4px 10px; background: transparent;
-  border: 1px solid transparent; border-radius: 4px;
-  cursor: pointer; color: white; text-decoration: none;
-  font-family: 'DM Sans', sans-serif; transition: border-color .15s; line-height: 1.25;
-}
-.nv-btn:hover { border-color: rgba(255,255,255,.4); }
-.nv-label { font-size: 11px; color: rgba(255,255,255,.72); }
-.nv-main  { font-size: 13px; font-weight: 700; color: white; }
-
-/* Liens barre 2 */
-.nv-navlink {
-  display: flex; align-items: center; height: 42px;
-  padding: 0 12px; font-size: 13px; font-family: 'DM Sans', sans-serif;
-  color: rgba(255,255,255,.88); text-decoration: none; white-space: nowrap;
-  border: 1px solid transparent; border-radius: 4px;
-  transition: color .15s, border-color .15s;
-}
-.nv-navlink:hover { color: white; border-color: rgba(255,255,255,.4); }
-
-/* Dropdown */
-.nv-dropdown {
-  position: absolute; right: 0; top: calc(100% + 4px);
-  min-width: 220px; background: white;
-  border: 1px solid #e5e7eb; border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.18); z-index: 50;
-}
-.nv-dd-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px; font-size: 13px; color: #374151;
-  font-family: 'DM Sans', sans-serif; text-decoration: none;
-  transition: background .1s;
-}
-.nv-dd-item:hover { background: #f9fafb; }
-
-/* Mobile links */
-.nv-mobile {
-  display: block; padding: 9px 12px; border-radius: 6px;
-  font-size: 13px; font-family: 'DM Sans', sans-serif;
-  color: rgba(255,255,255,.8); text-decoration: none;
-  transition: background .1s, color .1s;
-}
-.nv-mobile:hover { background: rgba(255,255,255,.1); color: white; }
-
-/* Burger visible seulement en mobile */
-.nv-burger { display: none; }
-
-/* Barre 2 : desktop uniquement */
-.nv-bar2 { display: none; }
-
-@media (min-width: 1024px) {
-  .nv-bar2 { display: block; }
-  .nv-burger { display: none !important; }
-}
-@media (max-width: 1023px) {
-  .nv-burger { display: flex !important; }
-}
-@media (min-width: 640px) {
-  .nv-sm-show { display: block !important; }
-  select.nv-sm-show { display: block !important; }
-  span.nv-sm-show  { display: inline !important; }
-}
-</style>
-
 <script>
 function doSearch() {
   const q   = (document.getElementById('search-input')?.value || '').trim();
   const cat = document.getElementById('search-cat')?.value || '';
+  if (!q && !cat) return;
   let url = '/produits/?search=' + encodeURIComponent(q);
   if (cat) url += '&categorie=' + encodeURIComponent(cat);
-  if (q || cat) window.location.href = url;
+  window.location.href = url;
 }
 
-function toggleCatalogue() {
-  const dd = document.getElementById('catalogue-dropdown');
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+// Unified dropdown toggle
+function toggleMenu(id) {
+  const dd = document.getElementById(id);
+  const isOpen = dd && dd.style.display !== 'none';
+  // Close all dropdowns
+  ['catalogue-dropdown','profile-dropdown','notif-dropdown'].forEach(i => {
+    const el = document.getElementById(i);
+    if (el) el.style.display = 'none';
+  });
+  if (!isOpen && dd) dd.style.display = 'block';
 }
-function toggleProfileMenu() {
-  const dd = document.getElementById('profile-dropdown');
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-  document.getElementById('notif-dropdown').style.display = 'none';
-}
+
 function toggleMobileMenu() {
   const m = document.getElementById('mobile-menu');
   m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
-async function toggleNotifMenu() {
-  const dd   = document.getElementById('notif-dropdown');
-  const open = dd.style.display !== 'none';
-  dd.style.display = open ? 'none' : 'block';
-  document.getElementById('profile-dropdown').style.display = 'none';
-  if (open) return;
 
-  const list   = document.getElementById('notif-list');
-  const icones = { commande:'📦', avis:'⭐', stock:'⚠️', systeme:'ℹ️' };
+// Close on outside click
+document.addEventListener('click', e => {
+  const containers = ['catalogue-container','profile-menu-container','notif-menu-container'];
+  containers.forEach(cid => {
+    const c = document.getElementById(cid);
+    const dd = c?.querySelector('.nav-dropdown');
+    if (dd && !c.contains(e.target)) dd.style.display = 'none';
+  });
+  const mob = document.getElementById('mobile-menu');
+  const burger = document.querySelector('.burger-btn');
+  if (mob && burger && !mob.contains(e.target) && !burger.contains(e.target)) {
+    mob.style.display = 'none';
+  }
+});
+
+// Load notifications
+async function loadNotifs() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  const icons = { commande:'📦', avis:'⭐', stock:'⚠️', systeme:'ℹ️' };
   try {
     const raw  = await API.get('/api/notifications/?page_size=8', { silentError: true });
     const data = raw?.results || raw || [];
     if (!data.length) {
-      list.innerHTML = '<p style="font-size:12px;text-align:center;color:#9ca3af;padding:24px 0;font-family:\'DM Sans\',sans-serif;">Aucune notification</p>';
+      list.innerHTML = '<p style="font-size:.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;">Aucune notification</p>';
       return;
     }
     list.innerHTML = data.map(n => `
       <div onclick="Notifications&&Notifications.marquerLue(${n.id});${n.lien?`window.location.href='${n.lien}'`:''}"
-        style="display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid #f9fafb;cursor:pointer;background:${!n.is_read?'#eff6ff':'white'};"
-        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='${!n.is_read?'#eff6ff':'white'}'">
-        <span style="font-size:16px;flex-shrink:0;margin-top:2px;">${icones[n.type_notif]||'ℹ️'}</span>
+        style="display:flex;gap:10px;padding:.625rem .875rem;border-bottom:1px solid var(--border);cursor:pointer;background:${!n.is_read?'var(--brand-50)':'transparent'};"
+        onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='${!n.is_read?'var(--brand-50)':'transparent'}'">
+        <span style="font-size:1rem;flex-shrink:0;margin-top:2px;">${icons[n.type_notif]||'ℹ️'}</span>
         <div style="flex:1;min-width:0;">
-          <p style="font-size:12px;font-weight:600;color:#111;font-family:'DM Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.titre}</p>
-          <p style="font-size:11px;color:#6b7280;font-family:'DM Sans',sans-serif;margin-top:2px;line-height:1.4;">${n.message}</p>
+          <p style="font-size:.8rem;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.titre}</p>
+          <p style="font-size:.7rem;color:var(--text-muted);margin-top:2px;line-height:1.4;">${n.message}</p>
         </div>
         ${!n.is_read?'<div style="width:7px;height:7px;border-radius:50%;background:#F97316;flex-shrink:0;margin-top:4px;"></div>':''}
       </div>`).join('');
   } catch(e) {
-    list.innerHTML = '<p style="font-size:12px;text-align:center;color:#9ca3af;padding:16px;font-family:\'DM Sans\',sans-serif;">Erreur de chargement</p>';
+    list.innerHTML = '<p style="font-size:.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;">Erreur de chargement</p>';
   }
 }
 
-// Fermeture dropdowns au clic extérieur
-document.addEventListener('click', e => {
-  [
-    ['catalogue-container', 'catalogue-dropdown'],
-    ['profile-menu-container', 'profile-dropdown'],
-    ['notif-menu-container', 'notif-dropdown'],
-  ].forEach(([cid, did]) => {
-    const c = document.getElementById(cid);
-    const d = document.getElementById(did);
-    if (c && d && !c.contains(e.target)) d.style.display = 'none';
-  });
+// Load notifs when dropdown opens
+document.getElementById('notif-menu-container')?.addEventListener('click', function() {
+  setTimeout(loadNotifs, 50);
 });
 </script>

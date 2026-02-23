@@ -2,200 +2,176 @@
 {% load static %}
 
 {% block title %}Inscription — HooYia Market{% endblock %}
-
 {% block main_class %}flex{% endblock %}
 
 {% block content %}
-<div class="flex min-h-[calc(100vh-72px)] w-full items-center justify-center bg-cream">
-  <div class="w-full max-w-lg px-6 py-10 animate-slide-up">
+<div style="min-height:calc(100vh - 72px);width:100%;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--bg);transition:background 200ms;">
+  <div class="animate-slide-up" style="width:100%;max-width:480px;">
 
-      <!-- Header -->
-      <div class="mb-7">
-        <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 mb-7">
-          <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-9 w-auto" />
-          <span class="font-display text-xl text-ink">HooYia Market</span>
-        </a>
-        <h1 class="font-display text-3xl text-ink mb-2">Créer un compte</h1>
-        <p class="text-ink/50 font-body text-sm">
-          Déjà inscrit ?
-          <a href="{% url 'users:connexion' %}" class="text-brand-600 font-medium hover:text-brand-700 transition-colors">Se connecter</a>
-        </p>
+    <!-- Logo -->
+    <a href="{% url 'products:accueil' %}" style="display:flex;align-items:center;gap:10px;margin-bottom:2rem;text-decoration:none;">
+      <img src="{% static 'img/logo.svg' %}" alt="HooYia" style="height:38px;width:auto;" />
+    </a>
+
+    <h1 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;">Créer un compte</h1>
+    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:2rem;">
+      Déjà inscrit ?
+      <a href="{% url 'users:connexion' %}" style="color:var(--brand-500);font-weight:600;text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#0D1F5C'" onmouseout="this.style.color='var(--brand-500)'">Se connecter</a>
+    </p>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for message in messages %}
+      <div style="margin-bottom:1.25rem;padding:.875rem 1rem;border-radius:.875rem;border:1px solid;font-size:.8125rem;font-weight:500;
+        {% if message.tags == 'success' %}background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2);color:#059669;
+        {% else %}background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626;{% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" novalidate style="display:flex;flex-direction:column;gap:1rem;">
+      {% csrf_token %}
+
+      <!-- Prénom + Nom -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+        <div>
+          <label class="label" for="id_prenom">Prénom</label>
+          <input type="text" name="prenom" id="id_prenom"
+            value="{{ form.prenom.value|default:'' }}"
+            placeholder="Jean"
+            class="field {% if form.prenom.errors %}error{% endif %}" />
+          {% if form.prenom.errors %}<p class="field-error">{{ form.prenom.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="label" for="id_nom">Nom</label>
+          <input type="text" name="nom" id="id_nom"
+            value="{{ form.nom.value|default:'' }}"
+            placeholder="Dupont"
+            class="field {% if form.nom.errors %}error{% endif %}" />
+          {% if form.nom.errors %}<p class="field-error">{{ form.nom.errors.0 }}</p>{% endif %}
+        </div>
       </div>
 
-      <!-- Erreurs globales -->
-      {% if messages %}
-        {% for message in messages %}
-        <div class="mb-4 px-4 py-3 rounded-xl border text-sm font-body font-medium
-          {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800
-          {% else %}bg-red-50 border-red-200 text-red-800{% endif %}">
-          {{ message }}
-        </div>
-        {% endfor %}
-      {% endif %}
-
-      <!-- Formulaire -->
-      <form method="POST" novalidate>
-        {% csrf_token %}
-
-        <!-- Ligne Prénom + Nom -->
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="label" for="id_prenom">Prénom</label>
-            <input type="text" name="prenom" id="id_prenom"
-              value="{{ form.prenom.value|default:'' }}"
-              placeholder="Jean"
-              class="field {% if form.prenom.errors %}error{% endif %}" />
-            {% if form.prenom.errors %}<p class="field-error">{{ form.prenom.errors.0 }}</p>{% endif %}
-          </div>
-          <div>
-            <label class="label" for="id_nom">Nom</label>
-            <input type="text" name="nom" id="id_nom"
-              value="{{ form.nom.value|default:'' }}"
-              placeholder="Dupont"
-              class="field {% if form.nom.errors %}error{% endif %}" />
-            {% if form.nom.errors %}<p class="field-error">{{ form.nom.errors.0 }}</p>{% endif %}
-          </div>
-        </div>
-
-        <!-- Nom d'utilisateur -->
-        <div class="mb-4">
-          <label class="label" for="id_username">Nom d'utilisateur</label>
-          <input type="text" name="username" id="id_username"
-            value="{{ form.username.value|default:'' }}"
-            placeholder="jean_dupont"
-            autocomplete="username"
-            class="field {% if form.username.errors %}error{% endif %}" />
-          {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
-        </div>
-
-        <!-- Email -->
-        <div class="mb-4">
-          <label class="label" for="id_email">Adresse email</label>
-          <input type="email" name="email" id="id_email"
-            value="{{ form.email.value|default:'' }}"
-            placeholder="jean@exemple.com"
-            autocomplete="email"
-            class="field {% if form.email.errors %}error{% endif %}" />
-          {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
-        </div>
-
-        <!-- Téléphone -->
-        <div class="mb-4">
-          <label class="label" for="id_telephone">Téléphone <span class="text-ink/30 font-normal">(optionnel)</span></label>
-          <input type="text" name="telephone" id="id_telephone"
-            value="{{ form.telephone.value|default:'' }}"
-            placeholder="+237 6XX XXX XXX"
-            class="field {% if form.telephone.errors %}error{% endif %}" />
-          {% if form.telephone.errors %}<p class="field-error">{{ form.telephone.errors.0 }}</p>{% endif %}
-        </div>
-
-        <!-- Mot de passe -->
-        <div class="mb-4">
-          <label class="label" for="id_password">Mot de passe</label>
-          <div class="relative">
-            <input type="password" name="password" id="id_password"
-              placeholder="8 caractères minimum"
-              autocomplete="new-password"
-              class="field pr-11 {% if form.password.errors %}error{% endif %}"
-              oninput="updateStrength(this.value)" />
-            <button type="button" onclick="togglePassword('id_password', this)"
-              class="absolute right-3 top-2.5 text-ink/30 hover:text-ink/60 transition-colors">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-            </button>
-          </div>
-          <!-- Indicateur de force -->
-          <div class="flex gap-1 mt-2" id="strength-bars">
-            <div class="h-1 flex-1 rounded-full bg-cream-border" id="bar-1"></div>
-            <div class="h-1 flex-1 rounded-full bg-cream-border" id="bar-2"></div>
-            <div class="h-1 flex-1 rounded-full bg-cream-border" id="bar-3"></div>
-            <div class="h-1 flex-1 rounded-full bg-cream-border" id="bar-4"></div>
-          </div>
-          {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
-        </div>
-
-        <!-- Confirmation mot de passe -->
-        <div class="mb-6">
-          <label class="label" for="id_password2">Confirmer le mot de passe</label>
-          <div class="relative">
-            <input type="password" name="password2" id="id_password2"
-              placeholder="••••••••"
-              autocomplete="new-password"
-              class="field pr-11 {% if form.password2.errors %}error{% endif %}" />
-            <button type="button" onclick="togglePassword('id_password2', this)"
-              class="absolute right-3 top-2.5 text-ink/30 hover:text-ink/60 transition-colors">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-            </button>
-          </div>
-          {% if form.password2.errors %}<p class="field-error">{{ form.password2.errors.0 }}</p>{% endif %}
-          {% if form.non_field_errors %}
-            {% for error in form.non_field_errors %}
-              <p class="field-error">{{ error }}</p>
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        <button type="submit" class="btn-primary w-full py-3 text-base">
-          Créer mon compte
-        </button>
-
-        <!-- Séparateur -->
-        <div class="flex items-center gap-3 my-2">
-          <div class="flex-1 h-px bg-cream-border"></div>
-          <span class="text-xs text-ink/30 font-body">ou</span>
-          <div class="flex-1 h-px bg-cream-border"></div>
-        </div>
-
-        <!-- Bouton Google -->
-        <button type="button" disabled
-          class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-all text-sm font-body font-medium text-ink/70 cursor-not-allowed opacity-60">
-          <svg class="h-5 w-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          S'inscrire avec Google
-        </button>
-      </form>
-
-      <!-- Info email -->
-      <div class="mt-5 flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
-        <svg class="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-        <p class="text-blue-700 font-body text-xs leading-relaxed">
-          Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les spams) pour activer votre compte.
-        </p>
+      <!-- Username -->
+      <div>
+        <label class="label" for="id_username">Nom d'utilisateur</label>
+        <input type="text" name="username" id="id_username"
+          value="{{ form.username.value|default:'' }}"
+          placeholder="jean_dupont"
+          autocomplete="username"
+          class="field {% if form.username.errors %}error{% endif %}" />
+        {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
       </div>
 
-      <p class="text-center text-xs text-ink/30 font-body mt-5">
-        En créant un compte, vous acceptez nos conditions d'utilisation.
-      </p>
+      <!-- Email -->
+      <div>
+        <label class="label" for="id_email">Adresse email</label>
+        <input type="email" name="email" id="id_email"
+          value="{{ form.email.value|default:'' }}"
+          placeholder="jean@exemple.com"
+          autocomplete="email"
+          class="field {% if form.email.errors %}error{% endif %}" />
+        {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Téléphone -->
+      <div>
+        <label class="label" for="id_telephone">
+          Téléphone <span style="font-weight:400;color:var(--text-muted);">(optionnel)</span>
+        </label>
+        <input type="text" name="telephone" id="id_telephone"
+          value="{{ form.telephone.value|default:'' }}"
+          placeholder="+237 6XX XXX XXX"
+          class="field {% if form.telephone.errors %}error{% endif %}" />
+        {% if form.telephone.errors %}<p class="field-error">{{ form.telephone.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Mot de passe -->
+      <div>
+        <label class="label" for="id_password">Mot de passe</label>
+        <div style="position:relative;">
+          <input type="password" name="password" id="id_password"
+            placeholder="8 caractères minimum"
+            autocomplete="new-password"
+            class="field {% if form.password.errors %}error{% endif %}" style="padding-right:2.75rem;"
+            oninput="updateStrength(this.value)" />
+          <button type="button" onclick="togglePwd('id_password',this)"
+            style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;"
+            onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+        <!-- Strength bars -->
+        <div style="display:flex;gap:4px;margin-top:.5rem;">
+          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-1"></div>
+          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-2"></div>
+          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-3"></div>
+          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-4"></div>
+        </div>
+        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Confirm password -->
+      <div>
+        <label class="label" for="id_password2">Confirmer le mot de passe</label>
+        <div style="position:relative;">
+          <input type="password" name="password2" id="id_password2"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            class="field {% if form.password2.errors %}error{% endif %}" style="padding-right:2.75rem;" />
+          <button type="button" onclick="togglePwd('id_password2',this)"
+            style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;"
+            onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+        {% if form.password2.errors %}<p class="field-error">{{ form.password2.errors.0 }}</p>{% endif %}
+        {% if form.non_field_errors %}{% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}{% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:.25rem;">
+        Créer mon compte
+      </button>
+
+      <div style="display:flex;align-items:center;gap:.75rem;margin:.25rem 0;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:.75rem;color:var(--text-muted);">ou</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
+      <button type="button" disabled
+        style="width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:.875rem;background:var(--surface);font-size:.875rem;font-weight:600;color:var(--text-muted);cursor:not-allowed;opacity:.55;font-family:'Plus Jakarta Sans',sans-serif;">
+        <svg height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        S'inscrire avec Google
+      </button>
+    </form>
+
+    <!-- Info email -->
+    <div style="margin-top:1.25rem;display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 1rem;background:rgba(30,58,138,.06);border:1px solid rgba(30,58,138,.12);border-radius:.875rem;">
+      <svg width="18" height="18" fill="none" stroke="var(--brand-500)" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <p style="font-size:.75rem;color:var(--brand-500);line-height:1.6;">Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les spams) pour activer votre compte.</p>
+    </div>
+
+    <p style="text-align:center;font-size:.75rem;color:var(--text-muted);margin-top:1.25rem;">
+      En créant un compte, vous acceptez nos conditions d'utilisation.
+    </p>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-function togglePassword(fieldId, btn) {
+function togglePwd(fieldId, btn) {
   const input = document.getElementById(fieldId);
   input.type = input.type === 'password' ? 'text' : 'password';
-  btn.style.opacity = input.type === 'text' ? '0.7' : '0.3';
 }
-
 function updateStrength(val) {
   const bars = [1,2,3,4].map(i => document.getElementById('bar-' + i));
-  const score = [
-    val.length >= 8,
-    /[A-Z]/.test(val),
-    /[0-9]/.test(val),
-    /[^A-Za-z0-9]/.test(val),
-  ].filter(Boolean).length;
-
-  const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+  const score = [val.length >= 8, /[A-Z]/.test(val), /[0-9]/.test(val), /[^A-Za-z0-9]/.test(val)].filter(Boolean).length;
+  const colors = ['#ef4444','#f97316','#eab308','#10b981'];
   bars.forEach((b, i) => {
-    b.className = 'h-1 flex-1 rounded-full ' + (i < score ? colors[score - 1] : 'bg-cream-border');
+    b.style.background = i < score ? colors[score - 1] : 'var(--border)';
   });
 }
 </script>

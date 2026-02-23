@@ -1,72 +1,84 @@
 {% load static %}
-<!-- ══════════════════════════════════════════════════
-     FOOTER — HooYia Market
-══════════════════════════════════════════════════ -->
-<footer class="bg-[#0d1b4b] text-white/60 mt-auto" style="position:relative;z-index:10;">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<footer style="background:#0D1F5C;color:rgba(255,255,255,.7);font-family:'Plus Jakarta Sans',sans-serif;">
 
-    <!-- ── Ligne principale ── -->
-    <div class="py-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-white/8">
+  <!-- Main footer content -->
+  <div style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2.5rem;">
 
-      <!-- Marque -->
-      <div class="md:col-span-1">
-        <a href="{% url 'products:accueil' %}" class="flex items-center gap-2.5 mb-4">
-          <img src="{% static 'img/logo.svg' %}" alt="HooYia" class="h-7 w-auto bg-white rounded-md p-1 opacity-100" />
-          <span class="font-display text-lg text-white leading-none">HooYia Market</span>
+    <!-- Brand column -->
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
+        <div style="background:white;border-radius:10px;padding:5px 10px;">
+          <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:34px;width:auto;" />
+        </div>
+      </div>
+      <p style="font-size:.8125rem;line-height:1.7;color:rgba(255,255,255,.5);max-width:220px;">
+        Marketplace de référence pour l'électronique et l'informatique au Cameroun.
+      </p>
+      <!-- Social links -->
+      <div style="display:flex;gap:.625rem;margin-top:1.25rem;">
+        {% for label, href in social_links|default:"" %}
+        <a href="{{ href }}" style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;transition:all 200ms;text-decoration:none;color:rgba(255,255,255,.6);"
+           onmouseover="this.style.background='rgba(249,115,22,.25)';this.style.borderColor='rgba(249,115,22,.4)';this.style.color='#F97316'"
+           onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.1)';this.style.color='rgba(255,255,255,.6)'">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
         </a>
-        <p class="text-sm font-body leading-relaxed text-white/45">
-          La marketplace tech de référence.<br/>Produits soigneusement sélectionnés.
-        </p>
-      </div>
-
-      <!-- Catalogue -->
-      <div>
-        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Catalogue</h4>
-        <ul class="space-y-2.5">
-          <li><a href="{% url 'products:liste' %}" class="text-sm font-body hover:text-white transition-colors">Tous les produits</a></li>
-          <li><a href="{% url 'products:liste' %}?en_vedette=true" class="text-sm font-body hover:text-white transition-colors">Produits en vedette</a></li>
-          <li><a href="{% url 'products:liste' %}?promo=true" class="text-sm font-body hover:text-white transition-colors">Promotions</a></li>
-        </ul>
-      </div>
-
-      <!-- Compte -->
-      <div>
-        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Mon compte</h4>
-        <ul class="space-y-2.5">
-          {% if user.is_authenticated %}
-          <li><a href="{% url 'users:profil' %}" class="text-sm font-body hover:text-white transition-colors">Mon profil</a></li>
-          <li><a href="{% url 'orders:historique' %}" class="text-sm font-body hover:text-white transition-colors">Mes commandes</a></li>
-          <li><a href="{% url 'cart:panier' %}" class="text-sm font-body hover:text-white transition-colors">Mon panier</a></li>
-          {% else %}
-          <li><a href="{% url 'users:connexion' %}" class="text-sm font-body hover:text-white transition-colors">Connexion</a></li>
-          <li><a href="{% url 'users:inscription' %}" class="text-sm font-body hover:text-white transition-colors">S'inscrire</a></li>
-          {% endif %}
-        </ul>
-      </div>
-
-      <!-- Contact -->
-      <div>
-        <h4 class="text-xs font-body font-semibold text-white/30 uppercase tracking-widest mb-4">Support</h4>
-        <ul class="space-y-2.5">
-          {% if user.is_authenticated %}
-          <li><a href="/chat/" class="text-sm font-body hover:text-white transition-colors">Contacter le support</a></li>
-          {% endif %}
-          <li><span class="text-sm font-body text-white/30">contact@hooyia.market</span></li>
-        </ul>
+        {% empty %}
+        <!-- Placeholder socials -->
+        {% for i in "123" %}
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.2);"></div>
+        </div>
+        {% endfor %}
+        {% endfor %}
       </div>
     </div>
 
-    <!-- ── Ligne copyright ── -->
-    <div class="py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p class="text-xs font-body text-white/30">
-        © {% now "Y" %} HooYia Market. Tous droits réservés.
-      </p>
-      <div class="flex items-center gap-1">
-        <span class="inline-flex items-center gap-1.5 text-xs font-body text-white/20">
-          <span class="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></span>
-          Tous systèmes opérationnels
-        </span>
-      </div>
+    <!-- Nav columns -->
+    <div>
+      <h4 style="font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;color:white;margin-bottom:1rem;letter-spacing:.02em;">Catalogue</h4>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
+        <li><a href="{% url 'products:liste' %}" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Tous les produits</a></li>
+        <li><a href="{% url 'products:liste' %}?ordering=-date_creation" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Nouveautés</a></li>
+        <li><a href="{% url 'products:liste' %}?promo=true" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Promotions</a></li>
+        <li><a href="{% url 'products:liste' %}?en_vedette=true" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">En vedette</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 style="font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;color:white;margin-bottom:1rem;letter-spacing:.02em;">Mon compte</h4>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'users:profil' %}" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Mon profil</a></li>
+        {% if not user.is_staff %}<li><a href="{% url 'orders:historique' %}" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Mes commandes</a></li>{% endif %}
+        <li><a href="/chat/" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Messages</a></li>
+        {% else %}
+        <li><a href="{% url 'users:connexion' %}" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Connexion</a></li>
+        <li><a href="{% url 'users:inscription' %}" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">S'inscrire</a></li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <div>
+      <h4 style="font-family:'Sora',sans-serif;font-size:.875rem;font-weight:700;color:white;margin-bottom:1rem;letter-spacing:.02em;">Informations</h4>
+      <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
+        <li><a href="#" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">À propos</a></li>
+        <li><a href="#" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Livraison</a></li>
+        <li><a href="#" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Retours</a></li>
+        <li><a href="#" style="font-size:.8125rem;color:rgba(255,255,255,.55);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Confidentialité</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Footer bottom bar -->
+  <div style="border-top:1px solid rgba(255,255,255,.08);padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+    <p style="font-size:.75rem;color:rgba(255,255,255,.3);">
+      &copy; {% now "Y" %} HooYia Market. Tous droits réservés.
+    </p>
+    <div style="display:flex;align-items:center;gap:1.25rem;">
+      <a href="#" style="font-size:.75rem;color:rgba(255,255,255,.3);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='rgba(255,255,255,.6)'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Conditions d'utilisation</a>
+      <a href="#" style="font-size:.75rem;color:rgba(255,255,255,.3);text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='rgba(255,255,255,.6)'" onmouseout="this.style.color='rgba(255,255,255,.3)'">Politique de confidentialité</a>
     </div>
   </div>
+
 </footer>

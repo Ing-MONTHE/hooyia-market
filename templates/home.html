@@ -8,84 +8,87 @@
 <!-- ══════════════════════════════════════════
      HERO
 ══════════════════════════════════════════ -->
-<section class="relative bg-ink overflow-hidden">
-  <!-- Image de fond floutée -->
-  <div class="absolute inset-0 pointer-events-none">
-    <img src="{% static 'img/Image_de_fond.png' %}" alt="" class="w-full h-full object-cover object-center opacity-20 blur-sm scale-110" />
-    <div class="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/60"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40"></div>
+<section style="position:relative;background:#0D1F5C;overflow:hidden;min-height:520px;display:flex;align-items:center;">
+  <!-- Background image -->
+  <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+    <img src="{% static 'img/Image_de_fond.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;opacity:.12;filter:blur(2px);transform:scale(1.08);" />
+    <div style="position:absolute;inset:0;background:linear-gradient(120deg,#0D1F5C 40%,rgba(13,31,92,.8) 70%,rgba(30,58,138,.6) 100%);"></div>
+    <!-- Decorative shapes -->
+    <div style="position:absolute;right:-80px;top:-80px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.12) 0%,transparent 70%);"></div>
+    <div style="position:absolute;left:30%;bottom:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,138,.4) 0%,transparent 70%);"></div>
   </div>
 
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-    <div class="max-w-2xl">
+  <div style="position:relative;max-width:1400px;margin:0 auto;padding:5rem 1.5rem 5rem;width:100%;">
+    <div style="max-width:600px;">
+
       <!-- Pill badge -->
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/12 border border-brand-500/20 mb-6 animate-fade-in">
-        <span class="h-1.5 w-1.5 rounded-full bg-brand-400 animate-pulse"></span>
-        <span class="text-xs font-body font-medium text-brand-300 tracking-wide">Marketplace tech de confiance</span>
+      <div class="animate-fade-in" style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:99px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);margin-bottom:1.5rem;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#F97316;animation:pulse-dot 2s infinite;display:block;"></span>
+        <span style="font-size:.75rem;font-weight:700;color:rgba(249,115,22,.9);letter-spacing:.06em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif;">Marketplace tech de confiance</span>
       </div>
 
-      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-5 animate-slide-up" style="animation-delay:0.05s">
+      <h1 class="animate-slide-up" style="font-family:'Sora',sans-serif;font-size:clamp(2rem,5vw,3.25rem);font-weight:800;color:white;line-height:1.1;margin-bottom:1.25rem;animation-delay:.05s;">
         L'électronique<br/>
-        <span class="text-brand-400">à votre portée.</span>
+        <span style="color:#F97316;">à votre portée.</span>
       </h1>
 
-      <p class="text-base md:text-lg text-white/55 font-body leading-relaxed mb-8 animate-slide-up" style="animation-delay:0.1s">
-        Des produits soigneusement sélectionnés, des prix transparents,
-        une livraison rapide. HooYia, c'est le commerce tech qui vous respecte.
+      <p class="animate-slide-up" style="font-size:1rem;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:2rem;animation-delay:.12s;font-family:'Plus Jakarta Sans',sans-serif;max-width:460px;">
+        Des produits soigneusement sélectionnés, des prix transparents, une livraison rapide. HooYia, c'est le commerce tech qui vous respecte.
       </p>
 
-      <div class="flex flex-wrap gap-3 animate-slide-up" style="animation-delay:0.15s">
-        <a href="{% url 'products:liste' %}" class="btn-primary px-6 py-3 text-base">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+      <div class="animate-slide-up" style="display:flex;flex-wrap:wrap;gap:.75rem;animation-delay:.18s;">
+        <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg" style="gap:.625rem;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
           Voir le catalogue
         </a>
         {% if not user.is_authenticated %}
-        <a href="{% url 'users:inscription' %}" class="btn-secondary px-6 py-3 text-base bg-white/15 border-white/30 text-white hover:bg-white/25">
+        <a href="{% url 'users:inscription' %}" style="display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 1.75rem;border-radius:0.875rem;font-size:1rem;font-weight:600;color:white;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.06);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;transition:all 200ms;backdrop-filter:blur(4px);"
+          onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.borderColor='rgba(255,255,255,.5)'"
+          onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.borderColor='rgba(255,255,255,.3)'">
           Créer un compte
         </a>
         {% endif %}
       </div>
 
       <!-- Stats -->
-      <div class="flex flex-wrap gap-6 mt-12 animate-fade-in" style="animation-delay:0.25s">
+      <div class="animate-fade-in" style="display:flex;flex-wrap:wrap;gap:2rem;margin-top:3rem;animation-delay:.3s;">
         <div>
-          <p class="text-2xl font-display text-white font-bold">500+</p>
-          <p class="text-xs text-white/40 font-body mt-0.5">Produits disponibles</p>
+          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">500+</p>
+          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Produits disponibles</p>
         </div>
-        <div class="w-px bg-white/10"></div>
+        <div style="width:1px;background:rgba(255,255,255,.1);"></div>
         <div>
-          <p class="text-2xl font-display text-white font-bold">24h</p>
-          <p class="text-xs text-white/40 font-body mt-0.5">Expédition rapide</p>
+          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">24h</p>
+          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Expédition rapide</p>
         </div>
-        <div class="w-px bg-white/10"></div>
+        <div style="width:1px;background:rgba(255,255,255,.1);"></div>
         <div>
-          <p class="text-2xl font-display text-white font-bold">4.8★</p>
-          <p class="text-xs text-white/40 font-body mt-0.5">Note moyenne</p>
+          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">4.8★</p>
+          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Note moyenne</p>
         </div>
       </div>
+
     </div>
   </div>
 </section>
 
 
 <!-- ══════════════════════════════════════════
-     CATÉGORIES RACINES
+     CATEGORIES BAR
 ══════════════════════════════════════════ -->
 {% if categories %}
-<section class="bg-cream-warm border-b border-cream-border">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
-      <a href="{% url 'products:liste' %}"
-         class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-ink text-white text-sm font-body font-medium transition-all">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-        Tout voir
+<section style="background:var(--surface);border-bottom:1px solid var(--border);transition:background 200ms,border-color 200ms;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 1.5rem;">
+    <div style="display:flex;align-items:center;gap:.5rem;overflow-x:auto;padding:.875rem 0;-ms-overflow-style:none;scrollbar-width:none;" class="scrollbar-hide">
+      <a href="{% url 'products:liste' %}" class="cat-pill active" style="flex-shrink:0;">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Tout
       </a>
       {% for cat in categories %}
-      <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
-         class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-cream-border text-sm font-body font-medium text-ink hover:border-brand-400 hover:text-brand-600 transition-all">
+      <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="cat-pill" style="flex-shrink:0;">
         {{ cat.nom }}
         {% if cat.nombre_produits %}
-        <span class="text-xs text-white/70 bg-ink/70 rounded-full px-1.5 py-0.5 leading-none">{{ cat.nombre_produits }}</span>
+        <span style="font-size:.65rem;font-weight:700;background:rgba(0,0,0,.08);border-radius:99px;padding:1px 6px;">{{ cat.nombre_produits }}</span>
         {% endif %}
       </a>
       {% endfor %}
@@ -96,87 +99,90 @@
 
 
 <!-- ══════════════════════════════════════════
-     PRODUITS EN VEDETTE
+     FEATURED PRODUCTS
 ══════════════════════════════════════════ -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+<section style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;">
 
-  <div class="flex items-end justify-between mb-8">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
     <div>
-      <p class="text-xs font-body font-semibold text-brand-500 uppercase tracking-widest mb-1">Sélection du moment</p>
-      <h2 class="font-display text-2xl md:text-3xl text-ink">Produits en vedette</h2>
+      <p class="section-label">Sélection du moment</p>
+      <h2 class="section-title">Produits en vedette</h2>
     </div>
-    <a href="{% url 'products:liste' %}?en_vedette=true" class="hidden sm:flex items-center gap-1.5 text-sm font-body font-medium text-brand-600 hover:text-brand-700 transition-colors">
+    <a href="{% url 'products:liste' %}?en_vedette=true" style="display:none;align-items:center;gap:.375rem;font-size:.875rem;font-weight:600;color:var(--brand-500);text-decoration:none;transition:gap 200ms;" class="see-all-link"
+       onmouseover="this.style.gap='.625rem'" onmouseout="this.style.gap='.375rem'">
       Voir tout
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
     </a>
   </div>
 
-  <!-- Grille produits — chargée via JS -->
-  <div id="featured-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    <!-- Skeletons pendant le chargement -->
+  <!-- Product grid -->
+  <div id="featured-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
     {% for i in "12345678" %}
-    <div class="card p-3">
-      <div class="skeleton aspect-square rounded-lg mb-3"></div>
-      <div class="skeleton h-3 rounded w-3/4 mb-2"></div>
-      <div class="skeleton h-3 rounded w-1/2 mb-3"></div>
-      <div class="skeleton h-5 rounded w-1/3"></div>
+    <div class="card" style="padding:1rem;">
+      <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
+      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div>
+      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;margin-bottom:.75rem;"></div>
+      <div class="skeleton" style="height:1.25rem;border-radius:.375rem;width:35%;"></div>
     </div>
     {% endfor %}
   </div>
 
-  <!-- Lien mobile -->
-  <div class="mt-6 text-center sm:hidden">
-    <a href="{% url 'products:liste' %}?en_vedette=true" class="btn-secondary px-6 py-2.5">
-      Voir tous les produits en vedette
-    </a>
+  <!-- Mobile "voir tout" -->
+  <div style="margin-top:1.5rem;text-align:center;">
+    <a href="{% url 'products:liste' %}?en_vedette=true" class="btn btn-secondary">Voir tous les produits en vedette</a>
   </div>
 </section>
 
 
 <!-- ══════════════════════════════════════════
-     BANNIÈRE PROMO
+     PROMO BANNER
 ══════════════════════════════════════════ -->
-<section class="bg-ink mx-4 sm:mx-6 lg:mx-8 rounded-xl3 overflow-hidden mb-14 max-w-7xl lg:mx-auto">
-  <div class="relative px-8 md:px-12 py-10 md:py-14 flex flex-col md:flex-row items-center justify-between gap-6">
-    <div class="absolute inset-0 pointer-events-none">
-      <div class="absolute right-0 top-0 w-72 h-72 bg-brand-500/10 rounded-full translate-x-1/3 -translate-y-1/3 blur-2xl"></div>
+<section style="max-width:1400px;margin:0 auto;padding:0 1.5rem 3.5rem;">
+  <div style="position:relative;background:linear-gradient(120deg,#0D1F5C 0%,#1E3A8A 100%);border-radius:1.25rem;overflow:hidden;padding:3rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start;">
+    <!-- Decorative circle -->
+    <div style="position:absolute;right:-40px;top:-40px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.15) 0%,transparent 70%);"></div>
+    <div style="position:absolute;right:120px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%);"></div>
+
+    <div style="position:relative;">
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(249,115,22,.18);border:1px solid rgba(249,115,22,.3);margin-bottom:.875rem;">
+        <span style="font-size:.7rem;font-weight:800;color:#F97316;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif;">Offres limitées</span>
+      </div>
+      <h3 style="font-family:'Sora',sans-serif;font-size:clamp(1.375rem,3vw,1.875rem);font-weight:800;color:white;line-height:1.2;margin-bottom:.5rem;">
+        Jusqu'à <span style="color:#F97316;">−40%</span> sur les promos
+      </h3>
+      <p style="font-size:.875rem;color:rgba(255,255,255,.45);font-family:'Plus Jakarta Sans',sans-serif;">Stocks limités · Renouvelés chaque semaine</p>
     </div>
-    <div class="relative text-center md:text-left">
-      <p class="text-brand-400 text-sm font-body font-semibold uppercase tracking-widest mb-2">Offres limitées</p>
-      <h3 class="font-display text-2xl md:text-3xl text-white mb-2">Jusqu'à −40% sur les promos</h3>
-      <p class="text-white/50 font-body text-sm">Stocks limités · Renouvelés chaque semaine</p>
-    </div>
-    <a href="{% url 'products:liste' %}?promo=true" class="relative flex-shrink-0 btn-primary px-7 py-3 text-base">
+    <a href="{% url 'products:liste' %}?promo=true" class="btn btn-primary" style="position:relative;gap:.5rem;">
       Voir les promotions
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
     </a>
   </div>
 </section>
 
 
 <!-- ══════════════════════════════════════════
-     NOUVEAUX PRODUITS
+     NEW PRODUCTS
 ══════════════════════════════════════════ -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-16">
+<section style="max-width:1400px;margin:0 auto;padding:0 1.5rem 4rem;">
 
-  <div class="flex items-end justify-between mb-8">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
     <div>
-      <p class="text-xs font-body font-semibold text-brand-500 uppercase tracking-widest mb-1">Vient d'arriver</p>
-      <h2 class="font-display text-2xl md:text-3xl text-ink">Nouveautés</h2>
+      <p class="section-label">Vient d'arriver</p>
+      <h2 class="section-title">Nouveautés</h2>
     </div>
-    <a href="{% url 'products:liste' %}?ordering=-date_creation" class="hidden sm:flex items-center gap-1.5 text-sm font-body font-medium text-brand-600 hover:text-brand-700 transition-colors">
+    <a href="{% url 'products:liste' %}?ordering=-date_creation" style="display:none;align-items:center;gap:.375rem;font-size:.875rem;font-weight:600;color:var(--brand-500);text-decoration:none;transition:gap 200ms;" class="see-all-link"
+       onmouseover="this.style.gap='.625rem'" onmouseout="this.style.gap='.375rem'">
       Voir tout
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
     </a>
   </div>
 
-  <div id="new-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  <div id="new-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
     {% for i in "1234" %}
-    <div class="card p-3">
-      <div class="skeleton aspect-square rounded-lg mb-3"></div>
-      <div class="skeleton h-3 rounded w-3/4 mb-2"></div>
-      <div class="skeleton h-3 rounded w-1/2 mb-3"></div>
-      <div class="skeleton h-5 rounded w-1/3"></div>
+    <div class="card" style="padding:1rem;">
+      <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
+      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div>
+      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;"></div>
     </div>
     {% endfor %}
   </div>
@@ -184,53 +190,60 @@
 
 
 <!-- ══════════════════════════════════════════
-     AVANTAGES
+     VALUE PROPS
 ══════════════════════════════════════════ -->
-<section class="bg-cream-warm border-t border-cream-border">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<section style="background:var(--surface-2);border-top:1px solid var(--border);transition:background 200ms,border-color 200ms;">
+  <div style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;">
 
-      <div class="flex items-start gap-4">
-        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        </div>
-        <div>
-          <h4 class="font-body font-semibold text-ink text-sm mb-1">Produits vérifiés</h4>
-          <p class="text-xs text-ink/50 font-body leading-relaxed">Chaque produit est contrôlé avant mise en ligne.</p>
-        </div>
+    {% for icon, title, desc in value_props|default:"" %}
+    <div style="display:flex;align-items:flex-start;gap:1rem;">…</div>
+    {% empty %}
+
+    <!-- Produits vérifiés -->
+    <div style="display:flex;align-items:flex-start;gap:1rem;">
+      <div style="width:44px;height:44px;border-radius:.875rem;background:var(--brand-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--brand-100);">
+        <svg width="20" height="20" fill="none" stroke="#1E3A8A" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-
-      <div class="flex items-start gap-4">
-        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8 5-8-5V5l8 5 8-5v2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11v8h16v-8"/></svg>
-        </div>
-        <div>
-          <h4 class="font-body font-semibold text-ink text-sm mb-1">Livraison rapide</h4>
-          <p class="text-xs text-ink/50 font-body leading-relaxed">Expédition sous 24h pour les commandes confirmées.</p>
-        </div>
+      <div>
+        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Produits vérifiés</h4>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Chaque produit est contrôlé avant mise en ligne.</p>
       </div>
-
-      <div class="flex items-start gap-4">
-        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-        </div>
-        <div>
-          <h4 class="font-body font-semibold text-ink text-sm mb-1">Support réactif</h4>
-          <p class="text-xs text-ink/50 font-body leading-relaxed">Chat en direct avec notre équipe, 7j/7.</p>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-4">
-        <div class="flex-shrink-0 h-10 w-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-        </div>
-        <div>
-          <h4 class="font-body font-semibold text-ink text-sm mb-1">Paiement sécurisé</h4>
-          <p class="text-xs text-ink/50 font-body leading-relaxed">Transactions protégées, données chiffrées.</p>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Livraison rapide -->
+    <div style="display:flex;align-items:flex-start;gap:1rem;">
+      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(249,115,22,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(249,115,22,.15);">
+        <svg width="20" height="20" fill="none" stroke="#F97316" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+      </div>
+      <div>
+        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Livraison rapide</h4>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Expédition sous 24h pour les commandes confirmées.</p>
+      </div>
+    </div>
+
+    <!-- Support -->
+    <div style="display:flex;align-items:flex-start;gap:1rem;">
+      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(16,185,129,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,.15);">
+        <svg width="20" height="20" fill="none" stroke="#10b981" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </div>
+      <div>
+        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Support réactif</h4>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Chat en direct avec notre équipe, 7j/7.</p>
+      </div>
+    </div>
+
+    <!-- Paiement sécurisé -->
+    <div style="display:flex;align-items:flex-start;gap:1rem;">
+      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(139,92,246,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(139,92,246,.15);">
+        <svg width="20" height="20" fill="none" stroke="#7c3aed" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      </div>
+      <div>
+        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Paiement sécurisé</h4>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Transactions protégées, données chiffrées.</p>
+      </div>
+    </div>
+
+    {% endfor %}
   </div>
 </section>
 
@@ -238,77 +251,77 @@
 
 
 {% block extra_scripts %}
+<style>
+@media (min-width: 640px) {
+  #featured-grid { grid-template-columns: repeat(3, 1fr); }
+  #new-grid { grid-template-columns: repeat(3, 1fr); }
+  .see-all-link { display: flex !important; }
+}
+@media (min-width: 1024px) {
+  #featured-grid { grid-template-columns: repeat(4, 1fr); }
+  #new-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
 <script>
-/**
- * home.js — Chargement produits en vedette + nouveautés
- * Consomme GET /api/produits/?en_vedette=true
- * et GET /api/produits/?ordering=-date_creation&page_size=4
- */
+const CURRENT_USER_IS_ADMIN = {% if user.is_staff or user.is_admin or user.is_vendeur %}true{% else %}false{% endif %};
 
-// ── Template carte produit ──
 function cardHTML(p) {
   const img = p.image_principale
-    ? `<img src="${p.image_principale}" alt="${p.nom}" class="product-img w-full" loading="lazy" />`
-    : `<div class="product-img w-full bg-cream-warm flex items-center justify-center text-ink/20">
-        <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    ? `<img src="${p.image_principale}" alt="${p.nom}" style="width:100%;height:100%;object-fit:cover;border-radius:.75rem;transition:transform .4s ease;" class="prod-img" loading="lazy" />`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--border-2);border-radius:.75rem;background:var(--surface-2);">
+        <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
        </div>`;
 
   const prix = p.prix_promo
-    ? `<span class="price-promo">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} FCFA</span>
-       <span class="price-original ml-1">${parseFloat(p.prix).toLocaleString('fr-FR')}</span>`
-    : `<span class="price-main">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} FCFA</span>`;
+    ? `<span class="price-promo">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} <small style="font-size:.7em;">FCFA</small></span>
+       <span class="price-original" style="margin-left:4px;">${parseFloat(p.prix).toLocaleString('fr-FR')}</span>`
+    : `<span class="price-main">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} <small style="font-size:.7em;">FCFA</small></span>`;
 
   const remise = p.pourcentage_remise > 0
-    ? `<span class="badge badge-orange absolute top-2 left-2">−${p.pourcentage_remise}%</span>`
-    : '';
-
+    ? `<span class="badge badge-orange" style="position:absolute;top:.5rem;left:.5rem;">−${p.pourcentage_remise}%</span>` : '';
   const stock = !p.est_en_stock
-    ? `<span class="badge badge-gray absolute top-2 right-2">Épuisé</span>`
-    : '';
-
+    ? `<span class="badge badge-gray" style="position:absolute;top:.5rem;right:.5rem;">Épuisé</span>` : '';
   const etoiles = p.note_moyenne > 0
-    ? `<div class="flex items-center gap-1 mt-1">
-        <span class="text-yellow-400 text-xs">★</span>
-        <span class="text-xs font-body text-ink/50">${parseFloat(p.note_moyenne).toFixed(1)} (${p.nombre_avis || 0})</span>
-       </div>`
-    : '';
+    ? `<div style="display:flex;align-items:center;gap:4px;margin-top:.25rem;">
+        <span style="color:#f59e0b;font-size:.75rem;">★</span>
+        <span style="font-size:.7rem;color:var(--text-muted);">${parseFloat(p.note_moyenne).toFixed(1)} (${p.nombre_avis||0})</span>
+       </div>` : '';
 
   return `
-    <a href="/produits/${p.slug}/" class="card p-3 flex flex-col group block animate-slide-up">
-      <div class="relative mb-3 overflow-hidden rounded-lg">
-        ${img}
-        ${remise}
-        ${stock}
+    <a href="/produits/${p.slug}/" class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden;text-decoration:none;"
+       onmouseover="this.querySelector('.prod-img')&&(this.querySelector('.prod-img').style.transform='scale(1.04)')"
+       onmouseout="this.querySelector('.prod-img')&&(this.querySelector('.prod-img').style.transform='scale(1)')">
+      <div style="position:relative;overflow:hidden;aspect-ratio:1;background:var(--surface-2);">
+        ${img}${remise}${stock}
       </div>
-      <p class="text-xs font-body text-ink/40 mb-0.5">${p.categorie_nom || ''}</p>
-      <h3 class="text-sm font-body font-medium text-ink leading-snug line-clamp-2 flex-1 group-hover:text-brand-600 transition-colors">${p.nom}</h3>
-      ${etoiles}
-      <div class="mt-2 flex items-center justify-between gap-2">
-        <div>${prix}</div>
-        ${p.est_en_stock && !CURRENT_USER_IS_ADMIN ? `
-        <button onclick="ajouterPanier(event, ${p.id})"
-          class="flex-shrink-0 h-8 w-8 rounded-lg bg-brand-50 hover:bg-brand-500 text-brand-500 hover:text-white flex items-center justify-center transition-all duration-150">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        </button>` : ''}
+      <div style="padding:.875rem;flex:1;display:flex;flex-direction:column;">
+        <p style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">${p.categorie_nom||''}</p>
+        <h3 style="font-size:.875rem;font-weight:600;color:var(--text-primary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:.5rem;font-family:'Plus Jakarta Sans',sans-serif;">${p.nom}</h3>
+        ${etoiles}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.625rem;">
+          <div style="min-width:0;">${prix}</div>
+          ${p.est_en_stock && !CURRENT_USER_IS_ADMIN ? `
+          <button onclick="ajouterPanier(event,${p.id})"
+            style="flex-shrink:0;width:34px;height:34px;border-radius:.625rem;background:var(--brand-50);border:1px solid var(--brand-100);color:var(--brand-500);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 200ms;font-size:1.125rem;line-height:1;"
+            onmouseover="this.style.background='#1E3A8A';this.style.color='white';this.style.borderColor='#1E3A8A'"
+            onmouseout="this.style.background='var(--brand-50)';this.style.color='var(--brand-500)';this.style.borderColor='var(--brand-100)'">
+            +
+          </button>` : ''}
+        </div>
       </div>
     </a>`;
 }
 
-// ── Rendu dans une grille ──
 function renderGrid(gridId, produits) {
   const grid = document.getElementById(gridId);
   if (!grid) return;
   if (!produits.length) {
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Aucun produit disponible.</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;">Aucun produit disponible.</div>`;
     return;
   }
   grid.innerHTML = produits.map(cardHTML).join('');
 }
 
-// Constante exposée depuis Django pour contrôle des droits côté JS
-const CURRENT_USER_IS_ADMIN = {% if user.is_staff or user.is_admin or user.is_vendeur %}true{% else %}false{% endif %};
-
-// ── Ajouter au panier ──
 async function ajouterPanier(e, produitId) {
   e.preventDefault();
   e.stopPropagation();
@@ -316,12 +329,10 @@ async function ajouterPanier(e, produitId) {
   try {
     await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
     window.toast('Produit ajouté au panier !', 'success');
-    // Met à jour badge navbar
     const badge = document.getElementById('cart-badge');
     if (badge) {
       const count = (parseInt(badge.textContent) || 0) + 1;
       badge.textContent = count;
-      badge.classList.remove('hidden');
     }
   } catch {}
   {% else %}
@@ -329,24 +340,18 @@ async function ajouterPanier(e, produitId) {
   {% endif %}
 }
 
-// ── Chargement au DOMContentLoaded ──
 document.addEventListener('DOMContentLoaded', async () => {
-  // Produits en vedette
   try {
     const data = await API.get('/api/produits/?en_vedette=true&page_size=8', { silentError: true });
     renderGrid('featured-grid', data?.results || data || []);
   } catch {
-    document.getElementById('featured-grid').innerHTML =
-      `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Impossible de charger les produits.</div>`;
+    document.getElementById('featured-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les produits.</div>`;
   }
-
-  // Nouveautés
   try {
     const data = await API.get('/api/produits/?ordering=-date_creation&page_size=4', { silentError: true });
     renderGrid('new-grid', data?.results || data || []);
   } catch {
-    document.getElementById('new-grid').innerHTML =
-      `<div class="col-span-full text-center py-10 text-ink/40 font-body text-sm">Impossible de charger les nouveautés.</div>`;
+    document.getElementById('new-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les nouveautés.</div>`;
   }
 });
 </script>

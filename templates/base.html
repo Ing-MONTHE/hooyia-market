@@ -1,158 +1,130 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
+<html lang="fr" data-theme="light" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}HooYia Market{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}HooYia Market — Électronique & Informatique au meilleur prix{% endblock %}" />
 
-  <!-- ── Tailwind CSS CDN ── -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-  <!-- ── Tailwind Config ── -->
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             brand: {
-              50:  '#eff4ff',
-              100: '#dce7fd',
-              200: '#b8d0fb',
-              300: '#7aaaf5',
-              400: '#2d52c4',
-              500: '#1E3A8A',  /* bleu marine principal */
-              600: '#0D1F5C',
-              700: '#091747',
-              800: '#060f30',
-              900: '#030921',
+              50:  'var(--brand-50)',
+              100: 'var(--brand-100)',
+              200: 'var(--brand-200)',
+              300: 'var(--brand-300)',
+              400: 'var(--brand-400)',
+              500: 'var(--brand-500)',
+              600: 'var(--brand-600)',
             },
             accent: {
               400: '#fb923c',
-              500: '#F97316',  /* orange accent */
+              500: '#F97316',
               600: '#ea6000',
-            },
-            ink: {
-              DEFAULT: '#0f0e0c',
-              soft:    '#1c1a17',
-              muted:   '#3d3a35',
-            },
-            cream: {
-              DEFAULT: '#faf8f5',
-              warm:    '#f4f1eb',
-              border:  '#e8e3da',
             },
           },
           fontFamily: {
-            display: ['"Playfair Display"', 'Georgia', 'serif'],
-            body:    ['"DM Sans"', 'sans-serif'],
+            display: ['Sora', 'system-ui', 'sans-serif'],
+            body:    ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
             mono:    ['"JetBrains Mono"', 'monospace'],
-          },
-          boxShadow: {
-            'card':  '0 2px 12px 0 rgba(15,14,12,0.08)',
-            'card-hover': '0 8px 32px 0 rgba(15,14,12,0.14)',
-            'btn':   '0 2px 8px 0 rgba(249,115,22,0.35)',
-          },
-          borderRadius: {
-            'xl2': '1rem',
-            'xl3': '1.5rem',
-          },
-          animation: {
-            'fade-in':    'fadeIn 0.4s ease forwards',
-            'slide-up':   'slideUp 0.4s ease forwards',
-            'toast-in':   'toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'toast-out':  'toastOut 0.25s ease forwards',
-          },
-          keyframes: {
-            fadeIn:  { from: { opacity: '0' }, to: { opacity: '1' } },
-            slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-            toastIn:  { from: { opacity: '0', transform: 'translateX(110%)' }, to: { opacity: '1', transform: 'translateX(0)' } },
-            toastOut: { from: { opacity: '1', transform: 'translateX(0)' }, to: { opacity: '0', transform: 'translateX(110%)' } },
           },
         },
       },
     }
   </script>
 
-  <!-- ── Google Fonts ── -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- ── Custom Base CSS ── -->
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+
+  <!-- Dark mode init (avant rendu pour éviter le flash) -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('hooyia-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
 
   {% block extra_head %}{% endblock %}
 </head>
 
-<body class="font-body text-ink min-h-screen flex flex-col antialiased" style="background:#f6f8fc;">
+<body style="background:var(--bg);color:var(--text-primary);font-family:'Plus Jakarta Sans',sans-serif;" class="min-h-screen flex flex-col antialiased transition-colors duration-200">
 
-  <!-- ════════════════════════════════════════
-       NAVBAR
-  ════════════════════════════════════════ -->
+  <!-- NAVBAR -->
   {% include 'partials/navbar.html' %}
 
-  <!-- ════════════════════════════════════════
-       MESSAGES DJANGO (Flash)
-  ════════════════════════════════════════ -->
+  <!-- FLASH MESSAGES -->
   {% if messages %}
   <div id="django-messages" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
     {% for message in messages %}
-    <div class="message-toast pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl2 shadow-card border animate-toast-in
-      {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800
-      {% elif message.tags == 'error'   %}bg-red-50   border-red-200   text-red-800
-      {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800
-      {% else %}bg-white border-cream-border text-ink{% endif %}">
-      <!-- Icône -->
-      <span class="mt-0.5 flex-shrink-0 text-lg leading-none">
-        {% if message.tags == 'success' %}✓
-        {% elif message.tags == 'error' %}✕
-        {% elif message.tags == 'warning' %}⚠
-        {% else %}ℹ{% endif %}
+    <div class="message-toast pointer-events-auto animate-toast-in"
+      style="background:var(--surface);border:1px solid var(--border);border-radius:0.875rem;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;box-shadow:var(--shadow-lg);
+      {% if message.tags == 'success' %}border-left:3px solid #10b981;{% elif message.tags == 'error' %}border-left:3px solid #ef4444;{% elif message.tags == 'warning' %}border-left:3px solid #f59e0b;{% else %}border-left:3px solid var(--brand-500);{% endif %}">
+      <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">
+        {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
       </span>
-      <p class="text-sm font-body font-medium leading-snug flex-1">{{ message }}</p>
-      <button onclick="this.closest('.message-toast').remove()" class="ml-1 opacity-40 hover:opacity-100 transition-opacity text-xs leading-none mt-0.5">✕</button>
+      <p style="font-size:0.8125rem;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5;">{{ message }}</p>
+      <button onclick="this.closest('.message-toast').remove()" style="opacity:.4;background:none;border:none;cursor:pointer;color:var(--text-primary);font-size:0.75rem;padding:0;line-height:1;flex-shrink:0;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='.4'">✕</button>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <!-- ════════════════════════════════════════
-       CONTENU PRINCIPAL
-  ════════════════════════════════════════ -->
+  <!-- MAIN CONTENT -->
   <main class="flex-1 {% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ════════════════════════════════════════
-       FOOTER
-  ════════════════════════════════════════ -->
+  <!-- FOOTER -->
   {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
 
-  <!-- ════════════════════════════════════════
-       TOAST CONTAINER (JS dynamique)
-  ════════════════════════════════════════ -->
+  <!-- TOAST CONTAINER -->
   {% include 'partials/toast.html' %}
 
-  <!-- ════════════════════════════════════════
-       SCRIPTS GLOBAUX
-  ════════════════════════════════════════ -->
+  <!-- SCRIPTS -->
   <script src="{% static 'js/api.js' %}"></script>
   {% if user.is_authenticated %}
   <script src="{% static 'js/notifications.js' %}"></script>
   {% endif %}
 
-  <!-- Auto-dismiss Django messages après 5s -->
+  <!-- Auto-dismiss flash -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.message-toast').forEach((el, i) => {
         setTimeout(() => {
           el.style.animation = 'toastOut 0.25s ease forwards';
           setTimeout(() => el.remove(), 250);
-        }, 5000 + i * 300);
+        }, 4500 + i * 300);
       });
     });
+
+    // Dark mode toggle global
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      html.classList.toggle('dark', !isDark);
+      localStorage.setItem('hooyia-theme', next);
+      // Update all toggle icons
+      document.querySelectorAll('[data-theme-icon]').forEach(el => {
+        el.textContent = isDark ? '🌙' : '☀️';
+      });
+    }
   </script>
 
   {% block extra_scripts %}{% endblock %}

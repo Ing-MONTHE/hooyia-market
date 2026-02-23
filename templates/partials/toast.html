@@ -1,52 +1,47 @@
-<!-- ══════════════════════════════════════════════════
-     TOAST CONTAINER — Notifications JS dynamiques
-     Utilisé par api.js et les pages JS via window.toast()
-══════════════════════════════════════════════════ -->
-<div id="toast-container"
-     class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
-  <!-- Les toasts sont injectés ici par JS -->
+<!-- Toast container for JS-triggered notifications -->
+<div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.625rem;max-width:360px;width:100%;pointer-events:none;">
 </div>
 
 <script>
-/**
- * window.toast(message, type, duration)
- * type : 'success' | 'error' | 'warning' | 'info'
- * Appelé par api.js et n'importe quelle page JS.
- */
-window.toast = function(message, type = 'info', duration = 4500) {
+window.toast = function(message, type = 'info', duration = 4000) {
   const container = document.getElementById('toast-container');
   if (!container) return;
 
   const icons = {
-    success: '✓',
-    error:   '✕',
-    warning: '⚠',
-    info:    'ℹ',
+    success: `<svg width="16" height="16" fill="none" stroke="#10b981" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`,
+    error:   `<svg width="16" height="16" fill="none" stroke="#ef4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>`,
+    warning: `<svg width="16" height="16" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
+    info:    `<svg width="16" height="16" fill="none" stroke="var(--brand-500)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/></svg>`,
   };
-  const colors = {
-    success: 'bg-green-50  border-green-200  text-green-800',
-    error:   'bg-red-50    border-red-200    text-red-800',
-    warning: 'bg-amber-50  border-amber-200  text-amber-800',
-    info:    'bg-white     border-cream-border text-ink',
-  };
+  const borderColors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: 'var(--brand-500)' };
 
-  const el = document.createElement('div');
-  el.className = `pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-card border animate-toast-in ${colors[type] || colors.info}`;
-  el.innerHTML = `
-    <span class="mt-0.5 flex-shrink-0 text-base leading-none font-semibold">${icons[type] || 'ℹ'}</span>
-    <p class="text-sm font-body font-medium leading-snug flex-1">${message}</p>
-    <button class="ml-1 opacity-40 hover:opacity-100 transition-opacity text-xs leading-none mt-0.5">✕</button>
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:3px solid ${borderColors[type] || borderColors.info};
+    border-radius:0.875rem;
+    box-shadow:var(--shadow-lg);
+    padding:.875rem 1rem;
+    display:flex;
+    align-items:flex-start;
+    gap:.75rem;
+    pointer-events:all;
+    animation:toastIn .35s cubic-bezier(0.16,1,0.3,1) forwards;
+  `;
+  toast.innerHTML = `
+    <span style="flex-shrink:0;margin-top:1px;">${icons[type] || icons.info}</span>
+    <p style="font-size:.8125rem;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5;">${message}</p>
+    <button onclick="this.closest('div').remove()" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;transition:color 150ms;line-height:1;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
   `;
 
-  el.querySelector('button').addEventListener('click', () => dismiss(el));
-  container.appendChild(el);
+  container.appendChild(toast);
 
-  const timer = setTimeout(() => dismiss(el), duration);
-
-  function dismiss(node) {
-    clearTimeout(timer);
-    node.style.animation = 'toastOut 0.25s ease forwards';
-    setTimeout(() => node.remove(), 250);
-  }
+  setTimeout(() => {
+    toast.style.animation = 'toastOut .25s ease forwards';
+    setTimeout(() => toast.remove(), 250);
+  }, duration);
 };
 </script>
