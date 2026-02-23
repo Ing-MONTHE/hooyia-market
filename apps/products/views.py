@@ -321,6 +321,100 @@ def gestion_categories(request):
 
 
 @user_passes_test(est_admin, login_url='/compte/connexion/')
+def api_categories_crud(request):
+    """Endpoint JSON pour le CRUD des catégories depuis le dashboard."""
+    from django.http import JsonResponse
+    import json
+
+    if request.method == 'GET':
+        # Liste toutes les catégories (racines + sous-catégories)
+        cats = Categorie.objects.filter(est_active=True).select_related('parent').order_by('tree_id', 'lft')
+        data = []
+        for c in cats:
+            data.append({
+                'id': c.id,
+                'nom': c.nom,
+                'slug': c.slug,
+                'description': c.description,
+                'parent_id': c.parent_id,
+                'parent_nom': c.parent.nom if c.parent else None,
+                'est_active': c.est_active,
+                'image': c.image.url if c.image else None,
+                'niveau': 'Niveau 1' if c.parent else 'Niveau 0',
+                'nb_produits': c.produits.count(),
+            })
+        return JsonResponse({'categories': data})
+
+    elif request.method == 'POST':
+        nom = request.POST.get('nom', '').strip()
+        if not nom:
+            return JsonResponse({'error': 'Le nom est obligatoire.'}, status=400)
+        description = request.POST.get('description', '').strip()
+        parent_id = request.POST.get('parent_id') or None
+        est_active = request.POST.get('est_active', 'true') == 'true'
+        cat_id = request.POST.get('cat_id')
+
+        try:
+            if cat_id:
+                # Modification
+                cat = get_object_or_404(Categorie, id=cat_id)
+                cat.nom = nom
+                cat.description = description
+                cat.parent_id = parent_id
+                cat.est_active = est_active
+                if 'image' in request.FILES:
+                    cat.image = request.FILES['image']
+                cat.save()
+                action = 'modified'
+            else:
+                # Création
+                cat = Categorie.objects.create(
+                    nom=nom,
+                    description=description,
+                    parent_id=parent_id,
+                    est_active=est_active,
+                )
+                if 'image' in request.FILES:
+                    cat.image = request.FILES['image']
+                    cat.save()
+                action = 'created'
+            cache.delete('categories_api')
+            cache.delete('categories_racines')
+            return JsonResponse({
+                'success': True,
+                'action': action,
+                'categorie': {
+                    'id': cat.id,
+                    'nom': cat.nom,
+                    'slug': cat.slug,
+                    'parent_id': cat.parent_id,
+                    'parent_nom': cat.parent.nom if cat.parent else None,
+                    'image': cat.image.url if cat.image else None,
+                    'est_active': cat.est_active,
+                    'niveau': 'Niveau 1' if cat.parent else 'Niveau 0',
+                    'nb_produits': cat.produits.count(),
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    elif request.method == 'DELETE':
+        body = json.loads(request.body or '{}')
+        cat_id = body.get('cat_id')
+        if not cat_id:
+            return JsonResponse({'error': 'cat_id manquant'}, status=400)
+        cat = get_object_or_404(Categorie, id=cat_id)
+        nom = cat.nom
+        cat.est_active = False
+        cat.save()
+        cache.delete('categories_api')
+        cache.delete('categories_racines')
+        return JsonResponse({'success': True, 'nom': nom})
+
+    return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+
+
+@user_passes_test(est_admin, login_url='/compte/connexion/')
 def supprimer_categorie(request, cat_id):
     """Suppression (désactivation) d'une catégorie."""
     cat = get_object_or_404(Categorie, id=cat_id)

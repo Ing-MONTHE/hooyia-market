@@ -13,4 +13,5 @@ urlpatterns = [
     path('administration/',              views.admin_dashboard,  name='admin_dashboard'),
     path('administration/categories/',   views.gestion_categories, name='gestion_categories'),
     path('administration/categories/supprimer/<int:cat_id>/', views.supprimer_categorie, name='supprimer_categorie'),
+    path('administration/categories/api/', views.api_categories_crud, name='api_categories_crud'),
 ]

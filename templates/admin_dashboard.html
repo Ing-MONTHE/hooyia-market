@@ -304,6 +304,16 @@ body { background: var(--bg) !important; }
 @media (max-width: 960px)  { .da-row-3-1, .da-row-2 { grid-template-columns: 1fr; } }
 @media (max-width: 800px)  { .da-sidebar { display: none; } }
 @media (max-width: 540px)  { .da-kpi-grid { grid-template-columns: 1fr; } .da-main { padding: 16px; } }
+
+/* ── Formulaire inline ajouter produit ── */
+.ap-lbl { display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px; }
+.ap-req { font-weight:400;color:rgba(13,31,92,.35);text-transform:none;letter-spacing:0;margin-left:4px; }
+.ap-opt { font-weight:400;color:rgba(13,31,92,.25);text-transform:none;letter-spacing:0;margin-left:4px; }
+.ap-input { width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13.5px;color:#111;font-family:'DM Sans',sans-serif;background:#fafbff;transition:border .15s,box-shadow .15s;box-sizing:border-box; }
+.ap-input:focus { outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1);background:white; }
+.ap-select { appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230D1F5C' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer; }
+.ap-flash-ok  { padding:11px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:8px;background:#d1fae5;color:#065f46;border:1px solid #6ee7b7; }
+.ap-flash-err { padding:11px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:8px;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5; }
 </style>
 {% endblock %}
 
@@ -400,7 +410,7 @@ body { background: var(--bg) !important; }
           <h1>Tableau de bord</h1>
           <div class="da-ph-sub" id="date-now"></div>
         </div>
-        <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter produit</a>
+        <button class="da-btn-primary" onclick="navToAjouter()">＋ Ajouter produit</button>
       </div>
 
       <!-- KPIs -->
@@ -450,19 +460,19 @@ body { background: var(--bg) !important; }
         <div class="da-card">
           <div class="da-card-hd"><h3>⚡ Actions rapides</h3></div>
           <div class="qa-list">
-            <a href="{% url 'products:ajouter' %}" class="qa or">
+            <a href="#" onclick="navToAjouter();return false;" class="qa or">
               <span class="qa-ico">➕</span> Ajouter un produit
             </a>
-            <a href="#" onclick="nav(document.querySelector('[data-section=commandes]'))" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=commandes]'));return false;" class="qa bl">
               <span class="qa-ico">🛒</span> Commandes en attente
             </a>
-            <a href="#" onclick="nav(document.querySelector('[data-section=avis]'))" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=avis]'));return false;" class="qa bl">
               <span class="qa-ico">⭐</span> Avis à modérer
             </a>
             <button class="qa gr" onclick="nav(document.querySelector('[data-section=stocks]'))">
               <span class="qa-ico">⚠️</span> Vérifier les stocks
             </button>
-            <a href="#" onclick="nav(document.querySelector('[data-section=utilisateurs]'))" class="qa bl">
+            <a href="#" onclick="nav(document.querySelector('[data-section=utilisateurs]'));return false;" class="qa bl">
               <span class="qa-ico">👤</span> Gérer utilisateurs
             </a>
           </div>
@@ -511,7 +521,7 @@ body { background: var(--bg) !important; }
     <div id="sec-produits" class="da-section">
       <div class="da-ph">
         <div><h1>Produits</h1><div class="da-ph-sub">Gestion du catalogue</div></div>
-        <a href="{% url 'products:ajouter' %}" class="da-btn-primary">＋ Ajouter</a>
+        <button class="da-btn-primary" onclick="navToAjouter()">＋ Ajouter</button>
       </div>
       <div class="da-card">
         <div class="da-card-hd">
@@ -521,7 +531,7 @@ body { background: var(--bg) !important; }
               <button class="vt-btn active" id="vt-prod-table" onclick="setView('produits','table')" title="Tableau">☰</button>
               <button class="vt-btn" id="vt-prod-card" onclick="setView('produits','card')" title="Cartes">⊞</button>
             </div>
-            <a href="/produits/ajouter/">Ajouter →</a>
+            <button class="link" onclick="navToAjouter()">Ajouter →</button>
           </div>
         </div>
         <table class="da-table" id="view-produits-table">
@@ -536,32 +546,117 @@ body { background: var(--bg) !important; }
     <div id="sec-categories" class="da-section">
       <div class="da-ph">
         <div><h1>Catégories</h1><div class="da-ph-sub">Arborescence du catalogue</div></div>
-        <a href="/administration/categories/" class="da-btn-primary">＋ Ajouter</a>
+        <button class="da-btn-primary" onclick="navToAjouterCat()">＋ Ajouter</button>
       </div>
       <div class="da-card">
         <div class="da-card-hd">
           <h3>Toutes les catégories</h3>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="view-toggle">
-              <button class="vt-btn active" id="vt-cat-table" onclick="setView('categories','table')" title="Tableau">☰</button>
-              <button class="vt-btn" id="vt-cat-card" onclick="setView('categories','card')" title="Cartes">⊞</button>
-            </div>
-            <a href="/administration/categories/">Gérer →</a>
-          </div>
+          <button class="link" onclick="navToAjouterCat()">Ajouter →</button>
         </div>
-        <table class="da-table" id="view-categories-table">
-          <thead><tr><th>Nom</th><th>Slug</th><th>Niveau</th><th>Produits</th></tr></thead>
-          <tbody id="tbl-categories"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
-        </table>
-        <div id="view-categories-card" class="card-grid" style="display:none;"></div>
+        <div id="cat-list-body" style="padding:0;">
+          <div class="da-loading" style="padding:20px;">Chargement…</div>
+        </div>
       </div>
     </div>
+
+    <!-- ──────── AJOUTER / MODIFIER CATÉGORIE ──────── -->
+    <div id="sec-ajouter-categorie" class="da-section">
+      <div class="da-ph">
+        <div>
+          <h1 id="cat-form-title">➕ Nouvelle catégorie</h1>
+          <div class="da-ph-sub" id="cat-form-sub">Remplissez le formulaire pour créer une catégorie</div>
+        </div>
+        <button class="da-btn-primary" style="background:#64748b;" onclick="navBackCat()">← Retour aux catégories</button>
+      </div>
+
+      <div id="cat-flash" style="display:none;margin-bottom:16px;"></div>
+
+      <div id="cat-edit-banner" style="display:none;padding:12px 16px;border-radius:10px;background:linear-gradient(135deg,rgba(30,58,138,.08),rgba(249,115,22,.06));border:1.5px solid rgba(30,58,138,.2);margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:8px;">
+        ✏️ Vous modifiez : <strong id="cat-edit-nom"></strong>
+      </div>
+
+      <form id="cat-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="cat-id" name="cat_id" value="" />
+
+        <!-- Infos de base -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>📝 Informations</h3></div>
+          <div style="padding:20px;">
+            <div style="margin-bottom:14px;">
+              <label class="ap-lbl">Nom <span class="ap-req">(obligatoire)</span></label>
+              <input type="text" name="nom" id="cat-nom" placeholder="Ex: Smartphones, Ordinateurs portables…" class="ap-input" required />
+            </div>
+            <div style="margin-bottom:14px;">
+              <label class="ap-lbl">Description <span class="ap-opt">(optionnel)</span></label>
+              <textarea name="description" id="cat-description" rows="3" placeholder="Courte description de la catégorie…" class="ap-input" style="resize:vertical;min-height:70px;"></textarea>
+            </div>
+            <div>
+              <label class="ap-lbl">Catégorie parente <span class="ap-opt">(vide = catégorie principale)</span></label>
+              <select name="parent_id" id="cat-parent" class="ap-input ap-select">
+                <option value="">— Aucun parent (catégorie racine) —</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>🖼️ Image <span style="font-weight:400;color:#94a3b8;font-size:12px;">(optionnel)</span></h3></div>
+          <div style="padding:20px;">
+            <div id="cat-drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#fafbff;transition:border .15s,background .15s;"
+              onclick="document.getElementById('cat-image').click()"
+              ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='#f0f4ff';"
+              ondragleave="this.style.borderColor='';this.style.background='#fafbff';"
+              ondrop="catHandleDrop(event)">
+              <div id="cat-img-placeholder">
+                <div style="font-size:32px;margin-bottom:8px;">📷</div>
+                <p style="font-size:13px;color:rgba(13,31,92,.5);"><strong style="color:var(--orange);">Cliquez</strong> ou glissez votre image ici</p>
+                <p style="font-size:12px;color:rgba(13,31,92,.35);">JPG, PNG, WebP — recommandé 400×400px</p>
+              </div>
+              <img id="cat-img-preview" style="display:none;width:100px;height:100px;border-radius:10px;object-fit:cover;" />
+            </div>
+            <input type="file" id="cat-image" name="image" accept="image/*" onchange="catPreviewImage(this)" style="display:none;" />
+          </div>
+        </div>
+
+        <!-- Statut -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>⚙️ Statut</h3></div>
+          <div style="padding:20px;display:flex;align-items:center;gap:12px;">
+            <label style="position:relative;display:inline-block;width:44px;height:24px;">
+              <input type="checkbox" id="cat-active" name="est_active" checked style="opacity:0;width:0;height:0;">
+              <span class="toggle-slider" style="position:absolute;inset:0;border-radius:24px;background:#d1d5e8;cursor:pointer;transition:.2s;"></span>
+            </label>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--navy);">Catégorie active</div>
+              <div style="font-size:11.5px;color:rgba(13,31,92,.4);">Visible sur le site</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="da-card" style="margin-bottom:28px;">
+          <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <button type="button" id="cat-btn-delete" onclick="catSupprimerCurrent()" style="display:none;padding:10px 18px;border-radius:8px;border:1.5px solid #fecaca;background:#fff5f5;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑 Supprimer</button>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button type="button" onclick="navBackCat()" style="padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;background:white;color:var(--navy);border:1.5px solid var(--border);">Annuler</button>
+              <button type="submit" id="cat-btn-submit" class="da-btn-primary">➕ Créer la catégorie</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+
 
     <!-- ──────── STOCKS ──────── -->
     <div id="sec-stocks" class="da-section">
       <div class="da-ph">
         <div><h1>Stocks</h1><div class="da-ph-sub">Gestion des stocks</div></div>
-        <a href="/produits/ajouter/" class="da-btn-primary">＋ Nouveau produit</a>
+        <button class="da-btn-primary" onclick="navToAjouter()">＋ Nouveau produit</button>
       </div>
       <!-- KPIs stocks -->
       <div class="da-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
@@ -669,7 +764,7 @@ body { background: var(--bg) !important; }
     <div id="sec-messages" class="da-section">
       <div class="da-ph"><div><h1>Conversations</h1><div class="da-ph-sub">Messages entre utilisateurs</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Toutes les conversations</h3><a href="#" onclick="nav(document.querySelector('[data-section=messages]'))"></span></div>
+        <div class="da-card-hd"><h3>Toutes les conversations</h3><button class="link" onclick="nav(document.querySelector('[data-section=messages]'))">Voir tout →</button></div>
         <table class="da-table">
           <thead><tr><th>Participants</th><th>Dernier message</th><th>Messages non lus</th><th>Date</th></tr></thead>
           <tbody id="tbl-messages"><tr><td colspan="4" class="da-loading">Chargement…</td></tr></tbody>
@@ -681,7 +776,7 @@ body { background: var(--bg) !important; }
     <div id="sec-notifications" class="da-section">
       <div class="da-ph"><div><h1>Notifications</h1><div class="da-ph-sub">Historique des notifications</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Notifications récentes</h3><a href="#" onclick="nav(document.querySelector('[data-section=notifications]'))"></span></div>
+        <div class="da-card-hd"><h3>Notifications récentes</h3><button class="link" onclick="nav(document.querySelector('[data-section=notifications]'))">Voir tout →</button></div>
         <table class="da-table">
           <thead><tr><th>Type</th><th>Destinataire</th><th>Titre</th><th>Date</th><th>Lu</th></tr></thead>
           <tbody id="tbl-notifs"><tr><td colspan="5" class="da-loading">Chargement…</td></tr></tbody>
@@ -693,9 +788,147 @@ body { background: var(--bg) !important; }
     <div id="sec-audit" class="da-section">
       <div class="da-ph"><div><h1>Journal d'audit</h1><div class="da-ph-sub">Traçabilité des actions</div></div></div>
       <div class="da-card">
-        <div class="da-card-hd"><h3>Activité du système</h3><a href="#" onclick="nav(document.querySelector('[data-section=audit]'))"></span></div>
+        <div class="da-card-hd"><h3>Activité du système</h3></div>
         <div id="tbl-audit"><div class="da-loading">Chargement…</div></div>
       </div>
+    </div>
+
+    <!-- ──────── AJOUTER PRODUIT ──────── -->
+    <div id="sec-ajouter-produit" class="da-section">
+      <div class="da-ph">
+        <div>
+          <h1>➕ Nouveau produit</h1>
+          <div class="da-ph-sub">Remplissez le formulaire pour publier un produit</div>
+        </div>
+        <button class="da-btn-primary" style="background:#64748b;" onclick="navBack()">← Retour aux produits</button>
+      </div>
+
+      <div id="ap-flash" style="display:none;"></div>
+
+      <form id="ap-form" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Infos de base -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>📝 Informations de base</h3></div>
+          <div style="padding:20px;">
+            <div style="margin-bottom:14px;">
+              <label class="ap-lbl">Nom du produit <span class="ap-req">(obligatoire)</span></label>
+              <input type="text" name="nom" id="ap-nom" placeholder="Ex: Samsung Galaxy S24 Ultra 256Go" class="ap-input" required />
+            </div>
+            <div style="margin-bottom:14px;">
+              <label class="ap-lbl">Description courte <span class="ap-opt">(max 500 caractères)</span></label>
+              <input type="text" name="description_courte" id="ap-desc-courte" placeholder="Résumé affiché dans la liste produits" maxlength="500" class="ap-input" />
+            </div>
+            <div style="margin-bottom:14px;">
+              <label class="ap-lbl">Description complète <span class="ap-req">(obligatoire)</span></label>
+              <textarea name="description" id="ap-desc" rows="5" placeholder="Description détaillée : caractéristiques, contenu de la boîte, garantie…" class="ap-input" style="resize:vertical;min-height:90px;" required></textarea>
+            </div>
+            <div>
+              <label class="ap-lbl">Catégorie <span class="ap-req">(obligatoire)</span></label>
+              <select name="categorie" id="ap-categorie" class="ap-input ap-select" required>
+                <option value="">— Choisir une catégorie —</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.nom }}</option>
+                {% for sous in cat.sous_categories.all %}
+                <option value="{{ sous.id }}">　↳ {{ sous.nom }}</option>
+                {% endfor %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prix & Stock -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>💰 Prix &amp; Stock</h3></div>
+          <div style="padding:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <label class="ap-lbl">Prix (FCFA) <span class="ap-req">(obligatoire)</span></label>
+                <div style="position:relative;">
+                  <input type="number" name="prix" id="ap-prix" placeholder="150000" min="0" step="500" class="ap-input" style="padding-right:56px;" required />
+                  <span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:11px;color:rgba(13,31,92,.35);font-weight:600;pointer-events:none;">FCFA</span>
+                </div>
+              </div>
+              <div>
+                <label class="ap-lbl">Prix promo <span class="ap-opt">(optionnel)</span></label>
+                <div style="position:relative;">
+                  <input type="number" name="prix_promo" id="ap-prix-promo" placeholder="120000" min="0" step="500" class="ap-input" style="padding-right:56px;" />
+                  <span style="position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:11px;color:rgba(13,31,92,.35);font-weight:600;pointer-events:none;">FCFA</span>
+                </div>
+                <div id="ap-remise" style="display:none;margin-top:5px;display:inline-block;background:#d1fae5;color:#065f46;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;"></div>
+              </div>
+              <div>
+                <label class="ap-lbl">Stock <span class="ap-req">(obligatoire)</span></label>
+                <input type="number" name="stock" id="ap-stock" value="0" min="0" class="ap-input" required />
+              </div>
+              <div>
+                <label class="ap-lbl">Seuil d'alerte <span class="ap-opt">(défaut : 5)</span></label>
+                <input type="number" name="stock_minimum" id="ap-stock-min" value="5" min="0" class="ap-input" />
+                <p style="font-size:11.5px;color:rgba(13,31,92,.4);margin-top:4px;">Alerte si stock ≤ cette valeur</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statut & Options -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>⚙️ Statut &amp; Options</h3></div>
+          <div style="padding:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <label class="ap-lbl">Statut de vente</label>
+                <select name="statut" id="ap-statut" class="ap-input ap-select">
+                  <option value="actif">✅ Actif — visible et en vente</option>
+                  <option value="inactif">🔒 Inactif — masqué</option>
+                  <option value="epuise">❌ Épuisé</option>
+                  <option value="archive">📦 Archivé</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding-top:28px;">
+                <label style="position:relative;display:inline-block;width:44px;height:24px;">
+                  <input type="checkbox" name="en_vedette" id="ap-vedette" style="opacity:0;width:0;height:0;">
+                  <span class="toggle-slider" style="position:absolute;inset:0;border-radius:24px;background:#d1d5e8;cursor:pointer;transition:.2s;"></span>
+                </label>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--navy);">Produit en vedette</div>
+                  <div style="font-size:11.5px;color:rgba(13,31,92,.4);">Affiché sur la page d'accueil</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="da-card" style="margin-bottom:16px;">
+          <div class="da-card-hd"><h3>🖼️ Images du produit</h3></div>
+          <div style="padding:20px;">
+            <div id="ap-drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:border .15s,background .15s;background:#fafbff;"
+              onclick="document.getElementById('ap-images').click()"
+              ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='#f0f4ff';"
+              ondragleave="this.style.borderColor='';this.style.background='#fafbff';"
+              ondrop="apHandleDrop(event)">
+              <div style="font-size:32px;margin-bottom:8px;">📷</div>
+              <p style="font-size:13px;color:rgba(13,31,92,.5);"><strong style="color:var(--orange);">Cliquez</strong> ou glissez vos images ici</p>
+              <p style="font-size:12px;color:rgba(13,31,92,.35);">JPG, PNG, WebP — Max 5 Mo/image — 1ère image = principale</p>
+            </div>
+            <input type="file" name="images" id="ap-images" multiple accept="image/*" onchange="apPreviewImages(this.files)" style="display:none;" />
+            <div id="ap-preview-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="da-card" style="margin-bottom:28px;">
+          <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <button type="button" onclick="navBack()" style="padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;background:white;color:var(--navy);border:1.5px solid var(--border);transition:all .15s;display:inline-flex;align-items:center;gap:7px;">Annuler</button>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" name="action" value="draft" id="ap-btn-draft" style="padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;background:white;color:var(--navy);border:1.5px solid var(--border);transition:all .15s;display:inline-flex;align-items:center;gap:7px;">💾 Brouillon</button>
+              <button type="submit" name="action" value="publish" id="ap-btn-pub" style="padding:10px 22px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,var(--orange),var(--orange-d));color:white;box-shadow:0 2px 8px rgba(249,115,22,.3);display:inline-flex;align-items:center;gap:7px;">🚀 Publier le produit</button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
 
   </main>
@@ -727,8 +960,367 @@ const statut = s => STATUTS[s] || `<span class="st st-off">${s}</span>`;
 
 const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
 
-/* ─── Navigation ─── */
-const ALL_SECTIONS = ['overview','produits','categories','stocks','commandes','avis','paniers','utilisateurs','messages','notifications','audit'];
+/* ─── GESTION CATÉGORIES INLINE ─── */
+
+async function catLoadList() {
+  const body = document.getElementById('cat-list-body');
+  if (!body) return;
+  body.innerHTML = '<div class="da-loading" style="padding:20px;">Chargement…</div>';
+  try {
+    const resp = await fetch('/administration/categories/api/', { credentials: 'same-origin' });
+    const data = await resp.json();
+    const cats = data.categories || [];
+    if (!cats.length) {
+      body.innerHTML = '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:13px;">Aucune catégorie. Créez-en une !</div>';
+      return;
+    }
+    body.innerHTML = `<table class="da-table" style="width:100%;">
+      <thead><tr><th>Produit</th><th>Slug</th><th>Niveau</th><th>Produits</th><th></th></tr></thead>
+      <tbody>
+        ${cats.map(c => {
+          const isParent = !c.parent_id;
+          const niveauBadge = isParent
+            ? '<span class="st st-off">● Niveau 0</span>'
+            : '<span class="st" style="background:#f0fdf4;color:#16a34a;">● Niveau 1</span>';
+          const imgEl = c.image
+            ? `<img src="${c.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0;">`
+            : `<div style="width:36px;height:36px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${isParent?'🗂':'📁'}</div>`;
+          const indent = isParent ? '' : '└ ';
+          return `<tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                ${imgEl}
+                <span style="font-size:13px;font-weight:600;color:var(--navy);">${indent}${c.nom}</span>
+              </div>
+            </td>
+            <td class="mono">${c.slug}</td>
+            <td>${niveauBadge}</td>
+            <td style="color:#64748b;">${c.nb_produits || '—'}</td>
+            <td style="white-space:nowrap;">
+              <button onclick="navToModifierCat(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="font-size:11.5px;color:var(--blue-l);text-decoration:none;font-weight:600;background:none;border:none;cursor:pointer;">Modifier →</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    body.innerHTML = '<div style="padding:20px;color:var(--red);font-size:13px;">Erreur de chargement.</div>';
+  }
+}
+
+async function catLoadParentSelect(selectedId = null) {
+  try {
+    const resp = await fetch('/administration/categories/api/', { credentials: 'same-origin' });
+    const data = await resp.json();
+    const cats = (data.categories || []).filter(c => !c.parent_id);
+    const sel = document.getElementById('cat-parent');
+    if (!sel) return;
+    const currentId = document.getElementById('cat-id')?.value;
+    sel.innerHTML = '<option value="">— Aucun parent (catégorie racine) —</option>';
+    cats.forEach(c => {
+      if (currentId && String(c.id) === String(currentId)) return; // pas soi-même
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.nom;
+      if (selectedId && c.id === selectedId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } catch(e) {}
+}
+
+function navToAjouterCat() {
+  ALL_SECTIONS.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.className = 'da-section';
+  });
+  document.getElementById('sec-ajouter-categorie').className = 'da-section shown';
+  document.querySelectorAll('.da-sb-item').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('[data-section="categories"]');
+  if (btn) btn.classList.add('active');
+  history.replaceState(null, '', '#ajouter-categorie');
+  // Reset form — nouvelle catégorie
+  catFormReset();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function navToModifierCat(cat) {
+  ALL_SECTIONS.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.className = 'da-section';
+  });
+  document.getElementById('sec-ajouter-categorie').className = 'da-section shown';
+  document.querySelectorAll('.da-sb-item').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('[data-section="categories"]');
+  if (btn) btn.classList.add('active');
+  history.replaceState(null, '', '#ajouter-categorie');
+  // Pré-remplir le formulaire
+  document.getElementById('cat-id').value = cat.id;
+  document.getElementById('cat-nom').value = cat.nom;
+  document.getElementById('cat-description').value = cat.description || '';
+  document.getElementById('cat-active').checked = cat.est_active;
+  document.getElementById('cat-form-title').textContent = '✏️ Modifier la catégorie';
+  document.getElementById('cat-form-sub').textContent = `Mise à jour de « ${cat.nom} »`;
+  document.getElementById('cat-edit-nom').textContent = cat.nom;
+  const banner = document.getElementById('cat-edit-banner');
+  banner.style.display = 'flex';
+  document.getElementById('cat-btn-submit').textContent = '✓ Enregistrer les modifications';
+  document.getElementById('cat-btn-delete').style.display = 'inline-flex';
+  document.getElementById('cat-flash').style.display = 'none';
+  // Image
+  const preview = document.getElementById('cat-img-preview');
+  const placeholder = document.getElementById('cat-img-placeholder');
+  if (cat.image) {
+    preview.src = cat.image;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+  } else {
+    preview.style.display = 'none';
+    placeholder.style.display = 'block';
+  }
+  catLoadParentSelect(cat.parent_id);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function navBackCat() {
+  const btn = document.querySelector('[data-section="categories"]');
+  if (btn) nav(btn);
+}
+
+function catFormReset() {
+  document.getElementById('cat-id').value = '';
+  document.getElementById('cat-form').reset();
+  document.getElementById('cat-form-title').textContent = '➕ Nouvelle catégorie';
+  document.getElementById('cat-form-sub').textContent = 'Remplissez le formulaire pour créer une catégorie';
+  document.getElementById('cat-edit-banner').style.display = 'none';
+  document.getElementById('cat-btn-submit').textContent = '➕ Créer la catégorie';
+  document.getElementById('cat-btn-delete').style.display = 'none';
+  document.getElementById('cat-img-preview').style.display = 'none';
+  document.getElementById('cat-img-placeholder').style.display = 'block';
+  document.getElementById('cat-flash').style.display = 'none';
+  catLoadParentSelect();
+}
+
+function catPreviewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('cat-img-preview');
+      const placeholder = document.getElementById('cat-img-placeholder');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function catHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '';
+  e.currentTarget.style.background = '#fafbff';
+  const input = document.getElementById('cat-image');
+  const dt = new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+  input.files = dt.files;
+  catPreviewImage(input);
+}
+
+async function catSupprimerCurrent() {
+  const id = document.getElementById('cat-id').value;
+  const nom = document.getElementById('cat-nom').value;
+  if (!id || !confirm(`Supprimer la catégorie "${nom}" ?`)) return;
+  const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+  try {
+    const resp = await fetch('/administration/categories/api/', {
+      method: 'DELETE',
+      headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cat_id: id }),
+      credentials: 'same-origin'
+    });
+    const data = await resp.json();
+    if (data.success) {
+      showToast(`Catégorie "${data.nom}" supprimée`, 'success');
+      loaded.delete('categories');
+      navBackCat();
+    } else {
+      showToast(data.error || 'Erreur', 'error');
+    }
+  } catch(e) {
+    showToast('Erreur réseau', 'error');
+  }
+}
+
+// Soumission formulaire catégorie
+(function initCatForm() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cat-form');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const flashEl = document.getElementById('cat-flash');
+      const btn = document.getElementById('cat-btn-submit');
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳…';
+
+      const fd = new FormData(form);
+      fd.set('est_active', document.getElementById('cat-active').checked ? 'true' : 'false');
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+      try {
+        const resp = await fetch('/administration/categories/api/', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrf },
+          body: fd,
+          credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data.success) {
+          const verb = data.action === 'created' ? 'créée' : 'modifiée';
+          flashEl.className = 'ap-flash-ok';
+          flashEl.innerHTML = `✓ Catégorie « ${data.categorie.nom} » ${verb} avec succès ! <button onclick="navBackCat()" style="margin-left:12px;padding:4px 12px;border-radius:6px;border:1.5px solid #065f46;background:transparent;color:#065f46;font-weight:600;font-size:12px;cursor:pointer;">Voir la liste →</button>`;
+          flashEl.style.display = 'flex';
+          loaded.delete('categories');
+          if (data.action === 'created') catFormReset();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          flashEl.className = 'ap-flash-err';
+          flashEl.innerHTML = '✗ ' + (data.error || 'Erreur inconnue');
+          flashEl.style.display = 'flex';
+        }
+      } catch(err) {
+        flashEl.className = 'ap-flash-err';
+        flashEl.innerHTML = '✗ Erreur réseau : ' + err.message;
+        flashEl.style.display = 'flex';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  });
+})();
+
+/* ─── Navigation ajouter produit ─── */
+function navToAjouter() {
+  ALL_SECTIONS.forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.className = 'da-section';
+  });
+  const el = document.getElementById('sec-ajouter-produit');
+  if (el) el.className = 'da-section shown';
+  document.querySelectorAll('.da-sb-item').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('[data-section="produits"]');
+  if (btn) btn.classList.add('active');
+  history.replaceState(null, '', '#ajouter-produit');
+  const form = document.getElementById('ap-form');
+  if (form) form.reset();
+  const pg = document.getElementById('ap-preview-grid');
+  if (pg) pg.innerHTML = '';
+  const fl = document.getElementById('ap-flash');
+  if (fl) fl.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function navBack() {
+  const btn = document.querySelector('[data-section="produits"]');
+  if (btn) nav(btn);
+}
+
+function apPreviewImages(files) {
+  const grid = document.getElementById('ap-preview-grid');
+  grid.innerHTML = '';
+  Array.from(files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;';
+      div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" />`
+        + (i === 0 ? '<span style="position:absolute;top:4px;left:4px;background:var(--blue);color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;">Principal</span>' : '');
+      grid.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function apHandleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '';
+  e.currentTarget.style.background = '#fafbff';
+  const input = document.getElementById('ap-images');
+  const dt = new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+  input.files = dt.files;
+  apPreviewImages(e.dataTransfer.files);
+}
+
+// Remise preview & form submit — init after DOM ready
+(function initApForm() {
+  const prixEl  = document.getElementById('ap-prix');
+  const promoEl = document.getElementById('ap-prix-promo');
+  const remiseEl = document.getElementById('ap-remise');
+  if (promoEl && prixEl && remiseEl) {
+    function updateRemise() {
+      const prix = parseFloat(prixEl.value);
+      const promo = parseFloat(promoEl.value);
+      if (prix && promo && promo < prix) {
+        remiseEl.textContent = '− ' + Math.round(((prix - promo) / prix) * 100) + '% de remise';
+        remiseEl.style.display = 'inline-block';
+      } else { remiseEl.style.display = 'none'; }
+    }
+    promoEl.addEventListener('input', updateRemise);
+    prixEl.addEventListener('input', updateRemise);
+  }
+  const form = document.getElementById('ap-form');
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const action = e.submitter ? e.submitter.value : 'publish';
+      const flashEl = document.getElementById('ap-flash');
+      const btnPub = document.getElementById('ap-btn-pub');
+      const btnDraft = document.getElementById('ap-btn-draft');
+      if (action === 'draft') {
+        const statutEl = document.getElementById('ap-statut');
+        if (statutEl) statutEl.value = 'inactif';
+      }
+      btnPub.disabled = true; btnDraft.disabled = true;
+      btnPub.textContent = '⏳ Publication…';
+      const fd = new FormData(form);
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+      try {
+        const resp = await fetch('/api/produits/', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrf },
+          body: fd
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+          flashEl.className = 'ap-flash-ok';
+          flashEl.innerHTML = '✓ Produit publié avec succès ! <button onclick="navBack()" style="margin-left:12px;padding:4px 12px;border-radius:6px;border:1.5px solid #065f46;background:transparent;color:#065f46;font-weight:600;font-size:12px;cursor:pointer;">Voir la liste →</button>';
+          flashEl.style.display = 'flex';
+          form.reset();
+          const pg = document.getElementById('ap-preview-grid');
+          if (pg) pg.innerHTML = '';
+          loaded.delete('produits');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          const errs = Object.values(data).flat().join(' · ');
+          flashEl.className = 'ap-flash-err';
+          flashEl.innerHTML = '✗ Erreur : ' + (errs || JSON.stringify(data));
+          flashEl.style.display = 'flex';
+        }
+      } catch (err) {
+        flashEl.className = 'ap-flash-err';
+        flashEl.innerHTML = '✗ Erreur réseau : ' + err.message;
+        flashEl.style.display = 'flex';
+      } finally {
+        btnPub.disabled = false; btnDraft.disabled = false;
+        btnPub.innerHTML = '🚀 Publier le produit';
+      }
+    });
+  }
+})();
+
+const ALL_SECTIONS = ['overview','produits','ajouter-produit','categories','ajouter-categorie','stocks','commandes','avis','paniers','utilisateurs','messages','notifications','audit'];
 const loaded = new Set();
 
 function nav(btn) {
@@ -747,6 +1339,8 @@ function nav(btn) {
 // Restore section from URL hash on page load
 function restoreSection() {
   const hash = window.location.hash.replace('#', '');
+  if (hash === 'ajouter-produit') { navToAjouter(); return; }
+  if (hash === 'ajouter-categorie') { navToAjouterCat(); return; }
   if (hash && ALL_SECTIONS.includes(hash)) {
     const btn = document.querySelector('[data-section="' + hash + '"]');
     if (btn) { nav(btn); return; }
@@ -979,42 +1573,8 @@ async function loadSection(name) {
   }
 
   if (name === 'categories') {
-    const raw = await apiFetch('/api/categories/');
-    // Flatten nested tree into flat list with level
-    function flattenCats(cats, level=0) {
-      let result = [];
-      for (const cat of cats) {
-        result.push({...cat, _level: level});
-        if (cat.sous_categories?.length) result = result.concat(flattenCats(cat.sous_categories, level+1));
-      }
-      return result;
-    }
-    const d = flattenCats(Array.isArray(raw) ? raw : []);
-    $('tbl-categories').innerHTML = d.length ? d.map(c=>`<tr>
-      <td style="padding-left:${(c._level||0)*20+16}px;">${'└ '.repeat(c._level||0)}${bold(c.nom)}</td>
-      <td>${mono(c.slug)}</td>
-      <td><span class="st st-off">Niveau ${c._level||0}</span></td>
-      <td style="color:#64748b;">${c.nombre_produits||'—'}</td>
-    </tr>`).join('') : empty(4);
-
-    // Card view
-    const catGrid = $('view-categories-card');
-    if (catGrid) {
-      catGrid.innerHTML = d.length ? d.map(cat => {
-        const imgSrc = cat.image || '';
-        const indent = cat._level > 0 ? `<span style="font-size:10px;color:#94a3b8;margin-right:4px;">${'└ '.repeat(cat._level)}</span>` : '';
-        return `<div class="cat-card">
-          ${imgSrc ? `<img src="${imgSrc}" class="prod-card-img" style="aspect-ratio:1;object-fit:cover;width:100%;" onerror="this.style.display='none'">` : `<div class="cat-card-img">🗂️</div>`}
-          <div class="cat-card-body">
-            <div class="cat-card-name">${indent}${cat.nom}</div>
-            <div class="cat-card-meta">${cat._level===0?'Catégorie principale':'Sous-catégorie'} · ${cat.nombre_produits||0} produit(s)</div>
-            <div style="margin-top:6px;">
-              <a href="/administration/categories/?modifier=${cat.id}" style="font-size:11px;color:var(--blue-l);font-weight:600;text-decoration:none;">Modifier →</a>
-            </div>
-          </div>
-        </div>`;
-      }).join('') : '<p style="padding:20px;color:#94a3b8;text-align:center;">Aucune catégorie</p>';
-    }
+    await catLoadList();
+    catLoadParentSelect();
   }
 
   if (name === 'stocks') {
