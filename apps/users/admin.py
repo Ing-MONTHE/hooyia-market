@@ -1,5 +1,4 @@
 """
-HooYia Market — users/admin.py
 Configure l'affichage et la gestion des utilisateurs
 dans l'interface d'administration Django.
 """

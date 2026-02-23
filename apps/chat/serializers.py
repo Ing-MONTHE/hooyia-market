@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/serializers.py
 Serializers pour le chat.
 
 - MessageChatSerializer     → un message (lecture)

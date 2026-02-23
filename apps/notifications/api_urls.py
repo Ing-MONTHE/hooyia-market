@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/api_urls.py
 Routes API pour les notifications.
 
 Endpoints (préfixe 'api/notifications/' défini dans config/urls.py) :

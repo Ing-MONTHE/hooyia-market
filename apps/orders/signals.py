@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/signals.py
 Signals pour l'app orders.
 
 Écoute les changements de statut des commandes pour déclencher

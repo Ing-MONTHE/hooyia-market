@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/models.py
 Gestion du panier d'achat.
 
 Chaque utilisateur possède UN seul panier (OneToOneField).

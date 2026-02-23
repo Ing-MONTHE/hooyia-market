@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/apps.py
 Configuration de l'application cart.
 """
 from django.apps import AppConfig

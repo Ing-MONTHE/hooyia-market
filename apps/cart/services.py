@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/services.py
 Service métier pour la gestion du panier.
 
 Pourquoi un service séparé des vues ?

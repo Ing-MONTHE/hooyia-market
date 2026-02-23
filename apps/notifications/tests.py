@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/tests.py
 Tests pour l'app notifications.
 
 Couverture :

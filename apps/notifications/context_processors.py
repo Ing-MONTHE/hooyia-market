@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/context_processors.py
 Context processor pour injecter le badge de notifications dans tous les templates.
 
 Fonctionne comme cart/context_processors.py (badge panier).

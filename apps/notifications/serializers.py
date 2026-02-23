@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/serializers.py
 Serializers pour les notifications in-app.
 
 - NotificationSerializer       → lecture d'une notification

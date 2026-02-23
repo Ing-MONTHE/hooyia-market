@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/models.py
 Gestion du chat en temps réel entre utilisateurs.
 
 Architecture :

@@ -1,5 +1,4 @@
 """
-HooYia Market — audit/middleware.py
 Enregistre automatiquement toutes les actions importantes (POST, PUT, DELETE)
 Ce middleware s'exécute à chaque requête HTTP, comme une caméra de surveillance
 """

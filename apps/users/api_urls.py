@@ -1,5 +1,4 @@
 """
-HooYia Market — users/api_urls.py
 Routes pour l'API REST de l'app users.
 Toutes retournent du JSON.
 """

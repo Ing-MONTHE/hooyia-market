@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/api_urls.py
 Routes API pour le chat.
 
 Endpoints (préfixe 'api/chat/' défini dans config/urls.py) :

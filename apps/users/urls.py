@@ -1,7 +1,3 @@
-"""
-HooYia Market — users/urls.py
-Routes pour les pages HTML de l'app users.
-"""
 from django.urls import path
 from . import views
 

@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/views.py
 Vues HTML pour les commandes.
 Les données sont chargées via JavaScript (fetch API → JSON).
 """

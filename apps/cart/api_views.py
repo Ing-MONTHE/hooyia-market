@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/api_views.py
 Vues API REST pour le panier.
 Retournent du JSON consommé par JavaScript (fetch API).
 

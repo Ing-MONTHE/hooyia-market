@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/apps.py
 Configuration de l'application chat.
 """
 from django.apps import AppConfig

@@ -1,6 +1,4 @@
 """
-HooYia Market — users/api_views.py
-
 Les vues API retournent du JSON au lieu de HTML.
 Elles sont consommées par JavaScript (fetch API) côté frontend.
 

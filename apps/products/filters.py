@@ -1,6 +1,4 @@
 """
-HooYia Market — products/filters.py
-
 Filtres django-filter pour l'API produits.
 Permet de filtrer les produits via les paramètres URL :
   /api/produits/?categorie=1&prix_min=5000&prix_max=50000&note_min=4

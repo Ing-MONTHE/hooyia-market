@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/models.py
 Gestion des avis clients sur les produits.
 
 Architecture :

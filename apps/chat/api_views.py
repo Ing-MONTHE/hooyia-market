@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/api_views.py
 Vues API REST pour le chat (conversations + messages).
 
 Endpoints :

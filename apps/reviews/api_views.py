@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/api_views.py
 Vues API JSON pour les avis clients.
 
 Endpoints exposés (préfixe défini dans config/urls.py : api/avis/) :

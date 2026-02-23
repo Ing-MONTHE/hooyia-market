@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/services.py
 Service métier pour la création et la gestion des commandes.
 
 Même philosophie que cart/services.py :

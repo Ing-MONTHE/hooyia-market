@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/urls.py
 Routes HTML pour le chat.
 """
 from django.urls import path

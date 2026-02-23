@@ -1,6 +1,4 @@
 """
-HooYia Market — users/serializers.py
-
 Les serializers sont les "traducteurs" entre Python et JSON.
 Ils font deux choses :
   1. Convertir un objet Python (modèle) → JSON (pour envoyer au frontend)

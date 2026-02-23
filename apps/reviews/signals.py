@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/signals.py
 Signals pour recalculer automatiquement la note moyenne d'un produit
 après chaque création, modification ou suppression d'un avis.
 

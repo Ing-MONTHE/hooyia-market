@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/tests.py
 Tests pour l'app chat.
 
 Couverture :

@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/tasks.py
 Tâches Celery pour les notifications asynchrones.
 
 Tâches déclenchées par des événements (via signals orders/signals.py) :

@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/consumers.py
 Consumer WebSocket pour le chat en temps réel.
 
 Fonctionnement :

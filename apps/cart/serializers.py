@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/serializers.py
 Serializers pour le panier.
 
 Rôle des serializers ici :

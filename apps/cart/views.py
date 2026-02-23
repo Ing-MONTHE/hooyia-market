@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/views.py
 Vues HTML pour le panier.
 Ces vues retournent des pages HTML qui chargent les données
 via JavaScript (fetch API → JSON depuis api_views.py).

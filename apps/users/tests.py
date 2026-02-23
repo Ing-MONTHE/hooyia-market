@@ -1,6 +1,3 @@
-"""
-HooYia Market — users/tests.py
-"""
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.core import mail

@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/serializers.py
 Serializers pour les commandes.
 
 - LigneCommandeSerializer    → une ligne d'une commande

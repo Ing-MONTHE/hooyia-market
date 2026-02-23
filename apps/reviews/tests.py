@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/tests.py
 Tests pour l'app reviews.
 
 Couverture :

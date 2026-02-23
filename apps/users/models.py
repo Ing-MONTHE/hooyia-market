@@ -1,5 +1,4 @@
 """
-HooYia Market — users/models.py
 Gestion des utilisateurs, adresses de livraison et rôles.
 
 On remplace le modèle User par défaut de Django par notre propre modèle

@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/models.py
 Gestion des notifications en temps réel et des emails asynchrones.
 
 Architecture :

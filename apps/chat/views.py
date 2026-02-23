@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/views.py
 Vues HTML pour le chat.
 
 Ces vues rendent les templates HTML qui utilisent ensuite

@@ -1,9 +1,5 @@
 """
-HooYia Market — cart/api_urls.py
 Routes API REST pour le panier. Retournent du JSON.
-
-Inclus dans config/urls.py via :
-  path('api/panier/', include('apps.cart.api_urls'))
 """
 from django.urls import path
 from . import api_views

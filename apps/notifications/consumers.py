@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/consumers.py
 Consumer WebSocket pour les notifications en temps réel.
 
 Fonctionnement :

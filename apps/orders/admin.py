@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/admin.py
 Interface d'administration pour les commandes, lignes et paiements.
 Permet aux admins de suivre et gérer les commandes directement depuis l'admin.
 """

@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/apps.py
 Configuration de l'application orders.
 Charge les signals au démarrage de Django.
 """

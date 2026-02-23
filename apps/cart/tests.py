@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/tests.py
 Tests pour l'app cart.
 
 Couverture :

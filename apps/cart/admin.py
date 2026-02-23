@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/admin.py
 Interface d'administration pour les paniers et leurs articles.
 Utile pour déboguer, voir l'état des paniers clients et
 surveiller les articles abandonnés.

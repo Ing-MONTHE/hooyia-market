@@ -1,5 +1,4 @@
 """
-HooYia Market — products/admin.py
 Interface d'administration pour les produits, catégories et stocks.
 """
 from django.contrib import admin

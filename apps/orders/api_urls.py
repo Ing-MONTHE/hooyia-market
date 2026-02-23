@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/api_urls.py
 Routes API REST pour les commandes. Retournent du JSON.
 
 Inclus dans config/urls.py via :

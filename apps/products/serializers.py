@@ -1,6 +1,4 @@
 """
-HooYia Market — products/serializers.py
-
 Serializers pour les produits :
 - CategorieSerializer        → arbre des catégories
 - ImageProduitSerializer     → images d'un produit

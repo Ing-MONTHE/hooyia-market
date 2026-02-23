@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/api_urls.py
 Routes API pour les avis clients.
 
 IMPORTANT : on enregistre le ViewSet sur r'' (chaîne vide) car le préfixe

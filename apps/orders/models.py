@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/models.py
 Gestion des commandes, lignes de commande et paiements.
 
 Architecture :

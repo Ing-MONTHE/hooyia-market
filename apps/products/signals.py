@@ -1,6 +1,4 @@
 """
-HooYia Market — products/signals.py
-
 Signals pour l'app products :
 1. Resize automatique des images via Pillow après upload
 2. Invalidation du cache Redis après modification d'un produit

@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/apps.py
 Configuration de l'application notifications.
 """
 from django.apps import AppConfig

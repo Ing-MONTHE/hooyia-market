@@ -1,5 +1,4 @@
 """
-HooYia Market — users/permissions.py
 Permissions personnalisées pour l'API DRF.
 Utilisées pour contrôler qui peut faire quoi.
 """

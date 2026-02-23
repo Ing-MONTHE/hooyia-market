@@ -1,5 +1,4 @@
 """
-HooYia Market — products/tests.py
 Tests pour l'app products.
 
 Couverture :

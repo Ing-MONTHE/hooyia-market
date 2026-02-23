@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/admin.py
 Interface d'administration pour le chat.
 
 Fonctionnalités :

@@ -1,7 +1,3 @@
-"""
-HooYia Market — products/urls.py
-Routes HTML pour les pages produits.
-"""
 from django.urls import path
 from . import views
 

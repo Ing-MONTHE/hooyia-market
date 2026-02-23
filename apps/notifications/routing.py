@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/routing.py
 Routes WebSocket pour les notifications en temps réel.
 
 Format WebSocket : ws://localhost:8000/ws/notifications/

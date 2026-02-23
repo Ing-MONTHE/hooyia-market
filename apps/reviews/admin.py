@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/admin.py
 Interface d'administration pour les avis clients.
 
 Fonctionnalités :

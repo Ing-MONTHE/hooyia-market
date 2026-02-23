@@ -1,5 +1,4 @@
 """
-HooYia Market — products/views.py
 Vues HTML pour le catalogue produits.
 Ces vues retournent des pages HTML qui chargent
 les données via JavaScript (fetch API → JSON).

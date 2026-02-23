@@ -1,5 +1,4 @@
 """
-HooYia Market — chat/routing.py
 Routes WebSocket pour le chat en temps réel.
 
 Format WebSocket : ws://localhost:8000/ws/chat/<conversation_id>/

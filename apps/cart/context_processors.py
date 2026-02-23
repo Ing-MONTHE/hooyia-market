@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/context_processors.py
 Injecte automatiquement le nombre d'articles du panier dans tous les templates.
 
 Un context processor est une fonction appelée à chaque requête HTTP.

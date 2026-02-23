@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/admin.py
 Interface d'administration pour les notifications et emails asynchrones.
 """
 from django.contrib import admin

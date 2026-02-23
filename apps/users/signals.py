@@ -1,6 +1,4 @@
 """
-HooYia Market — users/signals.py
-
 Les signals Django sont comme des "écouteurs d'événements".
 Quand quelque chose se passe (ex: un utilisateur est créé),
 Django envoie un signal et notre fonction réagit automatiquement.

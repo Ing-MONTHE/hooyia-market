@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/tests.py
 Tests pour l'app orders.
 
 Couverture :

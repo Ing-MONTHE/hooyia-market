@@ -1,5 +1,4 @@
 """
-HooYia Market — users/forms.py
 Formulaires Django pour les vues HTML.
 Les formulaires gèrent la validation côté serveur
 et la génération des champs HTML.

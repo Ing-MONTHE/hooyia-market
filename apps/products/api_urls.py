@@ -1,5 +1,4 @@
 """
-HooYia Market — products/api_urls.py
 Routes API REST pour les produits. Retournent du JSON.
 """
 from django.urls import path, include

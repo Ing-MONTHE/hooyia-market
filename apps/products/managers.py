@@ -1,6 +1,4 @@
 """
-HooYia Market — products/managers.py
-
 Les managers personnalisés permettent d'ajouter des raccourcis
 pour les requêtes fréquentes.
 

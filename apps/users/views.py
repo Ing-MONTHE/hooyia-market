@@ -1,6 +1,4 @@
 """
-HooYia Market — users/views.py
-
 Les vues HTML de l'application users.
 Ces vues retournent des pages HTML au navigateur
 (contrairement aux api_views qui retournent du JSON).

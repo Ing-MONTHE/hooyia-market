@@ -1,5 +1,4 @@
 """
-HooYia Market — cart/urls.py
 Routes HTML pour la page panier.
 
 Inclus dans config/urls.py via :

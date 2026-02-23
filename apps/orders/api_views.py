@@ -1,5 +1,4 @@
 """
-HooYia Market — orders/api_views.py
 Vues API REST pour les commandes.
 Retournent du JSON consommé par JavaScript.
 

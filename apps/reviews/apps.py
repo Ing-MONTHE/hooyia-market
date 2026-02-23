@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/apps.py
 Configuration de l'application reviews.
 Le ready() charge les signals au démarrage de Django.
 """

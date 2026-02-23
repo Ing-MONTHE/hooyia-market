@@ -1,5 +1,4 @@
 """
-HooYia Market — reviews/serializers.py
 Serializers pour les avis clients.
 
 - AvisListSerializer   → lecture légère (liste d'avis sur un produit)

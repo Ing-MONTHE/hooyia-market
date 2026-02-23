@@ -1,5 +1,4 @@
 """
-HooYia Market — notifications/api_views.py
 Vues API REST pour les notifications in-app.
 
 Endpoints :

@@ -1,5 +1,4 @@
 """
-HooYia Market — audit/models.py
 Modèle pour stocker les logs en base de données
 """
 from django.db import models
