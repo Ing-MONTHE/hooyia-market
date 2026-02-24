@@ -116,7 +116,7 @@
   </div>
 
   <!-- Product grid -->
-  <div id="featured-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+  <div id="featured-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
     {% for i in "12345678" %}
     <div class="card" style="padding:1rem;">
       <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
@@ -177,7 +177,7 @@
     </a>
   </div>
 
-  <div id="new-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+  <div id="new-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
     {% for i in "1234" %}
     <div class="card" style="padding:1rem;">
       <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>

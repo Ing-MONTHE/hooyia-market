@@ -57,19 +57,19 @@
       <div class="card p-5">
         <h2 class="font-display text-base text-ink mb-4">Accès rapides</h2>
         <div class="space-y-2">
-          <a href="/admin/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">⚙️</span> Interface d'administration
+          <a href="{% url 'products:admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
+            <span class="text-lg">📊</span> Dashboard admin
           </a>
-          <a href="{% url 'products:ajouter' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
+          <a href="{% url 'products:admin_dashboard' %}#ajouter-produit" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
             <span class="text-lg">➕</span> Ajouter un produit
           </a>
-          <a href="{% url 'products:liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">📦</span> Gérer le catalogue
+          <a href="{% url 'products:admin_dashboard' %}#commandes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
+            <span class="text-lg">🛒</span> Voir les commandes
           </a>
-          <a href="{% url 'orders:historique' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">📋</span> Toutes les commandes
+          <a href="{% url 'products:admin_dashboard' %}#utilisateurs" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
+            <span class="text-lg">👥</span> Gérer utilisateurs
           </a>
-          <a href="/chat/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
+          <a href="{% url 'products:admin_dashboard' %}#messages" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
             <span class="text-lg">💬</span> Messages clients
           </a>
         </div>
@@ -313,14 +313,15 @@
 // ── Dashboard admin : charger les stats
 async function loadAdminStats() {
   try {
-    const [produits, commandes, avis] = await Promise.allSettled([
+    const [produits, commandes, avis, utilisateurs] = await Promise.allSettled([
       API.get('/api/produits/?page_size=1', { silentError: true }),
       API.get('/api/commandes/', { silentError: true }),
       API.get('/api/avis/', { silentError: true }),
+      API.get('/api/auth/utilisateurs/', { silentError: true }),
     ]);
 
     if (produits.status === 'fulfilled')
-      document.getElementById('nb-produits').textContent = produits.value.count || '—';
+      document.getElementById('nb-produits').textContent = produits.value.count || (produits.value.results||produits.value).length || '—';
     if (commandes.status === 'fulfilled') {
       const cmds = commandes.value.results || commandes.value;
       document.getElementById('nb-commandes').textContent = commandes.value.count || cmds.length || '—';
@@ -333,18 +334,22 @@ async function loadAdminStats() {
         ? lastCmds.map(c => `
           <div class="flex items-center justify-between py-2 border-b border-cream-border last:border-0">
             <div>
-              <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">#${c.reference || c.id}</a>
+              <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">#${c.reference_courte || c.reference_courte || c.id}</a>
               <p class="text-xs text-ink/40 font-body">${new Date(c.date_creation).toLocaleDateString('fr-FR')}</p>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-sm font-body font-semibold text-ink">${parseInt(c.total).toLocaleString('fr-FR')} F</span>
+              <span class="text-sm font-body font-semibold text-ink">${parseInt(c.montant_total || 0).toLocaleString('fr-FR')} F</span>
               <span class="px-2 py-0.5 rounded-full text-xs font-body ${COLORS[c.statut]||'bg-gray-100 text-gray-600'}">${LABELS[c.statut]||c.statut}</span>
             </div>
           </div>`).join('')
         : '<p class="text-ink/30 font-body text-sm">Aucune commande.</p>';
     }
     if (avis.status === 'fulfilled')
-      document.getElementById('nb-avis').textContent = avis.value.count || '—';
+      document.getElementById('nb-avis').textContent = avis.value.count || (avis.value.results||avis.value).length || '—';
+    if (utilisateurs.status === 'fulfilled') {
+      const users = utilisateurs.value.results || utilisateurs.value;
+      document.getElementById('nb-utilisateurs').textContent = utilisateurs.value.count || (Array.isArray(users) ? users.length : '—');
+    }
   } catch(e) {}
 }
 
@@ -379,11 +384,11 @@ async function loadCommandesRecentes() {
       ? cmds.map(c => `
         <div class="flex items-center justify-between py-2.5 border-b border-cream-border last:border-0">
           <div>
-            <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">Commande #${c.reference || c.id}</a>
+            <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">Commande #${c.reference_courte || c.id}</a>
             <p class="text-xs text-ink/40 font-body">${new Date(c.date_creation).toLocaleDateString('fr-FR')}</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-sm font-body font-semibold">${parseInt(c.total).toLocaleString('fr-FR')} F</span>
+            <span class="text-sm font-body font-semibold">${parseInt(c.montant_total || 0).toLocaleString('fr-FR')} F</span>
             <span class="px-2 py-0.5 rounded-full text-xs font-body ${COLORS[c.statut]||'bg-gray-100'}">${LABELS[c.statut]||c.statut}</span>
           </div>
         </div>`).join('')

@@ -427,12 +427,16 @@ input[type="checkbox"]:checked {
   position: relative;
   overflow: hidden;
   background: var(--surface-2);
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .product-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 0.75rem;
   transition: transform 0.4s ease;
 }
 .product-card:hover .product-img { transform: scale(1.04); }
