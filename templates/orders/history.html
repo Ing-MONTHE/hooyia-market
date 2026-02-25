@@ -119,8 +119,9 @@ function renderCommande(c) {
   </div>`;
 }
 
-async function annulerCommande(commandeId, btn) {
-  if (!confirm('Annuler cette commande ?')) return;
+async async function annulerCommande(commandeId, btn) {
+  const ok = await showConfirm({ title: 'Annuler cette commande ?', body: 'Cette action est irréversible. La commande sera annulée.', confirmText: '✕ Annuler la commande', type: 'warning' });
+  if (!ok) return;
   btn.disabled = true;
   try {
     await API.post(`/api/commandes/${commandeId}/annuler/`, {});

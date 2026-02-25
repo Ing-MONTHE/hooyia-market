@@ -1128,8 +1128,8 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
     <div id="sec-ajouter-produit" class="da-section">
       <div class="da-ph">
         <div>
-          <h1>➕ Nouveau produit</h1>
-          <div class="da-ph-sub">Remplissez le formulaire pour publier</div>
+          <h1 id="ap-section-title">➕ Nouveau produit</h1>
+          <div class="da-ph-sub" id="ap-section-sub">Remplissez le formulaire pour publier</div>
         </div>
         <button class="btn-secondary" onclick="navBack()">← Retour aux produits</button>
       </div>
@@ -1138,6 +1138,7 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
 
       <form id="ap-form" enctype="multipart/form-data">
         {% csrf_token %}
+        <input type="hidden" id="ap-produit-id" name="_produit_id" value="">
 
         <!-- Infos de base -->
         <div class="da-card" style="margin-bottom:16px;">
@@ -1253,7 +1254,10 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
         <!-- Actions -->
         <div class="da-card" style="margin-bottom:28px;">
           <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-            <button type="button" onclick="navBack()" class="btn-secondary">Annuler</button>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="button" onclick="navBack()" class="btn-secondary">Annuler</button>
+              <button type="button" id="ap-btn-del" onclick="supprimerProduitEdit()" style="display:none;padding:8px 16px;border-radius:8px;border:1.5px solid #fee2e2;background:#fff5f5;color:#ef4444;font-weight:600;font-size:13px;cursor:pointer;">🗑 Supprimer</button>
+            </div>
             <div style="display:flex;gap:10px;">
               <button type="submit" name="action" value="draft" id="ap-btn-draft" class="btn-secondary">💾 Brouillon</button>
               <button type="submit" name="action" value="publish" id="ap-btn-pub" class="btn-primary">🚀 Publier le produit</button>
@@ -1339,6 +1343,8 @@ function navToAjouter() {
   history.replaceState(null, '', '#ajouter-produit');
   const form = $('ap-form'); if(form) form.reset();
   const pg = $('ap-preview-grid'); if(pg) pg.innerHTML='';
+  const _del=$('ap-btn-del'); if(_del) _del.style.display='none';
+  $('ap-produit-id').value='';
   const fl = $('ap-flash'); if(fl) fl.style.display='none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1346,6 +1352,41 @@ function navToAjouter() {
 function navBack() {
   const btn = document.querySelector('[data-section="produits"]');
   if (btn) nav(btn);
+}
+
+async function navToModifierProduit(id) {
+  // Ouvrir la section formulaire
+  navToAjouter();
+  // Changer le titre en mode édition
+  const title = $('ap-section-title'), sub = $('ap-section-sub');
+  if(title) title.textContent = '✏️ Modifier le produit';
+  if(sub) sub.textContent = 'Modifiez les informations du produit';
+  const btnPub = $('ap-btn-pub'), btnDraft = $('ap-btn-draft');
+  if(btnPub) btnPub.innerHTML = '✓ Enregistrer';
+  const delBtn = $('ap-btn-del'); if(delBtn) delBtn.style.display = 'inline-flex';
+  // Stocker l'ID
+  $('ap-produit-id').value = id;
+  // Charger les données du produit
+  try {
+    const p = await API.get('/api/produits/'+id+'/', { silentError: true });
+    if(!p) return;
+    $('ap-nom').value = p.nom || '';
+    $('ap-desc-courte').value = p.description_courte || '';
+    $('ap-desc').value = p.description || '';
+    $('ap-prix').value = p.prix || '';
+    $('ap-prix-promo').value = p.prix_promo || '';
+    const stockEl = $('ap-stock'); if(stockEl) stockEl.value = p.stock || 0;
+    // Catégorie
+    const catSel = $('ap-categorie');
+    if(catSel && p.categorie) {
+      const catId = typeof p.categorie === 'object' ? p.categorie.id : p.categorie;
+      catSel.value = catId;
+    }
+    // Statut & vedette
+    const statutEl = $('ap-statut'); if(statutEl) statutEl.value = p.statut || 'actif';
+    const vedetteEl = $('ap-vedette'); if(vedetteEl) vedetteEl.checked = !!p.en_vedette;
+    history.replaceState(null, '', '#modifier-produit-'+id);
+  } catch(e) { showToast('Impossible de charger le produit', 'error'); }
 }
 
 function navToAjouterCat() {
@@ -1521,7 +1562,7 @@ async function loadSection(name) {
         <td>${mono(fmtPrice(p.prix))}</td>
         <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${sCol};">${s}</td>
         <td>${p.statut==='actif'?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
-        <td><a href="/produits/modifier/${p.id}/" style="font-size:11.5px;color:var(--navy-2);text-decoration:none;font-weight:600;">Modifier →</a></td>
+        <td><button onclick="navToModifierProduit(${p.id})" style="font-size:11.5px;color:var(--navy-2);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Modifier →</button></td>
       </tr>`;
     }).join('') : empty(6);
 
@@ -1540,7 +1581,7 @@ async function loadSection(name) {
             <div class="prod-card-meta">${p.categorie_nom||'—'} · <span style="color:${sCol};font-weight:700;">${s} en stock</span></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
               <span class="prod-card-price">${fmtPrice(p.prix_promo||p.prix)}</span>
-              <a href="/produits/modifier/${p.id}/" style="font-size:11px;color:var(--navy-2);font-weight:600;text-decoration:none;">Modifier →</a>
+              <button onclick="navToModifierProduit(${p.id})" style="font-size:11px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;padding:0;">Modifier →</button>
             </div>
           </div>
         </div>`;
@@ -1762,7 +1803,9 @@ function catHandleDrop(e) {
 
 async function catSupprimerCurrent() {
   const id=$('cat-id').value, nom=$('cat-nom').value;
-  if(!id||!confirm(`Supprimer la catégorie "${nom}" ?`)) return;
+  if(!id) return;
+  const ok = await showConfirm({ title: `Supprimer « ${nom} » ?`, body: 'Action <strong>irréversible</strong>. Les produits associés seront sans catégorie.', confirmText: '🗑 Supprimer', type: 'danger' });
+  if(!ok) return;
   const csrf=document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
   try {
     const resp=await fetch('/administration/categories/api/',{method:'DELETE',headers:{'X-CSRFToken':csrf,'Content-Type':'application/json'},body:JSON.stringify({cat_id:id}),credentials:'same-origin'});
@@ -1845,12 +1888,21 @@ function apHandleDrop(e) {
       const fd=new FormData(form);
       const csrf=document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
       try {
-        const resp=await fetch('/api/produits/',{method:'POST',headers:{'X-CSRFToken':csrf},body:fd});
+        const produitId=$('ap-produit-id').value;
+      const url=produitId?'/api/produits/'+produitId+'/':'/api/produits/';
+      const method=produitId?'PATCH':'POST';
+      const resp=await fetch(url,{method:method,headers:{'X-CSRFToken':csrf},body:fd});
         const data=await resp.json();
         if(resp.ok){
           flashEl.className='ap-flash-ok';
-          flashEl.innerHTML='✓ Produit publié avec succès ! <button onclick="navBack()" style="margin-left:12px;padding:4px 12px;border-radius:6px;border:1.5px solid #065f46;background:transparent;color:#065f46;font-weight:600;font-size:12px;cursor:pointer;">Voir la liste →</button>';
+          const isEdit=$('ap-produit-id').value;
+          flashEl.innerHTML=(isEdit?'✓ Produit modifié !':'✓ Produit publié !')+' <button onclick="navBack()" style="margin-left:12px;padding:4px 12px;border-radius:6px;border:1.5px solid #065f46;background:transparent;color:#065f46;font-weight:600;font-size:12px;cursor:pointer;">Voir la liste →</button>';
           flashEl.style.display='flex'; form.reset(); $('ap-preview-grid').innerHTML='';
+          $('ap-produit-id').value='';
+          const t=$('ap-section-title'),s=$('ap-section-sub'),bp=$('ap-btn-pub');
+          if(t) t.textContent='➕ Nouveau produit'; if(s) s.textContent='Remplissez le formulaire pour publier';
+          if(bp) bp.innerHTML='🚀 Publier le produit';
+          const _d=$('ap-btn-del'); if(_d) _d.style.display='none';
           loaded.delete('produits'); window.scrollTo({top:0,behavior:'smooth'});
         } else {
           const errs=Object.values(data).flat().join(' · ');
@@ -1872,6 +1924,23 @@ function openStockModal(produitId,nom,stockActuel){
   $('modal-stock').style.display='flex';
 }
 function closeStockModal(){ $('modal-stock').style.display='none'; stockProduitId=null; }
+async function supprimerProduitEdit() {
+  const id = $('ap-produit-id').value;
+  if(!id) return;
+  const nom = $('ap-nom').value || 'ce produit';
+  const ok = await showConfirm({ title: `Supprimer « ${nom} » ?`, body: 'Action <strong>irréversible</strong>. Le produit et ses images seront définitivement supprimés.', confirmText: '🗑 Supprimer', type: 'danger' });
+  if(!ok) return;
+  const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
+  try {
+    const resp = await fetch('/api/produits/'+id+'/', {method:'DELETE', headers:{'X-CSRFToken':csrf}});
+    if(resp.ok || resp.status===204) {
+      showToast('Produit supprimé','success');
+      loaded.delete('produits');
+      navBack();
+    } else { showToast('Erreur suppression','error'); }
+  } catch(e) { showToast('Erreur réseau','error'); }
+}
+
 async function submitStock(){
   if(!stockProduitId) return;
   const type_mouvement=$('modal-stock-type').value;
@@ -1880,7 +1949,7 @@ async function submitStock(){
   if(!quantite||quantite<=0){ alert('Quantité invalide'); return; }
   try {
     await API.post(`/api/produits/${stockProduitId}/gerer_stock/`,{type_mouvement,quantite,note});
-    closeStockModal(); loaded.delete('stocks'); loadSection('stocks');
+    closeStockModal(); loaded.delete('stocks'); loaded.delete('produits'); await loadSection('stocks');
     showToast('Stock mis à jour avec succès','success');
   } catch(e){ showToast('Erreur lors de la mise à jour du stock','error'); }
 }
@@ -1892,7 +1961,8 @@ async function changerStatutCommande(id,action,btn){
   catch(e){ showToast('Erreur : '+(e.message||'impossible'),'error'); btn.disabled=false; }
 }
 async function annulerCommande(id,btn){
-  if(!confirm('Annuler cette commande ?')) return;
+  const _okA = await showConfirm({ title: 'Annuler cette commande ?', body: 'Cette action est irréversible.', confirmText: '✕ Annuler la commande', type: 'warning' });
+  if(!_okA) return;
   btn.disabled=true;
   try { await API.post(`/api/commandes/${id}/annuler/`,{}); loaded.delete('commandes'); loadSection('commandes'); showToast('Commande annulée','success'); }
   catch(e){ showToast('Erreur annulation','error'); btn.disabled=false; }
@@ -1903,13 +1973,15 @@ async function validerAvis(id,valider,btn){
   catch(e){ showToast('Erreur modération avis','error'); btn.disabled=false; }
 }
 async function supprimerAvis(id,btn){
-  if(!confirm('Supprimer définitivement cet avis ?')) return;
+  const _ok2 = await showConfirm({ title: 'Supprimer cet avis ?', body: 'Cet avis sera définitivement supprimé.', confirmText: '🗑 Supprimer', type: 'danger' });
+  if(!_ok2) return;
   btn.disabled=true;
   try { await API.delete(`/api/avis/${id}/`); loaded.delete('avis'); loadSection('avis'); showToast('Avis supprimé','success'); }
   catch(e){ showToast('Erreur suppression avis','error'); btn.disabled=false; }
 }
 async function toggleUser(id,isActive,btn){
-  if(!confirm(`${isActive?'Désactiver':'Activer'} ce compte ?`)) return;
+  const _ok3 = await showConfirm({ title: `${isActive?'Désactiver':'Activer'} ce compte ?`, body: isActive ? "Le compte sera désactivé et l'utilisateur ne pourra plus se connecter." : 'Le compte sera réactivé.', confirmText: isActive ? '🔒 Désactiver' : '✓ Activer', type: isActive ? 'warning' : 'info' });
+  if(!_ok3) return;
   btn.disabled=true;
   try { await API.post(`/api/auth/utilisateurs/${id}/toggle_actif/`,{}); loaded.delete('utilisateurs'); loadSection('utilisateurs'); showToast(`Compte ${isActive?'désactivé':'activé'}`,'success'); }
   catch(e){ showToast('Erreur modification compte','error'); btn.disabled=false; }

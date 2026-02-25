@@ -340,6 +340,26 @@ async function ajouterPanier(e, produitId) {
   {% endif %}
 }
 
+async function filterFeatured(slug, btn) {
+  // Active state sur les boutons
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const grid = document.getElementById('featured-grid');
+  // Skeleton pendant le chargement
+  grid.innerHTML = Array(4).fill(`<div class="card" style="padding:1rem;"><div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div><div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div><div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;margin-bottom:.75rem;"></div><div class="skeleton" style="height:1.25rem;border-radius:.375rem;width:35%;"></div></div>`).join('');
+
+  try {
+    let url = slug
+      ? '/api/produits/?categorie_slug=' + slug + '&page_size=8'
+      : '/api/produits/?en_vedette=true&page_size=8';
+    const data = await API.get(url, { silentError: true });
+    renderGrid('featured-grid', data?.results || data || []);
+  } catch {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les produits.</div>`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const data = await API.get('/api/produits/?en_vedette=true&page_size=8', { silentError: true });

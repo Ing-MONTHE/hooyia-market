@@ -271,7 +271,7 @@
               <p class="text-xs text-ink/50 font-body">{{ adr.region }}, {{ adr.pays }}</p>
               {% if adr.telephone %}<p class="text-xs text-ink/50 font-body">{{ adr.telephone }}</p>{% endif %}
             </div>
-            <form method="POST" onsubmit="return confirm('Supprimer cette adresse ?')">
+            <form method="POST" onsubmit="return false" data-confirm-delete>
               {% csrf_token %}
               <button type="submit" formaction="{% url 'users:supprimer_adresse' adr.id %}"
                 class="text-xs text-red-400 hover:text-red-600 font-body underline underline-offset-2">
@@ -400,5 +400,21 @@ async function loadCommandesRecentes() {
 
 loadCommandesRecentes();
 {% endif %}
-</script>
+
+// Remplacement confirm() natif — suppression adresse
+document.addEventListener('click', async function(e) {
+  const btn = e.target.closest('[type="submit"][formaction]');
+  if (!btn) return;
+  const form = btn.closest('form[data-confirm-delete]');
+  if (!form) return;
+  e.preventDefault();
+  const ok = await showConfirm({
+    title: 'Supprimer cette adresse ?',
+    body: 'Cette adresse de livraison sera définitivement supprimée.',
+    confirmText: '🗑 Supprimer',
+    type: 'danger'
+  });
+  if (ok) { form.action = btn.getAttribute('formaction'); form.removeAttribute('data-confirm-delete'); form.submit(); }
+});
+  </script>
 {% endblock %}

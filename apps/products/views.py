@@ -113,7 +113,7 @@ def detail_produit(request, slug):
 
 @user_passes_test(est_admin, login_url='/compte/connexion/')
 def ajouter_produit(request):
-    categories = Categorie.objects.filter(est_active=True)
+    categories = Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories')
 
     if request.method == 'POST':
         nom = request.POST.get('nom', '').strip()
@@ -190,7 +190,7 @@ def ajouter_produit(request):
 @user_passes_test(est_admin, login_url='/compte/connexion/')
 def modifier_produit(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
-    categories = Categorie.objects.filter(est_active=True)
+    categories = Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories')
 
     if request.method == 'POST':
         produit.nom = request.POST.get('nom', produit.nom).strip()
@@ -439,5 +439,6 @@ def admin_dashboard(request):
     context = {
         'users_count':  CustomUser.objects.filter(is_active=True).count(),
         'paniers_count': Panier.objects.filter(items__isnull=False).distinct().count(),
+        'categories': Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories'),
     }
     return render(request, 'admin_dashboard.html', context)

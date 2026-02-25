@@ -72,9 +72,9 @@ const Catalogue = (() => {
       state.page = 1;
       state.hasMore = true;
       grid.innerHTML = '';
-      grid.classList.add('hidden');
-      if (skeleton) skeleton.classList.remove('hidden');
-      if (empty) empty.classList.add('hidden');
+      grid.style.display = 'none';
+      if (skeleton) skeleton.style.display = '';
+      if (empty) empty.style.display = 'none';
     }
 
     state.loading = true;
@@ -84,7 +84,7 @@ const Catalogue = (() => {
       const produits = data.results || data;
       const count    = data.count ?? produits.length;
 
-      if (skeleton) skeleton.classList.add('hidden');
+      if (skeleton) skeleton.style.display = 'none';
 
       if (countEl) {
         countEl.textContent = count === 0
@@ -93,7 +93,7 @@ const Catalogue = (() => {
       }
 
       if (produits.length === 0 && state.page === 1) {
-        if (empty) empty.classList.remove('hidden');
+        if (empty) empty.style.display = '';
         return;
       }
 
@@ -101,15 +101,15 @@ const Catalogue = (() => {
       produits.forEach(p => {
         grid.insertAdjacentHTML('beforeend', renderCard(p));
       });
-      grid.classList.remove('hidden');
+      grid.style.display = 'grid';
 
       // Pagination
       state.hasMore = !!data.next;
       if (pagEl) renderPagination(data, pagEl, count);
 
     } catch (e) {
-      if (skeleton) skeleton.classList.add('hidden');
-      if (empty) empty.classList.remove('hidden');
+      if (skeleton) skeleton.style.display = 'none';
+      if (empty) empty.style.display = '';
     } finally {
       state.loading = false;
     }
@@ -167,10 +167,10 @@ const Catalogue = (() => {
   // ── Pagination
   function renderPagination(data, container, total) {
     if (!data.next && !data.previous) {
-      container.classList.add('hidden');
+      container.style.display = 'none';
       return;
     }
-    container.classList.remove('hidden');
+    container.style.display = 'flex';
     const totalPages = Math.ceil(total / PAGE_SIZE);
     container.innerHTML = '';
 
@@ -320,7 +320,7 @@ async function ajouterRapide(produitId, event) {
     // Mettre à jour le badge navbar
     const badge = document.getElementById('cart-badge');
     if (badge) {
-      badge.classList.remove('hidden');
+      badge.style.display = '';
       badge.textContent = (parseInt(badge.textContent) || 0) + 1;
     }
   } catch(e) {}

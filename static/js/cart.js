@@ -141,7 +141,8 @@ const Cart = (() => {
 
   // ── Vider le panier
   async function vider() {
-    if (!confirm('Vider tout le panier ?')) return;
+    const ok = await showConfirm({ title: 'Vider le panier ?', body: 'Tous les articles seront supprimés de votre panier.', confirmText: '🗑 Vider le panier', type: 'warning' });
+    if (!ok) return;
     try {
       await API.delete('/api/panier/vider/');
       await load();

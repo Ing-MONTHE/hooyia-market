@@ -13,7 +13,7 @@
       <p style="font-size:.875rem;color:var(--text-muted);" id="result-count">Chargement…</p>
     </div>
     {% if user.is_staff %}
-    <a href="{% url 'products:ajouter' %}" class="btn btn-primary" style="gap:.5rem;">
+    <a href="/administration/#ajouter-produit" class="btn btn-primary" style="gap:.5rem;">
       <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Ajouter un produit
     </a>
@@ -98,7 +98,7 @@
     <!-- ── GRID ── -->
     <div style="flex:1;min-width:0;">
       <!-- Skeleton -->
-      <div id="skeleton-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+      <div id="skeleton-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
         {% for i in "123456" %}
         <div class="card" style="padding:1rem;">
           <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
@@ -110,7 +110,7 @@
       </div>
 
       <!-- Products grid (filled by JS) -->
-      <div id="products-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:1rem;"></div>
+      <div id="products-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:1rem;" data-display="grid"></div>
 
       <!-- Empty state -->
       <div id="empty-state" style="display:none;" class="empty-state">
@@ -134,10 +134,10 @@
 }
 @media (min-width: 1024px) {
   #filter-sidebar { display: block !important; }
-  #skeleton-grid, #products-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  #skeleton-grid, #products-grid { grid-template-columns: repeat(4, 1fr) !important; }
 }
 @media (min-width: 1280px) {
-  #skeleton-grid, #products-grid { grid-template-columns: repeat(4, 1fr) !important; }
+  #skeleton-grid, #products-grid { grid-template-columns: repeat(5, 1fr) !important; }
 }
 </style>
 {% endblock %}
