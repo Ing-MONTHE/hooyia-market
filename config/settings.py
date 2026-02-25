@@ -340,4 +340,4 @@ AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
 # ═══════════════════════════════════════════════════════════
 GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
-GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://127.0.0.1:8000/compte/google/callback/')
+GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='https://hooyia-market-wpsp.onrender.com/compte/google/callback/')
