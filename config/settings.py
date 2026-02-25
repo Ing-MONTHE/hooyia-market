@@ -277,6 +277,8 @@ DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL', default=f'HooYia Market <{con
 STATIC_URL = '/static/'
 # Django cherche les fichiers statiques dans ce dossier
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'stacticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 # Les images uploadées (photos produits) sont stockées ici
