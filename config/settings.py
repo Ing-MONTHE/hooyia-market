@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # True en local → affiche les erreurs détaillées
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = True
 
 # Hôtes autorisés à accéder au site
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0'] + config('ALLOWED_HOSTS', default='', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
