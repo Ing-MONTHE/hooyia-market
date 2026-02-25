@@ -9,14 +9,46 @@
      HERO
 ══════════════════════════════════════════ -->
 <section style="position:relative;background:#0D1F5C;overflow:hidden;min-height:520px;display:flex;align-items:center;">
-  <!-- Background image -->
-  <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
-    <img src="{% static 'img/Image_de_fond.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;opacity:.12;filter:blur(2px);transform:scale(1.08);" />
-    <div style="position:absolute;inset:0;background:linear-gradient(120deg,#0D1F5C 40%,rgba(13,31,92,.8) 70%,rgba(30,58,138,.6) 100%);"></div>
-    <!-- Decorative shapes -->
+  <!-- Carousel Background -->
+  <div id="hero-carousel" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:1;">
+      <img src="{% static 'img/Carousel 1.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;" />
+    </div>
+    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:0;">
+      <img src="{% static 'img/Carousel 2.webp' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;" />
+    </div>
+    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:0;">
+      <img src="{% static 'img/Image de fond.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:blur(2px);transform:scale(1.08);" />
+    </div>
+    <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(13,31,92,.88) 35%,rgba(13,31,92,.72) 65%,rgba(30,58,138,.55) 100%);"></div>
     <div style="position:absolute;right:-80px;top:-80px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.12) 0%,transparent 70%);"></div>
     <div style="position:absolute;left:30%;bottom:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,138,.4) 0%,transparent 70%);"></div>
   </div>
+  <!-- Carousel arrows -->
+  <button onclick="heroPrev()" style="position:absolute;left:18px;top:50%;transform:translateY(-50%);z-index:10;pointer-events:all;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(13,31,92,.5);color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:all .2s;" onmouseover="this.style.background='rgba(249,115,22,.8)';this.style.borderColor='#F97316'" onmouseout="this.style.background='rgba(13,31,92,.5)';this.style.borderColor='rgba(255,255,255,.3)'">&#8249;</button>
+  <button onclick="heroNext()" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);z-index:10;pointer-events:all;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(13,31,92,.5);color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:all .2s;" onmouseover="this.style.background='rgba(249,115,22,.8)';this.style.borderColor='#F97316'" onmouseout="this.style.background='rgba(13,31,92,.5)';this.style.borderColor='rgba(255,255,255,.3)'">&#8250;</button>
+  <!-- Carousel dots -->
+  <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:10;pointer-events:all;">
+    <button class="hero-dot" onclick="heroGoTo(0)" style="width:24px;height:6px;border-radius:99px;border:none;background:#F97316;cursor:pointer;transition:all .3s;padding:0;"></button>
+    <button class="hero-dot" onclick="heroGoTo(1)" style="width:6px;height:6px;border-radius:99px;border:none;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s;padding:0;"></button>
+    <button class="hero-dot" onclick="heroGoTo(2)" style="width:6px;height:6px;border-radius:99px;border:none;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s;padding:0;"></button>
+  </div>
+  <script>
+    var _hIdx=0,_hTimer;
+    function _hSlides(){return document.querySelectorAll('.hero-slide');}
+    function _hDots(){return document.querySelectorAll('.hero-dot');}
+    function heroGoTo(n){
+      _hSlides().forEach(function(s,i){s.style.opacity=i===n?'1':'0';});
+      _hDots().forEach(function(d,i){d.style.width=i===n?'24px':'6px';d.style.background=i===n?'#F97316':'rgba(255,255,255,.4)';});
+      _hIdx=n;
+    }
+    function heroNext(){heroGoTo((_hIdx+1)%_hSlides().length);clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);}
+    function heroPrev(){heroGoTo((_hIdx-1+_hSlides().length)%_hSlides().length);clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);}
+    _hTimer=setInterval(heroNext,5000);
+    document.querySelectorAll('.hero-dot').forEach(function(d){
+      d.addEventListener('click',function(){clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);});
+    });
+  </script>
 
   <div style="position:relative;max-width:1400px;margin:0 auto;padding:5rem 1.5rem 5rem;width:100%;">
     <div style="max-width:600px;">

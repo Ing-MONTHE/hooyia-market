@@ -241,3 +241,124 @@ def supprimer_adresse(request, adresse_id):
         messages.success(request, "Adresse supprimée.")
 
     return redirect('users:profil')
+
+# ═══════════════════════════════════════════════════════════════
+# VUE — Google OAuth2
+# ═══════════════════════════════════════════════════════════════
+
+import urllib.parse
+import secrets
+import requests as http_requests
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+GOOGLE_AUTH_URL     = 'https://accounts.google.com/o/oauth2/v2/auth'
+GOOGLE_TOKEN_URL    = 'https://oauth2.googleapis.com/token'
+GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
+
+
+def google_login(request):
+    """Redirige vers Google pour l'authentification."""
+    state = secrets.token_urlsafe(16)
+    request.session['google_oauth_state'] = state
+
+    params = {
+        'client_id':     settings.GOOGLE_CLIENT_ID,
+        'redirect_uri':  settings.GOOGLE_REDIRECT_URI,
+        'response_type': 'code',
+        'scope':         'openid email profile',
+        'state':         state,
+        'access_type':   'online',
+        'prompt':        'select_account',
+    }
+    url = GOOGLE_AUTH_URL + '?' + urllib.parse.urlencode(params)
+    return redirect(url)
+
+
+def google_callback(request):
+    """Reçoit le code de Google, récupère le profil et connecte l'utilisateur."""
+    # Vérification CSRF state
+    state = request.GET.get('state', '')
+    if state != request.session.get('google_oauth_state', ''):
+        messages.error(request, "Erreur de sécurité OAuth. Réessayez.")
+        return redirect('users:connexion')
+
+    code = request.GET.get('code')
+    if not code:
+        messages.error(request, "Connexion Google annulée ou refusée.")
+        return redirect('users:connexion')
+
+    # Échange du code contre un access_token
+    try:
+        token_resp = http_requests.post(GOOGLE_TOKEN_URL, data={
+            'code':          code,
+            'client_id':     settings.GOOGLE_CLIENT_ID,
+            'client_secret': settings.GOOGLE_CLIENT_SECRET,
+            'redirect_uri':  settings.GOOGLE_REDIRECT_URI,
+            'grant_type':    'authorization_code',
+        }, timeout=10)
+        token_data = token_resp.json()
+    except Exception:
+        messages.error(request, "Impossible de contacter Google. Réessayez.")
+        return redirect('users:connexion')
+
+    access_token = token_data.get('access_token')
+    if not access_token:
+        messages.error(request, "Échec de l'authentification Google.")
+        return redirect('users:connexion')
+
+    # Récupération du profil Google
+    try:
+        userinfo_resp = http_requests.get(
+            GOOGLE_USERINFO_URL,
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=10
+        )
+        userinfo = userinfo_resp.json()
+    except Exception:
+        messages.error(request, "Impossible de récupérer le profil Google.")
+        return redirect('users:connexion')
+
+    email      = userinfo.get('email', '').lower()
+    first_name = userinfo.get('given_name', '')
+    last_name  = userinfo.get('family_name', '')
+    google_id  = userinfo.get('sub', '')
+
+    if not email:
+        messages.error(request, "Impossible de récupérer votre email Google.")
+        return redirect('users:connexion')
+
+    # Connexion ou création du compte
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Génère un username unique depuis l'email
+        base_username = email.split('@')[0].replace('.', '_')[:30]
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}_{counter}"
+            counter += 1
+
+        user = User.objects.create_user(
+            email    = email,
+            username = username,
+            password = None,
+        )
+        user.prenom        = first_name
+        user.nom           = last_name
+        user.is_active     = True
+        user.email_verifie = True
+        user.save()
+
+    # Activer le compte si pas encore actif (cas edge)
+    if not user.is_active:
+        user.is_active     = True
+        user.email_verifie = True
+        user.save()
+
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    messages.success(request, f"Bienvenue {user.prenom or user.username} ! 👋")
+    return redirect(settings.LOGIN_REDIRECT_URL)

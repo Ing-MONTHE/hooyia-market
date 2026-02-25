@@ -17,4 +17,6 @@ urlpatterns = [
     # Adresses
     path('adresses/ajouter/',       views.ajouter_adresse,   name='ajouter_adresse'),
     path('adresses/<int:adresse_id>/supprimer/', views.supprimer_adresse, name='supprimer_adresse'),
+    path('google/login/',    views.google_login,    name='google_login'),
+    path('google/callback/',  views.google_callback, name='google_callback'),
 ]

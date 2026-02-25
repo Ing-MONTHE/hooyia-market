@@ -142,7 +142,7 @@
     </div>
   </div>
   <script>
-  function showConfirm({ title='Confirmer', body='', confirmText='Confirmer', type='danger' }={}) {
+  function showConfirm({ title='Confirmer', body='', confirmText='Confirmer', type='danger', hideCancelBtn=false }={}) {
     return new Promise(resolve => {
       const overlay=document.getElementById('g-confirm-overlay'),box=document.getElementById('g-confirm-box'),
         iconWrap=document.getElementById('g-confirm-icon-wrap'),titleEl=document.getElementById('g-confirm-title'),
@@ -156,6 +156,7 @@
       titleEl.style.color=t.tc; titleEl.textContent=title; bodyEl.innerHTML=body;
       okBtn.textContent=confirmText; okBtn.style.background=t.btn; okBtn.style.color='white';
       okBtn.style.boxShadow='0 2px 10px '+t.btn+'55';
+      cancelBtn.style.display=hideCancelBtn?'none':'';
       overlay.style.display='flex';
       requestAnimationFrame(()=>{ box.style.transform='scale(1) translateY(0)'; box.style.opacity='1'; });
       function close(r){ box.style.transform='scale(.94) translateY(10px)'; box.style.opacity='0';

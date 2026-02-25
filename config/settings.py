@@ -21,7 +21,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Hôtes autorisés à accéder au site
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0'] + config('ALLOWED_HOSTS', default='', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
 
 
 # ═══════════════════════════════════════════════
@@ -77,6 +77,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     #'debug_toolbar.middleware.DebugToolbarMiddleware', # Barre debug (dev)
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Servir les fichiers statiques en prod
     'corsheaders.middleware.CorsMiddleware',           # CORS pour les appels JS
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -128,16 +129,23 @@ TEMPLATES = [
 # BASE DE DONNÉES (PostgreSQL)
 # ═══════════════════════════════════════════════
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':     config('DB_NAME',     default='hooYia_db'),
-        'USER':     config('DB_USER',     default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        'HOST':     config('DB_HOST',     default='localhost'),
-        'PORT':     config('DB_PORT',     default='5432'),
+# Supporte DATABASE_URL (Render) ou config individuelle (local)
+import dj_database_url as _dj_db_url
+
+_db_url = config('DATABASE_URL', default='')
+if _db_url:
+    DATABASES = {'default': _dj_db_url.parse(_db_url, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME':     config('DB_NAME',     default='hooYia_db'),
+            'USER':     config('DB_USER',     default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default='postgres'),
+            'HOST':     config('DB_HOST',     default='localhost'),
+            'PORT':     config('DB_PORT',     default='5432'),
+        }
     }
-}
 
 # Modèle utilisateur personnalisé (on le créera dans apps/users/)
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -321,3 +329,13 @@ LOGIN_URL = '/compte/connexion/'
 # En production (DEBUG=False), mettre True pour exiger une commande LIVREE.
 # En développement, False permet de tester les avis sans avoir passé commande.
 AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
+# ═══════════════════════════════════════════════════════════
+# GOOGLE OAUTH2
+# Créez vos credentials sur : https://console.cloud.google.com
+# Ajoutez dans votre .env : GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET
+# URI de redirection à configurer dans Google Console :
+#   http://127.0.0.1:8000/compte/google/callback/
+# ═══════════════════════════════════════════════════════════
+GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
+GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
+GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://127.0.0.1:8000/compte/google/callback/')

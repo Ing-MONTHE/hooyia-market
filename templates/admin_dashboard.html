@@ -1027,7 +1027,7 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
       <div class="da-card">
         <div class="da-card-head">
           <h3>Toutes les commandes</h3>
-          <span style="font-size:11.5px;color:var(--muted);">Cliquez pour changer le statut</span>
+          <span style="font-size:11.5px;color:var(--muted);"></span>
         </div>
         <table class="da-table">
           <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
@@ -1488,7 +1488,8 @@ async function loadOverview() {
 /* ─── Stocks ─── */
 function renderStockRow(p) {
   const min=p.stock_minimum||5, s=p.stock;
-  const pct=s===0?0:Math.min(100,Math.round(s/Math.max(min*2,1)*100));
+  const max=p.stock_max||Math.max(s, min*2, 1);
+  const pct=s===0?0:Math.min(100,Math.round(s/max*100));
   const col=s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
   const cls=s===0?'sk-cr':s<=min?'sk-lo':'sk-ok';
   const badge=s===0
@@ -1614,7 +1615,8 @@ async function loadSection(name) {
       <td>${statut(c.statut)}</td>
       <td style="display:flex;gap:4px;flex-wrap:wrap;">
         ${nextStatut[c.statut]?`<button onclick="changerStatutCommande(${c.id},'${nextStatut[c.statut]}',this)" style="padding:4px 9px;border-radius:var(--r-sm);border:none;background:var(--navy-2);color:white;font-size:11px;font-weight:600;cursor:pointer;">${nextLabel[c.statut]}</button>`:''}
-        ${c.statut!=='livree'&&c.statut!=='annulee'?`<button onclick="annulerCommande(${c.id},this)" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #fecaca;background:var(--red-l);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">✕ Annuler</button>`:'<span style="color:var(--muted);font-size:11px;">—</span>'}
+        ${c.statut!=='livree'&&c.statut!=='annulee'?`<button onclick="annulerCommande(${c.id},this)" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #fecaca;background:var(--red-l);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">✕ Annuler</button>`:''}
+        <button onclick="voirDetailCommande(${c.id})" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:11px;font-weight:600;cursor:pointer;">👁 Voir</button>
       </td>
     </tr>`).join('') : empty(6);
   }
@@ -1966,6 +1968,41 @@ async function annulerCommande(id,btn){
   btn.disabled=true;
   try { await API.post(`/api/commandes/${id}/annuler/`,{}); loaded.delete('commandes'); loadSection('commandes'); showToast('Commande annulée','success'); }
   catch(e){ showToast('Erreur annulation','error'); btn.disabled=false; }
+}
+async function voirDetailCommande(id){
+  try {
+    const c = await apiFetch(`/api/commandes/${id}/`);
+    const lignes = (c.lignes||[]).map(l=>`<tr>
+      <td style="padding:6px 8px;border-bottom:1px solid #f1f5f9;">${l.produit_nom||l.produit||'—'}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f1f5f9;text-align:center;">${l.quantite}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-family:monospace;">${fmtPrice(l.prix_unitaire)}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-family:monospace;font-weight:700;">${fmtPrice(l.prix_total||l.quantite*l.prix_unitaire)}</td>
+    </tr>`).join('');
+    const html=`<div style="font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:12px;">
+        <div><span style="color:var(--muted);">Client :</span> <strong>${c.client_nom||c.client||'—'}</strong></div>
+        <div><span style="color:var(--muted);">Statut :</span> ${statut(c.statut)}</div>
+        <div><span style="color:var(--muted);">Date :</span> ${fmtDate(c.date_creation)}</div>
+        <div><span style="color:var(--muted);">Paiement :</span> ${c.mode_paiement||'—'}</div>
+        <div style="grid-column:1/-1;"><span style="color:var(--muted);">Adresse :</span> ${c.adresse_livraison_ville||''} ${c.adresse_livraison_adresse||''}</div>
+        ${c.note_client?`<div style="grid-column:1/-1;"><span style="color:var(--muted);">Note :</span> ${c.note_client}</div>`:''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f8fafc;">
+          <th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600;">Produit</th>
+          <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;">Qté</th>
+          <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;">P.U.</th>
+          <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;">Total</th>
+        </tr></thead>
+        <tbody>${lignes||'<tr><td colspan="4" style="padding:8px;color:var(--muted);text-align:center;">—</td></tr>'}</tbody>
+        <tfoot><tr>
+          <td colspan="3" style="padding:8px;text-align:right;font-weight:700;">Total</td>
+          <td style="padding:8px;text-align:right;font-family:monospace;font-weight:700;color:var(--navy-2);">${fmtPrice(c.montant_total)}</td>
+        </tr></tfoot>
+      </table>
+    </div>`;
+    await showConfirm({ title: `Commande #${c.reference_courte||id}`, body: html, confirmText: 'Fermer', hideCancelBtn: true, type: 'info' });
+  } catch(e){ showToast('Impossible de charger le détail','error'); }
 }
 async function validerAvis(id,valider,btn){
   btn.disabled=true;

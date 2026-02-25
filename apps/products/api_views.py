@@ -89,13 +89,13 @@ class ProduitViewSet(viewsets.ModelViewSet):
             # Admin voit tout
             return Produit.objects.all().select_related(
                 'categorie', 'vendeur'
-            ).prefetch_related('images')
+            ).prefetch_related('images', 'mouvements_stock')
 
         if user.is_authenticated and getattr(user, 'is_vendeur', False):
             # Vendeur voit ses propres produits
             return Produit.objects.filter(
                 vendeur=user
-            ).select_related('categorie').prefetch_related('images')
+            ).select_related('categorie').prefetch_related('images', 'mouvements_stock')
 
         # Public → produits actifs uniquement
         return Produit.actifs.all()

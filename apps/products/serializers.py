@@ -88,13 +88,16 @@ class ProduitListSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    # Stock maximum historique (pour calculer le % de remplissage correct)
+    stock_max = serializers.SerializerMethodField()
+
     class Meta:
         model  = Produit
         fields = [
             'id', 'nom', 'slug',
             'prix', 'prix_promo', 'prix_actuel',
             'pourcentage_remise',
-            'stock', 'stock_minimum', 'est_en_stock',
+            'stock', 'stock_minimum', 'stock_max', 'est_en_stock',
             'note_moyenne', 'nombre_avis',
             'categorie_nom',
             'en_vedette', 'statut',
@@ -114,6 +117,20 @@ class ProduitListSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(image.image.url)
             return image.image.url
         return None
+
+    def get_stock_max(self, obj):
+        """
+        Retourne le stock maximum historique (plus haute valeur stock_apres
+        enregistrée dans MouvementStock), utilisé pour calculer le % de remplissage.
+        Si aucun mouvement, fallback sur stock actuel.
+        """
+        from django.db.models import Max
+        result = obj.mouvements_stock.aggregate(Max('stock_apres'))
+        max_val = result.get('stock_apres__max')
+        if max_val and max_val > 0:
+            return max_val
+        # Fallback : stock actuel (100% par défaut si pas d'historique)
+        return max(obj.stock, 1)
 
 
 # ═══════════════════════════════════════════════════════════════

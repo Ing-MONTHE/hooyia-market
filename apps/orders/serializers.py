@@ -118,13 +118,30 @@ class CommandeDetailSerializer(serializers.ModelSerializer):
     statut_affiche   = serializers.CharField(source='get_statut_display', read_only=True)
     reference_courte = serializers.ReadOnlyField()
     peut_etre_annulee = serializers.ReadOnlyField()
+    # Nom du client
+    client_nom = serializers.SerializerMethodField()
+    # Mode de paiement depuis le modèle Paiement lié
+    mode_paiement = serializers.SerializerMethodField()
+
+    def get_client_nom(self, obj):
+        u = obj.client
+        if not u:
+            return '—'
+        full = f"{u.prenom or ''} {u.nom or ''}".strip()
+        return full or u.username or u.email or '—'
+
+    def get_mode_paiement(self, obj):
+        try:
+            return obj.paiement.get_mode_paiement_display() or obj.paiement.mode_paiement or '—'
+        except Exception:
+            return '—'
 
     class Meta:
         model  = Commande
         fields = [
             'id', 'reference', 'reference_courte',
             'statut', 'statut_affiche', 'peut_etre_annulee',
-            'montant_total',
+            'montant_total', 'client_nom', 'mode_paiement',
             # Adresse de livraison complète
             'adresse_livraison_nom', 'adresse_livraison_telephone',
             'adresse_livraison_adresse', 'adresse_livraison_ville',
