@@ -1413,18 +1413,29 @@ async function apiFetch(url) {
   } catch { return []; }
 }
 
+/* apiFetch qui retourne l'objet brut {count, results} pour les KPIs */
+async function apiFetchRaw(url) {
+  try {
+    return await (typeof API !== 'undefined' ? API.get(url, {silentError:true}) : fetch(url, {credentials:'same-origin'}).then(r=>r.json()));
+  } catch { return {}; }
+}
+
 /* ─── OVERVIEW ─── */
 async function loadOverview() {
   $('date-now').textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
-  const [produits, commandes, avis, cats] = await Promise.all([
-    apiFetch('/api/produits/?page_size=100'),
+  const [produitsRaw, commandes, avis, cats] = await Promise.all([
+    apiFetchRaw('/api/produits/'),
     apiFetch('/api/commandes/'),
     apiFetch('/api/avis/'),
     apiFetch('/api/categories/'),
   ]);
 
-  $('kpi-produits').textContent   = produits.length || '—';
+  // Utilise count (total réel) si disponible, sinon la longueur des résultats
+  const totalProduits = produitsRaw?.count ?? (produitsRaw?.results?.length ?? 0);
+  const produits = produitsRaw?.results ?? [];
+
+  $('kpi-produits').textContent   = totalProduits || '—';
   $('kpi-produits-t').innerHTML   = `<span>▲</span> ${cats.length} catégorie${cats.length>1?'s':''}`;
   $('kpi-commandes').textContent  = commandes.length || '—';
   const pending = commandes.filter(c=>c.statut==='en_attente').length;
@@ -1488,8 +1499,12 @@ async function loadOverview() {
 /* ─── Stocks ─── */
 function renderStockRow(p) {
   const min=p.stock_minimum||5, s=p.stock;
-  const max=p.stock_max||Math.max(s, min*2, 1);
-  const pct=s===0?0:Math.min(100,Math.round(s/max*100));
+  // Référence : maximum entre le stock actuel et le double du seuil minimum (au moins 10)
+  // Utilise stock_max si disponible, sinon une référence contextuelle depuis les données globales
+  const allStocks = (window._stocksData||[]).map(x=>x.stock).filter(x=>x>0);
+  const globalMax = allStocks.length ? Math.max(...allStocks) : 100;
+  const ref = Math.max(globalMax, min*4, 20); // référence = max global ou 4x le seuil
+  const pct = s===0 ? 0 : Math.min(100, Math.round((s / ref) * 100));
   const col=s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
   const cls=s===0?'sk-cr':s<=min?'sk-lo':'sk-ok';
   const badge=s===0

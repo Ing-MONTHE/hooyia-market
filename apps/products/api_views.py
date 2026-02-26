@@ -146,6 +146,26 @@ class ProduitViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
+    def perform_update(self, serializer):
+        """
+        Override pour gérer les images lors d'un PATCH/PUT.
+        Les fichiers envoyés dans request.FILES['images'] sont ajoutés au produit.
+        """
+        from .models import ImageProduit
+        instance = serializer.save()
+        images = self.request.FILES.getlist('images')
+        for i, img_file in enumerate(images):
+            est_principale = (not instance.images.exists() and i == 0)
+            ImageProduit.objects.create(
+                produit=instance,
+                image=img_file,
+                ordre=instance.images.count(),
+                est_principale=est_principale,
+            )
+        # Invalider le cache
+        cache.delete(f'produit_{instance.pk}')
+        cache.delete(f'produit_slug_{instance.slug}')
+
     # ── Action spéciale : produits en vedette ─────────────────
     @action(detail=False, methods=['get'], url_path='en_vedette')
     def en_vedette(self, request):
@@ -178,7 +198,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         produit = self.get_object()
 
         # Vérifie que c'est le propriétaire ou un admin
-        if produit.vendeur != request.user and not request.user.is_admin:
+        if produit.vendeur != request.user and not (request.user.is_admin or request.user.is_staff):
             return Response(
                 {'erreur': 'Permission refusée.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -205,7 +225,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         produit = self.get_object()
 
         # Vérifie les permissions
-        if not (request.user.is_admin or produit.vendeur == request.user):
+        if not (request.user.is_admin or request.user.is_staff or produit.vendeur == request.user):
             return Response(
                 {'erreur': 'Permission refusée.'},
                 status=status.HTTP_403_FORBIDDEN
