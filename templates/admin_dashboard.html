@@ -1503,7 +1503,8 @@ function renderStockRow(p) {
   // Utilise stock_max si disponible, sinon une référence contextuelle depuis les données globales
   const allStocks = (window._stocksData||[]).map(x=>x.stock).filter(x=>x>0);
   const globalMax = allStocks.length ? Math.max(...allStocks) : 100;
-  const ref = Math.max(globalMax, min*4, 20); // référence = max global ou 4x le seuil
+  const stockMax = p.stock_max && p.stock_max > 0 ? p.stock_max : null;
+  const ref = stockMax || Math.max(globalMax, min*4, 20);
   const pct = s===0 ? 0 : Math.min(100, Math.round((s / ref) * 100));
   const col=s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
   const cls=s===0?'sk-cr':s<=min?'sk-lo':'sk-ok';
@@ -1512,16 +1513,19 @@ function renderStockRow(p) {
     :s<=min?'<span class="st" style="background:#fff7ed;color:var(--orange);">⚠ Faible</span>'
     :'<span class="st st-active">OK</span>';
   const imgSrc=p.image_principale||'';
+  const nomEscaped = p.nom.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   return `<tr>
     <td><div style="display:flex;align-items:center;gap:10px;">
-      ${imgSrc?`<img src="${imgSrc}" style="width:38px;height:38px;border-radius:var(--r-sm);object-fit:contain;flex-shrink:0;border:1px solid var(--border);padding:2px;background:var(--s2);">` : `<div style="width:38px;height:38px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📦</div>`}
+      ${imgSrc
+        ? `<img src="${imgSrc}" style="width:38px;height:38px;border-radius:var(--r-sm);object-fit:contain;flex-shrink:0;border:1px solid var(--border);padding:2px;background:var(--s2);" onerror="this.outerHTML='<div style=width:38px;height:38px;border-radius:4px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;>📦</div>'">`
+        : `<div style="width:38px;height:38px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📦</div>`}
       <div><div style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</div>${badge}</div>
     </div></td>
     <td style="color:var(--text-2);">${p.categorie_nom||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${col};font-size:14px;">${s}</td>
     <td style="color:var(--muted);font-family:monospace;">${min}</td>
     <td><div style="display:flex;align-items:center;gap:8px;"><div class="sk-bar-bg" style="width:90px;"><div class="sk-bar ${cls}" style="width:${pct}%;"></div></div><span style="font-size:11px;color:${col};font-weight:700;min-width:30px;">${pct}%</span></div></td>
-    <td><button onclick="openStockModal(${p.id},'${p.nom.replace(/'/g,"\\'")}',${p.stock})" style="padding:5px 12px;border-radius:var(--r-sm);border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--navy-2);font-size:11.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">📦 Réappro</button></td>
+    <td><button data-pid="${p.id}" data-pnom="${nomEscaped}" data-pstock="${p.stock}" onclick="openStockModal(this.dataset.pid, this.dataset.pnom, parseInt(this.dataset.pstock))" style="padding:5px 12px;border-radius:var(--r-sm);border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--navy-2);font-size:11.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">📦 Réappro</button></td>
   </tr>`;
 }
 
@@ -1570,7 +1574,7 @@ async function loadSection(name) {
       return `<tr>
         <td><div style="display:flex;align-items:center;gap:10px;">
           ${imgSrc
-            ? `<div style="width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:center;"><img src="${imgSrc}" alt="${p.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px;"></div>`
+            ? `<div style="width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:center;"><img src="${imgSrc}" alt="${p.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px;" onerror="this.closest('div').outerHTML='<div style=width:40px;height:40px;border-radius:4px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;>📦</div>'"></div>`
             : `<div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>`}
           <span style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</span>
         </div></td>
