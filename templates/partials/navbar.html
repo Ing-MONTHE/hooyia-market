@@ -257,16 +257,23 @@
 }
 @media (max-width: 1023px) {
   .burger-btn { display: flex !important; }
+  /* Sur mobile, montrer Connexion + S'inscrire dans le menu burger */
+  .nav-action { display: none !important; }
+  a[href*="inscription"]:not(.mobile-link):not(.btn) { display: none !important; }
 }
-@media (min-width: 640px) {
+@media (min-width: 480px) {
   .nav-cat-select { display: block; }
+  .nav-search-wrap { display: flex !important; }
+}
+@media (max-width: 479px) {
+  .nav-search-wrap { display: none !important; }
 }
 </style>
 
 <header class="navbar-top">
 
   <!-- ══ BARRE PRINCIPALE ══ -->
-  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;">
+  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;" class="navbar-main-row">
 
     <!-- Logo -->
     <a href="{% url 'products:accueil' %}"
@@ -421,7 +428,7 @@
       {% endif %}
 
       <!-- Burger (mobile) -->
-      <button onclick="toggleMobileMenu()" class="burger-btn" aria-label="Menu" style="display:none;">
+      <button onclick="toggleMobileMenu()" class="burger-btn" aria-label="Menu">
         <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>

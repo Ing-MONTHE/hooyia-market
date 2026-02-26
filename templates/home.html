@@ -50,7 +50,7 @@
     });
   </script>
 
-  <div style="position:relative;max-width:1400px;margin:0 auto;padding:5rem 1.5rem 5rem;width:100%;">
+  <div style="position:relative;max-width:1400px;margin:0 auto;padding:5rem 1.5rem 5rem;width:100%;" class="hero-content-wrap">
     <div style="max-width:600px;">
 
       <!-- Pill badge -->
@@ -170,7 +170,7 @@
      PROMO BANNER
 ══════════════════════════════════════════ -->
 <section style="max-width:1400px;margin:0 auto;padding:0 1.5rem 3.5rem;">
-  <div style="position:relative;background:linear-gradient(120deg,#0D1F5C 0%,#1E3A8A 100%);border-radius:1.25rem;overflow:hidden;padding:3rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start;">
+  <div style="position:relative;background:linear-gradient(120deg,#0D1F5C 0%,#1E3A8A 100%);border-radius:1.25rem;overflow:hidden;padding:3rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start;" class="promo-banner">
     <!-- Decorative circle -->
     <div style="position:absolute;right:-40px;top:-40px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.15) 0%,transparent 70%);"></div>
     <div style="position:absolute;right:120px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%);"></div>
@@ -225,7 +225,7 @@
      VALUE PROPS
 ══════════════════════════════════════════ -->
 <section style="background:var(--surface-2);border-top:1px solid var(--border);transition:background 200ms,border-color 200ms;">
-  <div style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;">
+  <div style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;" class="value-props-grid">
 
     {% for icon, title, desc in value_props|default:"" %}
     <div style="display:flex;align-items:flex-start;gap:1rem;">…</div>
@@ -284,14 +284,49 @@
 
 {% block extra_scripts %}
 <style>
+/* Grilles produits */
+#featured-grid,
+#new-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: .625rem;
+}
+@media (min-width: 480px) {
+  #featured-grid, #new-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+}
 @media (min-width: 640px) {
-  #featured-grid { grid-template-columns: repeat(3, 1fr); }
-  #new-grid { grid-template-columns: repeat(3, 1fr); }
+  #featured-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  #new-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .see-all-link { display: flex !important; }
 }
 @media (min-width: 1024px) {
   #featured-grid { grid-template-columns: repeat(4, 1fr); }
   #new-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Hero mobile */
+@media (max-width: 639px) {
+  .hero-content-wrap { padding: 2.5rem 1rem 3rem !important; }
+  .hero-content-wrap h1 { font-size: clamp(1.75rem, 7vw, 2rem) !important; margin-bottom: 1rem !important; }
+  .hero-content-wrap p  { font-size: .875rem !important; margin-bottom: 1.25rem !important; }
+  .hero-content-wrap div[style*="flex-wrap:wrap"] { flex-direction: column !important; }
+  .hero-content-wrap div[style*="flex-wrap:wrap"] a { width: 100% !important; justify-content: center !important; }
+  .hero-content-wrap div[style*="gap:2rem"] { gap: 1.25rem !important; margin-top: 1.75rem !important; }
+  .hero-content-wrap div[style*="gap:2rem"] > div:not([style*="width:1px"]) p:first-child { font-size: 1.375rem !important; }
+}
+
+/* Value props mobile */
+@media (max-width: 639px) {
+  .value-props-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.25rem !important;
+    padding: 2rem 1rem !important;
+  }
+}
+
+/* Promo banner mobile */
+@media (max-width: 639px) {
+  .promo-banner { padding: 1.75rem 1.25rem !important; }
+  .promo-banner h3 { font-size: 1.25rem !important; }
 }
 </style>
 <script>
