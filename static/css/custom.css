@@ -897,7 +897,7 @@ input[type="checkbox"]:checked {
   .burger-btn { display: flex !important; }
 
   /* Barre principale : réduit les gaps */
-  .navbar-top > div:first-child {
+  .navbar-main-row {
     gap: .5rem !important;
     padding: 0 .75rem !important;
     height: 56px !important;
@@ -905,26 +905,18 @@ input[type="checkbox"]:checked {
 
   /* Logo plus petit */
   .navbar-top a[href] img { height: 28px !important; }
-  .navbar-top a[href] { padding: 4px 8px !important; }
+  .navbar-top a[href]:not(.nav-dd-item):not(.mobile-link) { padding: 4px 8px !important; }
 
-  /* Barre de recherche : cachée sur très petit écran, visible sinon */
-  .nav-search-wrap { display: none !important; }
+  /* Barre de recherche toujours visible sur mobile */
+  .nav-search-wrap { display: flex !important; }
 
-  /* Actions droite : réduit */
+  /* Actions droite : compte masqué sur mobile */
   .nav-action { display: none !important; }
   .nav-cart   { padding: 4px 8px !important; }
   .nav-cart-label { display: none; }
 
-  /* Bouton S'inscrire raccourci */
+  /* S'inscrire masqué (dans le menu burger) */
   a[href*="inscription"]:not(.mobile-link):not(.btn) { display: none !important; }
-
-  /* Bouton Connexion : garde uniquement l'icône */
-  .nav-action:has(+ .burger-btn) { display: none !important; }
-}
-
-/* Afficher la barre de recherche sur tablette */
-@media (min-width: 480px) and (max-width: 1023px) {
-  .nav-search-wrap { display: flex !important; }
 }
 
 /* ── HERO MOBILE ── */
