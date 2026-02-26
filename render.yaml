@@ -17,8 +17,6 @@ services:
         fromDatabase:
           name: hooyia-db
           property: connectionString
-      - key: REDIS_URL
-        value: "redis://localhost:6379"
 
 databases:
   - name: hooyia-db

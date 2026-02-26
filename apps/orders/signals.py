@@ -2,16 +2,11 @@
 Signals pour l'app orders.
 
 Écoute les changements de statut des commandes pour déclencher
-les tâches Celery asynchrones (emails, rappels).
+les notifications (emails, rappels) — exécutées de façon synchrone.
 
-Signals écoutés :
-  - post_save Commande (statut CONFIRMEE) → email de confirmation
-  - post_save Commande (statut LIVREE)    → rappel laisser un avis (3j après)
-
-Pourquoi utiliser des signals ici plutôt qu'appeler Celery directement ?
-  Le service (OrderService) ne doit pas connaître les détails de l'envoi d'emails.
-  Les signals permettent de découpler : le service change le statut, les signals
-  réagissent et délèguent à Celery. Chaque couche fait une seule chose.
+Note : le rappel avis (send_review_reminder) était autrefois différé de 3 jours
+via Celery countdown. Sans Celery, il est appelé immédiatement à la livraison.
+Pour un vrai délai, utiliser un cron Render qui appelle un management command.
 """
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -22,74 +17,36 @@ from .models import Commande
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════════
-# SIGNAL 1 — Email de confirmation de commande
-# Se déclenche quand une commande passe au statut CONFIRMEE
-# ═══════════════════════════════════════════════════════════════
-
 @receiver(post_save, sender=Commande)
 def envoyer_email_confirmation(sender, instance, created, **kwargs):
-    """
-    Quand une commande passe au statut CONFIRMEE,
-    déclenche la tâche Celery d'envoi d'email de confirmation.
-
-    La tâche est asynchrone : l'utilisateur reçoit sa réponse HTTP immédiatement,
-    l'email part en arrière-plan via le worker Celery.
-
-    Note : on utilise .delay() pour envoyer la tâche à la file Celery.
-    """
-    # On n'envoie l'email que quand la commande passe en CONFIRMEE
-    # et seulement si ce n'est pas la création initiale (créée en EN_ATTENTE)
+    """Email de confirmation quand la commande passe en CONFIRMEE."""
     if not created and instance.statut == Commande.CONFIRMEE:
         try:
-            # Import ici pour éviter les imports circulaires avec notifications
             from apps.notifications.tasks import send_order_confirmation_email
-            # .delay() = envoi asynchrone via Celery (ne bloque pas la requête HTTP)
-            send_order_confirmation_email.delay(instance.pk)
-            logger.info(f"Email confirmation planifié pour commande #{instance.reference_courte}")
+            send_order_confirmation_email(instance.pk)
+            logger.info(f"Email confirmation envoyé pour commande #{instance.reference_courte}")
         except Exception as e:
-            # On ne laisse pas une erreur Celery bloquer la commande
-            logger.error(f"Erreur planification email confirmation : {e}")
+            logger.error(f"Erreur envoi email confirmation : {e}")
 
-
-# ═══════════════════════════════════════════════════════════════
-# SIGNAL 2 — Rappel laisser un avis après livraison
-# Se déclenche quand une commande passe au statut LIVREE
-# ═══════════════════════════════════════════════════════════════
 
 @receiver(post_save, sender=Commande)
 def planifier_rappel_avis(sender, instance, created, **kwargs):
     """
-    Quand une commande est livrée, planifie un rappel Celery
-    pour inviter le client à laisser un avis 3 jours après.
-
-    On utilise apply_async() avec countdown pour différer l'exécution.
+    Rappel avis quand la commande passe en LIVREE.
+    Exécuté immédiatement (plus de countdown Celery).
     """
     if not created and instance.statut == Commande.LIVREE:
         try:
             from apps.notifications.tasks import send_review_reminder
-            # countdown = délai en secondes avant exécution (3 jours = 259200 secondes)
-            send_review_reminder.apply_async(
-                args=[instance.pk],
-                countdown=259200   # 3 jours × 24h × 60min × 60sec
-            )
-            logger.info(f"Rappel avis planifié pour commande #{instance.reference_courte}")
+            send_review_reminder(instance.pk)
+            logger.info(f"Rappel avis envoyé pour commande #{instance.reference_courte}")
         except Exception as e:
-            logger.error(f"Erreur planification rappel avis : {e}")
+            logger.error(f"Erreur envoi rappel avis : {e}")
 
-# ═══════════════════════════════════════════════════════════════
-# SIGNAL 3 — Paiement automatique à la livraison
-# Quand une commande "paiement à la livraison" passe en LIVREE,
-# on marque automatiquement le paiement comme REUSSI.
-# Logique : si c'est livré, le cash a été remis en main propre.
-# ═══════════════════════════════════════════════════════════════
 
 @receiver(post_save, sender=Commande)
 def marquer_paiement_livraison(sender, instance, created, **kwargs):
-    """
-    Quand une commande passe en LIVREE ET que le mode de paiement
-    est LIVRAISON, on marque automatiquement le paiement comme REUSSI.
-    """
+    """Marque automatiquement le paiement REUSSI pour les commandes LIVRAISON."""
     if created or instance.statut != Commande.LIVREE:
         return
     try:
@@ -97,12 +54,9 @@ def marquer_paiement_livraison(sender, instance, created, **kwargs):
         paiement = instance.paiement
         if (paiement.mode == Paiement.ModePaiement.LIVRAISON
                 and paiement.statut == Paiement.StatutPaiement.EN_ATTENTE):
-            paiement.statut       = Paiement.StatutPaiement.REUSSI
+            paiement.statut        = Paiement.StatutPaiement.REUSSI
             paiement.date_paiement = instance.date_modification
             paiement.save(update_fields=['statut', 'date_paiement'])
-            logger.info(
-                f"Paiement livraison marqué REUSSI pour commande "
-                f"#{instance.reference_courte}"
-            )
+            logger.info(f"Paiement livraison marqué REUSSI pour commande #{instance.reference_courte}")
     except Exception as e:
         logger.error(f"Erreur mise à jour statut paiement : {e}")

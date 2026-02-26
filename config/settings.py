@@ -51,9 +51,6 @@ INSTALLED_APPS = [
     'mptt',           # Catégories en arbre
     'django_fsm',     # Statuts commande (machine à états)
 
-    # Tâches asynchrones
-    'django_celery_beat',
-
     # Débogage en développement
     #'debug_toolbar',
 
@@ -152,61 +149,36 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 
 # ═══════════════════════════════════════════════
-# REDIS — Cache + Sessions
-# ═══════════════════════════════════════════════
 
-REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379')
+# ═══════════════════════════════════════════════
+# CACHE — En mémoire (pas de Redis)
+# ═══════════════════════════════════════════════
 
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        # Base Redis n°1 réservée au cache
-        'LOCATION': f'{REDIS_URL}/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        # Préfixe sur toutes les clés Redis pour éviter les conflits
-        'KEY_PREFIX': 'hooYia',
-        # Durée de vie par défaut : 5 minutes
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'hooYia-cache',
         'TIMEOUT': 300,
     }
 }
 
-# Les sessions utilisateur sont stockées dans Redis (rapide)
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Sessions stockées en base de données PostgreSQL
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # ═══════════════════════════════════════════════
 # DJANGO CHANNELS — WebSockets (Chat + Notifications)
+# InMemoryChannelLayer : fonctionne sans Redis
+# Limitation : ne supporte pas multi-process (ok sur Render free tier)
 # ═══════════════════════════════════════════════
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # Base Redis n°0 réservée aux WebSockets
-        'CONFIG': {
-            'hosts': [f'{REDIS_URL}/0'],
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     }
 }
 
 
-# ═══════════════════════════════════════════════
-# CELERY — Tâches asynchrones
-# ═══════════════════════════════════════════════
-
-# Base Redis n°2 réservée à Celery (broker = file d'attente des tâches)
-CELERY_BROKER_URL = f'{REDIS_URL}/2'
-CELERY_RESULT_BACKEND = f'{REDIS_URL}/2'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Africa/Douala'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
-
-# ═══════════════════════════════════════════════
 # DJANGO REST FRAMEWORK
 # ═══════════════════════════════════════════════
 
