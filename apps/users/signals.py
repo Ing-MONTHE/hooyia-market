@@ -31,7 +31,7 @@ def creer_token_verification(sender, instance, created, **kwargs):
         token = TokenVerificationEmail.objects.create(utilisateur=instance)
 
         # Construit le lien de vérification
-        lien = f"http://localhost:8000/compte/verifier-email/{token.token}/"
+        lien = f"https://hooyia-market-wpsp.onrender.com/compte/verifier-email/{token.token}/"
 
         # Envoie l'email (en local : affiché dans le terminal)
         send_mail(
