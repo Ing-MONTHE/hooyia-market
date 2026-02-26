@@ -11,10 +11,3 @@ python manage.py collectstatic --no-input
 
 # Migrations de la base de données
 python manage.py migrate
-
-python manage.py shell -c "
-from apps.users.models import CustomUser
-if not CustomUser.objects.filter(email='monthefrancklin@gmail.com').exists():
-    CustomUser.objects.create_superuser(email='monthefrancklin@gmail.com', username='Admin', password='@Dmin#1234!')
-    print('Superuser créé')
-"
