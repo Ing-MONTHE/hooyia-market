@@ -308,7 +308,7 @@ AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
 # Créez vos credentials sur : https://console.cloud.google.com
 # Ajoutez dans votre .env : GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET
 # URI de redirection à configurer dans Google Console :
-#   http://127.0.0.1:8000/compte/google/callback/
+#   https://hooyia-market-wpsp.onrender.com/compte/google/callback/
 # ═══════════════════════════════════════════════════════════
 GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
