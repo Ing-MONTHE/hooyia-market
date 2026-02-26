@@ -35,22 +35,22 @@
     </select>
   </div>
 
+  <!-- Mobile filter overlay (backdrop) -->
+  <div id="mobile-filter-overlay" onclick="toggleMobileFilters()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);"></div>
+
   <div style="display:flex;gap:1.75rem;">
 
     <!-- ── SIDEBAR FILTRES ── -->
     <aside id="filter-sidebar" style="display:none;width:240px;flex-shrink:0;">
-      <!-- Fermer overlay en cliquant dehors (mobile) -->
-      <div onclick="closeMobileFilters(event)" style="position:absolute;inset:0;z-index:-1;" class="lg:hidden"></div>
-      <div id="filter-sidebar-inner" class="card-raised" style="padding:1.25rem;position:sticky;top:80px;">
-        <!-- Bouton fermer (mobile) -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;" class="filter-mobile-header">
-          <span style="font-size:.9375rem;font-weight:700;color:var(--text-primary);font-family:'Sora',sans-serif;">Filtres</span>
-          <button onclick="closeMobileFilters()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='none'">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      <div class="card-raised" style="padding:1.25rem;position:sticky;top:80px;background:var(--bg-card,#fff);">
+
+        <!-- Close button (mobile only) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;" class="lg:hidden">
+          <span style="font-weight:700;font-size:1rem;color:var(--text-primary);">Filtres</span>
+          <button onclick="toggleMobileFilters()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
-
-        <!-- Search -->
         <div class="filter-section">
           <label class="label">Recherche</label>
           <div style="position:relative;">
@@ -101,7 +101,7 @@
         <button onclick="Catalogue.reset()" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;font-size:.8rem;">
           Réinitialiser les filtres
         </button>
-      </div><!-- /filter-sidebar-inner -->
+      </div>
     </aside>
 
     <!-- ── GRID ── -->
@@ -132,59 +132,47 @@
       </div>
 
       <!-- Pagination -->
-      <div id="pagination" style="display:none;flex;justify-content:center;gap:.5rem;margin-top:2.5rem;flex-wrap:wrap;"></div>
+      <div id="pagination" style="display:none;justify-content:center;gap:.5rem;margin-top:2.5rem;flex-wrap:wrap;"></div>
     </div>
   </div>
 </div>
 
 <style>
-/* Grille produits */
-@media (min-width: 480px) {
-  #skeleton-grid, #products-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
 @media (min-width: 768px) {
   #skeleton-grid, #products-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 @media (min-width: 1024px) {
-  #filter-sidebar { display: block !important; width: 240px !important; position: relative !important; }
+  #filter-sidebar { display: block !important; position: static !important; width: 240px !important; height: auto !important; top: auto !important; left: auto !important; box-shadow: none !important; }
+  #filter-sidebar .card-raised { position: sticky; top: 80px; }
   #skeleton-grid, #products-grid { grid-template-columns: repeat(4, 1fr) !important; }
 }
 @media (min-width: 1280px) {
   #skeleton-grid, #products-grid { grid-template-columns: repeat(5, 1fr) !important; }
 }
 
-/* Sidebar mobile : overlay plein écran */
+/* Mobile drawer */
 @media (max-width: 1023px) {
   #filter-sidebar {
-    display: none;
     position: fixed !important;
-    inset: 0 !important;
-    width: 100% !important;
-    z-index: 200 !important;
-    background: rgba(0,0,0,.45) !important;
+    top: 0 !important;
+    left: -320px !important;
+    width: 300px !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    z-index: 300 !important;
+    transition: left .28s cubic-bezier(.4,0,.2,1) !important;
     padding: 0 !important;
-    overflow-y: auto !important;
   }
-  #filter-sidebar.open {
-    display: flex !important;
-    align-items: flex-end !important;
-  }
-  #filter-sidebar-inner {
-    background: var(--surface) !important;
-    border-radius: 1.25rem 1.25rem 0 0 !important;
-    padding: 1.5rem !important;
-    width: 100% !important;
-    max-height: 85vh !important;
-    overflow-y: auto !important;
-    position: relative !important;
-  }
-  /* Masque le sticky desktop dans la card */
   #filter-sidebar .card-raised {
-    box-shadow: none !important;
-    border: none !important;
+    min-height: 100%;
     border-radius: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
+    padding: 1.5rem 1.25rem 2rem !important;
+    background: var(--bg-card, #fff) !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,.12) !important;
+  }
+  #filter-sidebar.mobile-open {
+    left: 0 !important;
+    display: block !important;
   }
 }
 </style>
@@ -195,20 +183,17 @@
 <script>
 function toggleMobileFilters() {
   const sb = document.getElementById('filter-sidebar');
-  const isDesktop = window.innerWidth >= 1024;
-  if (isDesktop) {
-    sb.style.display = sb.style.display === 'none' ? 'block' : 'none';
+  const overlay = document.getElementById('mobile-filter-overlay');
+  const isVisible = sb.classList.contains('mobile-open');
+  if (isVisible) {
+    sb.classList.remove('mobile-open');
+    if (overlay) overlay.style.display = 'none';
+    document.body.style.overflow = '';
   } else {
-    sb.classList.toggle('open');
-    document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+    sb.classList.add('mobile-open');
+    if (overlay) overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
   }
-}
-
-function closeMobileFilters(e) {
-  if (e && e.target !== e.currentTarget) return;
-  const sb = document.getElementById('filter-sidebar');
-  sb.classList.remove('open');
-  document.body.style.overflow = '';
 }
 </script>
 {% endblock %}

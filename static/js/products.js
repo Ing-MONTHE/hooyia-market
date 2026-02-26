@@ -166,12 +166,12 @@ const Catalogue = (() => {
 
   // ── Pagination
   function renderPagination(data, container, total) {
-    if (!data.next && !data.previous) {
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    if (totalPages <= 1) {
       container.style.display = 'none';
       return;
     }
     container.style.display = 'flex';
-    const totalPages = Math.ceil(total / PAGE_SIZE);
     container.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
@@ -184,6 +184,8 @@ const Catalogue = (() => {
       }`;
       btn.onclick = () => {
         state.page = i;
+        const grid = document.getElementById('products-grid');
+        if (grid) grid.innerHTML = '';
         load(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
