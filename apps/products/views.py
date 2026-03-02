@@ -48,27 +48,65 @@ def accueil(request):
 
 def liste_produits(request):
     """
-    Page catalogue.
-    La grille de produits est chargée dynamiquement
-    via JavaScript depuis /api/produits/
-    Les filtres (prix, catégorie, note) sont aussi gérés en JS.
-    On passe juste les catégories pour la sidebar de filtres.
+    Page catalogue avec pagination Python (Django Paginator).
+    Les filtres dynamiques restent gérés en JS, mais la pagination
+    est rendue côté serveur via des liens HTML classiques.
     """
+    from django.core.paginator import Paginator
+    from .filters import ProduitFilter
+
     categories = Categorie.objects.filter(est_active=True)
 
-    # Catégorie active si filtre dans l'URL
-    # Ex: /produits/?categorie=telephonie
     categorie_slug = request.GET.get('categorie', '')
     categorie_active = None
     if categorie_slug:
-        categorie_active = Categorie.objects.filter(
-            slug=categorie_slug
-        ).first()
+        categorie_active = Categorie.objects.filter(slug=categorie_slug).first()
+
+    # Construire le queryset avec filtres GET
+    qs = Produit.objects.filter(statut='actif').select_related('categorie').prefetch_related('images')
+
+    search = request.GET.get('search', '').strip()
+    if search:
+        from django.db.models import Q
+        qs = qs.filter(Q(nom__icontains=search) | Q(description__icontains=search))
+
+    if categorie_slug:
+        qs = qs.filter(categorie__slug=categorie_slug)
+
+    promo = request.GET.get('promo')
+    if promo:
+        qs = qs.filter(prix_promo__isnull=False)
+
+    en_vedette = request.GET.get('en_vedette')
+    if en_vedette:
+        qs = qs.filter(en_vedette=True)
+
+    ordering = request.GET.get('ordering', '-date_creation')
+    allowed_orderings = ['prix', '-prix', '-date_creation', 'date_creation', '-note_moyenne']
+    if ordering in allowed_orderings:
+        qs = qs.order_by(ordering)
+    else:
+        qs = qs.order_by('-date_creation')
+
+    paginator = Paginator(qs, 12)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    # Conserver les paramètres GET sans 'page' pour les liens de pagination
+    params = request.GET.copy()
+    params.pop('page', None)
+    params_str = params.urlencode()
 
     context = {
         'categories'      : categories,
         'categorie_active': categorie_active,
         'titre'           : 'Catalogue — HooYia Market',
+        'page_obj'        : page_obj,
+        'paginator'       : paginator,
+        'params_str'      : params_str,
+        'total_count'     : paginator.count,
+        'search'          : search,
+        'ordering'        : ordering,
     }
     return render(request, 'products/list.html', context)
 

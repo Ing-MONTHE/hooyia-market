@@ -1007,12 +1007,20 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
       <div class="da-card">
         <div class="da-card-head">
           <h3 id="stocks-title">Tous les produits</h3>
-          <span style="font-size:11.5px;color:var(--muted);">Cliquez sur «&nbsp;Réappro&nbsp;» pour ajuster le stock</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="view-toggle">
+              <button class="vt-btn active" id="vt-stocks-table" onclick="setStocksView('table')" title="Tableau">☰</button>
+              <button class="vt-btn" id="vt-stocks-card" onclick="setStocksView('card')" title="Cartes">⊞</button>
+            </div>
+            <span style="font-size:11.5px;color:var(--muted);">«&nbsp;Réappro&nbsp;» pour ajuster</span>
+          </div>
         </div>
-        <table class="da-table">
+        <table class="da-table" id="view-stocks-table">
           <thead><tr><th>Produit</th><th>Catégorie</th><th>Stock</th><th>Seuil</th><th>Niveau</th><th>Action</th></tr></thead>
           <tbody id="tbl-stocks"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
+        <div id="view-stocks-card" class="card-grid" style="display:none;padding:16px;"></div>
+        <div id="pag-stocks" class="da-pagination" style="display:none;"></div>
       </div>
     </div>
 
@@ -1553,9 +1561,65 @@ function renderStockRow(p) {
   </tr>`;
 }
 
+function renderStocksPage() {
+  const slice = getPageSlice('stocks');
+  const view = PAG.stocks.view;
+  const tblEl = $('view-stocks-table');
+  const cardEl = $('view-stocks-card');
+
+  if (view === 'table') {
+    if(tblEl) tblEl.style.display = '';
+    if(cardEl) cardEl.style.display = 'none';
+    $('tbl-stocks').innerHTML = slice.length ? slice.map(renderStockRow).join('') : `<tr><td colspan="6" class="da-empty">Aucun produit trouvé</td></tr>`;
+  } else {
+    if(tblEl) tblEl.style.display = 'none';
+    if(cardEl) {
+      cardEl.style.display = '';
+      cardEl.innerHTML = slice.length ? slice.map(p => {
+        const min=p.stock_minimum||5, s=p.stock;
+        const col=s===0?'#ef4444':s<=min?'#f97316':'#22c55e';
+        const badge=s===0?'<span class="st" style="background:#fee2e2;color:#ef4444;">Épuisé</span>':s<=min?'<span class="st" style="background:#fff7ed;color:#f97316;">⚠ Faible</span>':'<span class="st st-active">OK</span>';
+        const imgSrc=p.image_principale||'';
+        const allStocks=(window._stocksData||[]).map(x=>x.stock).filter(x=>x>0);
+        const globalMax=allStocks.length?Math.max(...allStocks):100;
+        const ref=Math.max(globalMax,min*4,20);
+        const pct=s===0?0:Math.min(100,Math.round((s/ref)*100));
+        return `<div class="prod-card">
+          <div class="prod-card-img-wrap">
+            ${imgSrc?`<img src="${imgSrc}" class="prod-card-img">`:`<div style="font-size:36px;">📦</div>`}
+          </div>
+          <div class="prod-card-body">
+            <div class="prod-card-name">${p.nom}</div>
+            <div style="margin:4px 0;">${badge}</div>
+            <div class="prod-card-meta">${p.categorie_nom||'—'}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin:8px 0;">
+              <div class="sk-bar-bg" style="flex:1;"><div class="sk-bar ${s===0?'sk-cr':s<=min?'sk-lo':'sk-ok'}" style="width:${pct}%;"></div></div>
+              <span style="font-size:11px;color:${col};font-weight:700;">${pct}%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:700;color:${col};">${s} <span style="color:var(--muted);font-weight:400;font-size:11px;">/ seuil ${min}</span></span>
+              <button onclick="openStockModal(${p.id},'${p.nom.replace(/'/g,"\\'")}',${p.stock})" style="padding:4px 10px;border-radius:var(--r-sm);border:1.5px solid #bfdbfe;background:#eff6ff;color:var(--navy-2);font-size:11px;font-weight:600;cursor:pointer;">📦 Réappro</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : '<p style="color:var(--muted);text-align:center;padding:20px;">Aucun produit</p>';
+    }
+  }
+  renderPagination('stocks', 6, ()=>{});
+}
+
+function setStocksView(v) {
+  PAG.stocks.view = v;
+  $('vt-stocks-table')?.classList.toggle('active', v==='table');
+  $('vt-stocks-card')?.classList.toggle('active', v==='card');
+  renderStocksPage();
+}
+
 function renderStocks(data) {
-  const tbl=$('tbl-stocks'); if(!tbl) return;
-  tbl.innerHTML = data.length ? data.map(renderStockRow).join('') : `<tr><td colspan="6" class="da-empty">Aucun produit trouvé</td></tr>`;
+  PAG.stocks.data = data;
+  PAG.stocks.page = 1;
+  renderStocksPage();
+  renderPagination('stocks', 6, ()=>{});
 }
 
 function filtreStock(type, btn) {
@@ -1591,6 +1655,7 @@ const PAG = {
   produits:    { data: [], page: 1, perPage: 10, view: 'table' },
   categories:  { data: [], page: 1, perPage: 10, view: 'table' },
   commandes:   { data: [], page: 1, perPage: 10 },
+  stocks:      { data: [], page: 1, perPage: 10, view: 'table' },
 };
 
 function renderPagination(key, colSpan, renderFn) {
@@ -1620,6 +1685,7 @@ function goPage(key, page) {
   if (key === 'produits') renderProduits();
   if (key === 'categories') renderCatList();
   if (key === 'commandes') renderCommandes();
+  if (key === 'stocks') renderStocksPage();
 }
 
 function getPageSlice(key) {

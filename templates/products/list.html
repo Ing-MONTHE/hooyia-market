@@ -10,7 +10,7 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem;">
     <div>
       <h1 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text-primary);margin-bottom:.25rem;">Catalogue</h1>
-      <p style="font-size:.875rem;color:var(--text-muted);" id="result-count">Chargement…</p>
+      <p style="font-size:.875rem;color:var(--text-muted);">{{ total_count }} produit{{ total_count|pluralize }}</p>
     </div>
     {% if user.is_staff %}
     <a href="/administration/#ajouter-produit" class="btn btn-primary" style="gap:.5rem;">
@@ -27,11 +27,11 @@
       Filtres
     </button>
     <select id="filter-ordering-mobile" class="field btn-sm" style="width:auto;flex-shrink:0;cursor:pointer;"
-      onchange="Catalogue.setFilter('ordering',this.value)">
-      <option value="-date_creation">Plus récents</option>
-      <option value="prix">Prix ↑</option>
-      <option value="-prix">Prix ↓</option>
-      <option value="-note_moyenne">Mieux notés</option>
+      onchange="applyFilter('ordering', this.value)">
+      <option value="-date_creation" {% if ordering == '-date_creation' %}selected{% endif %}>Plus récents</option>
+      <option value="prix" {% if ordering == 'prix' %}selected{% endif %}>Prix ↑</option>
+      <option value="-prix" {% if ordering == '-prix' %}selected{% endif %}>Prix ↓</option>
+      <option value="-note_moyenne" {% if ordering == '-note_moyenne' %}selected{% endif %}>Mieux notés</option>
     </select>
   </div>
 
@@ -51,88 +51,153 @@
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
+
+        <!-- Recherche -->
         <div class="filter-section">
           <label class="label">Recherche</label>
           <div style="position:relative;">
-            <input type="search" id="filter-search" placeholder="Nom du produit…" class="field" style="padding-left:2.25rem;font-size:.8rem;" />
+            <input type="search" id="filter-search" placeholder="Nom du produit…" class="field"
+              style="padding-left:2.25rem;font-size:.8rem;" value="{{ search }}"
+              onkeydown="if(event.key==='Enter') applyFilter('search', this.value)" />
             <svg style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
         </div>
 
-        <!-- Categories -->
+        <!-- Catégories -->
         <div class="filter-section">
           <label class="label">Catégorie</label>
-          <div style="display:flex;flex-direction:column;gap:2px;" id="categories-list">
-            <button onclick="Catalogue.setFilter('categorie', '')" data-cat=""
-              class="cat-btn active">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <a href="?ordering={{ ordering }}" class="cat-btn {% if not categorie_active %}active{% endif %}" style="text-decoration:none;">
               Toutes les catégories
-            </button>
+            </a>
+            {% for cat in categories %}
+            {% if not cat.parent %}
+            <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}"
+              class="cat-btn {% if categorie_active.slug == cat.slug %}active{% endif %}" style="text-decoration:none;">
+              {{ cat.nom }}
+            </a>
+            {% for sous in cat.sous_categories.all %}
+            <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}"
+              class="cat-btn {% if categorie_active.slug == sous.slug %}active{% endif %}" style="text-decoration:none;padding-left:1.5rem;">
+              └ {{ sous.nom }}
+            </a>
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
           </div>
         </div>
 
-        <!-- Price -->
-        <div class="filter-section">
-          <label class="label">Prix max (FCFA)</label>
-          <input type="range" id="filter-prix" min="0" max="2000000" step="10000" value="2000000"
-            oninput="Catalogue.updatePrix(this.value)" />
-          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-muted);margin-top:.375rem;">
-            <span>0</span>
-            <span id="prix-label" style="color:var(--brand-500);font-weight:600;">2 000 000</span>
-          </div>
-        </div>
-
-        <!-- Sort -->
+        <!-- Trier par -->
         <div class="filter-section">
           <label class="label">Trier par</label>
-          <select id="filter-ordering" class="field" style="font-size:.8rem;cursor:pointer;">
-            <option value="-date_creation">Plus récents</option>
-            <option value="prix">Prix croissant</option>
-            <option value="-prix">Prix décroissant</option>
-            <option value="-note_moyenne">Mieux notés</option>
+          <select id="filter-ordering" class="field" style="font-size:.8rem;cursor:pointer;"
+            onchange="applyFilter('ordering', this.value)">
+            <option value="-date_creation" {% if ordering == '-date_creation' %}selected{% endif %}>Plus récents</option>
+            <option value="prix" {% if ordering == 'prix' %}selected{% endif %}>Prix croissant</option>
+            <option value="-prix" {% if ordering == '-prix' %}selected{% endif %}>Prix décroissant</option>
+            <option value="-note_moyenne" {% if ordering == '-note_moyenne' %}selected{% endif %}>Mieux notés</option>
           </select>
         </div>
 
-        <!-- Promo only -->
+        <!-- Promo uniquement -->
         <div style="display:flex;align-items:center;gap:.75rem;padding-bottom:1.25rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);">
-          <input type="checkbox" id="filter-promo" style="width:16px;height:16px;" />
+          <input type="checkbox" id="filter-promo" style="width:16px;height:16px;"
+            {% if request.GET.promo %}checked{% endif %}
+            onchange="applyFilter('promo', this.checked ? '1' : '')" />
           <label for="filter-promo" style="font-size:.8125rem;color:var(--text-secondary);cursor:pointer;font-weight:500;">Promotions uniquement</label>
         </div>
 
-        <button onclick="Catalogue.reset()" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;font-size:.8rem;">
+        <a href="{% url 'products:liste' %}" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;font-size:.8rem;text-decoration:none;">
           Réinitialiser les filtres
-        </button>
+        </a>
       </div>
     </aside>
 
     <!-- ── GRID ── -->
     <div style="flex:1;min-width:0;">
-      <!-- Skeleton -->
-      <div id="skeleton-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
-        {% for i in "123456" %}
-        <div class="card" style="padding:1rem;">
-          <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
-          <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div>
-          <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;margin-bottom:.75rem;"></div>
-          <div class="skeleton" style="height:1.25rem;border-radius:.375rem;width:35%;"></div>
-        </div>
+      <!-- Products count -->
+      <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1rem;">
+        {{ total_count }} produit{{ total_count|pluralize }}
+      </p>
+
+      <!-- Products grid (server-rendered) -->
+      {% if page_obj.object_list %}
+      <div id="products-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;" data-display="grid">
+        {% for p in page_obj %}
+        {% with img=p.image_principale|default:'' prix=p.prix_promo|default:p.prix note=p.note_moyenne|floatformat:0 %}
+        <a href="/produits/{{ p.slug }}/" class="card group flex flex-col overflow-hidden animate-fade-in">
+          <div class="relative overflow-hidden bg-cream-warm aspect-square">
+            {% if img %}
+            <img src="{{ img }}" alt="{{ p.nom }}" loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onerror="this.src='/static/img/logo.svg'" />
+            {% else %}
+            <img src="/static/img/logo.svg" alt="{{ p.nom }}" loading="lazy"
+              class="w-full h-full object-cover" />
+            {% endif %}
+            {% if p.prix_promo %}
+            <span class="absolute top-2 left-2 bg-brand-500 text-white text-xs font-mono font-bold px-2 py-0.5 rounded-lg">-{{ p.pourcentage_remise }}%</span>
+            {% endif %}
+            {% if p.en_vedette %}
+            <span class="absolute top-2 right-2 bg-amber-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">★</span>
+            {% endif %}
+          </div>
+          <div class="p-4 flex flex-col flex-1">
+            <p class="text-xs text-ink/40 font-body mb-1">{{ p.categorie.nom|default:'' }}</p>
+            <h3 class="font-body font-semibold text-ink text-sm leading-snug line-clamp-2 flex-1">{{ p.nom }}</h3>
+            <div class="flex items-center gap-1 mt-2 mb-3">
+              <span class="text-amber-400 text-xs">{% for i in "12345" %}{% if forloop.counter <= note|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
+              <span class="text-xs text-ink/30 font-body">({{ p.nombre_avis }})</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="font-display font-bold text-ink text-sm">{{ prix|floatformat:0 }} F</span>
+                {% if p.prix_promo %}<span class="text-xs text-ink/30 line-through ml-1 font-body">{{ p.prix|floatformat:0 }} F</span>{% endif %}
+              </div>
+              {% if p.stock > 0 %}
+              <span class="text-xs text-green-600 font-body">En stock</span>
+              {% else %}
+              <span class="text-xs text-red-400 font-body">Épuisé</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+        {% endwith %}
         {% endfor %}
       </div>
 
-      <!-- Products grid (filled by JS) -->
-      <div id="products-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:1rem;" data-display="grid"></div>
+      <!-- Pagination Python -->
+      {% if paginator.num_pages > 1 %}
+      <div style="display:flex;justify-content:center;gap:.5rem;margin-top:2.5rem;flex-wrap:wrap;">
+        {% if page_obj.has_previous %}
+        <a href="?{% if params_str %}{{ params_str }}&{% endif %}page={{ page_obj.previous_page_number }}"
+          class="px-3 py-1.5 rounded-lg text-sm font-body border border-cream-border text-ink/60 hover:border-brand-400 hover:text-brand-600" style="text-decoration:none;">‹</a>
+        {% endif %}
 
+        {% for num in paginator.page_range %}
+        <a href="?{% if params_str %}{{ params_str }}&{% endif %}page={{ num }}"
+          class="px-3 py-1.5 rounded-lg text-sm font-body border {% if num == page_obj.number %}bg-brand-500 text-white border-brand-500{% else %}border-cream-border text-ink/60 hover:border-brand-400 hover:text-brand-600{% endif %}"
+          style="text-decoration:none;">{{ num }}</a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{% if params_str %}{{ params_str }}&{% endif %}page={{ page_obj.next_page_number }}"
+          class="px-3 py-1.5 rounded-lg text-sm font-body border border-cream-border text-ink/60 hover:border-brand-400 hover:text-brand-600" style="text-decoration:none;">›</a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% else %}
       <!-- Empty state -->
-      <div id="empty-state" style="display:none;" class="empty-state">
+      <div class="empty-state">
         <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <p class="empty-state-title">Aucun produit trouvé</p>
         <p class="empty-state-desc">Essayez d'autres filtres ou catégories.</p>
-        <button onclick="Catalogue.reset()" class="btn btn-primary btn-sm">Réinitialiser les filtres</button>
+        <a href="{% url 'products:liste' %}" class="btn btn-primary btn-sm">Réinitialiser les filtres</a>
       </div>
-
-      <!-- Pagination -->
-      <div id="pagination" style="display:none;justify-content:center;gap:.5rem;margin-top:2.5rem;flex-wrap:wrap;"></div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -179,7 +244,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/products.js' %}"></script>
 <script>
 function toggleMobileFilters() {
   const sb = document.getElementById('filter-sidebar');
@@ -194,6 +258,17 @@ function toggleMobileFilters() {
     if (overlay) overlay.style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
+}
+
+function applyFilter(key, value) {
+  const params = new URLSearchParams(window.location.search);
+  params.delete('page');
+  if (value) {
+    params.set(key, value);
+  } else {
+    params.delete(key);
+  }
+  window.location.href = '?' + params.toString();
 }
 </script>
 {% endblock %}
