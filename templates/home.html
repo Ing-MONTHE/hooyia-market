@@ -386,8 +386,8 @@ async function filterFeatured(slug, btn) {
 
   try {
     let url = slug
-      ? '/api/produits/?categorie_slug=' + slug + '&page_size=8'
-      : '/api/produits/?en_vedette=true&page_size=8';
+      ? '/api/produits/?categorie_slug=' + slug + '&page_size=5'
+      : '/api/produits/?en_vedette=true&page_size=5';
     const data = await API.get(url, { silentError: true });
     renderGrid('featured-grid', data?.results || data || []);
   } catch {
@@ -397,13 +397,13 @@ async function filterFeatured(slug, btn) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const data = await API.get('/api/produits/?en_vedette=true&page_size=8', { silentError: true });
+    const data = await API.get('/api/produits/?en_vedette=true&page_size=5', { silentError: true });
     renderGrid('featured-grid', data?.results || data || []);
   } catch {
     document.getElementById('featured-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les produits.</div>`;
   }
   try {
-    const data = await API.get('/api/produits/?ordering=-date_creation&page_size=4', { silentError: true });
+    const data = await API.get('/api/produits/?ordering=-date_creation&page_size=5', { silentError: true });
     renderGrid('new-grid', data?.results || data || []);
   } catch {
     document.getElementById('new-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les nouveautés.</div>`;

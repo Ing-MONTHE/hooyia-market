@@ -254,15 +254,11 @@
 @media (min-width: 1024px) {
   .nav-bar2 { display: block; }
   .burger-btn { display: none !important; }
-  .nav-cat-select { display: block !important; }
   .nav-desktop-actions { display: flex !important; }
 }
 @media (max-width: 1023px) {
   .burger-btn { display: flex !important; }
   .nav-desktop-actions { display: none !important; }
-}
-@media (min-width: 640px) {
-  .nav-cat-select { display: block; }
 }
 </style>
 
@@ -281,10 +277,6 @@
 
     <!-- Search bar -->
     <div class="nav-search-wrap" style="flex:1;margin:0 0.5rem;">
-      <select class="nav-search-select nav-cat-select" id="search-cat" style="display:none;">
-        <option value="">Tout</option>
-        {% for cat in categories %}<option value="{{ cat.slug }}">{{ cat.nom }}</option>{% endfor %}
-      </select>
       <input type="search" id="search-input" class="nav-search-input"
         placeholder="Rechercher des produits…"
         onkeydown="if(event.key==='Enter')doSearch()" />
@@ -477,7 +469,7 @@
       <a href="/chat/" class="nav-link">Messages</a>
       {% endif %}
 
-      {% if user.is_staff %}
+      {% if user.is_staff and request.resolver_match.url_name != 'admin_dashboard' %}
       <div style="margin-left:auto;">
         <a href="{% url 'products:admin_dashboard' %}" class="nav-link highlight">⚙ Dashboard Admin</a>
       </div>
@@ -498,8 +490,10 @@
     {% if user.is_staff %}
     <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
     <a href="/chat/" class="mobile-link">💬 Messages</a>
+    {% if request.resolver_match.url_name != 'admin_dashboard' %}
     <a href="{% url 'products:admin_dashboard' %}" class="mobile-link special">⚙️ Administration</a>
     <a href="{% url 'products:admin_dashboard' %}#ajouter-produit" class="mobile-link special">➕ Ajouter un produit</a>
+    {% endif %}
     {% elif not user.is_admin and not user.is_vendeur %}
     <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
     <a href="{% url 'cart:panier' %}" class="mobile-link">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
