@@ -1307,7 +1307,67 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
 </div>
 {% endblock %}
 
-{% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block navbar %}
+{% load static %}
+<header style="background:var(--navy,#0D1F5C);position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.25);">
+  <div style="max-width:1400px;margin:0 auto;padding:0 1.25rem;display:flex;align-items:center;gap:1rem;height:60px;">
+
+    <!-- Logo -->
+    <a href="{% url 'products:accueil' %}" style="display:flex;align-items:center;flex-shrink:0;background:white;border-radius:10px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,.2);text-decoration:none;">
+      <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:32px;width:auto;" />
+    </a>
+
+    <!-- Titre -->
+    <span style="font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;color:white;opacity:.9;flex-shrink:0;">Administration</span>
+
+    <div style="flex:1;"></div>
+
+    <!-- Thème -->
+    <button onclick="toggleTheme()" title="Thème" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">
+      <span data-theme-icon>🌙</span>
+    </button>
+
+    <!-- Notifications -->
+    <div style="position:relative;flex-shrink:0;">
+      <button onclick="Notifications&&Notifications.toggle()" style="width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;">
+        🔔
+        <span id="notif-badge" style="display:none;position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:99px;background:#ef4444;color:white;font-size:9px;font-weight:800;line-height:16px;text-align:center;padding:0 3px;"></span>
+      </button>
+    </div>
+
+    <!-- Compte -->
+    <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F97316,#ea580c);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;flex-shrink:0;">
+        {{ user.username|first|upper }}
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.2;">
+        <span style="font-size:.8rem;font-weight:700;color:white;">{{ user.username }}</span>
+        <span style="font-size:.7rem;color:rgba(255,255,255,.5);">Administrateur</span>
+      </div>
+    </div>
+
+    <!-- Retour au site -->
+    <a href="{% url 'products:accueil' %}" style="display:flex;align-items:center;gap:.375rem;padding:6px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:white;font-size:.8rem;font-weight:600;text-decoration:none;flex-shrink:0;transition:all .15s;"
+      onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+      ← Site
+    </a>
+
+    <!-- Déconnexion -->
+    <a href="{% url 'users:deconnexion' %}" style="display:flex;align-items:center;gap:.375rem;padding:6px 14px;border-radius:8px;border:1.5px solid rgba(249,115,22,.5);background:rgba(249,115,22,.12);color:#F97316;font-size:.8rem;font-weight:600;text-decoration:none;flex-shrink:0;transition:all .15s;"
+      onmouseover="this.style.background='rgba(249,115,22,.25)'" onmouseout="this.style.background='rgba(249,115,22,.12)'">
+      Déconnexion
+    </a>
+  </div>
+</header>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.querySelectorAll('[data-theme-icon]').forEach(el => { el.textContent = isDark ? '☀️' : '🌙'; });
+  });
+</script>
+{% endblock %}
 
 {% block extra_scripts %}
 <script>

@@ -65,7 +65,7 @@
 <body style="background:var(--bg);color:var(--text-primary);font-family:'Plus Jakarta Sans',sans-serif;" class="min-h-screen flex flex-col antialiased transition-colors duration-200">
 
   <!-- NAVBAR -->
-  {% include 'partials/navbar.html' %}
+  {% block navbar %}{% include 'partials/navbar.html' %}{% endblock %}
 
   <!-- FLASH MESSAGES -->
   {% if messages %}
