@@ -456,6 +456,25 @@ body { background: var(--bg) !important; }
 .vt-btn:hover { border-color: var(--navy-2); color: var(--navy-2); }
 .vt-btn.active { border-color: var(--navy-2); background: var(--navy-2); color: white; }
 
+/* ─── Pagination ─── */
+.da-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+}
+.pag-info { font-size: 12px; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; }
+.pag-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+.pag-btn {
+  min-width: 30px; height: 30px; padding: 0 8px;
+  border-radius: var(--r-sm); border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text-1);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: .15s;
+}
+.pag-btn:hover:not(:disabled) { border-color: var(--navy-2); color: var(--navy-2); }
+.pag-btn.active { background: var(--navy-2); border-color: var(--navy-2); color: white; }
+.pag-btn:disabled { opacity: .35; cursor: default; }
+
 /* ─── Filter buttons ─── */
 .st-filter-btn {
   padding: 6px 14px; border-radius: 20px;
@@ -833,6 +852,7 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
           <tbody id="tbl-produits"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
         <div id="view-produits-card" class="card-grid" style="display:none;"></div>
+        <div id="pag-produits" class="da-pagination" style="display:none;"></div>
       </div>
     </div>
 
@@ -847,11 +867,18 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
       <div class="da-card">
         <div class="da-card-head">
           <h3>Toutes les catégories</h3>
-          <button class="card-action" onclick="navToAjouterCat()">Ajouter →</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="view-toggle">
+              <button class="vt-btn active" id="vt-cat-table" onclick="setCatView('table')" title="Tableau">☰</button>
+              <button class="vt-btn" id="vt-cat-card" onclick="setCatView('card')" title="Cartes">⊞</button>
+            </div>
+            <button class="card-action" onclick="navToAjouterCat()">Ajouter →</button>
+          </div>
         </div>
         <div id="cat-list-body" style="padding:0;">
           <div class="da-loading" style="padding:24px;">Chargement…</div>
         </div>
+        <div id="pag-categories" class="da-pagination" style="display:none;"></div>
       </div>
     </div>
 
@@ -1033,6 +1060,7 @@ input[type=checkbox]:checked + .toggle-slider::after { transform: translateX(20p
           <thead><tr><th>Référence</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
           <tbody id="tbl-commandes"><tr><td colspan="6" class="da-loading">Chargement…</td></tr></tbody>
         </table>
+        <div id="pag-commandes" class="da-pagination" style="display:none;"></div>
       </div>
     </div>
 
@@ -1547,6 +1575,7 @@ function filtreStock(type, btn) {
 const viewState = {};
 function setView(section, mode) {
   viewState[section]=mode;
+  if(PAG[section]) { PAG[section].view = mode; renderProduits(); return; }
   const tableEl=document.getElementById('view-'+section+'-table');
   const cardEl=document.getElementById('view-'+section+'-card');
   const btnT=document.getElementById('vt-prod-table');
@@ -1557,52 +1586,57 @@ function setView(section, mode) {
   if(btnC) btnC.classList.toggle('active',mode==='card');
 }
 
+/* ─── Pagination state ─── */
+const PAG = {
+  produits:    { data: [], page: 1, perPage: 10, view: 'table' },
+  categories:  { data: [], page: 1, perPage: 10, view: 'table' },
+  commandes:   { data: [], page: 1, perPage: 10 },
+};
+
+function renderPagination(key, colSpan, renderFn) {
+  const state = PAG[key];
+  const total = state.data.length;
+  const pages = Math.ceil(total / state.perPage);
+  const pagEl = $('pag-' + key);
+  if (!pagEl) return;
+  if (pages <= 1) { pagEl.style.display = 'none'; return; }
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = `
+    <span class="pag-info">Page ${state.page} / ${pages} — ${total} éléments</span>
+    <div class="pag-btns">
+      <button class="pag-btn" onclick="goPage('${key}',1)" ${state.page===1?'disabled':''}>«</button>
+      <button class="pag-btn" onclick="goPage('${key}',${state.page-1})" ${state.page===1?'disabled':''}>‹</button>
+      ${Array.from({length:pages},(_,i)=>i+1).map(p=>`<button class="pag-btn${p===state.page?' active':''}" onclick="goPage('${key}',${p})">${p}</button>`).join('')}
+      <button class="pag-btn" onclick="goPage('${key}',${state.page+1})" ${state.page===pages?'disabled':''}>›</button>
+      <button class="pag-btn" onclick="goPage('${key}',${pages})" ${state.page===pages?'disabled':''}>»</button>
+    </div>`;
+  renderFn();
+}
+
+function goPage(key, page) {
+  const state = PAG[key];
+  const pages = Math.ceil(state.data.length / state.perPage);
+  state.page = Math.max(1, Math.min(page, pages));
+  if (key === 'produits') renderProduits();
+  if (key === 'categories') renderCatList();
+  if (key === 'commandes') renderCommandes();
+}
+
+function getPageSlice(key) {
+  const { data, page, perPage } = PAG[key];
+  return data.slice((page - 1) * perPage, page * perPage);
+}
+
 /* ─── Sections loader ─── */
 async function loadSection(name) {
   if (name === 'overview') return;
 
   if (name === 'produits') {
     const d = await apiFetch('/api/produits/?page_size=100');
-    $('tbl-produits').innerHTML = d.length ? d.map(p => {
-      const s=p.stock, min=p.stock_minimum||5;
-      const sCol=s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
-      const imgSrc=p.image_principale||(p.images&&p.images[0]?.image)||'';
-      return `<tr>
-        <td><div style="display:flex;align-items:center;gap:10px;">
-          ${imgSrc
-            ? `<div style="width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:center;"><img src="${imgSrc}" alt="${p.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px;"></div>`
-            : `<div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>`}
-          <span style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</span>
-        </div></td>
-        <td style="color:var(--text-2);">${p.categorie_nom||'—'}</td>
-        <td>${mono(fmtPrice(p.prix))}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${sCol};">${s}</td>
-        <td>${p.statut==='actif'?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
-        <td><button onclick="navToModifierProduit(${p.id})" style="font-size:11.5px;color:var(--navy-2);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Modifier →</button></td>
-      </tr>`;
-    }).join('') : empty(6);
-
-    const cardGrid=$('view-produits-card');
-    if(cardGrid) {
-      cardGrid.innerHTML = d.length ? d.map(p => {
-        const imgSrc=p.image_principale||(p.images&&p.images[0]?.image)||'';
-        const s=p.stock, min=p.stock_minimum||5;
-        const sCol=s===0?'#ef4444':s<=min?'#f97316':'#22c55e';
-        return `<div class="prod-card">
-          <div class="prod-card-img-wrap">
-            ${imgSrc?`<img src="${imgSrc}" class="prod-card-img" onerror="this.parentElement.innerHTML='<div style=font-size:36px;>📦</div>'">` : `<div style="font-size:36px;">📦</div>`}
-          </div>
-          <div class="prod-card-body">
-            <div class="prod-card-name">${p.nom}</div>
-            <div class="prod-card-meta">${p.categorie_nom||'—'} · <span style="color:${sCol};font-weight:700;">${s} en stock</span></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
-              <span class="prod-card-price">${fmtPrice(p.prix_promo||p.prix)}</span>
-              <button onclick="navToModifierProduit(${p.id})" style="font-size:11px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;padding:0;">Modifier →</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('') : '<p style="padding:20px;color:var(--muted);text-align:center;">Aucun produit</p>';
-    }
+    PAG.produits.data = d;
+    PAG.produits.page = 1;
+    renderProduits();
+    renderPagination('produits', 6, renderProduits);
   }
 
   if (name === 'categories') { await catLoadList(); catLoadParentSelect(); }
@@ -1620,20 +1654,10 @@ async function loadSection(name) {
 
   if (name === 'commandes') {
     const d = await apiFetch('/api/commandes/');
-    const nextStatut={en_attente:'confirmer',confirmee:'mettre_en_preparation',en_preparation:'expedier',expediee:'livrer'};
-    const nextLabel={en_attente:'✓ Confirmer',confirmee:'🔧 Préparer',en_preparation:'🚚 Expédier',expediee:'📬 Livrer'};
-    $('tbl-commandes').innerHTML = d.length ? d.map(c=>`<tr>
-      <td>${mono('#'+(c.reference_courte||String(c.id).slice(-6)))}</td>
-      <td>${bold(c.client_nom||c.client||'—')}</td>
-      <td>${mono(fmtPrice(c.montant_total))}</td>
-      <td>${mono(fmtDate(c.date_creation))}</td>
-      <td>${statut(c.statut)}</td>
-      <td style="display:flex;gap:4px;flex-wrap:wrap;">
-        ${nextStatut[c.statut]?`<button onclick="changerStatutCommande(${c.id},'${nextStatut[c.statut]}',this)" style="padding:4px 9px;border-radius:var(--r-sm);border:none;background:var(--navy-2);color:white;font-size:11px;font-weight:600;cursor:pointer;">${nextLabel[c.statut]}</button>`:''}
-        ${c.statut!=='livree'&&c.statut!=='annulee'?`<button onclick="annulerCommande(${c.id},this)" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #fecaca;background:var(--red-l);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">✕ Annuler</button>`:''}
-        <button onclick="voirDetailCommande(${c.id})" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:11px;font-weight:600;cursor:pointer;">👁 Voir</button>
-      </td>
-    </tr>`).join('') : empty(6);
+    PAG.commandes.data = d;
+    PAG.commandes.page = 1;
+    renderCommandes();
+    renderPagination('commandes', 6, renderCommandes);
   }
 
   if (name === 'avis') {
@@ -1717,34 +1741,132 @@ async function loadSection(name) {
 }
 
 /* ─── CATÉGORIES ─── */
+/* ─── Render helpers for pagination ─── */
+function renderProduits() {
+  const slice = getPageSlice('produits');
+  const view = PAG.produits.view;
+  const tbl = $('view-produits-table');
+  const cardGrid = $('view-produits-card');
+  if (view === 'table') {
+    if(tbl) tbl.style.display='';
+    if(cardGrid) cardGrid.style.display='none';
+    $('tbl-produits').innerHTML = slice.length ? slice.map(p => {
+      const s=p.stock, min=p.stock_minimum||5;
+      const sCol=s===0?'var(--red)':s<=min?'var(--orange)':'var(--green)';
+      const imgSrc=p.image_principale||(p.images&&p.images[0]?.image)||'';
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px;">
+          ${imgSrc?`<div style="width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:center;"><img src="${imgSrc}" alt="${p.nom}" style="width:100%;height:100%;object-fit:contain;padding:3px;"></div>`:`<div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📦</div>`}
+          <span style="font-size:13px;font-weight:600;color:var(--navy);">${p.nom}</span>
+        </div></td>
+        <td style="color:var(--text-2);">${p.categorie_nom||'—'}</td>
+        <td>${mono(fmtPrice(p.prix))}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${sCol};">${s}</td>
+        <td>${p.statut==='actif'?'<span class="st st-active">Actif</span>':'<span class="st st-off">Inactif</span>'}</td>
+        <td><button onclick="navToModifierProduit(${p.id})" style="font-size:11.5px;color:var(--navy-2);background:none;border:none;cursor:pointer;font-weight:600;padding:0;">Modifier →</button></td>
+      </tr>`;
+    }).join('') : empty(6);
+  } else {
+    if(tbl) tbl.style.display='none';
+    if(cardGrid) { cardGrid.style.display=''; cardGrid.innerHTML = slice.length ? slice.map(p => {
+      const imgSrc=p.image_principale||(p.images&&p.images[0]?.image)||'';
+      const s=p.stock, min=p.stock_minimum||5;
+      const sCol=s===0?'#ef4444':s<=min?'#f97316':'#22c55e';
+      return `<div class="prod-card">
+        <div class="prod-card-img-wrap">${imgSrc?`<img src="${imgSrc}" class="prod-card-img">`:`<div style="font-size:36px;">📦</div>`}</div>
+        <div class="prod-card-body">
+          <div class="prod-card-name">${p.nom}</div>
+          <div class="prod-card-meta">${p.categorie_nom||'—'} · <span style="color:${sCol};font-weight:700;">${s} en stock</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+            <span class="prod-card-price">${fmtPrice(p.prix_promo||p.prix)}</span>
+            <button onclick="navToModifierProduit(${p.id})" style="font-size:11px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;padding:0;">Modifier →</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : '<p style="padding:20px;color:var(--muted);text-align:center;">Aucun produit</p>'; }
+  }
+  renderPagination('produits', 6, ()=>{});
+}
+
+function renderCommandes() {
+  const slice = getPageSlice('commandes');
+  const nextStatut={en_attente:'confirmer',confirmee:'mettre_en_preparation',en_preparation:'expedier',expediee:'livrer'};
+  const nextLabel={en_attente:'✓ Confirmer',confirmee:'🔧 Préparer',en_preparation:'🚚 Expédier',expediee:'📬 Livrer'};
+  $('tbl-commandes').innerHTML = slice.length ? slice.map(c=>`<tr>
+    <td>${mono('#'+(c.reference_courte||String(c.id).slice(-6)))}</td>
+    <td>${bold(c.client_nom||c.client||'—')}</td>
+    <td>${mono(fmtPrice(c.montant_total))}</td>
+    <td>${mono(fmtDate(c.date_creation))}</td>
+    <td>${statut(c.statut)}</td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap;">
+      ${nextStatut[c.statut]?`<button onclick="changerStatutCommande(${c.id},'${nextStatut[c.statut]}',this)" style="padding:4px 9px;border-radius:var(--r-sm);border:none;background:var(--navy-2);color:white;font-size:11px;font-weight:600;cursor:pointer;">${nextLabel[c.statut]}</button>`:''}
+      ${c.statut!=='livree'&&c.statut!=='annulee'?`<button onclick="annulerCommande(${c.id},this)" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #fecaca;background:var(--red-l);color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">✕ Annuler</button>`:''}
+      <button onclick="voirDetailCommande(${c.id})" style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:11px;font-weight:600;cursor:pointer;">👁 Voir</button>
+    </td>
+  </tr>`).join('') : empty(6);
+  renderPagination('commandes', 6, ()=>{});
+}
+
+/* ─── Catégories vue toggle ─── */
+let _catView = 'table';
+function setCatView(v) {
+  _catView = v;
+  $('vt-cat-table')?.classList.toggle('active', v==='table');
+  $('vt-cat-card')?.classList.toggle('active', v==='card');
+  renderCatList();
+}
+
+function renderCatList() {
+  const body = $('cat-list-body'); if(!body) return;
+  const slice = getPageSlice('categories');
+  if (!slice.length) { body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">Aucune catégorie.</div>'; return; }
+
+  if (_catView === 'table') {
+    body.innerHTML = `<table class="da-table" style="width:100%;">
+      <thead><tr><th>Catégorie</th><th>Slug</th><th>Niveau</th><th>Produits</th><th></th></tr></thead>
+      <tbody>${slice.map(c=>{
+        const isParent=!c.parent_id;
+        const niveauBadge=isParent?'<span class="st st-off">Niveau 0</span>':'<span class="st" style="background:#f0fdf4;color:#16a34a;">Niveau 1</span>';
+        const imgEl=c.image?`<img src="${c.image}" style="width:34px;height:34px;border-radius:var(--r-sm);object-fit:contain;border:1px solid var(--border);padding:2px;background:var(--s2);flex-shrink:0;">`:`<div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">${isParent?'🗂':'📁'}</div>`;
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:10px;">${imgEl}<span style="font-size:13px;font-weight:600;color:var(--navy);">${isParent?'':' └ '}${c.nom}</span></div></td>
+          <td class="mono">${c.slug}</td>
+          <td>${niveauBadge}</td>
+          <td style="color:var(--text-2);">${c.nb_produits||'—'}</td>
+          <td><button onclick="navToModifierCat(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="font-size:11.5px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;">Modifier →</button></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  } else {
+    body.innerHTML = `<div class="card-grid" style="padding:16px;">${slice.map(c=>{
+      const isParent=!c.parent_id;
+      const imgEl=c.image?`<img src="${c.image}" style="width:60px;height:60px;border-radius:var(--r-md);object-fit:contain;border:1px solid var(--border);padding:4px;background:var(--s2);">`:`<div style="width:60px;height:60px;border-radius:var(--r-md);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:28px;">${isParent?'🗂':'📁'}</div>`;
+      const niveauBadge=isParent?'<span class="st st-off">Racine</span>':'<span class="st" style="background:#f0fdf4;color:#16a34a;">Sous-cat.</span>';
+      return `<div class="prod-card">
+        <div class="prod-card-img-wrap" style="padding:16px;">${imgEl}</div>
+        <div class="prod-card-body">
+          <div class="prod-card-name">${c.nom}</div>
+          <div class="prod-card-meta" style="display:flex;align-items:center;gap:6px;margin-top:4px;">${niveauBadge}<span style="color:var(--text-2);font-size:11px;">${c.nb_produits||0} produits</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${c.slug}</span>
+            <button onclick="navToModifierCat(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="font-size:11px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;padding:0;">Modifier →</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  renderPagination('categories', 5, ()=>{});
+}
+
 async function catLoadList() {
   const body=$('cat-list-body'); if(!body) return;
   body.innerHTML='<div class="da-loading" style="padding:24px;">Chargement…</div>';
   try {
     const resp=await fetch('/administration/categories/api/',{credentials:'same-origin'});
     const data=await resp.json();
-    const cats=data.categories||[];
-    if(!cats.length) { body.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">Aucune catégorie. Créez-en une !</div>'; return; }
-    body.innerHTML=`<table class="da-table" style="width:100%;">
-      <thead><tr><th>Catégorie</th><th>Slug</th><th>Niveau</th><th>Produits</th><th></th></tr></thead>
-      <tbody>
-        ${cats.map(c=>{
-          const isParent=!c.parent_id;
-          const niveauBadge=isParent?'<span class="st st-off">Niveau 0</span>':'<span class="st" style="background:#f0fdf4;color:#16a34a;">Niveau 1</span>';
-          const imgEl=c.image
-            ?`<img src="${c.image}" style="width:34px;height:34px;border-radius:var(--r-sm);object-fit:contain;border:1px solid var(--border);padding:2px;background:var(--s2);flex-shrink:0;">`
-            :`<div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">${isParent?'🗂':'📁'}</div>`;
-          const indent=isParent?'':'└ ';
-          return `<tr>
-            <td><div style="display:flex;align-items:center;gap:10px;">${imgEl}<span style="font-size:13px;font-weight:600;color:var(--navy);">${indent}${c.nom}</span></div></td>
-            <td class="mono">${c.slug}</td>
-            <td>${niveauBadge}</td>
-            <td style="color:var(--text-2);">${c.nb_produits||'—'}</td>
-            <td><button onclick="navToModifierCat(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="font-size:11.5px;color:var(--navy-2);font-weight:600;background:none;border:none;cursor:pointer;">Modifier →</button></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+    PAG.categories.data = data.categories||[];
+    PAG.categories.page = 1;
+    renderCatList();
+    renderPagination('categories', 5, ()=>{});
   } catch(e) { body.innerHTML='<div style="padding:20px;color:var(--red);font-size:13px;">Erreur de chargement.</div>'; }
 }
 
