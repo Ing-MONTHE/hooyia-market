@@ -21,118 +21,86 @@
 
 {# ══ STYLES SPÉCIFIQUES HOME ══ #}
 <style>
-  /* ── Hero ── */
-  .hero {
-    background: linear-gradient(135deg, #091747 0%, #0D1F5C 50%, #1E3A8A 100%);
-    min-height: 480px;
+  /* ── Hero Banner ── */
+  .hero-banner {
+    padding: 2.5rem 1.5rem;
+    background: #F4F7FC;
+  }
+  .hero-banner-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    position: relative;
+    min-height: 340px;
     display: flex;
     align-items: center;
-    position: relative;
-    overflow: hidden;
+    background: linear-gradient(105deg, #0a1740 0%, #0d1f5c 40%, #1a3a8a 65%, #2060c8 85%, #4a90e8 100%);
+    box-shadow: 0 20px 60px rgba(13,31,92,0.25);
   }
-  /* Motif géométrique décoratif en arrière-plan — subtil */
-  .hero::before {
-    content: '';
+  .hero-banner-bg {
     position: absolute;
     inset: 0;
-    background-image:
-      radial-gradient(circle at 75% 30%, rgba(249,115,22,0.1) 0%, transparent 50%),
-      radial-gradient(circle at 20% 80%, rgba(30,58,138,0.4) 0%, transparent 40%);
-    pointer-events: none;
+    background-size: cover;
+    background-position: center right;
+    opacity: 0.45;
+    mix-blend-mode: luminosity;
   }
-  /* Cercle décoratif droit */
-  .hero-deco {
+  .hero-banner-overlay {
     position: absolute;
-    right: -100px;
-    top: -100px;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.04);
-    pointer-events: none;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(10,23,64,0.97) 0%, rgba(10,23,64,0.88) 38%, rgba(10,23,64,0.4) 65%, transparent 100%);
   }
-  .hero-deco-2 {
-    position: absolute;
-    right: 60px;
-    top: 60px;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    border: 1px solid rgba(249,115,22,0.08);
-    pointer-events: none;
+  .hero-banner-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem 3.5rem;
+    max-width: 520px;
   }
-
-  /* ── Badge pill hero ── */
-  .hero-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0.875rem;
-    border-radius: 999px;
-    background: rgba(249,115,22,0.12);
-    border: 1px solid rgba(249,115,22,0.28);
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #ffa05e; /* Orange clair — ratio 4.5:1 sur fond sombre ✓ */
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+  .hero-banner-title {
     font-family: 'Poppins', sans-serif;
-    margin-bottom: 1.5rem;
-  }
-  /* Point pulsant dans le pill */
-  .hero-pill-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #F97316;
-    animation: pulse-dot 2s infinite;
-    flex-shrink: 0;
-  }
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.5; transform: scale(0.75); }
-  }
-
-  /* ── Bouton hero outline (blanc transparent) ── */
-  .btn-hero-outline {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.9);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    background: rgba(255,255,255,0.06);
-    text-decoration: none;
-    transition: all 180ms;
-    font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(4px);
-  }
-  .btn-hero-outline:hover {
-    border-color: rgba(255,255,255,0.5);
-    background: rgba(255,255,255,0.12);
-    color: #ffffff;
-  }
-
-  /* ── Stats hero ── */
-  .hero-stat {
-    display: flex;
-    flex-direction: column;
-  }
-  .hero-stat-value {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.375rem;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
     font-weight: 800;
     color: #ffffff;
-    line-height: 1.1;
+    line-height: 1.2;
+    margin: 0 0 1rem 0;
   }
-  .hero-stat-label {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.5);
+  .hero-banner-subtitle {
     font-family: 'Poppins', sans-serif;
-    margin-top: 2px;
+    font-size: 0.9375rem;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.7;
+    margin: 0 0 2rem 0;
+    max-width: 400px;
+  }
+  .btn-hero-discover {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.625rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    background: #1E3A8A;
+    border: none;
+    text-decoration: none;
+    transition: background 180ms, transform 150ms, box-shadow 180ms;
+    box-shadow: 0 4px 16px rgba(30,58,138,0.4);
+    cursor: pointer;
+  }
+  .btn-hero-discover:hover {
+    background: #162d6e;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(30,58,138,0.55);
+    color: #ffffff;
+  }
+  .btn-hero-discover svg { transition: transform 180ms; }
+  .btn-hero-discover:hover svg { transform: translateX(3px); }
+  @media (max-width: 640px) {
+    .hero-banner-content { padding: 2rem 1.5rem; }
+    .hero-banner-inner { min-height: 240px; }
   }
 
   /* ── Titres de section ── */
@@ -363,87 +331,28 @@
    Contrastes : blanc sur #091747 → 18.5:1 ✓
                 #ffa05e sur fond sombre → 4.5:1 ✓
 ════════════════════════════════════════════════════ {% endcomment %}
-<section class="hero">
-  {# Éléments décoratifs (cercles en arrière-plan) #}
-  <div class="hero-deco"></div>
-  <div class="hero-deco-2"></div>
+<section class="hero-banner">
+  <div class="hero-banner-inner">
+    {# Image de fond (photo desktop avec circuit/clavier) #}
+    {% static "img/Carousel 1.png" as hero_img %}
+    <div class="hero-banner-bg" style="background-image:url('{{ hero_img }}');"></div>
+    {# Overlay dégradé pour lisibilité du texte #}
+    <div class="hero-banner-overlay"></div>
 
-  <div class="container" style="position:relative;z-index:1;padding-top:4rem;padding-bottom:4rem;">
-    <div style="max-width:580px;">
-
-      {# Pill badge #}
-      <div class="hero-pill">
-        <span class="hero-pill-dot"></span>
-        Marketplace tech du Cameroun
-      </div>
-
-      {# Titre principal — clamp pour responsive naturel #}
-      <h1 style="font-family:'Poppins',sans-serif;
-                 font-size:clamp(2rem,5vw,3rem);
-                 font-weight:800;
-                 color:#ffffff;
-                 line-height:1.15;
-                 margin-bottom:1.25rem;">
-        L'électronique<br>
-        <span style="color:#F97316;">à votre portée.</span>
-      </h1>
-
-      {# Accroche — rgba(255,255,255,0.75) → ratio 12:1 sur #091747 ✓ #}
-      <p style="font-family:'Poppins',sans-serif;
-                font-size:1rem;
-                color:rgba(255,255,255,0.75);
-                line-height:1.75;
-                margin-bottom:2rem;
-                max-width:440px;">
-        Des produits soigneusement sélectionnés, des prix transparents, une livraison fiable. HooYia, c'est le commerce tech qui vous respecte.
+    {# Contenu texte #}
+    <div class="hero-banner-content">
+      <h1 class="hero-banner-title">La performance<br>commence ici.</h1>
+      <p class="hero-banner-subtitle">
+        Découvrez les meilleurs équipements et accessoires informatiques pour booster votre productivité.
       </p>
-
-      {# CTA : Voir le catalogue (orange — 1 seul primary par vue) #}
-      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
-        <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg">
-          {# Lucide : ShoppingBag #}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          Voir le catalogue
-        </a>
-        {% if not user.is_authenticated %}
-        <a href="{% url 'users:inscription' %}" class="btn-hero-outline">
-          {# Lucide : UserPlus #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <line x1="19" y1="8" x2="19" y2="14"/>
-            <line x1="22" y1="11" x2="16" y2="11"/>
-          </svg>
-          Créer un compte
-        </a>
-        {% endif %}
-      </div>
-
-      {# Stats — séparateur visuel + chiffres clés #}
-      <div style="display:flex;gap:2rem;margin-top:2.5rem;padding-top:2rem;
-                  border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;">
-        <div class="hero-stat">
-          <span class="hero-stat-value">500+</span>
-          <span class="hero-stat-label">Produits référencés</span>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
-        <div class="hero-stat">
-          <span class="hero-stat-value">48h</span>
-          <span class="hero-stat-label">Livraison Yaoundé</span>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
-        <div class="hero-stat">
-          <span class="hero-stat-value">100%</span>
-          <span class="hero-stat-label">Produits garantis</span>
-        </div>
-      </div>
-
+      <a href="{% url 'products:liste' %}" class="btn-hero-discover">
+        Découvrir nos produits
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
     </div>
   </div>
 </section>
