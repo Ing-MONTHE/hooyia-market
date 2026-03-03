@@ -502,3 +502,36 @@ def admin_dashboard(request):
         'categories': Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories'),
     }
     return render(request, 'admin_dashboard.html', context)
+
+# ──────────────────────────────────────────────────────────────
+# AUTOCOMPLETE RECHERCHE
+# ──────────────────────────────────────────────────────────────
+from django.http import JsonResponse
+from django.db.models import Q
+
+def autocomplete_search(request):
+    """Retourne des suggestions produits pour la barre de recherche (JSON)."""
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': []})
+
+    produits = (
+        Produit.objects
+        .filter(statut='actif')
+        .filter(Q(nom__icontains=q) | Q(categorie__nom__icontains=q))
+        .select_related('categorie')
+        .prefetch_related('images')
+        [:8]
+    )
+
+    results = []
+    for p in produits:
+        img = p.images.filter(est_principale=True).first() or p.images.first()
+        results.append({
+            'nom': p.nom,
+            'slug': p.slug,
+            'prix': str(p.prix_actuel),
+            'image': img.image.url if img else None,
+        })
+
+    return JsonResponse({'results': results})

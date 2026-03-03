@@ -6,6 +6,7 @@ app_name = 'products'
 urlpatterns = [
     path('',                              views.accueil,          name='accueil'),
     path('produits/',                     views.liste_produits,   name='liste'),
+    path('produits/autocomplete/',        views.autocomplete_search, name='autocomplete'),
     path('produits/ajouter/',             views.ajouter_produit,  name='ajouter'),
     path('produits/modifier/<int:produit_id>/', views.modifier_produit, name='modifier'),
     path('produits/supprimer/<int:produit_id>/', views.supprimer_produit, name='supprimer'),
