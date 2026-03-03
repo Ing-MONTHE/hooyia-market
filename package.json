@@ -1,0 +1,12 @@
+{
+  "name": "hooyia-market",
+  "version": "1.0.0",
+  "description": "HooYia Market — Design System Build",
+  "scripts": {
+    "tw:dev":   "tailwindcss -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --watch",
+    "tw:build": "tailwindcss -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

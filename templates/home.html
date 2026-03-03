@@ -1,105 +1,446 @@
 {% extends 'base.html' %}
 {% load static %}
+{# ═══════════════════════════════════════════════════════════════
+   HooYia Market — home.html
+
+   SECTIONS :
+     1. Hero           — accroche principale, CTA catalogue
+     2. Produits vedette — jusqu'à 8 produits (en_vedette=True)
+     3. Nouveaux arrivages — 8 derniers produits actifs
+     4. Offre HooYia   — ce que propose la plateforme
+
+   DONNÉES DJANGO (depuis views.py > accueil) :
+     {{ produits_vedette }}   — QuerySet Produit (en_vedette=True, max 8)
+     {{ nouveaux_arrivages }} — QuerySet Produit (order -date_creation, max 8)
+     {{ categories }}         — QuerySet Categorie (racines)
+#}
 
 {% block title %}HooYia Market — Électronique & Informatique{% endblock %}
 
 {% block content %}
 
-<!-- ══════════════════════════════════════════
-     HERO
-══════════════════════════════════════════ -->
-<section style="position:relative;background:#0D1F5C;overflow:hidden;min-height:520px;display:flex;align-items:center;">
-  <!-- Carousel Background -->
-  <div id="hero-carousel" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
-    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:1;">
-      <img src="{% static 'img/Carousel 1.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;" />
-    </div>
-    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:0;">
-      <img src="{% static 'img/Carousel 2.webp' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;" />
-    </div>
-    <div class="hero-slide" style="position:absolute;inset:0;transition:opacity 1.2s ease;opacity:0;">
-      <img src="{% static 'img/Image de fond.png' %}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:blur(2px);transform:scale(1.08);" />
-    </div>
-    <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(13,31,92,.88) 35%,rgba(13,31,92,.72) 65%,rgba(30,58,138,.55) 100%);"></div>
-    <div style="position:absolute;right:-80px;top:-80px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.12) 0%,transparent 70%);"></div>
-    <div style="position:absolute;left:30%;bottom:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,138,.4) 0%,transparent 70%);"></div>
-  </div>
-  <!-- Carousel arrows (desktop only) -->
-  <button onclick="heroPrev()" class="hero-arrow" style="position:absolute;left:18px;top:50%;transform:translateY(-50%);z-index:10;pointer-events:all;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(13,31,92,.5);color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:all .2s;" onmouseover="this.style.background='rgba(249,115,22,.8)';this.style.borderColor='#F97316'" onmouseout="this.style.background='rgba(13,31,92,.5)';this.style.borderColor='rgba(255,255,255,.3)'">&#8249;</button>
-  <button onclick="heroNext()" class="hero-arrow" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);z-index:10;pointer-events:all;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(13,31,92,.5);color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:all .2s;" onmouseover="this.style.background='rgba(249,115,22,.8)';this.style.borderColor='#F97316'" onmouseout="this.style.background='rgba(13,31,92,.5)';this.style.borderColor='rgba(255,255,255,.3)'">&#8250;</button>
-  <style>
-    @media (max-width: 767px) { .hero-arrow { display: none !important; } }
-  </style>
-  <!-- Carousel dots -->
-  <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:10;pointer-events:all;">
-    <button class="hero-dot" onclick="heroGoTo(0)" style="width:24px;height:6px;border-radius:99px;border:none;background:#F97316;cursor:pointer;transition:all .3s;padding:0;"></button>
-    <button class="hero-dot" onclick="heroGoTo(1)" style="width:6px;height:6px;border-radius:99px;border:none;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s;padding:0;"></button>
-    <button class="hero-dot" onclick="heroGoTo(2)" style="width:6px;height:6px;border-radius:99px;border:none;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s;padding:0;"></button>
-  </div>
-  <script>
-    var _hIdx=0,_hTimer;
-    function _hSlides(){return document.querySelectorAll('.hero-slide');}
-    function _hDots(){return document.querySelectorAll('.hero-dot');}
-    function heroGoTo(n){
-      _hSlides().forEach(function(s,i){s.style.opacity=i===n?'1':'0';});
-      _hDots().forEach(function(d,i){d.style.width=i===n?'24px':'6px';d.style.background=i===n?'#F97316':'rgba(255,255,255,.4)';});
-      _hIdx=n;
-    }
-    function heroNext(){heroGoTo((_hIdx+1)%_hSlides().length);clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);}
-    function heroPrev(){heroGoTo((_hIdx-1+_hSlides().length)%_hSlides().length);clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);}
-    _hTimer=setInterval(heroNext,5000);
-    document.querySelectorAll('.hero-dot').forEach(function(d){
-      d.addEventListener('click',function(){clearInterval(_hTimer);_hTimer=setInterval(heroNext,5000);});
-    });
-  </script>
+{# ══ STYLES SPÉCIFIQUES HOME ══ #}
+<style>
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #091747 0%, #0D1F5C 50%, #1E3A8A 100%);
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Motif géométrique décoratif en arrière-plan — subtil */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 75% 30%, rgba(249,115,22,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(30,58,138,0.4) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  /* Cercle décoratif droit */
+  .hero-deco {
+    position: absolute;
+    right: -100px;
+    top: -100px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
+  .hero-deco-2 {
+    position: absolute;
+    right: 60px;
+    top: 60px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(249,115,22,0.08);
+    pointer-events: none;
+  }
 
-  <div style="position:relative;max-width:1400px;margin:0 auto;padding:5rem 1.5rem 5rem;width:100%;">
-    <div style="max-width:600px;">
+  /* ── Badge pill hero ── */
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.875rem;
+    border-radius: 999px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid rgba(249,115,22,0.28);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ffa05e; /* Orange clair — ratio 4.5:1 sur fond sombre ✓ */
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 1.5rem;
+  }
+  /* Point pulsant dans le pill */
+  .hero-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #F97316;
+    animation: pulse-dot 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.75); }
+  }
 
-      <!-- Pill badge -->
-      <div class="animate-fade-in" style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:99px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.25);margin-bottom:1.5rem;">
-        <span style="width:6px;height:6px;border-radius:50%;background:#F97316;animation:pulse-dot 2s infinite;display:block;"></span>
-        <span style="font-size:.75rem;font-weight:700;color:rgba(249,115,22,.9);letter-spacing:.06em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif;">Marketplace tech de confiance</span>
+  /* ── Bouton hero outline (blanc transparent) ── */
+  .btn-hero-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.06);
+    text-decoration: none;
+    transition: all 180ms;
+    font-family: 'Poppins', sans-serif;
+    backdrop-filter: blur(4px);
+  }
+  .btn-hero-outline:hover {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.12);
+    color: #ffffff;
+  }
+
+  /* ── Stats hero ── */
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-stat-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.375rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.1;
+  }
+  .hero-stat-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Poppins', sans-serif;
+    margin-top: 2px;
+  }
+
+  /* ── Titres de section ── */
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.375rem;
+  }
+  .section-heading h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: #0D1F5C;
+    margin: 0;
+  }
+  .section-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    color: #F97316;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.375rem;
+  }
+  .section-sub {
+    font-size: 0.875rem;
+    color: #4A5568;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Grille produits ── */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+  @media (min-width: 640px)  { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 768px)  { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  /* ── Carte produit ── */
+  .pcard {
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: box-shadow 200ms, transform 200ms;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+  .pcard:hover {
+    box-shadow: 0 8px 28px rgba(13,31,92,0.11);
+    transform: translateY(-3px);
+  }
+  .pcard-img-wrap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: #f0f3fa;
+    overflow: hidden;
+  }
+  .pcard-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 300ms ease;
+  }
+  .pcard:hover .pcard-img { transform: scale(1.04); }
+
+  /* Badge promo sur l'image */
+  .pcard-promo-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: #F97316;
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.4;
+  }
+  /* Badge "Nouveau" */
+  .pcard-new-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: #1E3A8A;
+    color: #ffffff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.4;
+  }
+
+  .pcard-body {
+    padding: 0.875rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .pcard-cat {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #8898AA;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'Poppins', sans-serif;
+  }
+  .pcard-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0F1923;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    flex: 1;
+  }
+  .pcard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid #f0f3fa;
+    gap: 0.5rem;
+  }
+  .pcard-price {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0D1F5C;
+    line-height: 1;
+  }
+  .pcard-price-old {
+    font-size: 0.75rem;
+    color: #8898AA;
+    text-decoration: line-through;
+    font-weight: 400;
+    font-family: 'Poppins', sans-serif;
+  }
+  /* Bouton panier rapide sur la carte */
+  .pcard-cart-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 0.5rem;
+    background: #eff4ff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1E3A8A;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+    flex-shrink: 0;
+  }
+  .pcard-cart-btn:hover {
+    background: #F97316;
+    color: #ffffff;
+  }
+
+  /* Placeholder carte (quand pas d'image) */
+  .pcard-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f3fa;
+    color: #c8d6f0;
+  }
+
+  /* ── Offre HooYia — cartes valeur ── */
+  .value-card {
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 1rem;
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    transition: box-shadow 200ms, transform 200ms;
+  }
+  .value-card:hover {
+    box-shadow: 0 6px 24px rgba(13,31,92,0.08);
+    transform: translateY(-2px);
+  }
+  .value-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .value-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0D1F5C;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .value-card p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    color: #4A5568;
+    line-height: 1.65;
+    margin: 0;
+  }
+</style>
+
+{# ════════════════════════════════════════════════════
+   1. HERO
+   Fond dégradé bleu marine, texte blanc.
+   Contrastes : blanc sur #091747 → 18.5:1 ✓
+                #ffa05e sur fond sombre → 4.5:1 ✓
+════════════════════════════════════════════════════ #}
+<section class="hero">
+  {# Éléments décoratifs (cercles en arrière-plan) #}
+  <div class="hero-deco"></div>
+  <div class="hero-deco-2"></div>
+
+  <div class="container" style="position:relative;z-index:1;padding-top:4rem;padding-bottom:4rem;">
+    <div style="max-width:580px;">
+
+      {# Pill badge #}
+      <div class="hero-pill">
+        <span class="hero-pill-dot"></span>
+        Marketplace tech du Cameroun
       </div>
 
-      <h1 class="animate-slide-up" style="font-family:'Sora',sans-serif;font-size:clamp(2rem,5vw,3.25rem);font-weight:800;color:white;line-height:1.1;margin-bottom:1.25rem;animation-delay:.05s;">
-        L'électronique<br/>
+      {# Titre principal — clamp pour responsive naturel #}
+      <h1 style="font-family:'Poppins',sans-serif;
+                 font-size:clamp(2rem,5vw,3rem);
+                 font-weight:800;
+                 color:#ffffff;
+                 line-height:1.15;
+                 margin-bottom:1.25rem;">
+        L'électronique<br>
         <span style="color:#F97316;">à votre portée.</span>
       </h1>
 
-      <p class="animate-slide-up" style="font-size:1rem;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:2rem;animation-delay:.12s;font-family:'Plus Jakarta Sans',sans-serif;max-width:460px;">
-        Des produits soigneusement sélectionnés, des prix transparents, une livraison rapide. HooYia, c'est le commerce tech qui vous respecte.
+      {# Accroche — rgba(255,255,255,0.75) → ratio 12:1 sur #091747 ✓ #}
+      <p style="font-family:'Poppins',sans-serif;
+                font-size:1rem;
+                color:rgba(255,255,255,0.75);
+                line-height:1.75;
+                margin-bottom:2rem;
+                max-width:440px;">
+        Des produits soigneusement sélectionnés, des prix transparents, une livraison fiable. HooYia, c'est le commerce tech qui vous respecte.
       </p>
 
-      <div class="animate-slide-up" style="display:flex;flex-wrap:wrap;gap:.75rem;animation-delay:.18s;">
-        <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg" style="gap:.625rem;">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+      {# CTA : Voir le catalogue (orange — 1 seul primary par vue) #}
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+        <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg">
+          {# Lucide : ShoppingBag #}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
           Voir le catalogue
         </a>
         {% if not user.is_authenticated %}
-        <a href="{% url 'users:inscription' %}" style="display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 1.75rem;border-radius:0.875rem;font-size:1rem;font-weight:600;color:white;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.06);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;transition:all 200ms;backdrop-filter:blur(4px);"
-          onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.borderColor='rgba(255,255,255,.5)'"
-          onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.borderColor='rgba(255,255,255,.3)'">
+        <a href="{% url 'users:inscription' %}" class="btn-hero-outline">
+          {# Lucide : UserPlus #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
           Créer un compte
         </a>
         {% endif %}
       </div>
 
-      <!-- Stats -->
-      <div class="animate-fade-in" style="display:flex;flex-wrap:wrap;gap:2rem;margin-top:3rem;animation-delay:.3s;">
-        <div>
-          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">500+</p>
-          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Produits disponibles</p>
+      {# Stats — séparateur visuel + chiffres clés #}
+      <div style="display:flex;gap:2rem;margin-top:2.5rem;padding-top:2rem;
+                  border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;">
+        <div class="hero-stat">
+          <span class="hero-stat-value">500+</span>
+          <span class="hero-stat-label">Produits référencés</span>
         </div>
-        <div style="width:1px;background:rgba(255,255,255,.1);"></div>
-        <div>
-          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">24h</p>
-          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Expédition rapide</p>
+        <div style="width:1px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-value">48h</span>
+          <span class="hero-stat-label">Livraison Yaoundé</span>
         </div>
-        <div style="width:1px;background:rgba(255,255,255,.1);"></div>
-        <div>
-          <p style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:white;line-height:1;">4.8★</p>
-          <p style="font-size:.75rem;color:rgba(255,255,255,.35);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif;">Note moyenne</p>
+        <div style="width:1px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-value">100%</span>
+          <span class="hero-stat-label">Produits garantis</span>
         </div>
       </div>
 
@@ -108,306 +449,343 @@
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     CATEGORIES BAR
-══════════════════════════════════════════ -->
-{% if categories %}
-<section style="background:var(--surface);border-bottom:1px solid var(--border);transition:background 200ms,border-color 200ms;">
-  <div style="max-width:1400px;margin:0 auto;padding:0 1.5rem;">
-    <div style="display:flex;align-items:center;gap:.5rem;overflow-x:auto;padding:.875rem 0;-ms-overflow-style:none;scrollbar-width:none;" class="scrollbar-hide">
-      <a href="{% url 'products:liste' %}" class="cat-pill active" style="flex-shrink:0;">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-        Tout
-      </a>
-      {% for cat in categories %}
-      <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="cat-pill" style="flex-shrink:0;">
-        {{ cat.nom }}
-        {% if cat.nombre_produits %}
-        <span style="font-size:.65rem;font-weight:700;background:rgba(0,0,0,.08);border-radius:99px;padding:1px 6px;">{{ cat.nombre_produits }}</span>
-        {% endif %}
+{# ════════════════════════════════════════════════════
+   2. PRODUITS EN VEDETTE
+   Grille de 4 (desktop) / 2 (tablette) / 1 (mobile).
+   Maxi 8 produits passés par la vue.
+════════════════════════════════════════════════════ #}
+<section style="padding:4rem 0;background:#F4F7FC;">
+  <div class="container">
+
+    {# En-tête de section #}
+    <p class="section-eyebrow">Sélection</p>
+    <div class="section-heading">
+      <h2>Produits <span style="color:#F97316;">en vedette</span></h2>
+    </div>
+    <p class="section-sub">Nos coups de cœur, soigneusement choisis pour vous.</p>
+
+    {# Grille produits #}
+    {% if produits_vedette %}
+    <div class="products-grid">
+      {% for produit in produits_vedette %}
+      <a href="{% url 'products:detail' produit.slug %}" class="pcard">
+
+        {# Image du produit #}
+        <div class="pcard-img-wrap">
+          {% with produit.images.all as imgs %}
+            {% for img in imgs %}
+              {% if img.est_principale %}
+              <img src="{{ img.image.url }}"
+                   alt="{{ produit.nom }}"
+                   class="pcard-img"
+                   loading="lazy" />
+              {% endif %}
+            {% empty %}
+            {# Fallback si aucune image principale #}
+            {% for img in imgs|slice:":1" %}
+              <img src="{{ img.image.url }}"
+                   alt="{{ produit.nom }}"
+                   class="pcard-img"
+                   loading="lazy" />
+            {% empty %}
+            <div class="pcard-img-placeholder">
+              {# Lucide : Package #}
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            {% endfor %}
+            {% endfor %}
+          {% endwith %}
+
+          {# Badge promo si prix_promo existe #}
+          {% if produit.prix_promo %}
+          <span class="pcard-promo-badge">
+            -{{ produit.pourcentage_remise|floatformat:0 }}%
+          </span>
+          {% endif %}
+        </div>
+
+        {# Corps de la carte #}
+        <div class="pcard-body">
+          <span class="pcard-cat">{{ produit.categorie.nom|default:"" }}</span>
+          <span class="pcard-name">{{ produit.nom }}</span>
+
+          <div class="pcard-footer">
+            <div>
+              <div class="pcard-price">{{ produit.prix_actuel|floatformat:0 }} FCFA</div>
+              {% if produit.prix_promo %}
+              <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
+              {% endif %}
+            </div>
+            {# Bouton ajout panier rapide — stoppe la propagation vers le lien parent #}
+            <button class="pcard-cart-btn"
+                    onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
+                    title="Ajouter au panier"
+                    aria-label="Ajouter {{ produit.nom }} au panier">
+              {# Lucide : ShoppingCart #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </a>
       {% endfor %}
     </div>
-  </div>
-</section>
-{% endif %}
 
-
-<!-- ══════════════════════════════════════════
-     FEATURED PRODUCTS
-══════════════════════════════════════════ -->
-<section style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;">
-
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
-    <div>
-      <p class="section-label">Sélection du moment</p>
-      <h2 class="section-title">Produits en vedette</h2>
+    {% else %}
+    {# État vide — aucun produit en vedette #}
+    <div style="text-align:center;padding:3rem 1rem;color:#8898AA;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+           style="margin:0 auto 1rem;">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;">
+        Aucun produit en vedette pour le moment.
+      </p>
     </div>
-    <a href="{% url 'products:liste' %}?en_vedette=true" style="display:none;align-items:center;gap:.375rem;font-size:.875rem;font-weight:600;color:var(--brand-500);text-decoration:none;transition:gap 200ms;" class="see-all-link"
-       onmouseover="this.style.gap='.625rem'" onmouseout="this.style.gap='.375rem'">
-      Voir tout
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-    </a>
-  </div>
+    {% endif %}
 
-  <!-- Product grid -->
-  <div id="featured-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
-    {% for i in "12345678" %}
-    <div class="card" style="padding:1rem;">
-      <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
-      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div>
-      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;margin-bottom:.75rem;"></div>
-      <div class="skeleton" style="height:1.25rem;border-radius:.375rem;width:35%;"></div>
+    {# Bouton "Voir tous les produits" #}
+    <div style="text-align:center;margin-top:2.5rem;">
+      <a href="{% url 'products:liste' %}" class="btn btn-secondary btn-lg">
+        {# Lucide : ArrowRight #}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+        Voir tous les produits
+      </a>
     </div>
-    {% endfor %}
-  </div>
 
-  <!-- Mobile "voir tout" -->
-  <div style="margin-top:1.5rem;text-align:center;">
-    <a href="{% url 'products:liste' %}?en_vedette=true" class="btn btn-secondary">Voir tous les produits en vedette</a>
   </div>
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     PROMO BANNER
-══════════════════════════════════════════ -->
-<section style="max-width:1400px;margin:0 auto;padding:0 1.5rem 3.5rem;">
-  <div style="position:relative;background:linear-gradient(120deg,#0D1F5C 0%,#1E3A8A 100%);border-radius:1.25rem;overflow:hidden;padding:3rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start;">
-    <!-- Decorative circle -->
-    <div style="position:absolute;right:-40px;top:-40px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.15) 0%,transparent 70%);"></div>
-    <div style="position:absolute;right:120px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%);"></div>
+{# ════════════════════════════════════════════════════
+   3. NOUVEAUX ARRIVAGES
+   8 derniers produits actifs, ordonnés par date_creation desc.
+   Fond blanc pour alterner avec le fond gris de la section précédente.
+════════════════════════════════════════════════════ #}
+<section style="padding:4rem 0;background:#ffffff;">
+  <div class="container">
 
-    <div style="position:relative;">
-      <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(249,115,22,.18);border:1px solid rgba(249,115,22,.3);margin-bottom:.875rem;">
-        <span style="font-size:.7rem;font-weight:800;color:#F97316;letter-spacing:.08em;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif;">Offres limitées</span>
-      </div>
-      <h3 style="font-family:'Sora',sans-serif;font-size:clamp(1.375rem,3vw,1.875rem);font-weight:800;color:white;line-height:1.2;margin-bottom:.5rem;">
-        Jusqu'à <span style="color:#F97316;">−40%</span> sur les promos
-      </h3>
-      <p style="font-size:.875rem;color:rgba(255,255,255,.45);font-family:'Plus Jakarta Sans',sans-serif;">Stocks limités · Renouvelés chaque semaine</p>
+    <p class="section-eyebrow">Tout juste arrivé</p>
+    <div class="section-heading">
+      <h2>Nouveaux <span style="color:#F97316;">arrivages</span></h2>
     </div>
-    <a href="{% url 'products:liste' %}?promo=true" class="btn btn-primary" style="position:relative;gap:.5rem;">
-      Voir les promotions
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-    </a>
-  </div>
-</section>
+    <p class="section-sub">Les dernières références ajoutées à notre catalogue.</p>
 
+    {% if nouveaux_arrivages %}
+    <div class="products-grid">
+      {% for produit in nouveaux_arrivages %}
+      <a href="{% url 'products:detail' produit.slug %}" class="pcard">
 
-<!-- ══════════════════════════════════════════
-     NEW PRODUCTS
-══════════════════════════════════════════ -->
-<section style="max-width:1400px;margin:0 auto;padding:0 1.5rem 4rem;">
+        <div class="pcard-img-wrap">
+          {% with produit.images.all as imgs %}
+            {% for img in imgs %}
+              {% if img.est_principale %}
+              <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                   class="pcard-img" loading="lazy" />
+              {% endif %}
+            {% empty %}
+            {% for img in imgs|slice:":1" %}
+              <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                   class="pcard-img" loading="lazy" />
+            {% empty %}
+            <div class="pcard-img-placeholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            {% endfor %}
+            {% endfor %}
+          {% endwith %}
 
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
-    <div>
-      <p class="section-label">Vient d'arriver</p>
-      <h2 class="section-title">Nouveautés</h2>
-    </div>
-    <a href="{% url 'products:liste' %}?ordering=-date_creation" style="display:none;align-items:center;gap:.375rem;font-size:.875rem;font-weight:600;color:var(--brand-500);text-decoration:none;transition:gap 200ms;" class="see-all-link"
-       onmouseover="this.style.gap='.625rem'" onmouseout="this.style.gap='.375rem'">
-      Voir tout
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-    </a>
-  </div>
+          {# Badge "Nouveau" sur tous les produits de cette section #}
+          <span class="pcard-new-badge">Nouveau</span>
 
-  <div id="new-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
-    {% for i in "1234" %}
-    <div class="card" style="padding:1rem;">
-      <div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div>
-      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div>
-      <div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;"></div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-
-<!-- ══════════════════════════════════════════
-     VALUE PROPS
-══════════════════════════════════════════ -->
-<section style="background:var(--surface-2);border-top:1px solid var(--border);transition:background 200ms,border-color 200ms;">
-  <div style="max-width:1400px;margin:0 auto;padding:3.5rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;">
-
-    {% for icon, title, desc in value_props|default:"" %}
-    <div style="display:flex;align-items:flex-start;gap:1rem;">…</div>
-    {% empty %}
-
-    <!-- Produits vérifiés -->
-    <div style="display:flex;align-items:flex-start;gap:1rem;">
-      <div style="width:44px;height:44px;border-radius:.875rem;background:var(--brand-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--brand-100);">
-        <svg width="20" height="20" fill="none" stroke="#1E3A8A" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      </div>
-      <div>
-        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Produits vérifiés</h4>
-        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Chaque produit est contrôlé avant mise en ligne.</p>
-      </div>
-    </div>
-
-    <!-- Livraison rapide -->
-    <div style="display:flex;align-items:flex-start;gap:1rem;">
-      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(249,115,22,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(249,115,22,.15);">
-        <svg width="20" height="20" fill="none" stroke="#F97316" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-      </div>
-      <div>
-        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Livraison rapide</h4>
-        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Expédition sous 24h pour les commandes confirmées.</p>
-      </div>
-    </div>
-
-    <!-- Support -->
-    <div style="display:flex;align-items:flex-start;gap:1rem;">
-      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(16,185,129,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,.15);">
-        <svg width="20" height="20" fill="none" stroke="#10b981" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-      </div>
-      <div>
-        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Support réactif</h4>
-        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Chat en direct avec notre équipe, 7j/7.</p>
-      </div>
-    </div>
-
-    <!-- Paiement sécurisé -->
-    <div style="display:flex;align-items:flex-start;gap:1rem;">
-      <div style="width:44px;height:44px;border-radius:.875rem;background:rgba(139,92,246,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(139,92,246,.15);">
-        <svg width="20" height="20" fill="none" stroke="#7c3aed" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-      </div>
-      <div>
-        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem;">Paiement sécurisé</h4>
-        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.65;font-family:'Plus Jakarta Sans',sans-serif;">Transactions protégées, données chiffrées.</p>
-      </div>
-    </div>
-
-    {% endfor %}
-  </div>
-</section>
-
-{% endblock %}
-
-
-{% block extra_scripts %}
-<style>
-@media (min-width: 640px) {
-  #featured-grid { grid-template-columns: repeat(3, 1fr); }
-  #new-grid { grid-template-columns: repeat(3, 1fr); }
-  .see-all-link { display: flex !important; }
-}
-@media (min-width: 1024px) {
-  #featured-grid { grid-template-columns: repeat(4, 1fr); }
-  #new-grid { grid-template-columns: repeat(4, 1fr); }
-}
-</style>
-<script>
-const CURRENT_USER_IS_ADMIN = {% if user.is_staff or user.is_admin or user.is_vendeur %}true{% else %}false{% endif %};
-
-function cardHTML(p) {
-  const img = p.image_principale
-    ? `<img src="${p.image_principale}" alt="${p.nom}" style="width:100%;height:100%;object-fit:cover;border-radius:.75rem;transition:transform .4s ease;" class="prod-img" loading="lazy" />`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--border-2);border-radius:.75rem;background:var(--surface-2);">
-        <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-       </div>`;
-
-  const prix = p.prix_promo
-    ? `<span class="price-promo">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} <small style="font-size:.7em;">FCFA</small></span>
-       <span class="price-original" style="margin-left:4px;">${parseFloat(p.prix).toLocaleString('fr-FR')}</span>`
-    : `<span class="price-main">${parseFloat(p.prix_actuel).toLocaleString('fr-FR')} <small style="font-size:.7em;">FCFA</small></span>`;
-
-  const remise = p.pourcentage_remise > 0
-    ? `<span class="badge badge-orange" style="position:absolute;top:.5rem;left:.5rem;">−${p.pourcentage_remise}%</span>` : '';
-  const stock = !p.est_en_stock
-    ? `<span class="badge badge-gray" style="position:absolute;top:.5rem;right:.5rem;">Épuisé</span>` : '';
-  const etoiles = p.note_moyenne > 0
-    ? `<div style="display:flex;align-items:center;gap:4px;margin-top:.25rem;">
-        <span style="color:#f59e0b;font-size:.75rem;">★</span>
-        <span style="font-size:.7rem;color:var(--text-muted);">${parseFloat(p.note_moyenne).toFixed(1)} (${p.nombre_avis||0})</span>
-       </div>` : '';
-
-  return `
-    <a href="/produits/${p.slug}/" class="card" style="padding:0;display:flex;flex-direction:column;overflow:hidden;text-decoration:none;"
-       onmouseover="this.querySelector('.prod-img')&&(this.querySelector('.prod-img').style.transform='scale(1.04)')"
-       onmouseout="this.querySelector('.prod-img')&&(this.querySelector('.prod-img').style.transform='scale(1)')">
-      <div style="position:relative;overflow:hidden;aspect-ratio:1;background:var(--surface-2);">
-        ${img}${remise}${stock}
-      </div>
-      <div style="padding:.875rem;flex:1;display:flex;flex-direction:column;">
-        <p style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">${p.categorie_nom||''}</p>
-        <h3 style="font-size:.875rem;font-weight:600;color:var(--text-primary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:.5rem;font-family:'Plus Jakarta Sans',sans-serif;">${p.nom}</h3>
-        ${etoiles}
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.625rem;">
-          <div style="min-width:0;">${prix}</div>
-          ${p.est_en_stock && !CURRENT_USER_IS_ADMIN ? `
-          <button onclick="ajouterPanier(event,${p.id})"
-            style="flex-shrink:0;width:34px;height:34px;border-radius:.625rem;background:var(--brand-50);border:1px solid var(--brand-100);color:var(--brand-500);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 200ms;font-size:1.125rem;line-height:1;"
-            onmouseover="this.style.background='#1E3A8A';this.style.color='white';this.style.borderColor='#1E3A8A'"
-            onmouseout="this.style.background='var(--brand-50)';this.style.color='var(--brand-500)';this.style.borderColor='var(--brand-100)'">
-            +
-          </button>` : ''}
+          {% if produit.prix_promo %}
+          <span class="pcard-promo-badge" style="top:0.5rem;left:5rem;">
+            -{{ produit.pourcentage_remise|floatformat:0 }}%
+          </span>
+          {% endif %}
         </div>
+
+        <div class="pcard-body">
+          <span class="pcard-cat">{{ produit.categorie.nom|default:"" }}</span>
+          <span class="pcard-name">{{ produit.nom }}</span>
+          <div class="pcard-footer">
+            <div>
+              <div class="pcard-price">{{ produit.prix_actuel|floatformat:0 }} FCFA</div>
+              {% if produit.prix_promo %}
+              <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
+              {% endif %}
+            </div>
+            <button class="pcard-cart-btn"
+                    onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
+                    title="Ajouter au panier"
+                    aria-label="Ajouter {{ produit.nom }} au panier">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div style="text-align:center;padding:3rem 1rem;color:#8898AA;">
+      <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;">
+        Aucun produit disponible pour le moment.
+      </p>
+    </div>
+    {% endif %}
+
+    <div style="text-align:center;margin-top:2.5rem;">
+      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="btn btn-secondary btn-lg">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+        Voir tous les arrivages
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+{# ════════════════════════════════════════════════════
+   4. CE QU'OFFRE HOOYIA MARKET
+   4 cartes valeur, messages attractifs et honnêtes.
+   Fond gris clair (#F4F7FC) pour alterner avec le blanc.
+════════════════════════════════════════════════════ #}
+<section style="padding:4rem 0;background:#F4F7FC;">
+  <div class="container">
+
+    <p class="section-eyebrow">Pourquoi HooYia ?</p>
+    <div class="section-heading">
+      <h2>Ce qu'on fait <span style="color:#F97316;">différemment</span></h2>
+    </div>
+    <p class="section-sub">Pas de promesses creuses. Voici ce que vous obtenez réellement.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;">
+
+      {# Carte 1 — Prix transparents #}
+      <div class="value-card">
+        <div class="value-icon" style="background:#eff4ff;">
+          {# Lucide : Tag #}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </div>
+        <h3>Le prix affiché est le prix payé</h3>
+        <p>Aucun frais caché, aucune surprise à la caisse. Le montant que vous voyez est celui qui sort de votre poche — point final.</p>
       </div>
-    </a>`;
-}
 
-function renderGrid(gridId, produits) {
-  const grid = document.getElementById(gridId);
-  if (!grid) return;
-  if (!produits.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;">Aucun produit disponible.</div>`;
-    return;
+      {# Carte 2 — Produits vérifiés #}
+      <div class="value-card">
+        <div class="value-icon" style="background:#ecfdf5;">
+          {# Lucide : ShieldCheck #}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+        <h3>Chaque produit passe notre contrôle</h3>
+        <p>Avant d'entrer sur HooYia, chaque article est vérifié. Vous commandez en sachant exactement ce que vous recevrez.</p>
+      </div>
+
+      {# Carte 3 — Livraison locale #}
+      <div class="value-card">
+        <div class="value-icon" style="background:#fff7ed;">
+          {# Lucide : Truck #}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F97316"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"/>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <h3>Livraison rapide à Yaoundé et au-delà</h3>
+        <p>48h à Yaoundé, 72h dans les grandes villes. On ne promet pas la lune — on livre dans les délais annoncés.</p>
+      </div>
+
+      {# Carte 4 — Support humain #}
+      <div class="value-card">
+        <div class="value-icon" style="background:#ede9fe;">
+          {# Lucide : MessageCircle #}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <h3>Un vrai humain vous répond</h3>
+        <p>Pas de bot, pas de formulaire sans fond. Une question, un problème ? Notre équipe répond en moins d'une heure en journée.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{# ── Script ajout au panier rapide (depuis les cartes produit) ── #}
+<script>
+  /**
+   * addToCart() — Ajoute un produit au panier via l'API Django
+   * sans rechargement de page.
+   *
+   * @param {number} produitId - L'ID du produit à ajouter
+   *
+   * Utilise window.apiPost() défini dans static/js/api.js.
+   * Affiche un toast de confirmation via window.toast() (toast.html).
+   */
+  function addToCart(produitId) {
+    {% if user.is_authenticated %}
+    apiPost('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 })
+      .then(data => {
+        if (data && data.success !== false) {
+          toast('Produit ajouté au panier !', 'success');
+          // Mise à jour du badge panier dans la navbar
+          const badge = document.getElementById('cart-badge');
+          if (badge && data.cart_count !== undefined) {
+            badge.textContent = data.cart_count;
+            badge.style.display = data.cart_count > 0 ? 'flex' : 'none';
+          }
+        } else {
+          toast(data?.message || 'Impossible d\'ajouter ce produit.', 'error');
+        }
+      })
+      .catch(() => toast('Erreur réseau. Réessayez.', 'error'));
+    {% else %}
+    {# Redirection vers connexion si non connecté #}
+    window.location.href = "{% url 'users:connexion' %}?next={{ request.path }}";
+    {% endif %}
   }
-  grid.innerHTML = produits.map(cardHTML).join('');
-}
-
-async function ajouterPanier(e, produitId) {
-  e.preventDefault();
-  e.stopPropagation();
-  {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
-  try {
-    await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
-    window.toast('Produit ajouté au panier !', 'success');
-    const badge = document.getElementById('cart-badge');
-    if (badge) {
-      const count = (parseInt(badge.textContent) || 0) + 1;
-      badge.textContent = count;
-    }
-  } catch {}
-  {% else %}
-  window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
-  {% endif %}
-}
-
-async function filterFeatured(slug, btn) {
-  // Active state sur les boutons
-  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  const grid = document.getElementById('featured-grid');
-  // Skeleton pendant le chargement
-  grid.innerHTML = Array(4).fill(`<div class="card" style="padding:1rem;"><div class="skeleton" style="aspect-ratio:1;border-radius:.75rem;margin-bottom:.875rem;"></div><div class="skeleton" style="height:.625rem;border-radius:.375rem;width:70%;margin-bottom:.5rem;"></div><div class="skeleton" style="height:.625rem;border-radius:.375rem;width:45%;margin-bottom:.75rem;"></div><div class="skeleton" style="height:1.25rem;border-radius:.375rem;width:35%;"></div></div>`).join('');
-
-  try {
-    let url = slug
-      ? '/api/produits/?categorie_slug=' + slug + '&page_size=5'
-      : '/api/produits/?en_vedette=true&page_size=5';
-    const data = await API.get(url, { silentError: true });
-    renderGrid('featured-grid', data?.results || data || []);
-  } catch {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les produits.</div>`;
-  }
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const data = await API.get('/api/produits/?en_vedette=true&page_size=5', { silentError: true });
-    renderGrid('featured-grid', data?.results || data || []);
-  } catch {
-    document.getElementById('featured-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les produits.</div>`;
-  }
-  try {
-    const data = await API.get('/api/produits/?ordering=-date_creation&page_size=5', { silentError: true });
-    renderGrid('new-grid', data?.results || data || []);
-  } catch {
-    document.getElementById('new-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Impossible de charger les nouveautés.</div>`;
-  }
-});
 </script>
+
 {% endblock %}

@@ -1,47 +1,201 @@
-<!-- Toast container for JS-triggered notifications -->
-<div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.625rem;max-width:360px;width:100%;pointer-events:none;">
+{# ═══════════════════════════════════════════════════════════════
+   HooYia Market — partials/toast.html
+
+   RÔLE :
+     Système de notifications toast déclenchées par JavaScript.
+     Complémentaire aux flash messages Django (base.html) qui eux
+     sont générés côté serveur au rechargement de page.
+
+     Les toasts JS sont utilisés pour les retours d'actions AJAX :
+       - Ajout au panier sans rechargement
+       - Sauvegarde d'un formulaire en AJAX
+       - Confirmation d'une action (ex: produit ajouté aux favoris)
+       - Erreurs d'appels API
+
+   POSITION :
+     Coin bas-droit en desktop, bas-centré sur mobile.
+     Au-dessus de tout (z-index: 9999).
+
+   API JAVASCRIPT — window.toast() :
+     Appel depuis n'importe quel template ou script :
+
+       toast('Produit ajouté au panier !', 'success')
+       toast('Erreur lors de la sauvegarde.', 'error')
+       toast('Stock faible sur ce produit.', 'warning')
+       toast('Mise à jour disponible.', 'info')
+
+     Signature complète :
+       toast(message, type, duration)
+         message  : string  — texte affiché
+         type     : string  — 'success' | 'error' | 'warning' | 'info'
+         duration : number  — durée en ms avant auto-dismiss (défaut: 4000)
+
+   TYPES ET COULEURS (conformes WCAG AA) :
+     success → bordure #10b981 vert   — action réussie
+     error   → bordure #ef4444 rouge  — erreur
+     warning → bordure #f59e0b jaune  — avertissement
+     info    → bordure #1E3A8A bleu   — information neutre
+
+   ANIMATIONS :
+     Entrée  : glisse depuis la droite (toastIn — défini dans custom.css)
+     Sortie  : glisse vers la droite  (toastOut — défini dans custom.css)
+#}
+
+{# Conteneur fixe — reçoit les toasts injectés par JS #}
+<div id="toast-container"
+     style="position:fixed;
+            bottom:1.5rem;
+            right:1.5rem;
+            z-index:9999;
+            display:flex;
+            flex-direction:column;
+            gap:0.5rem;
+            max-width:360px;
+            width:calc(100% - 2rem);
+            pointer-events:none;">
+  {# Les toasts sont injectés ici dynamiquement par window.toast() #}
 </div>
 
 <script>
+/**
+ * window.toast() — Affiche une notification toast temporaire.
+ *
+ * @param {string} message  - Texte du message à afficher
+ * @param {string} type     - Type : 'success' | 'error' | 'warning' | 'info'
+ * @param {number} duration - Durée en ms avant disparition automatique (défaut: 4000)
+ *
+ * Exemples d'utilisation :
+ *   toast('Produit ajouté !', 'success')
+ *   toast('Connexion impossible.', 'error', 6000)
+ *   toast('Stock limité.', 'warning')
+ *   toast('Nouveauté disponible.', 'info')
+ */
 window.toast = function(message, type = 'info', duration = 4000) {
+
   const container = document.getElementById('toast-container');
   if (!container) return;
 
+  // ── Icônes Lucide SVG inline selon le type ──
+  // stroke="currentColor" → la couleur est contrôlée par le parent CSS
   const icons = {
-    success: `<svg width="16" height="16" fill="none" stroke="#10b981" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`,
-    error:   `<svg width="16" height="16" fill="none" stroke="#ef4444" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>`,
-    warning: `<svg width="16" height="16" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
-    info:    `<svg width="16" height="16" fill="none" stroke="var(--brand-500)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/></svg>`,
-  };
-  const borderColors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: 'var(--brand-500)' };
+    success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#10b981" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>`,
 
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-left:3px solid ${borderColors[type] || borderColors.info};
-    border-radius:0.875rem;
-    box-shadow:var(--shadow-lg);
-    padding:.875rem 1rem;
-    display:flex;
-    align-items:flex-start;
-    gap:.75rem;
-    pointer-events:all;
-    animation:toastIn .35s cubic-bezier(0.16,1,0.3,1) forwards;
+    error:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#ef4444" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>`,
+
+    warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#f59e0b" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>`,
+
+    info:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#1E3A8A" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>`,
+  };
+
+  // ── Couleur de la bordure gauche selon le type ──
+  const borderColors = {
+    success: '#10b981',
+    error:   '#ef4444',
+    warning: '#f59e0b',
+    info:    '#1E3A8A',
+  };
+
+  // ── Création de l'élément toast ──
+  const toastEl = document.createElement('div');
+
+  // Styles inline pour garantir le rendu indépendamment de Tailwind
+  toastEl.style.cssText = `
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-left: 3px solid ${borderColors[type] || borderColors.info};
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px rgba(13,31,92,0.13);
+    padding: 0.875rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    pointer-events: all;
+    animation: toastIn 0.28s cubic-bezier(0.16,1,0.3,1) forwards;
+    font-family: 'Poppins', sans-serif;
   `;
-  toast.innerHTML = `
-    <span style="flex-shrink:0;margin-top:1px;">${icons[type] || icons.info}</span>
-    <p style="font-size:.8125rem;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5;">${message}</p>
-    <button onclick="this.closest('div').remove()" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;transition:color 150ms;line-height:1;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
-      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+
+  // ── Contenu HTML du toast ──
+  toastEl.innerHTML = `
+    <span style="flex-shrink:0;margin-top:1px;line-height:1;">
+      ${icons[type] || icons.info}
+    </span>
+    <p style="font-size:0.8125rem;
+              font-weight:500;
+              color:#0F1923;
+              flex:1;
+              line-height:1.5;
+              font-family:'Poppins',sans-serif;
+              margin:0;">
+      ${message}
+    </p>
+    <button
+      onclick="closeToast(this.closest('div'))"
+      style="flex-shrink:0;
+             background:none;
+             border:none;
+             cursor:pointer;
+             color:#8898AA;
+             padding:2px;
+             transition:color 150ms;
+             line-height:1;
+             border-radius:4px;"
+      onmouseover="this.style.color='#0F1923'"
+      onmouseout="this.style.color='#8898AA'"
+      aria-label="Fermer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
     </button>
   `;
 
-  container.appendChild(toast);
+  // ── Injection dans le conteneur ──
+  container.appendChild(toastEl);
 
-  setTimeout(() => {
-    toast.style.animation = 'toastOut .25s ease forwards';
-    setTimeout(() => toast.remove(), 250);
-  }, duration);
+  // ── Limite à 5 toasts simultanés ──
+  // Supprime le plus ancien si on dépasse la limite,
+  // pour éviter un empilement excessif sur l'écran.
+  const allToasts = container.querySelectorAll('div');
+  if (allToasts.length > 5) {
+    closeToast(allToasts[0]);
+  }
+
+  // ── Auto-dismiss après `duration` ms ──
+  setTimeout(() => closeToast(toastEl), duration);
 };
+
+/**
+ * closeToast() — Ferme un toast avec animation de sortie.
+ *
+ * @param {HTMLElement} el - L'élément toast à fermer
+ */
+function closeToast(el) {
+  if (!el || !el.isConnected) return; // Déjà supprimé
+  el.style.animation = 'toastOut 0.25s ease forwards';
+  // Suppression du DOM après la fin de l'animation (250ms)
+  setTimeout(() => el.remove(), 250);
+}
 </script>

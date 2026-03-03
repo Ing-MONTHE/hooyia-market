@@ -1,588 +1,981 @@
 {% load static %}
-<!-- ═══════════════════════════════════════════
-     NAVBAR HooYia Market v2
-     Dark mode + Responsive + Modern
-═══════════════════════════════════════════ -->
+{# ═══════════════════════════════════════════════════════════════
+   HooYia Market — partials/navbar.html
 
+   STRUCTURE DE LA NAVBAR (une seule barre, responsive) :
+     [ LOGO ] [ Accueil ] [ Catégories ▼ ] [ Promotions ]
+     [ 🔍 Recherche ] [ Compte ▼ / Connexion / Inscription ]
+     [ 🛒 Panier ] [ Langue ] [ Dark Mode ] [ 📞 Aide ▼ ]
+
+   COMPORTEMENT SELON L'ÉTAT DE CONNEXION :
+     Connecté     → Compte ▼ (Profil, Mes commandes, Déconnexion)
+     Non connecté → Bouton Connexion + Bouton Inscription (orange)
+
+   ICÔNES : Lucide Icons via CDN SVG inline
+     On utilise les SVG inline pour éviter une dépendance JS externe
+     et pour permettre le contrôle couleur via CSS (stroke="currentColor").
+
+   VARIABLES DE CONTEXTE DJANGO UTILISÉES :
+     {{ user }}          — utilisateur Django courant
+     {{ categories }}    — QuerySet des catégories racines (parent=None)
+     {{ cart_count }}    — nombre d'articles dans le panier (context processor)
+     {{ notif_count }}   — nombre de notifications non lues (context processor)
+     {{ request }}       — pour détecter la page active (request.resolver_match)
+
+   DROPDOWNS :
+     Gérés en CSS pur (group/peer Tailwind) → pas de JS pour l'ouverture.
+     Exception : mobile menu toggle via JS léger en bas de fichier.
+
+   RESPONSIVE :
+     Desktop (lg+) : barre complète horizontale
+     Mobile (<lg)  : burger menu → tiroir vertical
+#}
+
+{# ── Style spécifique à la navbar ──
+   On garde un <style> dédié pour les comportements impossibles
+   avec Tailwind seul (dropdown hover, transitions complexes). #}
 <style>
-/* ── Navbar base ── */
-.navbar-top {
-  background: #0D1F5C;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  transition: background 200ms;
-}
-[data-theme="dark"] .navbar-top { background: #080f1f; }
+  /* ── Navbar sticky avec ombre subtile ──
+     L'ombre n'apparaît que lorsqu'on scroll (géré via JS en bas). */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #ffffff;
+    border-bottom: 1px solid #E2E8F0;
+    transition: box-shadow 200ms ease;
+  }
+  /* Classe ajoutée par JS quand on scroll vers le bas */
+  .navbar.scrolled {
+    box-shadow: 0 2px 12px rgba(13, 31, 92, 0.08);
+  }
 
-.navbar-bottom {
-  background: #1E3A8A;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-[data-theme="dark"] .navbar-bottom { background: #0d1d3d; border-color: rgba(255,255,255,.05); }
+  /* ── Lien de navigation de base ── */
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0D1F5C;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 150ms, color 150ms;
+    white-space: nowrap;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+  }
+  .nav-link:hover,
+  .nav-link.active {
+    background: #eff4ff;  /* brand-50 */
+    color: #1E3A8A;       /* brand-500 */
+  }
+  /* Lien actif : indicateur visuel de la page courante */
+  .nav-link.active {
+    font-weight: 600;
+  }
 
-/* ── Search ── */
-.nav-search-wrap {
-  display: flex;
-  flex: 1;
-  max-width: 640px;
-  height: 40px;
-  border-radius: 0.625rem;
-  overflow: hidden;
-  border: 1.5px solid rgba(255,255,255,.12);
-  transition: border-color 200ms;
-}
-.nav-search-wrap:focus-within { border-color: #F97316; box-shadow: 0 0 0 3px rgba(249,115,22,.18); }
+  /* ── Dropdown générique ──
+     Caché par défaut, affiché au hover du parent .nav-dropdown-wrap. */
+  .nav-dropdown-wrap {
+    position: relative;
+  }
+  .nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 220px;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px rgba(13, 31, 92, 0.13);
+    padding: 0.375rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.97);
+    transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
+    z-index: 200;
+  }
+  /* Dropdown aligné à droite pour les éléments en fin de navbar */
+  .nav-dropdown-menu.align-right {
+    left: auto;
+    right: 0;
+  }
+  /* Ouverture au hover du parent */
+  .nav-dropdown-wrap:hover .nav-dropdown-menu,
+  .nav-dropdown-wrap:focus-within .nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
 
-.nav-search-select {
-  padding: 0 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: rgba(255,255,255,.1);
-  color: rgba(255,255,255,.8);
-  border: none;
-  border-right: 1px solid rgba(255,255,255,.12);
-  cursor: pointer;
-  min-width: 100px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  outline: none;
-}
-.nav-search-select option { background: #1E3A8A; color: white; }
+  /* ── Item de dropdown ── */
+  .nav-dd-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4A5568;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 100ms, color 100ms;
+    cursor: pointer;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
+  }
+  .nav-dd-item:hover {
+    background: #f9fafb;
+    color: #0F1923;
+  }
+  /* Item destructif (ex: Déconnexion) */
+  .nav-dd-item.danger:hover {
+    background: #fef2f2;
+    color: #991b1b;
+  }
+  /* Séparateur entre groupes d'items */
+  .nav-dd-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 0.25rem 0.375rem;
+  }
 
-.nav-search-input {
-  flex: 1;
-  padding: 0 14px;
-  font-size: 0.875rem;
-  color: #111;
-  background: white;
-  border: none;
-  outline: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-[data-theme="dark"] .nav-search-input { background: #1a2235; color: #e8edf5; }
-[data-theme="dark"] .nav-search-input::placeholder { color: #5a7090; }
+  /* ── Badge panier / notifications ── */
+  .nav-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 16px;
+    height: 16px;
+    background: #F97316;
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    font-family: 'Poppins', sans-serif;
+    border: 2px solid white;
+    line-height: 1;
+  }
 
-.nav-search-btn {
-  padding: 0 16px;
-  background: #F97316;
-  border: none;
-  cursor: pointer;
-  transition: background 150ms;
-  display: flex;
-  align-items: center;
-}
-.nav-search-btn:hover { background: #ea6000; }
+  /* ── Barre de recherche ── */
+  .nav-search-wrap {
+    display: flex;
+    align-items: center;
+    background: #F4F7FC;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 0.5rem;
+    padding: 0 0.5rem 0 0.75rem;
+    transition: border-color 150ms, box-shadow 150ms;
+    height: 36px;
+  }
+  .nav-search-wrap:focus-within {
+    border-color: #1E3A8A;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    background: #ffffff;
+  }
+  .nav-search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    color: #0F1923;
+    width: 180px;
+  }
+  .nav-search-input::placeholder { color: #8898AA; }
 
-/* ── Nav action button ── */
-.nav-action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 5px 10px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-  text-decoration: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: border-color 150ms;
-  line-height: 1.25;
-  white-space: nowrap;
-}
-.nav-action:hover { border-color: rgba(255,255,255,.35); }
-.nav-action-label { font-size: 0.6875rem; color: rgba(255,255,255,.65); }
-.nav-action-main  { font-size: 0.8125rem; font-weight: 700; color: white; }
+  /* ── Toggle Dark Mode ── */
+  .nav-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 0.5rem;
+    border: 1.5px solid #E2E8F0;
+    background: transparent;
+    color: #0D1F5C;
+    cursor: pointer;
+    transition: background 150ms, border-color 150ms, color 150ms;
+    flex-shrink: 0;
+  }
+  .nav-icon-btn:hover {
+    background: #eff4ff;
+    border-color: #b8d0fb;
+    color: #1E3A8A;
+  }
 
-/* ── Cart button ── */
-.nav-cart {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  padding: 5px 12px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: border-color 150ms;
-}
-.nav-cart:hover { border-color: rgba(255,255,255,.35); }
-.nav-cart-count { font-size: 1.125rem; font-weight: 800; color: #F97316; font-family: 'Sora', sans-serif; line-height: 1; min-width: 20px; text-align: center; }
-.nav-cart-label { font-size: 0.8125rem; font-weight: 700; color: white; padding-bottom: 2px; }
+  /* ── Boutons Connexion / Inscription ── */
+  .nav-btn-login {
+    padding: 0.4rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 0.5rem;
+    border: 1.5px solid #1E3A8A;
+    color: #1E3A8A;
+    background: transparent;
+    text-decoration: none;
+    transition: all 150ms;
+    white-space: nowrap;
+  }
+  .nav-btn-login:hover {
+    background: #eff4ff;
+  }
+  .nav-btn-register {
+    padding: 0.4rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 0.5rem;
+    border: 1.5px solid #F97316;
+    color: #ffffff;
+    background: #F97316;
+    text-decoration: none;
+    transition: all 150ms;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+  }
+  .nav-btn-register:hover {
+    background: #ea6000;
+    border-color: #ea6000;
+  }
 
-/* ── Bottom nav links ── */
-.nav-link {
-  display: flex;
-  align-items: center;
-  height: 42px;
-  padding: 0 12px;
-  font-size: 0.8125rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 500;
-  color: rgba(255,255,255,.8);
-  text-decoration: none;
-  white-space: nowrap;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  transition: color 150ms, border-color 150ms, background 150ms;
-}
-.nav-link:hover { color: white; border-color: rgba(255,255,255,.3); }
-.nav-link.active { color: #F97316; font-weight: 700; }
-.nav-link.highlight { color: #FCD34D; font-weight: 700; }
+  /* ── Menu mobile ── */
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    border-top: 1px solid #E2E8F0;
+    background: #ffffff;
+    padding: 0.75rem;
+    gap: 0.25rem;
+  }
+  .mobile-menu.open { display: flex; }
 
-/* ── Dropdown ── */
-.nav-dropdown {
-  position: absolute;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 0.875rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,.16);
-  padding: 0.5rem;
-  z-index: 60;
-  animation: dropdown-in 0.15s ease;
-}
-@keyframes dropdown-in {
-  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.nav-dd-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary, #4a5568);
-  border-radius: 0.5rem;
-  text-decoration: none;
-  transition: background 100ms, color 100ms;
-  cursor: pointer;
-  width: 100%;
-  background: transparent;
-  border: none;
-  text-align: left;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-.nav-dd-item:hover { background: var(--surface-2, #f9fafb); color: var(--text-primary, #0f1923); }
-.nav-dd-item.danger:hover { background: rgba(239,68,68,.06); color: #ef4444; }
-.nav-dd-item.highlight { color: #F97316; font-weight: 600; }
-.nav-dd-item.highlight:hover { background: rgba(249,115,22,.06); }
-.nav-dd-divider { height: 1px; background: var(--border, #e2e8f0); margin: 0.375rem 0; }
-.nav-dd-header { padding: 0.625rem 0.875rem 0.375rem; border-bottom: 1px solid var(--border, #e2e8f0); margin-bottom: 0.25rem; }
+  .mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    color: #0D1F5C;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 100ms;
+  }
+  .mobile-link:hover { background: #eff4ff; }
+  .mobile-link.danger { color: #991b1b; }
+  .mobile-link.danger:hover { background: #fef2f2; }
+  .mobile-link.accent { color: #F97316; font-weight: 600; }
 
-/* ── Notification badge ── */
-.notif-badge {
-  position: absolute; top: -7px; right: -5px;
-  min-width: 17px; height: 17px;
-  background: #ef4444;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: 800;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  padding: 0 3px;
-  font-family: 'Sora', sans-serif;
-  border: 2px solid #0D1F5C;
-}
-[data-theme="dark"] .notif-badge { border-color: #080f1f; }
-
-/* ── Mobile menu ── */
-.mobile-menu {
-  background: #0D1F5C;
-  border-top: 1px solid rgba(255,255,255,.08);
-  padding: 0.75rem;
-}
-[data-theme="dark"] .mobile-menu { background: #080f1f; }
-
-.mobile-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0.625rem 0.75rem;
-  border-radius: 0.625rem;
-  font-size: 0.875rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 500;
-  color: rgba(255,255,255,.75);
-  text-decoration: none;
-  transition: background 100ms, color 100ms;
-}
-.mobile-link:hover { background: rgba(255,255,255,.08); color: white; }
-.mobile-link.danger { color: rgba(252,165,165,.85); }
-.mobile-link.danger:hover { background: rgba(239,68,68,.12); color: #fca5a5; }
-.mobile-link.special { color: #FCD34D; font-weight: 600; }
-
-/* ── Burger button ── */
-.burger-btn {
-  display: flex; align-items: center; justify-content: center;
-  padding: 7px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-  transition: border-color 150ms, background 150ms;
-}
-.burger-btn:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.06); }
-
-/* ── Theme toggle button ── */
-.theme-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  font-size: 1rem;
-  transition: all 150ms;
-  flex-shrink: 0;
-}
-.theme-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
-
-/* ── Catalogue dropdown in nav bar ── */
-#catalogue-dropdown { top: calc(100% + 4px); left: 0; min-width: 230px; }
-#profile-dropdown   { top: calc(100% + 4px); right: 0; min-width: 230px; }
-#notif-dropdown     { top: calc(100% + 4px); right: 0; width: 300px; }
-
-/* Responsive */
-.nav-bar2 { display: none; }
-.burger-btn { display: none; }
-.nav-cat-select { display: none; }
-.nav-desktop-actions { display: none; }
-
-@media (min-width: 1024px) {
-  .nav-bar2 { display: block; }
-  .burger-btn { display: none !important; }
-  .nav-desktop-actions { display: flex !important; }
-}
-@media (max-width: 1023px) {
-  .burger-btn { display: flex !important; }
-  .nav-desktop-actions { display: none !important; }
-}
+  .mobile-section-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    color: #8898AA;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.5rem 0.75rem 0.25rem;
+  }
+  .mobile-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 0.375rem 0;
+  }
 </style>
 
-<header class="navbar-top">
+{# ════════════════════════════════════════
+   NAVBAR PRINCIPALE
+════════════════════════════════════════ #}
+<header class="navbar" id="main-navbar">
+  <div class="container">
+    <nav style="display:flex;align-items:center;height:64px;gap:0.25rem;">
 
-  <!-- ══ BARRE PRINCIPALE ══ -->
-  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;">
+      {# ── LOGO ──
+         Lien vers l'accueil (même fonctionnalité que le bouton Accueil).
+         Le SVG a un fond blanc donc il s'intègre naturellement dans la navbar blanche. #}
+      <a href="{% url 'products:accueil' %}"
+         class="flex-shrink-0 mr-2"
+         aria-label="HooYia Market — Accueil">
+        <img src="{% static 'img/logo.svg' %}"
+             alt="HooYia Market"
+             style="height:38px;width:auto;display:block;" />
+      </a>
 
-    <!-- Logo -->
-    <a href="{% url 'products:accueil' %}"
-       onmouseover="this.style.boxShadow='0 4px 16px rgba(249,115,22,.4)'"
-       onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.2)'">
-      <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:36px;width:auto;" />
-    </a>
+      {# ── LIENS DE NAVIGATION (desktop uniquement) ── #}
+      <div class="hidden lg:flex items-center gap-0.5 flex-shrink-0">
 
-    <!-- Search bar -->
-    <div class="nav-search-wrap" style="flex:1;margin:0 0.5rem;">
-      <input type="search" id="search-input" class="nav-search-input"
-        placeholder="Rechercher des produits…"
-        onkeydown="if(event.key==='Enter')doSearch()" />
-      <button class="nav-search-btn" onclick="doSearch()" aria-label="Rechercher">
-        <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        {# Accueil #}
+        <a href="{% url 'products:accueil' %}"
+           class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">
+          {# Lucide : Home #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Accueil
+        </a>
+
+        {# ── Catégories (dropdown) ──
+           Les catégories racines sont injectées via le context processor
+           ou passées directement par les vues dans {{ categories }}. #}
+        <div class="nav-dropdown-wrap">
+          <button class="nav-link" aria-haspopup="true" aria-expanded="false">
+            {# Lucide : LayoutGrid #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            Catégories
+            {# Lucide : ChevronDown #}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="nav-dropdown-menu" role="menu">
+            {# Lien vers tout le catalogue #}
+            <a href="{% url 'products:liste' %}" class="nav-dd-item" role="menuitem">
+              {# Lucide : List #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+              <span style="font-weight:600;color:#0F1923;">Tous les produits</span>
+            </a>
+            <div class="nav-dd-divider"></div>
+            {# Catégories racines injectées par Django #}
+            {% for cat in categories %}
+            <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
+               class="nav-dd-item" role="menuitem">
+              {# Lucide : Tag #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              {{ cat.nom }}
+            </a>
+            {% empty %}
+            {# Fallback si aucune catégorie en base #}
+            <span class="nav-dd-item" style="color:#8898AA;cursor:default;">
+              Aucune catégorie disponible
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {# Promotions #}
+        <a href="{% url 'products:liste' %}?promo=true"
+           class="nav-link {% if request.GET.promo %}active{% endif %}"
+           style="color:#F97316;">
+          {# Lucide : Percent #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="5" x2="5" y2="19"/>
+            <circle cx="6.5" cy="6.5" r="2.5"/>
+            <circle cx="17.5" cy="17.5" r="2.5"/>
+          </svg>
+          Promotions
+        </a>
+
+      </div>{# fin liens desktop #}
+
+      {# ── BARRE DE RECHERCHE (desktop) ── #}
+      <div class="hidden lg:flex flex-1 mx-3">
+        <div class="nav-search-wrap w-full" style="max-width:380px;">
+          {# Lucide : Search #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8898AA"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               style="flex-shrink:0;">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search"
+                 id="nav-search-input"
+                 class="nav-search-input ml-2"
+                 placeholder="Rechercher un produit…"
+                 onkeydown="if(event.key==='Enter') navSearch()"
+                 aria-label="Rechercher" />
+          <button onclick="navSearch()"
+                  class="flex-shrink-0 ml-1 p-1 rounded hover:bg-brand-50 transition-colors"
+                  aria-label="Lancer la recherche">
+            {# Lucide : ArrowRight #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {# ── ACTIONS DROITE (desktop) ── #}
+      <div class="hidden lg:flex items-center gap-1 flex-shrink-0 ml-auto">
+
+        {# ── Compte (connecté) ou Connexion/Inscription (non connecté) ── #}
+        {% if user.is_authenticated %}
+
+        {# Compte ▼ — dropdown profil #}
+        <div class="nav-dropdown-wrap">
+          <button class="nav-link" aria-haspopup="true" aria-expanded="false">
+            {# Lucide : UserCircle #}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            {# Prénom ou username tronqué à 12 chars pour garder la navbar compacte #}
+            {{ user.prenom|default:user.username|truncatechars:12 }}
+            {# Lucide : ChevronDown #}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="nav-dropdown-menu align-right" role="menu"
+               style="min-width:200px;">
+
+            {# En-tête avec info utilisateur #}
+            <div style="padding:0.625rem 0.75rem 0.5rem;border-bottom:1px solid #E2E8F0;margin-bottom:0.25rem;">
+              <p style="font-size:0.8125rem;font-weight:600;color:#0F1923;font-family:'Poppins',sans-serif;">
+                {{ user.get_full_name|default:user.username }}
+              </p>
+              <p style="font-size:0.75rem;color:#8898AA;font-family:'Poppins',sans-serif;margin-top:1px;">
+                {{ user.email }}
+              </p>
+            </div>
+
+            {# Profil #}
+            <a href="{% url 'users:profil' %}" class="nav-dd-item" role="menuitem">
+              {# Lucide : User #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Mon profil
+            </a>
+
+            {# Mes commandes (uniquement pour les acheteurs, pas les admins/vendeurs) #}
+            {% if not user.is_staff %}
+            <a href="{% url 'orders:historique' %}" class="nav-dd-item" role="menuitem">
+              {# Lucide : ShoppingBag #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              Mes commandes
+            </a>
+            {% endif %}
+
+            {# Dashboard admin (uniquement pour le staff) #}
+            {% if user.is_staff %}
+            <a href="{% url 'products:admin_dashboard' %}" class="nav-dd-item" role="menuitem"
+               style="color:#1E3A8A;font-weight:600;">
+              {# Lucide : LayoutDashboard #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
+                <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+              </svg>
+              Administration
+            </a>
+            <div class="nav-dd-divider"></div>
+            {% endif %}
+
+            {# Séparateur avant déconnexion #}
+            {% if not user.is_staff %}<div class="nav-dd-divider"></div>{% endif %}
+
+            {# Déconnexion #}
+            <a href="{% url 'users:deconnexion' %}" class="nav-dd-item danger" role="menuitem">
+              {# Lucide : LogOut #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Déconnexion
+            </a>
+          </div>
+        </div>
+
+        {% else %}
+
+        {# Non connecté : Connexion + Inscription #}
+        <a href="{% url 'users:connexion' %}" class="nav-btn-login">
+          {# Lucide : LogIn #}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:middle;margin-right:4px;">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Connexion
+        </a>
+        <a href="{% url 'users:inscription' %}" class="nav-btn-register">
+          {# Lucide : UserPlus #}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:middle;margin-right:4px;">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          S'inscrire
+        </a>
+
+        {% endif %}
+
+        {# ── Panier ──
+           Visible pour tous (connecté ou non).
+           Caché pour les admins/vendeurs qui ne font pas d'achats. #}
+        {% if not user.is_staff %}
+        <a href="{% url 'cart:panier' %}"
+           class="nav-icon-btn relative"
+           style="width:auto;padding:0 0.625rem;gap:0.375rem;border-radius:0.5rem;"
+           aria-label="Panier ({{ cart_count }} article{% if cart_count != 1 %}s{% endif %})">
+          {# Lucide : ShoppingCart #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+          </svg>
+          {# Badge avec le nombre d'articles — masqué si panier vide #}
+          {% if cart_count > 0 %}
+          <span class="nav-badge" id="cart-badge">{{ cart_count }}</span>
+          {% else %}
+          <span class="nav-badge" id="cart-badge" style="display:none;">0</span>
+          {% endif %}
+          <span style="font-size:0.8125rem;font-weight:600;font-family:'Poppins',sans-serif;">
+            Panier
+          </span>
+        </a>
+        {% endif %}
+
+        {# ── Sélecteur de langue ──
+           Placeholder fonctionnel — à brancher sur i18n Django si besoin. #}
+        <div class="nav-dropdown-wrap">
+          <button class="nav-icon-btn" title="Langue" aria-label="Changer la langue">
+            {# Lucide : Globe #}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <div class="nav-dropdown-menu align-right" style="min-width:140px;">
+            <a href="#" class="nav-dd-item" style="font-weight:600;color:#0F1923;">🇫🇷 Français</a>
+            <a href="#" class="nav-dd-item" style="color:#8898AA;">🇬🇧 English</a>
+          </div>
+        </div>
+
+        {# ── Toggle Dark Mode ──
+           La fonctionnalité dark mode sera implémentée ultérieurement.
+           L'icône bascule entre soleil (mode clair) et lune (mode sombre). #}
+        <button class="nav-icon-btn"
+                onclick="toggleDarkMode()"
+                id="dark-mode-btn"
+                title="Mode sombre"
+                aria-label="Basculer le mode sombre">
+          {# Lucide : Moon (affiché en mode clair) #}
+          <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+          {# Lucide : Sun (affiché en mode sombre) — caché par défaut #}
+          <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               style="display:none;">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+
+        {# ── Aide ▼ (dropdown) ── #}
+        <div class="nav-dropdown-wrap">
+          <button class="nav-link" aria-haspopup="true" aria-expanded="false">
+            {# Lucide : HelpCircle #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Aide
+            {# Lucide : ChevronDown #}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="nav-dropdown-menu align-right" style="min-width:200px;" role="menu">
+
+            {# Accès à l'assistance #}
+            <a href="#" class="nav-dd-item" role="menuitem">
+              {# Lucide : HeadphonesIcon #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 18v-6a9 9 0 0118 0v6"/>
+                <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/>
+                <path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+              </svg>
+              Accès à l'assistance
+            </a>
+
+            {# FAQ #}
+            <a href="#" class="nav-dd-item" role="menuitem">
+              {# Lucide : BookOpen #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+              </svg>
+              FAQ
+            </a>
+
+            {# Chat en ligne #}
+            <a href="{% if user.is_authenticated %}/chat/{% else %}{% url 'users:connexion' %}{% endif %}"
+               class="nav-dd-item" role="menuitem">
+              {# Lucide : MessageCircle #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              Chat en ligne
+            </a>
+
+            <div class="nav-dd-divider"></div>
+
+            {# Nous contacter #}
+            <a href="#" class="nav-dd-item" role="menuitem">
+              {# Lucide : Mail #}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              Nous contacter
+            </a>
+          </div>
+        </div>
+
+      </div>{# fin actions droite desktop #}
+
+      {# ── BURGER (mobile uniquement) ──
+         Apparaît sur les écrans < lg (1024px).
+         Toggle le menu mobile via JS. #}
+      <button class="lg:hidden ml-auto nav-icon-btn"
+              onclick="toggleMobileMenu()"
+              id="burger-btn"
+              aria-label="Menu"
+              aria-expanded="false">
+        {# Lucide : Menu #}
+        <svg id="burger-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        {# Lucide : X (affiché quand menu ouvert) #}
+        <svg id="burger-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             style="display:none;">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
+
+    </nav>
+  </div>{# fin .container #}
+
+  {# ════════════════════════════════════════
+     MENU MOBILE
+     Tiroir vertical qui s'affiche sous la navbar sur mobile.
+     Contient tous les liens de navigation + recherche.
+  ════════════════════════════════════════ #}
+  <div id="mobile-menu" class="mobile-menu" role="navigation" aria-label="Menu mobile">
+
+    {# Barre de recherche mobile #}
+    <div style="padding:0.25rem 0.25rem 0.5rem;">
+      <div class="nav-search-wrap" style="height:40px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8898AA"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search"
+               id="nav-search-mobile"
+               class="nav-search-input ml-2 flex-1"
+               placeholder="Rechercher…"
+               onkeydown="if(event.key==='Enter') navSearchMobile()"
+               style="width:100%;" />
+      </div>
     </div>
 
-    <!-- Theme toggle (visible partout : mobile ET desktop) -->
-    <button class="theme-btn" onclick="toggleTheme()" title="Basculer le thème" aria-label="Thème" style="flex-shrink:0;">
-      <span data-theme-icon>🌙</span>
-    </button>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.querySelectorAll('[data-theme-icon]').forEach(el => {
-          el.textContent = isDark ? '☀️' : '🌙';
-        });
-      });
-    </script>
+    <div class="mobile-divider"></div>
 
-    <!-- Actions desktop (cachées sur mobile) -->
-    <div class="nav-desktop-actions" style="display:flex;align-items:center;gap:0.25rem;flex-shrink:0;">
-
-      {% if user.is_authenticated %}
-
-      <!-- Compte dropdown -->
-      <div style="position:relative;" id="profile-menu-container">
-        <button onclick="toggleMenu('profile-dropdown')" class="nav-action">
-          <span class="nav-action-label">Bonjour, {{ user.prenom|default:user.username }}</span>
-          <span class="nav-action-main">Compte ▾</span>
-        </button>
-        <div id="profile-dropdown" class="nav-dropdown" style="display:none;">
-          <div class="nav-dd-header">
-            <p style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">{{ user.prenom|default:user.username }} {{ user.nom|default:'' }}</p>
-            <p style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">{{ user.email }}</p>
-          </div>
-          {% if user.is_staff %}
-          <a href="{% url 'users:profil' %}" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            Mon profil
-          </a>
-          <a href="/chat/" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            Messages
-          </a>
-          <div class="nav-dd-divider"></div>
-          <a href="{% url 'products:admin_dashboard' %}" class="nav-dd-item highlight">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-            Administration
-          </a>
-          <a href="{% url 'products:admin_dashboard' %}#ajouter-produit" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Ajouter un produit
-          </a>
-          {% else %}
-          <a href="{% url 'users:profil' %}" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            Mon profil
-          </a>
-          <a href="{% url 'orders:historique' %}" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3H8l-2 4h12l-2-4z"/></svg>
-            Mes commandes
-          </a>
-          <a href="{% url 'users:ajouter_adresse' %}" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Mes adresses
-          </a>
-          <a href="/chat/" class="nav-dd-item">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            Messages
-          </a>
-          {% endif %}
-          <div class="nav-dd-divider"></div>
-          <a href="{% url 'users:deconnexion' %}" class="nav-dd-item danger">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-            Déconnexion
-          </a>
-        </div>
-      </div>
-
-      <!-- Notifications -->
-      <div style="position:relative;" id="notif-menu-container">
-        <button onclick="toggleMenu('notif-dropdown')" class="nav-action" style="padding:5px 9px;">
-          <span style="position:relative;display:flex;align-items:center;justify-content:center;">
-            <svg width="22" height="22" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
-            {% if notif_count > 0 %}
-            <span id="notif-badge" class="notif-badge">{{ notif_count }}</span>
-            {% else %}
-            <span id="notif-badge" class="notif-badge" style="display:none;"></span>
-            {% endif %}
-          </span>
-        </button>
-        <div id="notif-dropdown" class="nav-dropdown" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;" class="nav-dd-header">
-            <span style="font-size:0.875rem;font-weight:700;color:var(--text-primary);">Notifications</span>
-            <button onclick="Notifications&&Notifications.toutMarquerLu()" style="font-size:0.75rem;color:var(--brand-500);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;">Tout lire</button>
-          </div>
-          <div id="notif-list" style="max-height:260px;overflow-y:auto;">
-            <p style="font-size:0.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;font-family:'Plus Jakarta Sans',sans-serif;">Chargement…</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panier -->
-      {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
-      <a href="{% url 'cart:panier' %}" class="nav-cart">
-        <span style="position:relative;display:flex;flex-direction:column;align-items:center;">
-          <span id="cart-badge" class="nav-cart-count">{{ cart_count|default:"0" }}</span>
-          <svg width="26" height="26" fill="none" stroke="white" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-          </svg>
-        </span>
-        <span class="nav-cart-label">Panier</span>
-      </a>
-      {% endif %}
-
-      {% else %}
-
-      <!-- Non connecté -->
-      <a href="{% url 'users:connexion' %}" class="nav-action">
-        <span class="nav-action-label">Bonjour, visiteur</span>
-        <span class="nav-action-main">Connexion</span>
-      </a>
-      <a href="{% url 'users:inscription' %}"
-        style="padding:6px 14px;border-radius:8px;font-size:0.8125rem;font-weight:700;color:white;border:1.5px solid rgba(255,255,255,.4);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;margin-left:4px;transition:all 150ms;background:rgba(255,255,255,.06);"
-        onmouseover="this.style.borderColor='white';this.style.background='rgba(255,255,255,.12)'"
-        onmouseout="this.style.borderColor='rgba(255,255,255,.4)';this.style.background='rgba(255,255,255,.06)'">
-        S'inscrire
-      </a>
-
-      {% endif %}
-
-    </div>
-
-    <!-- Burger (mobile uniquement) -->
-    <button onclick="toggleMobileMenu()" class="burger-btn" aria-label="Menu">
-      <svg width="20" height="20" fill="none" stroke="white" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    {# Navigation principale #}
+    <p class="mobile-section-title">Navigation</p>
+    <a href="{% url 'products:accueil' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
-    </button>
-  </div>
+      Accueil
+    </a>
+    <a href="{% url 'products:liste' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      Catalogue
+    </a>
+    <a href="{% url 'products:liste' %}?promo=true" class="mobile-link accent">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="5" x2="5" y2="19"/>
+        <circle cx="6.5" cy="6.5" r="2.5"/>
+        <circle cx="17.5" cy="17.5" r="2.5"/>
+      </svg>
+      Promotions
+    </a>
 
-  <!-- ══ BARRE SECONDAIRE (desktop) ══ -->
-  <nav class="navbar-bottom nav-bar2">
-    <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;height:42px;gap:0.25rem;">
+    {# Catégories mobile #}
+    {% if categories %}
+    <div class="mobile-divider"></div>
+    <p class="mobile-section-title">Catégories</p>
+    {% for cat in categories %}
+    <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+        <line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+      {{ cat.nom }}
+    </a>
+    {% endfor %}
+    {% endif %}
 
-      <a href="{% url 'products:accueil' %}" class="nav-link">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Accueil
-      </a>
+    <div class="mobile-divider"></div>
 
-      <!-- Catalogue dropdown -->
-      <div style="position:relative;" id="catalogue-container">
-        <button onclick="toggleMenu('catalogue-dropdown')" class="nav-link" style="gap:6px;background:none;border:1px solid transparent;cursor:pointer;"
-          onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='white'"
-          onmouseout="this.style.borderColor='transparent';this.style.color='rgba(255,255,255,.8)'">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          Catalogue ▾
-        </button>
-        <div id="catalogue-dropdown" class="nav-dropdown" style="display:none;">
-          <a href="{% url 'products:liste' %}" class="nav-dd-item" style="font-weight:700;color:var(--text-primary);">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-            Tous les produits
-          </a>
-          <div class="nav-dd-divider"></div>
-          {% for cat in categories %}
-          <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="nav-dd-item">{{ cat.nom }}</a>
-          {% endfor %}
-          <div class="nav-dd-divider"></div>
-          <a href="{% url 'products:liste' %}?promo=true" class="nav-dd-item highlight">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
-            Promotions
-          </a>
-        </div>
-      </div>
-
-      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="nav-link">Nouveautés</a>
-      <a href="{% url 'products:liste' %}?promo=true" class="nav-link highlight">🔥 Promos</a>
-      <a href="{% url 'products:liste' %}?en_vedette=true" class="nav-link">En vedette</a>
-
-      {% if user.is_authenticated and not user.is_staff %}
-      <a href="{% url 'orders:historique' %}" class="nav-link">Mes commandes</a>
-      <a href="/chat/" class="nav-link">Messages</a>
-      {% elif user.is_staff %}
-      <a href="/chat/" class="nav-link">Messages</a>
-      {% endif %}
-
-      {% if user.is_staff and request.resolver_match.url_name != 'admin_dashboard' %}
-      <div style="margin-left:auto;">
-        <a href="{% url 'products:admin_dashboard' %}" class="nav-link highlight">⚙ Dashboard Admin</a>
-      </div>
-      {% endif %}
-    </div>
-  </nav>
-
-  <!-- ══ MENU MOBILE ══ -->
-  <div id="mobile-menu" class="mobile-menu" style="display:none;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.25rem;margin-bottom:0.5rem;">
-      <a href="{% url 'products:accueil' %}" class="mobile-link"> Accueil</a>
-      <a href="{% url 'products:liste' %}" class="mobile-link"> Catalogue</a>
-      <a href="{% url 'products:liste' %}?ordering=-date_creation" class="mobile-link"> Nouveautés</a>
-      <a href="{% url 'products:liste' %}?promo=true" class="mobile-link special"> Promos</a>
-    </div>
-    <div style="height:1px;background:rgba(255,255,255,.08);margin:0.5rem 0;"></div>
+    {# Compte mobile #}
     {% if user.is_authenticated %}
+    <p class="mobile-section-title">Mon compte</p>
+    <a href="{% url 'users:profil' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      Mon profil
+    </a>
+    {% if not user.is_staff %}
+    <a href="{% url 'orders:historique' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Mes commandes
+    </a>
+    <a href="{% url 'cart:panier' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+      </svg>
+      Panier {% if cart_count > 0 %}<span class="nav-badge" style="position:static;margin-left:4px;border:none;">{{ cart_count }}</span>{% endif %}
+    </a>
+    {% endif %}
     {% if user.is_staff %}
-    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
-    <a href="/chat/" class="mobile-link">💬 Messages</a>
-    {% if request.resolver_match.url_name != 'admin_dashboard' %}
-    <a href="{% url 'products:admin_dashboard' %}" class="mobile-link special">⚙️ Administration</a>
-    <a href="{% url 'products:admin_dashboard' %}#ajouter-produit" class="mobile-link special">➕ Ajouter un produit</a>
+    <a href="{% url 'products:admin_dashboard' %}" class="mobile-link" style="color:#1E3A8A;font-weight:600;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
+        <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+      </svg>
+      Administration
+    </a>
     {% endif %}
-    {% elif not user.is_admin and not user.is_vendeur %}
-    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
-    <a href="{% url 'cart:panier' %}" class="mobile-link">🛒 Panier{% if cart_count > 0 %} ({{ cart_count }}){% endif %}</a>
-    <a href="{% url 'orders:historique' %}" class="mobile-link">📋 Mes commandes</a>
-    <a href="/chat/" class="mobile-link">💬 Messages</a>
+    <div class="mobile-divider"></div>
+    <a href="{% url 'users:deconnexion' %}" class="mobile-link danger">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Déconnexion
+    </a>
     {% else %}
-    <a href="{% url 'users:profil' %}" class="mobile-link">👤 Mon profil</a>
+    {# Non connecté — mobile #}
+    <p class="mobile-section-title">Compte</p>
+    <a href="{% url 'users:connexion' %}" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Connexion
+    </a>
+    <a href="{% url 'users:inscription' %}" class="mobile-link accent">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <line x1="19" y1="8" x2="19" y2="14"/>
+        <line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+      S'inscrire
+    </a>
     {% endif %}
-    <div style="height:1px;background:rgba(255,255,255,.08);margin:0.5rem 0;"></div>
-    <a href="{% url 'users:deconnexion' %}" class="mobile-link danger">🚪 Déconnexion</a>
-    {% else %}
-    <a href="{% url 'users:connexion' %}" class="mobile-link">🔑 Connexion</a>
-    <a href="{% url 'users:inscription' %}" class="mobile-link" style="color:#F97316;font-weight:600;">✨ Créer un compte</a>
-    {% endif %}
-  </div>
+
+    {# Aide mobile #}
+    <div class="mobile-divider"></div>
+    <p class="mobile-section-title">Aide</p>
+    <a href="#" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 18v-6a9 9 0 0118 0v6"/>
+        <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/>
+        <path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+      </svg>
+      Assistance
+    </a>
+    <a href="#" class="mobile-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      FAQ
+    </a>
+
+  </div>{# fin #mobile-menu #}
 
 </header>
 
+{# ════════════════════════════════════════
+   SCRIPTS NAVBAR
+════════════════════════════════════════ #}
 <script>
-function doSearch() {
-  const q   = (document.getElementById('search-input')?.value || '').trim();
-  const cat = document.getElementById('search-cat')?.value || '';
-  if (!q && !cat) return;
-  let url = '/produits/?search=' + encodeURIComponent(q);
-  if (cat) url += '&categorie=' + encodeURIComponent(cat);
-  window.location.href = url;
-}
+  // ── Ombre navbar au scroll ──
+  // Ajoute la classe .scrolled quand l'utilisateur scroll vers le bas,
+  // ce qui déclenche l'ombre définie dans le CSS.
+  (function() {
+    const navbar = document.getElementById('main-navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true }); // passive:true améliore les performances de scroll
+  })();
 
-// Unified dropdown toggle
-function toggleMenu(id) {
-  const dd = document.getElementById(id);
-  const isOpen = dd && dd.style.display !== 'none';
-  // Close all dropdowns
-  ['catalogue-dropdown','profile-dropdown','notif-dropdown'].forEach(i => {
-    const el = document.getElementById(i);
-    if (el) el.style.display = 'none';
-  });
-  if (!isOpen && dd) dd.style.display = 'block';
-}
-
-function toggleMobileMenu() {
-  const m = document.getElementById('mobile-menu');
-  m.style.display = m.style.display === 'none' ? 'block' : 'none';
-}
-
-// Close on outside click
-document.addEventListener('click', e => {
-  const containers = ['catalogue-container','profile-menu-container','notif-menu-container'];
-  containers.forEach(cid => {
-    const c = document.getElementById(cid);
-    const dd = c?.querySelector('.nav-dropdown');
-    if (dd && !c.contains(e.target)) dd.style.display = 'none';
-  });
-  const mob = document.getElementById('mobile-menu');
-  const burger = document.querySelector('.burger-btn');
-  if (mob && burger && !mob.contains(e.target) && !burger.contains(e.target)) {
-    mob.style.display = 'none';
+  // ── Recherche desktop ──
+  function navSearch() {
+    const q = document.getElementById('nav-search-input')?.value.trim();
+    if (q) window.location.href = '/produits/?search=' + encodeURIComponent(q);
   }
-});
 
-// Load notifications
-async function loadNotifs() {
-  const list = document.getElementById('notif-list');
-  if (!list) return;
-  const icons = { commande:'📦', avis:'⭐', stock:'⚠️', systeme:'ℹ️' };
-  try {
-    const raw  = await API.get('/api/notifications/?page_size=8', { silentError: true });
-    const data = raw?.results || raw || [];
-    if (!data.length) {
-      list.innerHTML = '<p style="font-size:.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;">Aucune notification</p>';
-      return;
+  // ── Recherche mobile ──
+  function navSearchMobile() {
+    const q = document.getElementById('nav-search-mobile')?.value.trim();
+    if (q) window.location.href = '/produits/?search=' + encodeURIComponent(q);
+  }
+
+  // ── Toggle menu mobile ──
+  // Gère l'ouverture/fermeture du tiroir + swap des icônes burger/close.
+  function toggleMobileMenu() {
+    const menu       = document.getElementById('mobile-menu');
+    const burgerBtn  = document.getElementById('burger-btn');
+    const iconOpen   = document.getElementById('burger-icon-open');
+    const iconClose  = document.getElementById('burger-icon-close');
+    const isOpen     = menu.classList.contains('open');
+
+    menu.classList.toggle('open', !isOpen);
+    burgerBtn.setAttribute('aria-expanded', String(!isOpen));
+
+    // Swap des icônes burger ↔ croix
+    iconOpen.style.display  = isOpen ? 'block' : 'none';
+    iconClose.style.display = isOpen ? 'none'  : 'block';
+  }
+
+  // Fermer le menu mobile en cliquant en dehors
+  document.addEventListener('click', function(e) {
+    const menu   = document.getElementById('mobile-menu');
+    const burger = document.getElementById('burger-btn');
+    const navbar = document.getElementById('main-navbar');
+    if (menu.classList.contains('open') && !navbar.contains(e.target)) {
+      menu.classList.remove('open');
+      document.getElementById('burger-icon-open').style.display  = 'block';
+      document.getElementById('burger-icon-close').style.display = 'none';
+      burger.setAttribute('aria-expanded', 'false');
     }
-    list.innerHTML = data.map(n => `
-      <div onclick="Notifications&&Notifications.marquerLue(${n.id});${n.lien?`window.location.href='${n.lien}'`:''}"
-        style="display:flex;gap:10px;padding:.625rem .875rem;border-bottom:1px solid var(--border);cursor:pointer;background:${!n.is_read?'var(--brand-50)':'transparent'};"
-        onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='${!n.is_read?'var(--brand-50)':'transparent'}'">
-        <span style="font-size:1rem;flex-shrink:0;margin-top:2px;">${icons[n.type_notif]||'ℹ️'}</span>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:.8rem;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.titre}</p>
-          <p style="font-size:.7rem;color:var(--text-muted);margin-top:2px;line-height:1.4;">${n.message}</p>
-        </div>
-        ${!n.is_read?'<div style="width:7px;height:7px;border-radius:50%;background:#F97316;flex-shrink:0;margin-top:4px;"></div>':''}
-      </div>`).join('');
-  } catch(e) {
-    list.innerHTML = '<p style="font-size:.75rem;text-align:center;color:var(--text-muted);padding:1.5rem 0;">Erreur de chargement</p>';
-  }
-}
+  });
 
-// Load notifs when dropdown opens
-document.getElementById('notif-menu-container')?.addEventListener('click', function() {
-  setTimeout(loadNotifs, 50);
-});
+  // ── Dark Mode toggle ──
+  // Bascule la classe .dark sur <html> et sauvegarde en localStorage.
+  // L'icône lune/soleil est swappée selon l'état.
+  function toggleDarkMode() {
+    const html     = document.documentElement;
+    const isDark   = html.classList.contains('dark');
+    const iconMoon = document.getElementById('icon-moon');
+    const iconSun  = document.getElementById('icon-sun');
+
+    html.classList.toggle('dark', !isDark);
+    localStorage.setItem('hooyia-theme', isDark ? 'light' : 'dark');
+
+    // Swap icône lune ↔ soleil
+    iconMoon.style.display = isDark ? 'block' : 'none';
+    iconSun.style.display  = isDark ? 'none'  : 'block';
+  }
+
+  // Restaurer l'icône dark mode selon la préférence sauvegardée
+  (function() {
+    const isDark   = document.documentElement.classList.contains('dark');
+    const iconMoon = document.getElementById('icon-moon');
+    const iconSun  = document.getElementById('icon-sun');
+    if (isDark) {
+      iconMoon.style.display = 'none';
+      iconSun.style.display  = 'block';
+    }
+  })();
 </script>

@@ -1,175 +1,334 @@
 {% load static %}
+{# ═══════════════════════════════════════════════════════════════
+   HooYia Market — base.html
+   Template de base hérité par TOUS les templates du projet.
+
+   STRUCTURE :
+     <head>
+       - Meta, titre, description (blocs surchargeables)
+       - Poppins via Google Fonts (preconnect pour la perf)
+       - tailwind.css (build local — pas de CDN)
+       - custom.css (tokens, boutons, composants)
+       - block extra_head (CSS/meta spécifiques à une page)
+     <body>
+       - Navbar  → partials/navbar.html
+       - Flash messages Django (auto-dismiss 4.5s)
+       - block content (contenu de chaque page)
+       - Footer  → partials/footer.html
+       - Scripts globaux (api.js, notifications.js)
+       - Modal de confirmation globale (showConfirm())
+       - block extra_scripts (JS spécifiques à une page)
+
+   BLOCS DISPONIBLES POUR LES PAGES ENFANTS :
+     {% block title %}          — Titre de l'onglet
+     {% block meta_description %}— Meta description SEO
+     {% block extra_head %}     — CSS ou meta supplémentaires
+     {% block navbar %}         — Remplacer la navbar si besoin
+     {% block main_class %}     — Classes CSS sur la balise <main>
+     {% block content %}        — Contenu principal de la page
+     {% block footer %}         — Remplacer le footer si besoin
+     {% block extra_scripts %}  — JS supplémentaires en fin de body
+#}
 <!DOCTYPE html>
-<html lang="fr" data-theme="light" class="scroll-smooth">
+<html lang="fr" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}HooYia Market{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}HooYia Market — Électronique & Informatique au meilleur prix{% endblock %}" />
 
-  <!-- Fonts -->
+  {# ── Titre de l'onglet — chaque page surcharge ce bloc ── #}
+  <title>{% block title %}HooYia Market{% endblock %}</title>
+
+  {# ── Meta description — important pour le SEO ── #}
+  <meta name="description" content="{% block meta_description %}HooYia Market — Électronique & Informatique au meilleur prix au Cameroun{% endblock %}" />
+
+  {# ── Favicon ── #}
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}" />
+
+  {# ── Google Fonts : Poppins uniquement
+       preconnect établit la connexion DNS en avance → chargement plus rapide
+       On charge uniquement les graisses utilisées : 400, 500, 600, 700, 800
+       display=swap : le texte s'affiche en police système pendant le chargement ── #}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50:  'var(--brand-50)',
-              100: 'var(--brand-100)',
-              200: 'var(--brand-200)',
-              300: 'var(--brand-300)',
-              400: 'var(--brand-400)',
-              500: 'var(--brand-500)',
-              600: 'var(--brand-600)',
-            },
-            accent: {
-              400: '#fb923c',
-              500: '#F97316',
-              600: '#ea6000',
-            },
-          },
-          fontFamily: {
-            display: ['Sora', 'system-ui', 'sans-serif'],
-            body:    ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono:    ['"JetBrains Mono"', 'monospace'],
-          },
-        },
-      },
-    }
-  </script>
+  {# ── Tailwind CSS — build local (généré par npm run tw:build)
+       Ce fichier est produit par : npx tailwindcss -i static/css/tailwind.src.css -o static/css/tailwind.css
+       Il contient uniquement les classes Tailwind réellement utilisées dans les templates (purge auto). ── #}
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" />
 
-  <!-- Custom CSS -->
+  {# ── Custom CSS — tokens, boutons, cartes, composants du design system ── #}
   <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
 
-  <!-- Dark mode init (avant rendu pour éviter le flash) -->
-  <script>
-    (function() {
-      const saved = localStorage.getItem('hooyia-theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = saved || (prefersDark ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-      if (theme === 'dark') document.documentElement.classList.add('dark');
-    })();
-  </script>
-
+  {# ── Bloc pour les CSS ou meta spécifiques à certaines pages
+       Exemple d'utilisation dans une page enfant :
+       {% block extra_head %}
+         <link rel="stylesheet" href="{% static 'css/ma-page.css' %}" />
+       {% endblock %} ── #}
   {% block extra_head %}{% endblock %}
 </head>
 
-<body style="background:var(--bg);color:var(--text-primary);font-family:'Plus Jakarta Sans',sans-serif;" class="min-h-screen flex flex-col antialiased transition-colors duration-200">
+{# ── Body
+   - font-poppins : applique Poppins via la classe Tailwind définie dans tailwind.config.js
+   - antialiased  : rendu des polices plus fin (surtout sur macOS)
+   - min-h-screen + flex flex-col : garantit que le footer est toujours en bas
+   - bg-bg        : fond global #F4F7FC (jamais blanc pur) ── #}
+<body class="font-sans antialiased min-h-screen flex flex-col bg-bg text-ink">
 
-  <!-- NAVBAR -->
-  {% block navbar %}{% include 'partials/navbar.html' %}{% endblock %}
+  {# ══ NAVBAR ══
+     Incluse depuis partials/navbar.html.
+     Le bloc permet à certaines pages (ex: login) de supprimer la navbar :
+     {% block navbar %}{% endblock %} #}
+  {% block navbar %}
+    {% include 'partials/navbar.html' %}
+  {% endblock %}
 
-  <!-- FLASH MESSAGES -->
+  {# ══ FLASH MESSAGES DJANGO ══
+     Affichés en position fixe en haut à droite.
+     Chaque message est auto-dismissed après 4.5s (via JS en bas de page).
+     Les types Django (success, error, warning, info) mappent sur les classes .toast-*
+     définies dans custom.css.
+
+     Types de messages disponibles :
+       messages.success(request, "...")  → bordure verte
+       messages.error(request, "...")    → bordure rouge
+       messages.warning(request, "...")  → bordure jaune
+       messages.info(request, "...")     → bordure bleue #}
   {% if messages %}
-  <div id="django-messages" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+  <div id="flash-container"
+       class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
     {% for message in messages %}
-    <div class="message-toast pointer-events-auto animate-toast-in"
-      style="background:var(--surface);border:1px solid var(--border);border-radius:0.875rem;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;box-shadow:var(--shadow-lg);
-      {% if message.tags == 'success' %}border-left:3px solid #10b981;{% elif message.tags == 'error' %}border-left:3px solid #ef4444;{% elif message.tags == 'warning' %}border-left:3px solid #f59e0b;{% else %}border-left:3px solid var(--brand-500);{% endif %}">
-      <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">
-        {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+    <div class="flash-msg toast pointer-events-auto
+      {# Classe de couleur selon le type du message Django #}
+      {% if message.tags == 'success' %}toast-success
+      {% elif message.tags == 'error' %}toast-error
+      {% elif message.tags == 'warning' %}toast-warning
+      {% else %}toast-info{% endif %}"
+      style="animation: toastIn 0.28s cubic-bezier(0.16,1,0.3,1) both;">
+
+      {# Icône selon le type — reconnaissable d'un coup d'œil #}
+      <span class="text-base flex-shrink-0 mt-0.5">
+        {% if message.tags == 'success' %}
+          {# Coche verte #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        {% elif message.tags == 'error' %}
+          {# Croix rouge #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        {% elif message.tags == 'warning' %}
+          {# Triangle orange #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        {% else %}
+          {# Rond info bleu #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% endif %}
       </span>
-      <p style="font-size:0.8125rem;font-weight:500;color:var(--text-primary);flex:1;line-height:1.5;">{{ message }}</p>
-      <button onclick="this.closest('.message-toast').remove()" style="opacity:.4;background:none;border:none;cursor:pointer;color:var(--text-primary);font-size:0.75rem;padding:0;line-height:1;flex-shrink:0;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='.4'">✕</button>
+
+      {# Texte du message #}
+      <p class="flex-1 text-sm font-medium text-ink leading-snug">{{ message }}</p>
+
+      {# Bouton de fermeture manuelle #}
+      <button
+        onclick="this.closest('.flash-msg').remove()"
+        class="flex-shrink-0 opacity-40 hover:opacity-80 transition-opacity p-0.5 rounded"
+        aria-label="Fermer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <!-- MAIN CONTENT -->
+  {# ══ CONTENU PRINCIPAL ══
+     flex-1 : prend tout l'espace vertical disponible entre navbar et footer.
+     block main_class : permet aux pages d'ajouter des classes sur <main>
+     (ex: class="bg-white" pour une page sans fond gris). #}
   <main class="flex-1 {% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- FOOTER -->
-  {% block footer %}{% include 'partials/footer.html' %}{% endblock %}
+  {# ══ FOOTER ══ #}
+  {% block footer %}
+    {% include 'partials/footer.html' %}
+  {% endblock %}
 
-  <!-- TOAST CONTAINER -->
-  {% include 'partials/toast.html' %}
-
-  <!-- SCRIPTS -->
+  {# ══ SCRIPTS GLOBAUX ══
+     api.js       : fonctions utilitaires AJAX (GET, POST, PATCH, DELETE)
+                    utilisées dans tous les templates pour les appels API REST
+     notifications.js : polling des notifications non lues (badge navbar)
+                        chargé uniquement si l'utilisateur est connecté #}
   <script src="{% static 'js/api.js' %}"></script>
   {% if user.is_authenticated %}
   <script src="{% static 'js/notifications.js' %}"></script>
   {% endif %}
 
-  <!-- Auto-dismiss flash -->
+  {# ══ AUTO-DISMISS DES FLASH MESSAGES ══
+     Chaque message disparaît après 4.5s.
+     Un délai de 300ms est ajouté entre chaque message (i * 300)
+     pour éviter qu'ils disparaissent tous en même temps. #}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.message-toast').forEach((el, i) => {
+      document.querySelectorAll('.flash-msg').forEach((el, i) => {
         setTimeout(() => {
+          // Animation de sortie vers la droite
           el.style.animation = 'toastOut 0.25s ease forwards';
+          // Suppression du DOM après la fin de l'animation
           setTimeout(() => el.remove(), 250);
         }, 4500 + i * 300);
       });
     });
+  </script>
 
-    // Dark mode toggle global
-    window.toggleTheme = function() {
-      const html = document.documentElement;
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      html.classList.toggle('dark', !isDark);
-      localStorage.setItem('hooyia-theme', next);
-      // Update all toggle icons
-      document.querySelectorAll('[data-theme-icon]').forEach(el => {
-        el.textContent = isDark ? '🌙' : '☀️';
+  {# ══ MODAL DE CONFIRMATION GLOBALE ══
+     Utilisée partout dans le projet pour les actions destructives
+     (supprimer, annuler une commande, archiver un produit...).
+
+     API JavaScript — appel depuis n'importe quel template :
+       const ok = await showConfirm({
+         title:       'Supprimer ce produit ?',
+         body:        'Cette action est irréversible.',
+         confirmText: 'Supprimer',
+         type:        'danger'   // 'danger' | 'warning' | 'info'
+       });
+       if (ok) { ... }
+
+     Types disponibles :
+       danger  → fond rouge,  icône 🗑️ — suppressions
+       warning → fond jaune,  icône ⚠️ — actions risquées
+       info    → fond bleu,   icône ℹ️ — confirmations neutres #}
+
+  {# Overlay sombre avec blur derrière la modale #}
+  <div id="g-confirm-overlay"
+       style="display:none;position:fixed;inset:0;z-index:9999;
+              background:rgba(9,23,71,0.5);backdrop-filter:blur(4px);
+              align-items:center;justify-content:center;padding:20px;">
+
+    {# Boîte de dialogue #}
+    <div id="g-confirm-box"
+         style="background:white;border-radius:16px;max-width:400px;width:100%;
+                box-shadow:0 24px 60px rgba(9,23,71,0.2);overflow:hidden;
+                transform:scale(0.94) translateY(10px);opacity:0;
+                transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);">
+
+      {# En-tête colorée selon le type #}
+      <div id="g-confirm-header" style="padding:20px 24px 16px;display:flex;align-items:center;gap:12px;">
+        <div id="g-confirm-icon-wrap"
+             style="width:42px;height:42px;border-radius:10px;display:flex;
+                    align-items:center;justify-content:center;font-size:18px;flex-shrink:0;"></div>
+        <div id="g-confirm-title"
+             style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;line-height:1.3;"></div>
+      </div>
+
+      {# Corps — description de l'action #}
+      <div id="g-confirm-body"
+           style="padding:0 24px 20px;font-size:13px;font-family:'Poppins',sans-serif;
+                  color:#4A5568;line-height:1.6;"></div>
+
+      {# Boutons d'action #}
+      <div style="padding:0 20px 20px;display:flex;gap:8px;justify-content:flex-end;">
+        <button id="g-confirm-cancel"
+                style="padding:9px 18px;border-radius:8px;border:1.5px solid #E2E8F0;
+                       background:white;font-weight:600;font-size:13px;cursor:pointer;
+                       color:#4A5568;font-family:'Poppins',sans-serif;transition:all 150ms;">
+          Annuler
+        </button>
+        <button id="g-confirm-ok"
+                style="padding:9px 20px;border-radius:8px;border:none;font-weight:600;
+                       font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;
+                       transition:all 150ms;color:white;">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * showConfirm() — Modale de confirmation globale
+     *
+     * @param {Object} options
+     * @param {string} options.title       - Titre de la modale
+     * @param {string} options.body        - Description HTML de l'action
+     * @param {string} options.confirmText - Texte du bouton de confirmation
+     * @param {string} options.type        - 'danger' | 'warning' | 'info'
+     * @param {boolean} options.hideCancelBtn - Masquer le bouton Annuler
+     * @returns {Promise<boolean>} true si confirmé, false si annulé
+     */
+    function showConfirm({
+      title       = 'Confirmer',
+      body        = '',
+      confirmText = 'Confirmer',
+      type        = 'danger',
+      hideCancelBtn = false
+    } = {}) {
+      return new Promise(resolve => {
+
+        // Récupération des éléments DOM
+        const overlay   = document.getElementById('g-confirm-overlay');
+        const box       = document.getElementById('g-confirm-box');
+        const iconWrap  = document.getElementById('g-confirm-icon-wrap');
+        const titleEl   = document.getElementById('g-confirm-title');
+        const bodyEl    = document.getElementById('g-confirm-body');
+        const okBtn     = document.getElementById('g-confirm-ok');
+        const cancelBtn = document.getElementById('g-confirm-cancel');
+        const header    = document.getElementById('g-confirm-header');
+
+        // Thèmes visuels selon le type d'action
+        const themes = {
+          danger:  { bg: '#fff5f5', iconBg: '#fee2e2', icon: '🗑️', titleColor: '#991b1b', btnColor: '#ef4444' },
+          warning: { bg: '#fffbeb', iconBg: '#fef3c7', icon: '⚠️', titleColor: '#92400e', btnColor: '#f59e0b' },
+          info:    { bg: '#eff6ff', iconBg: '#dce7fd', icon: 'ℹ️', titleColor: '#0D1F5C', btnColor: '#1E3A8A' },
+        };
+        const t = themes[type] || themes.danger;
+
+        // Application du thème
+        header.style.background    = t.bg;
+        iconWrap.style.background  = t.iconBg;
+        iconWrap.textContent       = t.icon;
+        titleEl.style.color        = t.titleColor;
+        titleEl.textContent        = title;
+        bodyEl.innerHTML           = body;
+        okBtn.textContent          = confirmText;
+        okBtn.style.background     = t.btnColor;
+        okBtn.style.boxShadow      = `0 2px 10px ${t.btnColor}55`;
+        cancelBtn.style.display    = hideCancelBtn ? 'none' : '';
+
+        // Affichage de l'overlay
+        overlay.style.display = 'flex';
+        // Animation d'entrée (léger délai pour que le display:flex soit appliqué)
+        requestAnimationFrame(() => {
+          box.style.transform = 'scale(1) translateY(0)';
+          box.style.opacity   = '1';
+        });
+
+        // Fermeture avec résolution de la promesse
+        function close(result) {
+          box.style.transform = 'scale(0.94) translateY(10px)';
+          box.style.opacity   = '0';
+          setTimeout(() => { overlay.style.display = 'none'; }, 180);
+          // Nettoyage des listeners pour éviter les doublons
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          overlay.removeEventListener('click', onOverlayClick);
+          resolve(result);
+        }
+
+        const onOk           = () => close(true);
+        const onCancel       = () => close(false);
+        // Clic en dehors de la boîte = annulation
+        const onOverlayClick = (e) => { if (e.target === overlay) close(false); };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        overlay.addEventListener('click', onOverlayClick);
       });
     }
   </script>
 
-  <!-- ══ MODAL CONFIRMATION GLOBAL ══ -->
-  <div id="g-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,18,50,.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:20px;">
-    <div id="g-confirm-box" style="background:white;border-radius:18px;max-width:400px;width:100%;box-shadow:0 28px 80px rgba(10,18,50,.25);overflow:hidden;transform:scale(.94) translateY(10px);opacity:0;transition:all .2s cubic-bezier(.34,1.56,.64,1);">
-      <div id="g-confirm-header" style="padding:22px 24px 18px;display:flex;align-items:center;gap:14px;">
-        <div id="g-confirm-icon-wrap" style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;"></div>
-        <div id="g-confirm-title" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;line-height:1.3;"></div>
-      </div>
-      <div id="g-confirm-body" style="padding:0 24px 20px;font-size:13.5px;color:#64748b;line-height:1.6;"></div>
-      <div style="padding:0 20px 20px;display:flex;gap:8px;justify-content:flex-end;">
-        <button id="g-confirm-cancel" style="padding:10px 20px;border-radius:9px;border:1.5px solid #e2e8f8;background:white;font-weight:600;font-size:13px;cursor:pointer;color:#64748b;font-family:DM Sans,sans-serif;transition:all .12s;">Annuler</button>
-        <button id="g-confirm-ok" style="padding:10px 22px;border-radius:9px;border:none;font-weight:600;font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif;transition:all .12s;"></button>
-      </div>
-    </div>
-  </div>
-  <script>
-  function showConfirm({ title='Confirmer', body='', confirmText='Confirmer', type='danger', hideCancelBtn=false }={}) {
-    return new Promise(resolve => {
-      const overlay=document.getElementById('g-confirm-overlay'),box=document.getElementById('g-confirm-box'),
-        iconWrap=document.getElementById('g-confirm-icon-wrap'),titleEl=document.getElementById('g-confirm-title'),
-        bodyEl=document.getElementById('g-confirm-body'),okBtn=document.getElementById('g-confirm-ok'),
-        cancelBtn=document.getElementById('g-confirm-cancel'),header=document.getElementById('g-confirm-header');
-      const T={danger:{bg:'#fff5f5',iconBg:'#fee2e2',icon:'🗑️',tc:'#991b1b',btn:'#ef4444'},
-               warning:{bg:'#fffbeb',iconBg:'#fef3c7',icon:'⚠️',tc:'#92400e',btn:'#f59e0b'},
-               info:{bg:'#eff6ff',iconBg:'#dbeafe',icon:'ℹ️',tc:'#1e3a8a',btn:'#3b82f6'}};
-      const t=T[type]||T.danger;
-      header.style.background=t.bg; iconWrap.style.background=t.iconBg; iconWrap.textContent=t.icon;
-      titleEl.style.color=t.tc; titleEl.textContent=title; bodyEl.innerHTML=body;
-      okBtn.textContent=confirmText; okBtn.style.background=t.btn; okBtn.style.color='white';
-      okBtn.style.boxShadow='0 2px 10px '+t.btn+'55';
-      cancelBtn.style.display=hideCancelBtn?'none':'';
-      overlay.style.display='flex';
-      requestAnimationFrame(()=>{ box.style.transform='scale(1) translateY(0)'; box.style.opacity='1'; });
-      function close(r){ box.style.transform='scale(.94) translateY(10px)'; box.style.opacity='0';
-        setTimeout(()=>{ overlay.style.display='none'; },180);
-        okBtn.removeEventListener('click',onOk); cancelBtn.removeEventListener('click',onCancel);
-        overlay.removeEventListener('click',onBg); resolve(r); }
-      const onOk=()=>close(true), onCancel=()=>close(false), onBg=(e)=>{ if(e.target===overlay) close(false); };
-      okBtn.addEventListener('click',onOk); cancelBtn.addEventListener('click',onCancel);
-      overlay.addEventListener('click',onBg);
-    });
-  }
-  </script>
-
+  {# ── Bloc pour les scripts spécifiques à certaines pages
+     Exemple d'utilisation :
+     {% block extra_scripts %}
+       <script src="{% static 'js/mon-script.js' %}"></script>
+     {% endblock %} #}
   {% block extra_scripts %}{% endblock %}
+
 </body>
 </html>

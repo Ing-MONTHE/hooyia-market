@@ -20,12 +20,13 @@ def est_admin(user):
 def accueil(request):
     """
     Page d'accueil du site.
-    Les produits en vedette sont chargés via JavaScript
-    depuis /api/produits/?en_vedette=true
-    On passe juste les catégories pour le menu.
+
+    Données injectées dans le template :
+      - categories       : catégories racines pour la navbar et le menu
+      - produits_vedette : jusqu'à 8 produits marqués en_vedette=True
+      - nouveaux_arrivages: les 8 produits les plus récents (statut actif)
     """
-    # Les catégories racines (sans parent) pour le menu
-    # Mise en cache 1h car elles changent rarement
+    # ── Catégories racines — mises en cache 1h ──
     categories = cache.get('categories_racines')
     if not categories:
         categories = Categorie.objects.filter(
@@ -34,10 +35,31 @@ def accueil(request):
         )
         cache.set('categories_racines', categories, 3600)
 
+    # ── Produits en vedette (maxi 8) ──
+    # prefetch_related('images') évite les N+1 queries pour les images
+    produits_vedette = (
+        Produit.objects
+        .filter(statut='actif', en_vedette=True)
+        .prefetch_related('images')
+        .select_related('categorie')
+        [:8]
+    )
+
+    # ── Nouveaux arrivages (8 derniers produits actifs) ──
+    nouveaux_arrivages = (
+        Produit.objects
+        .filter(statut='actif')
+        .prefetch_related('images')
+        .select_related('categorie')
+        .order_by('-date_creation')
+        [:8]
+    )
+
     context = {
-        'categories': categories,
-        # Le titre de la page
-        'titre': 'HooYia Market — Électronique & Informatique',
+        'categories':        categories,
+        'produits_vedette':  produits_vedette,
+        'nouveaux_arrivages': nouveaux_arrivages,
+        'titre':             'HooYia Market — Électronique & Informatique',
     }
     return render(request, 'home.html', context)
 
