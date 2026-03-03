@@ -1,5 +1,5 @@
 {% load static %}
-{# ═══════════════════════════════════════════════════════════════
+{% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — partials/footer.html
 
    STRUCTURE :
@@ -24,16 +24,16 @@
    VARIABLES DJANGO UTILISÉES :
      {{ user }}        — état de connexion
      {{ categories }}  — catégories racines pour les liens rapides
-#}
+{% endcomment %}
 
-{# ── Variables de couleur du footer (définies une fois, réutilisées) ──
+{% comment %} ── Variables de couleur du footer (définies une fois, réutilisées) ──
    Fond principal  : #091747 (brand-700 — plus foncé que la navbar)
    Fond barre bas  : #060e30 (encore plus foncé pour la séparation)
    Texte titre     : #ffffff (blanc pur → ratio 18.5:1)
    Texte lien      : #c8d6f0 (bleu très clair → ratio 8.2:1)
    Texte secondaire: #94a8c8 (bleu-gris → ratio 4.8:1)
    Hover lien      : #F97316 (orange → ratio 4.5:1)
-   Bordure         : rgba(255,255,255,0.1) — décoratif uniquement #}
+   Bordure         : rgba(255,255,255,0.1) — décoratif uniquement {% endcomment %}
 
 <style>
   /* ── Footer base ── */
@@ -149,16 +149,16 @@
 
 <footer class="footer">
 
-  {# ════════════════════════════════════════
+  {% comment %} ════════════════════════════════════════
      CORPS PRINCIPAL — 4 colonnes
-  ════════════════════════════════════════ #}
+  ════════════════════════════════════════ {% endcomment %}
   <div class="container" style="padding-top:3.5rem;padding-bottom:2.5rem;">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2.5rem;">
 
       {# ── COLONNE 1 : Brand ── #}
       <div>
-        {# Logo sur fond sombre : le SVG a un fond blanc intégré,
-           on l'encadre dans un conteneur blanc arrondi. #}
+        {% comment %} Logo sur fond sombre : le SVG a un fond blanc intégré,
+           on l'encadre dans un conteneur blanc arrondi. {% endcomment %}
         <a href="{% url 'products:accueil' %}"
            style="display:inline-flex;align-items:center;background:white;
                   border-radius:0.625rem;padding:6px 12px;margin-bottom:1.25rem;
@@ -493,11 +493,11 @@
     </div>
   </div>
 
-  {# ════════════════════════════════════════
+  {% comment %} ════════════════════════════════════════
      BARRE DE BAS
      Fond #060e30 — encore plus foncé que le corps du footer
      pour une séparation visuelle nette sans bordure agressive.
-  ════════════════════════════════════════ #}
+  ════════════════════════════════════════ {% endcomment %}
   <div class="footer-bottom">
     <div class="container"
          style="padding-top:1.125rem;padding-bottom:1.125rem;

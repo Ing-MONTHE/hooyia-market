@@ -1,5 +1,5 @@
 {% load static %}
-{# ═══════════════════════════════════════════════════════════════
+{% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — base.html
    Template de base hérité par TOUS les templates du projet.
 
@@ -20,15 +20,15 @@
        - block extra_scripts (JS spécifiques à une page)
 
    BLOCS DISPONIBLES POUR LES PAGES ENFANTS :
-     {% block title %}          — Titre de l'onglet
-     {% block meta_description %}— Meta description SEO
-     {% block extra_head %}     — CSS ou meta supplémentaires
-     {% block navbar %}         — Remplacer la navbar si besoin
-     {% block main_class %}     — Classes CSS sur la balise <main>
-     {% block content %}        — Contenu principal de la page
-     {% block footer %}         — Remplacer le footer si besoin
-     {% block extra_scripts %}  — JS supplémentaires en fin de body
-#}
+     block title          — Titre de l'onglet
+     block meta_description — Meta description SEO
+     block extra_head     — CSS ou meta supplémentaires
+     block navbar         — Remplacer la navbar si besoin
+     block main_class     — Classes CSS sur la balise <main>
+     block content        — Contenu principal de la page
+     block footer         — Remplacer le footer si besoin
+     block extra_scripts  — JS supplémentaires en fin de body
+{% endcomment %}
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -44,46 +44,46 @@
   {# ── Favicon ── #}
   <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}" />
 
-  {# ── Google Fonts : Poppins uniquement
+  {% comment %} ── Google Fonts : Poppins uniquement
        preconnect établit la connexion DNS en avance → chargement plus rapide
        On charge uniquement les graisses utilisées : 400, 500, 600, 700, 800
-       display=swap : le texte s'affiche en police système pendant le chargement ── #}
+       display=swap : le texte s'affiche en police système pendant le chargement ── {% endcomment %}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  {# ── Tailwind CSS — build local (généré par npm run tw:build)
+  {% comment %} ── Tailwind CSS — build local (généré par npm run tw:build)
        Ce fichier est produit par : npx tailwindcss -i static/css/tailwind.src.css -o static/css/tailwind.css
-       Il contient uniquement les classes Tailwind réellement utilisées dans les templates (purge auto). ── #}
+       Il contient uniquement les classes Tailwind réellement utilisées dans les templates (purge auto). ── {% endcomment %}
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" />
 
   {# ── Custom CSS — tokens, boutons, cartes, composants du design system ── #}
   <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
 
-  {# ── Bloc pour les CSS ou meta spécifiques à certaines pages
+  {% comment %} ── Bloc pour les CSS ou meta spécifiques à certaines pages
        Exemple d'utilisation dans une page enfant :
-       {% block extra_head %}
-         <link rel="stylesheet" href="{% static 'css/ma-page.css' %}" />
-       {% endblock %} ── #}
+       block extra_head
+         <link rel="stylesheet" href="..." />
+       endblock ── {% endcomment %}
   {% block extra_head %}{% endblock %}
 </head>
 
-{# ── Body
+{% comment %} ── Body
    - font-poppins : applique Poppins via la classe Tailwind définie dans tailwind.config.js
    - antialiased  : rendu des polices plus fin (surtout sur macOS)
    - min-h-screen + flex flex-col : garantit que le footer est toujours en bas
-   - bg-bg        : fond global #F4F7FC (jamais blanc pur) ── #}
+   - bg-bg        : fond global #F4F7FC (jamais blanc pur) ── {% endcomment %}
 <body class="font-sans antialiased min-h-screen flex flex-col bg-bg text-ink">
 
-  {# ══ NAVBAR ══
+  {% comment %} ══ NAVBAR ══
      Incluse depuis partials/navbar.html.
      Le bloc permet à certaines pages (ex: login) de supprimer la navbar :
-     {% block navbar %}{% endblock %} #}
+     block navbar / endblock {% endcomment %}
   {% block navbar %}
     {% include 'partials/navbar.html' %}
   {% endblock %}
 
-  {# ══ FLASH MESSAGES DJANGO ══
+  {% comment %} ══ FLASH MESSAGES DJANGO ══
      Affichés en position fixe en haut à droite.
      Chaque message est auto-dismissed après 4.5s (via JS en bas de page).
      Les types Django (success, error, warning, info) mappent sur les classes .toast-*
@@ -93,7 +93,7 @@
        messages.success(request, "...")  → bordure verte
        messages.error(request, "...")    → bordure rouge
        messages.warning(request, "...")  → bordure jaune
-       messages.info(request, "...")     → bordure bleue #}
+       messages.info(request, "...")     → bordure bleue {% endcomment %}
   {% if messages %}
   <div id="flash-container"
        class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
@@ -138,10 +138,10 @@
   </div>
   {% endif %}
 
-  {# ══ CONTENU PRINCIPAL ══
+  {% comment %} ══ CONTENU PRINCIPAL ══
      flex-1 : prend tout l'espace vertical disponible entre navbar et footer.
      block main_class : permet aux pages d'ajouter des classes sur <main>
-     (ex: class="bg-white" pour une page sans fond gris). #}
+     (ex: class="bg-white" pour une page sans fond gris). {% endcomment %}
   <main class="flex-1 {% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>
@@ -151,20 +151,20 @@
     {% include 'partials/footer.html' %}
   {% endblock %}
 
-  {# ══ SCRIPTS GLOBAUX ══
+  {% comment %} ══ SCRIPTS GLOBAUX ══
      api.js       : fonctions utilitaires AJAX (GET, POST, PATCH, DELETE)
                     utilisées dans tous les templates pour les appels API REST
      notifications.js : polling des notifications non lues (badge navbar)
-                        chargé uniquement si l'utilisateur est connecté #}
+                        chargé uniquement si l'utilisateur est connecté {% endcomment %}
   <script src="{% static 'js/api.js' %}"></script>
   {% if user.is_authenticated %}
   <script src="{% static 'js/notifications.js' %}"></script>
   {% endif %}
 
-  {# ══ AUTO-DISMISS DES FLASH MESSAGES ══
+  {% comment %} ══ AUTO-DISMISS DES FLASH MESSAGES ══
      Chaque message disparaît après 4.5s.
      Un délai de 300ms est ajouté entre chaque message (i * 300)
-     pour éviter qu'ils disparaissent tous en même temps. #}
+     pour éviter qu'ils disparaissent tous en même temps. {% endcomment %}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.flash-msg').forEach((el, i) => {
@@ -178,7 +178,7 @@
     });
   </script>
 
-  {# ══ MODAL DE CONFIRMATION GLOBALE ══
+  {% comment %} ══ MODAL DE CONFIRMATION GLOBALE ══
      Utilisée partout dans le projet pour les actions destructives
      (supprimer, annuler une commande, archiver un produit...).
 
@@ -194,7 +194,7 @@
      Types disponibles :
        danger  → fond rouge,  icône 🗑️ — suppressions
        warning → fond jaune,  icône ⚠️ — actions risquées
-       info    → fond bleu,   icône ℹ️ — confirmations neutres #}
+       info    → fond bleu,   icône ℹ️ — confirmations neutres {% endcomment %}
 
   {# Overlay sombre avec blur derrière la modale #}
   <div id="g-confirm-overlay"
@@ -323,11 +323,11 @@
     }
   </script>
 
-  {# ── Bloc pour les scripts spécifiques à certaines pages
+  {% comment %} ── Bloc pour les scripts spécifiques à certaines pages
      Exemple d'utilisation :
-     {% block extra_scripts %}
-       <script src="{% static 'js/mon-script.js' %}"></script>
-     {% endblock %} #}
+     block extra_scripts
+       <script src="..."></script>
+     endblock {% endcomment %}
   {% block extra_scripts %}{% endblock %}
 
 </body>

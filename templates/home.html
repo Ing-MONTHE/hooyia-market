@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{# ═══════════════════════════════════════════════════════════════
+{% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — home.html
 
    SECTIONS :
@@ -13,7 +13,7 @@
      {{ produits_vedette }}   — QuerySet Produit (en_vedette=True, max 8)
      {{ nouveaux_arrivages }} — QuerySet Produit (order -date_creation, max 8)
      {{ categories }}         — QuerySet Categorie (racines)
-#}
+{% endcomment %}
 
 {% block title %}HooYia Market — Électronique & Informatique{% endblock %}
 
@@ -357,12 +357,12 @@
   }
 </style>
 
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    1. HERO
    Fond dégradé bleu marine, texte blanc.
    Contrastes : blanc sur #091747 → 18.5:1 ✓
                 #ffa05e sur fond sombre → 4.5:1 ✓
-════════════════════════════════════════════════════ #}
+════════════════════════════════════════════════════ {% endcomment %}
 <section class="hero">
   {# Éléments décoratifs (cercles en arrière-plan) #}
   <div class="hero-deco"></div>
@@ -449,11 +449,11 @@
 </section>
 
 
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    2. PRODUITS EN VEDETTE
    Grille de 4 (desktop) / 2 (tablette) / 1 (mobile).
    Maxi 8 produits passés par la vue.
-════════════════════════════════════════════════════ #}
+════════════════════════════════════════════════════ {% endcomment %}
 <section style="padding:4rem 0;background:#F4F7FC;">
   <div class="container">
 
@@ -573,11 +573,11 @@
 </section>
 
 
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    3. NOUVEAUX ARRIVAGES
    8 derniers produits actifs, ordonnés par date_creation desc.
    Fond blanc pour alterner avec le fond gris de la section précédente.
-════════════════════════════════════════════════════ #}
+════════════════════════════════════════════════════ {% endcomment %}
 <section style="padding:4rem 0;background:#ffffff;">
   <div class="container">
 
@@ -676,11 +676,11 @@
 </section>
 
 
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    4. CE QU'OFFRE HOOYIA MARKET
    4 cartes valeur, messages attractifs et honnêtes.
    Fond gris clair (#F4F7FC) pour alterner avec le blanc.
-════════════════════════════════════════════════════ #}
+════════════════════════════════════════════════════ {% endcomment %}
 <section style="padding:4rem 0;background:#F4F7FC;">
   <div class="container">
 

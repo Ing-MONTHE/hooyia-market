@@ -1,5 +1,5 @@
 {% load static %}
-{# ═══════════════════════════════════════════════════════════════
+{% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — partials/navbar.html
 
    STRUCTURE DE LA NAVBAR (une seule barre, responsive) :
@@ -29,11 +29,11 @@
    RESPONSIVE :
      Desktop (lg+) : barre complète horizontale
      Mobile (<lg)  : burger menu → tiroir vertical
-#}
+{% endcomment %}
 
-{# ── Style spécifique à la navbar ──
+{% comment %} ── Style spécifique à la navbar ──
    On garde un <style> dédié pour les comportements impossibles
-   avec Tailwind seul (dropdown hover, transitions complexes). #}
+   avec Tailwind seul (dropdown hover, transitions complexes). {% endcomment %}
 <style>
   /* ── Navbar sticky avec ombre subtile ──
      L'ombre n'apparaît que lorsqu'on scroll (géré via JS en bas). */
@@ -252,6 +252,19 @@
     border-color: #ea6000;
   }
 
+  /* ── Responsive navbar ── */
+  .nav-desktop-links,
+  .nav-desktop-search,
+  .nav-desktop-actions { display: none; }
+  .nav-mobile-burger   { display: flex; margin-left: auto; }
+
+  @media (min-width: 1024px) {
+    .nav-desktop-links   { display: flex; align-items: center; gap: 0.125rem; flex-shrink: 0; }
+    .nav-desktop-search  { display: flex; flex: 1; margin: 0 0.75rem; }
+    .nav-desktop-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; margin-left: auto; }
+    .nav-mobile-burger   { display: none; }
+  }
+
   /* ── Menu mobile ── */
   .mobile-menu {
     display: none;
@@ -297,16 +310,16 @@
   }
 </style>
 
-{# ════════════════════════════════════════
+{% comment %} ════════════════════════════════════════
    NAVBAR PRINCIPALE
-════════════════════════════════════════ #}
+════════════════════════════════════════ {% endcomment %}
 <header class="navbar" id="main-navbar">
   <div class="container">
     <nav style="display:flex;align-items:center;height:64px;gap:0.25rem;">
 
-      {# ── LOGO ──
+      {% comment %} ── LOGO ──
          Lien vers l'accueil (même fonctionnalité que le bouton Accueil).
-         Le SVG a un fond blanc donc il s'intègre naturellement dans la navbar blanche. #}
+         Le SVG a un fond blanc donc il s'intègre naturellement dans la navbar blanche. {% endcomment %}
       <a href="{% url 'products:accueil' %}"
          class="flex-shrink-0 mr-2"
          aria-label="HooYia Market — Accueil">
@@ -316,7 +329,7 @@
       </a>
 
       {# ── LIENS DE NAVIGATION (desktop uniquement) ── #}
-      <div class="hidden lg:flex items-center gap-0.5 flex-shrink-0">
+      <div class="nav-desktop-links">
 
         {# Accueil #}
         <a href="{% url 'products:accueil' %}"
@@ -330,9 +343,9 @@
           Accueil
         </a>
 
-        {# ── Catégories (dropdown) ──
+        {% comment %} ── Catégories (dropdown) ──
            Les catégories racines sont injectées via le context processor
-           ou passées directement par les vues dans {{ categories }}. #}
+           ou passées directement par les vues dans {{ categories }}. {% endcomment %}
         <div class="nav-dropdown-wrap">
           <button class="nav-link" aria-haspopup="true" aria-expanded="false">
             {# Lucide : LayoutGrid #}
@@ -403,7 +416,7 @@
       </div>{# fin liens desktop #}
 
       {# ── BARRE DE RECHERCHE (desktop) ── #}
-      <div class="hidden lg:flex flex-1 mx-3">
+      <div class="nav-desktop-search">
         <div class="nav-search-wrap w-full" style="max-width:380px;">
           {# Lucide : Search #}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8898AA"
@@ -432,7 +445,7 @@
       </div>
 
       {# ── ACTIONS DROITE (desktop) ── #}
-      <div class="hidden lg:flex items-center gap-1 flex-shrink-0 ml-auto">
+      <div class="nav-desktop-actions">
 
         {# ── Compte (connecté) ou Connexion/Inscription (non connecté) ── #}
         {% if user.is_authenticated %}
@@ -554,9 +567,9 @@
 
         {% endif %}
 
-        {# ── Panier ──
+        {% comment %} ── Panier ──
            Visible pour tous (connecté ou non).
-           Caché pour les admins/vendeurs qui ne font pas d'achats. #}
+           Caché pour les admins/vendeurs qui ne font pas d'achats. {% endcomment %}
         {% if not user.is_staff %}
         <a href="{% url 'cart:panier' %}"
            class="nav-icon-btn relative"
@@ -580,8 +593,8 @@
         </a>
         {% endif %}
 
-        {# ── Sélecteur de langue ──
-           Placeholder fonctionnel — à brancher sur i18n Django si besoin. #}
+        {% comment %} ── Sélecteur de langue ──
+           Placeholder fonctionnel — à brancher sur i18n Django si besoin. {% endcomment %}
         <div class="nav-dropdown-wrap">
           <button class="nav-icon-btn" title="Langue" aria-label="Changer la langue">
             {# Lucide : Globe #}
@@ -598,9 +611,9 @@
           </div>
         </div>
 
-        {# ── Toggle Dark Mode ──
+        {% comment %} ── Toggle Dark Mode ──
            La fonctionnalité dark mode sera implémentée ultérieurement.
-           L'icône bascule entre soleil (mode clair) et lune (mode sombre). #}
+           L'icône bascule entre soleil (mode clair) et lune (mode sombre). {% endcomment %}
         <button class="nav-icon-btn"
                 onclick="toggleDarkMode()"
                 id="dark-mode-btn"
@@ -696,10 +709,10 @@
 
       </div>{# fin actions droite desktop #}
 
-      {# ── BURGER (mobile uniquement) ──
+      {% comment %} ── BURGER (mobile uniquement) ──
          Apparaît sur les écrans < lg (1024px).
-         Toggle le menu mobile via JS. #}
-      <button class="lg:hidden ml-auto nav-icon-btn"
+         Toggle le menu mobile via JS. {% endcomment %}
+      <button class="nav-mobile-burger nav-icon-btn"
               onclick="toggleMobileMenu()"
               id="burger-btn"
               aria-label="Menu"
@@ -723,11 +736,11 @@
     </nav>
   </div>{# fin .container #}
 
-  {# ════════════════════════════════════════
+  {% comment %} ════════════════════════════════════════
      MENU MOBILE
      Tiroir vertical qui s'affiche sous la navbar sur mobile.
      Contient tous les liens de navigation + recherche.
-  ════════════════════════════════════════ #}
+  ════════════════════════════════════════ {% endcomment %}
   <div id="mobile-menu" class="mobile-menu" role="navigation" aria-label="Menu mobile">
 
     {# Barre de recherche mobile #}
@@ -895,9 +908,9 @@
 
 </header>
 
-{# ════════════════════════════════════════
+{% comment %} ════════════════════════════════════════
    SCRIPTS NAVBAR
-════════════════════════════════════════ #}
+════════════════════════════════════════ {% endcomment %}
 <script>
   // ── Ombre navbar au scroll ──
   // Ajoute la classe .scrolled quand l'utilisateur scroll vers le bas,
