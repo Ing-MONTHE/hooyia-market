@@ -503,18 +503,14 @@ def admin_dashboard(request):
     }
     return render(request, 'admin_dashboard.html', context)
 
-# ──────────────────────────────────────────────────────────────
-# AUTOCOMPLETE RECHERCHE
-# ──────────────────────────────────────────────────────────────
+# ── Autocomplete recherche ──
 from django.http import JsonResponse
 from django.db.models import Q
 
 def autocomplete_search(request):
-    """Retourne des suggestions produits pour la barre de recherche (JSON)."""
     q = request.GET.get('q', '').strip()
     if len(q) < 2:
         return JsonResponse({'results': []})
-
     produits = (
         Produit.objects
         .filter(statut='actif')
@@ -523,7 +519,6 @@ def autocomplete_search(request):
         .prefetch_related('images')
         [:8]
     )
-
     results = []
     for p in produits:
         img = p.images.filter(est_principale=True).first() or p.images.first()
@@ -533,5 +528,4 @@ def autocomplete_search(request):
             'prix': str(p.prix_actuel),
             'image': img.image.url if img else None,
         })
-
     return JsonResponse({'results': results})
