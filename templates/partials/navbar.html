@@ -263,14 +263,15 @@
 </style>
 
 <header class="navbar-top">
-
-  <!-- ══ BARRE PRINCIPALE ══ -->
-  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;">
-
-    <!-- Logo -->
+  <!-- Logo -->
     <a href="{% url 'products:accueil' %}"
+       style="display:flex;align-items:center;flex-shrink:0;background:white;border-radius:10px;padding:5px 12px;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all 200ms;text-decoration:none;"
+       onmouseover="this.style.boxShadow='0 4px 16px rgba(249,115,22,.4)'"
+       onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.2)'">
       <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:36px;width:auto;" />
     </a>
+  <!-- ══ BARRE PRINCIPALE ══ -->
+  <div style="max-width:1400px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:0.75rem;height:64px;">
 
     <!-- Search bar -->
     <div class="nav-search-wrap" style="flex:1;margin:0 0.5rem;">
