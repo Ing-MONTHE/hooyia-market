@@ -212,6 +212,93 @@
   }
   .nav-search-btn:hover { background: #0D1F5C; }
 
+  /* ── Autocomplete dropdown ── */
+  .nav-autocomplete {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgba(13,31,92,0.12);
+    z-index: 9999;
+    overflow: hidden;
+  }
+  .nav-ac-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    color: #8898AA;
+    font-size: 0.875rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  .nav-ac-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    text-decoration: none;
+    color: #0F1923;
+    transition: background 120ms;
+    border-bottom: 1px solid #F4F7FC;
+  }
+  .nav-ac-item:last-of-type { border-bottom: none; }
+  .nav-ac-item:hover { background: #F4F7FC; }
+  .nav-ac-img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+    border: 1px solid #E2E8F0;
+  }
+  .nav-ac-img-ph {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+    background: #F4F7FC;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-ac-name {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    color: #0F1923;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nav-ac-price {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #F97316;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-ac-footer {
+    display: block;
+    padding: 0.625rem 1rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #1E3A8A;
+    text-decoration: none;
+    background: #F4F7FC;
+    border-top: 1px solid #E2E8F0;
+    transition: background 120ms;
+  }
+  .nav-ac-footer:hover { background: #eff4ff; }
+
   /* ── Boutons icône (sans bordure) ── */
   .nav-icon-btn {
     display: flex;
