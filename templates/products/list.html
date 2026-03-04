@@ -498,6 +498,11 @@
     min-width: 0;
   }
   .cat-item-link.active { color: #1E3A8A; font-weight: 600; }
+  .cat-item-link.active .cat-checkbox {
+    background: #1E3A8A;
+    border-color: #1E3A8A;
+  }
+  .cat-item-link.active .cat-checkbox-check { display: block; }
 
   /* Bouton chevron — à droite, n'affecte pas le lien */
   .cat-collapse-btn {
@@ -913,11 +918,11 @@
 
           <div class="cat-parent-wrap">
 
-            <!-- Ligne catégorie mère : lien (gauche) + chevron collapse (droite) -->
+            <!-- Ligne catégorie mère : lien toggle (gauche) + chevron collapse (droite) -->
             <div class="cat-item-row {% if categorie_active.slug == cat.slug %}active{% endif %}">
 
-              <!-- Lien vers la catégorie mère -->
-              <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}"
+              <!-- Lien toggle : si déjà active → décocher (toutes catégories), sinon → filtrer -->
+              <a href="{% if categorie_active.slug == cat.slug %}?ordering={{ ordering }}{% else %}?categorie={{ cat.slug }}&ordering={{ ordering }}{% endif %}"
                  class="cat-item-link {% if categorie_active.slug == cat.slug %}active{% endif %}">
                 <span class="cat-checkbox">
                   <svg class="cat-checkbox-check" width="9" height="9" viewBox="0 0 24 24"
@@ -949,7 +954,7 @@
             {% if cat.sous_categories.all %}
             <div class="cat-sub-group {% for sous in cat.sous_categories.all %}{% if categorie_active.slug == sous.slug %}open{% endif %}{% endfor %}">
               {% for sous in cat.sous_categories.all %}
-              <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}"
+              <a href="{% if categorie_active.slug == sous.slug %}?ordering={{ ordering }}{% else %}?categorie={{ sous.slug }}&ordering={{ ordering }}{% endif %}"
                  class="cat-item sub {% if categorie_active.slug == sous.slug %}active{% endif %}">
                 <span class="cat-checkbox">
                   <svg class="cat-checkbox-check" width="9" height="9" viewBox="0 0 24 24"
