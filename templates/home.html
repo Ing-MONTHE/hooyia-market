@@ -368,7 +368,7 @@
   /* ── Carousel vedette ── */
   .vedette-header {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 0.25rem;
   }
@@ -376,25 +376,48 @@
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
+    padding-top: 0.25rem;
   }
-  .vedette-nav-btn {
-    width: 36px;
-    height: 36px;
+  /* Bouton Précédent — cercle gris clair avec bordure */
+  .vedette-nav-btn-prev {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 1.5px solid #CBD5E1;
-    background: #ffffff;
+    background: #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1E3A8A;
+    color: #475569;
     cursor: pointer;
     transition: background 150ms, border-color 150ms, color 150ms;
     flex-shrink: 0;
   }
-  .vedette-nav-btn:hover {
+  .vedette-nav-btn-prev:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    color: #0D1F5C;
+  }
+  /* Bouton Suivant — cercle bleu marine plein */
+  .vedette-nav-btn-next {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
     background: #1E3A8A;
-    border-color: #1E3A8A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #ffffff;
+    cursor: pointer;
+    transition: background 150ms, transform 150ms, box-shadow 150ms;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(30,58,138,0.35);
+  }
+  .vedette-nav-btn-next:hover {
+    background: #162d6e;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(30,58,138,0.45);
   }
   .vedette-carousel-wrap {
     overflow: hidden;
@@ -449,13 +472,13 @@
         <p class="section-sub">Les meilleures offres et équipements tech choisis pour vous.</p>
       </div>
       <div class="vedette-nav">
-        <button class="vedette-nav-btn" id="vedette-prev" aria-label="Précédent">
+        <button class="vedette-nav-btn-prev" id="vedette-prev" aria-label="Précédent">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <button class="vedette-nav-btn" id="vedette-next" aria-label="Suivant">
+        <button class="vedette-nav-btn-next" id="vedette-next" aria-label="Suivant">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"/>
@@ -562,83 +585,110 @@
 {% comment %} ════════════════════════════════════════════════════
    3. NOUVEAUX ARRIVAGES
    8 derniers produits actifs, ordonnés par date_creation desc.
+   Carousel horizontal avec boutons Prev/Next — même logique que section 2.
+   Badge "Nouveau" sur chaque carte. Badge promo décalé si les deux coexistent.
    Fond blanc pour alterner avec le fond gris de la section précédente.
+   DONNÉES : {{ nouveaux_arrivages }} — QuerySet Produit (order -date_creation, max 8)
 ════════════════════════════════════════════════════ {% endcomment %}
 {% if nouveaux_arrivages %}
-<section style="padding:4rem 0;background:#ffffff;">
+<section style="padding:2rem 0 4rem 0;background:#ffffff;">
   <div class="container">
 
-    <p class="section-eyebrow">Nouveautés du moment</p>
-    <div class="section-heading">
-      <h2>Tout juste <span style="color:#F97316;">en ligne</span></h2>
-    </div>
-    <p class="section-sub">Soyez parmi les premiers à découvrir nos derniers produits.</p>
-
-    <div class="products-grid">
-      {% for produit in nouveaux_arrivages %}
-      <a href="{% url 'products:detail' produit.slug %}" class="pcard">
-
-        <div class="pcard-img-wrap">
-          {% with produit.images.all as imgs %}
-            {% for img in imgs %}
-              {% if img.est_principale %}
-              <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
-                   class="pcard-img" loading="lazy" />
-              {% endif %}
-            {% empty %}
-            {% for img in imgs|slice:":1" %}
-              <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
-                   class="pcard-img" loading="lazy" />
-            {% empty %}
-            <div class="pcard-img-placeholder">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
-                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                <line x1="12" y1="22.08" x2="12" y2="12"/>
-              </svg>
-            </div>
-            {% endfor %}
-            {% endfor %}
-          {% endwith %}
-
-          {# Badge "Nouveau" sur tous les produits de cette section #}
-          <span class="pcard-new-badge">Nouveau</span>
-
-          {% if produit.prix_promo %}
-          <span class="pcard-promo-badge" style="top:0.5rem;left:5rem;">
-            -{{ produit.pourcentage_remise|floatformat:0 }}%
-          </span>
-          {% endif %}
+    {# En-tête + boutons nav #}
+    <div class="vedette-header">
+      <div>
+        <p class="section-eyebrow" style="margin-bottom:0.375rem;">Nouveautés du moment</p>
+        <div class="section-heading">
+          <h2>Tout juste <span style="color:#F97316;">en ligne</span></h2>
         </div>
+        <p class="section-sub">Soyez parmi les premiers à découvrir nos derniers produits.</p>
+      </div>
+      <div class="vedette-nav">
+        <button class="vedette-nav-btn-prev" id="arrivages-prev" aria-label="Précédent">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="vedette-nav-btn-next" id="arrivages-next" aria-label="Suivant">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
 
-        <div class="pcard-body">
-          <span class="pcard-cat">{{ produit.categorie.nom|default:"" }}</span>
-          <span class="pcard-name">{{ produit.nom }}</span>
-          <div class="pcard-footer">
-            <div>
-              <div class="pcard-price">{{ produit.prix_actuel|floatformat:0 }} FCFA</div>
-              {% if produit.prix_promo %}
-              <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
-              {% endif %}
-            </div>
-            <button class="pcard-cart-btn"
-                    onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
-                    title="Ajouter au panier"
-                    aria-label="Ajouter {{ produit.nom }} au panier">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
-              </svg>
-            </button>
+    {# Carousel horizontal #}
+    <div class="vedette-carousel-wrap">
+      <div class="vedette-carousel" id="arrivages-carousel">
+        {% for produit in nouveaux_arrivages %}
+        <a href="{% url 'products:detail' produit.slug %}" class="pcard-sm">
+
+          <div class="pcard-img-wrap">
+            {% with produit.images.all as imgs %}
+              {% for img in imgs %}
+                {% if img.est_principale %}
+                <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                     class="pcard-img" loading="lazy" />
+                {% endif %}
+              {% empty %}
+              {% for img in imgs|slice:":1" %}
+                <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                     class="pcard-img" loading="lazy" />
+              {% empty %}
+              <div class="pcard-img-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                  <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+              </div>
+              {% endfor %}
+              {% endfor %}
+            {% endwith %}
+
+            {# Badge "Nouveau" sur tous les produits de cette section #}
+            <span class="pcard-new-badge">Nouveau</span>
+
+            {# Badge promo décalé pour ne pas chevaucher le badge "Nouveau" #}
+            {% if produit.prix_promo %}
+            <span class="pcard-promo-badge" style="top:0.5rem;left:5rem;">
+              -{{ produit.pourcentage_remise|floatformat:0 }}%
+            </span>
+            {% endif %}
           </div>
-        </div>
-      </a>
-      {% endfor %}
+
+          <div class="pcard-body">
+            <span class="pcard-cat">{{ produit.categorie.nom|default:"" }}</span>
+            <span class="pcard-name">{{ produit.nom }}</span>
+            <div class="pcard-footer">
+              <div>
+                <div class="pcard-price">{{ produit.prix_actuel|floatformat:0 }} FCFA</div>
+                {% if produit.prix_promo %}
+                <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
+                {% endif %}
+              </div>
+              <button class="pcard-cart-btn"
+                      onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
+                      title="Ajouter au panier"
+                      aria-label="Ajouter {{ produit.nom }} au panier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
     </div>
 
+    {# Bouton "Voir tous les arrivages" #}
     <div style="text-align:center;margin-top:2.5rem;">
       <a href="{% url 'products:liste' %}?ordering=-date_creation" class="btn btn-secondary btn-lg">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -652,6 +702,22 @@
 
   </div>
 </section>
+
+<script>
+  (function() {
+    var carousel = document.getElementById('arrivages-carousel');
+    var btnPrev  = document.getElementById('arrivages-prev');
+    var btnNext  = document.getElementById('arrivages-next');
+    var step = 240; {# px par clic — identique au carousel vedette #}
+    if (!carousel) return;
+    btnPrev.addEventListener('click', function() {
+      carousel.scrollBy({ left: -step, behavior: 'smooth' });
+    });
+    btnNext.addEventListener('click', function() {
+      carousel.scrollBy({ left: step, behavior: 'smooth' });
+    });
+  })();
+</script>
 {% endif %}
 
 
