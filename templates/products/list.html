@@ -154,6 +154,8 @@
     padding: 0.375rem;
     z-index: 200;
     display: none;
+    max-height: 280px;
+    overflow-y: auto;
   }
   .header-cat-dropdown.open { display: block; }
 
@@ -775,21 +777,13 @@
 
           <div class="hcat-divider"></div>
 
-          <!-- Boucle sur les catégories racines (sans parent) et leurs enfants -->
+          <!-- Catégories parentes uniquement — sans sous-catégories -->
           {% for cat in categories %}{% if not cat.parent %}
           <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}"
              class="hcat-link {% if categorie_active.slug == cat.slug %}active{% endif %}"
              role="menuitem">
             {{ cat.nom }}
           </a>
-          <!-- Sous-catégories indentées -->
-          {% for sous in cat.sous_categories.all %}
-          <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}"
-             class="hcat-link sub {% if categorie_active.slug == sous.slug %}active{% endif %}"
-             role="menuitem">
-            └ {{ sous.nom }}
-          </a>
-          {% endfor %}
           {% endif %}{% endfor %}
 
         </div><!-- /cat-dropdown -->
