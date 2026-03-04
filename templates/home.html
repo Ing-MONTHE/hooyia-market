@@ -23,7 +23,7 @@
 <style>
   /* ── Hero Banner ── */
   .hero-banner {
-    padding: 2.5rem 1.5rem;
+    padding: 2.5rem 1.5rem 0 1.5rem;
     background: #F4F7FC;
   }
   .hero-banner-inner {
@@ -363,7 +363,8 @@
    Grille de 4 (desktop) / 2 (tablette) / 1 (mobile).
    Maxi 8 produits passés par la vue.
 ════════════════════════════════════════════════════ {% endcomment %}
-<section style="padding:4rem 0;background:#F4F7FC;">
+{% if produits_vedette %}
+<section style="padding:2rem 0 4rem 0;background:#F4F7FC;">
   <div class="container">
 
     {# En-tête de section #}
@@ -373,8 +374,6 @@
     </div>
     <p class="section-sub">Nos coups de cœur, soigneusement choisis pour vous.</p>
 
-    {# Grille produits #}
-    {% if produits_vedette %}
     <div class="products-grid">
       {% for produit in produits_vedette %}
       <a href="{% url 'products:detail' produit.slug %}" class="pcard">
@@ -449,22 +448,6 @@
       {% endfor %}
     </div>
 
-    {% else %}
-    {# État vide — aucun produit en vedette #}
-    <div style="text-align:center;padding:3rem 1rem;color:#8898AA;">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-           style="margin:0 auto 1rem;">
-        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 01-8 0"/>
-      </svg>
-      <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;">
-        Aucun produit en vedette pour le moment.
-      </p>
-    </div>
-    {% endif %}
-
     {# Bouton "Voir tous les produits" #}
     <div style="text-align:center;margin-top:2.5rem;">
       <a href="{% url 'products:liste' %}" class="btn btn-secondary btn-lg">
@@ -480,6 +463,7 @@
 
   </div>
 </section>
+{% endif %}
 
 
 {% comment %} ════════════════════════════════════════════════════
@@ -487,6 +471,7 @@
    8 derniers produits actifs, ordonnés par date_creation desc.
    Fond blanc pour alterner avec le fond gris de la section précédente.
 ════════════════════════════════════════════════════ {% endcomment %}
+{% if nouveaux_arrivages %}
 <section style="padding:4rem 0;background:#ffffff;">
   <div class="container">
 
@@ -496,7 +481,6 @@
     </div>
     <p class="section-sub">Les dernières références ajoutées à notre catalogue.</p>
 
-    {% if nouveaux_arrivages %}
     <div class="products-grid">
       {% for produit in nouveaux_arrivages %}
       <a href="{% url 'products:detail' produit.slug %}" class="pcard">
@@ -562,14 +546,6 @@
       {% endfor %}
     </div>
 
-    {% else %}
-    <div style="text-align:center;padding:3rem 1rem;color:#8898AA;">
-      <p style="font-family:'Poppins',sans-serif;font-size:0.875rem;">
-        Aucun produit disponible pour le moment.
-      </p>
-    </div>
-    {% endif %}
-
     <div style="text-align:center;margin-top:2.5rem;">
       <a href="{% url 'products:liste' %}?ordering=-date_creation" class="btn btn-secondary btn-lg">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -583,6 +559,7 @@
 
   </div>
 </section>
+{% endif %}
 
 
 {% comment %} ════════════════════════════════════════════════════
