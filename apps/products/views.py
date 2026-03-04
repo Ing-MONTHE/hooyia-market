@@ -77,7 +77,7 @@ def liste_produits(request):
     from django.core.paginator import Paginator
     from .filters import ProduitFilter
 
-    categories = Categorie.objects.filter(est_active=True)
+    categories = Categorie.objects.filter(est_active=True, parent=None).prefetch_related('sous_categories')
 
     categorie_slug = request.GET.get('categorie', '')
     categorie_active = None
@@ -92,8 +92,17 @@ def liste_produits(request):
         from django.db.models import Q
         qs = qs.filter(Q(nom__icontains=search) | Q(description__icontains=search))
 
-    if categorie_slug:
-        qs = qs.filter(categorie__slug=categorie_slug)
+    if categorie_slug and categorie_active:
+        # Si la catégorie a des enfants (mère), inclure tous les enfants
+        # Si c'est une feuille (sous-catégorie), filtrer uniquement sur elle
+        sous_slugs = list(categorie_active.sous_categories.values_list('slug', flat=True))
+        if sous_slugs:
+            # Catégorie mère : produits de la mère ET de tous ses enfants
+            from django.db.models import Q
+            qs = qs.filter(Q(categorie__slug=categorie_slug) | Q(categorie__slug__in=sous_slugs))
+        else:
+            # Sous-catégorie feuille : filtre exact
+            qs = qs.filter(categorie__slug=categorie_slug)
 
     promo = request.GET.get('promo')
     if promo:

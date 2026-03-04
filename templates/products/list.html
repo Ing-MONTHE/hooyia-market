@@ -11,16 +11,179 @@
     margin: 0 auto;
     padding: 2rem 1.25rem 4rem;
   }
-  .catalogue-header { margin-bottom: 1.75rem; }
-  .catalogue-header h1 {
-    font-family: 'Poppins', sans-serif;
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 800;
-    color: #0D1F5C;
-    margin-bottom: 0.25rem;
-  }
-  .catalogue-header p { font-size: 0.875rem; color: #8898AA; font-family: 'Poppins', sans-serif; }
+  /* ══════════════════════════════════════════════════════════════
+     EN-TÊTE CATALOGUE — barre de navigation produits
+     Structure :
+       [Gauche]  Barre de recherche (style identique à .nav-search-wrap)
+       [Droite]  "Tous les produits" (btn-primary orange = .nav-btn-register)
+                 "Catégories" (btn-secondary bleu outline = .nav-btn-login)
 
+     CHARTE respectée (custom.css / navbar.html) :
+       - Orange  #F97316 → fond bouton actif (--accent)
+       - Bleu    #1E3A8A → outline bouton secondaire (--brand-500)
+       - Radius  0.5rem  → 8px cohérent avec tous les .btn du système
+       - Police  Poppins 600, 13px — identique aux boutons navbar
+     ══════════════════════════════════════════════════════════════ */
+
+  /* Conteneur principal de l'en-tête */
+  .catalogue-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* ── Barre de recherche ──────────────────────────────────────
+     Copie exacte de .nav-search-wrap (navbar.html) :
+     fond --bg (#F4F7FC), bordure --border (#E2E8F0), pill 999px,
+     focus bleu #1E3A8A avec halo rgba(30,58,138,0.10). */
+  .header-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    max-width: 520px;
+    min-width: 200px;
+    background: #F4F7FC;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 999px;
+    padding: 0 0.75rem;
+    height: 40px;
+    transition: border-color 180ms, box-shadow 180ms, background 180ms;
+  }
+  .header-search-wrap:focus-within {
+    border-color: #1E3A8A;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.10);
+    background: #ffffff;
+  }
+  /* Icône loupe — couleur muted, non cliquable */
+  .header-search-wrap > svg {
+    color: #8898AA;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+  .header-search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    color: #0F1923;
+    flex: 1;
+    min-width: 0;
+  }
+  .header-search-input::placeholder { color: #8898AA; }
+
+  /* ── Tabs de navigation ──────────────────────────────────────
+     Deux boutons côte à côte alignés sur la charte :
+     - .header-tab-primary   → fond orange (= .nav-btn-register)
+     - .header-tab-secondary → contour bleu (= .nav-btn-login) */
+  .header-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Base commune — reprend exactement .btn de custom.css */
+  .header-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.875rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 0.5rem;       /* 8px — cohérent avec tous les boutons */
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 150ms;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* "Tous les produits" — fond orange, ombre orange
+     Identique à .nav-btn-register dans navbar.html */
+  .header-tab-primary {
+    background: #F97316;
+    border-color: #F97316;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.30);
+  }
+  .header-tab-primary:hover {
+    background: #ea6000;
+    border-color: #ea6000;
+  }
+
+  /* "Catégories" — contour bleu, fond transparent
+     Identique à .nav-btn-login dans navbar.html */
+  .header-tab-secondary {
+    background: transparent;
+    border-color: #1E3A8A;
+    color: #1E3A8A;
+  }
+  .header-tab-secondary:hover {
+    background: #eff4ff;  /* brand-50 — hover standard du système */
+  }
+
+  /* Wrapper positionné pour le dropdown */
+  .header-tab-secondary-wrap {
+    position: relative;
+  }
+
+  /* Chevron — tourne 180° à l'ouverture du dropdown */
+  .tab-chevron {
+    transition: transform 200ms;
+  }
+
+  /* ── Dropdown Catégories ─────────────────────────────────────
+     Identique au .nav-dropdown-menu de la navbar :
+     fond blanc, bordure #E2E8F0, radius 0.75rem, ombre bleue marine. */
+  .header-cat-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 220px;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px rgba(13, 31, 92, 0.13);
+    padding: 0.375rem;
+    z-index: 200;
+    display: none;
+  }
+  .header-cat-dropdown.open { display: block; }
+
+  /* Lien dropdown — identique à .nav-dd-item */
+  .hcat-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4A5568;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 100ms, color 100ms;
+  }
+  .hcat-link:hover { background: #f9fafb; color: #0F1923; }
+  .hcat-link.active { background: #eff4ff; color: #1E3A8A; font-weight: 700; }
+
+  /* Sous-catégories indentées */
+  .hcat-link.sub { padding-left: 1.75rem; font-size: 0.775rem; color: #8898AA; }
+  .hcat-link.sub:hover { color: #0F1923; }
+  .hcat-link.sub.active { color: #1E3A8A; font-weight: 600; }
+
+  /* Séparateur — identique à .nav-dd-divider */
+  .hcat-divider { height: 1px; background: #E2E8F0; margin: 0.25rem 0.375rem; }
+
+  /* ── Sous-barre de contrôles ─────────────────────────────────
+     Bouton "Filtres" (mobile uniquement) + sélecteur de tri */
   .catalogue-controls {
     display: flex;
     align-items: center;
@@ -42,68 +205,379 @@
   }
   .catalogue-sort select:focus { border-color: #1E3A8A; }
 
+  /* Bouton filtres mobile — même style que .nav-btn-login */
   .btn-filter-mobile {
     display: none; align-items: center; gap: 0.375rem;
-    padding: 0.45rem 0.875rem; font-family: 'Poppins', sans-serif;
-    font-size: 0.8125rem; font-weight: 600; color: #1E3A8A; background: #ffffff;
+    padding: 0.4rem 0.875rem; font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem; font-weight: 600; color: #1E3A8A; background: transparent;
     border: 1.5px solid #1E3A8A; border-radius: 0.5rem; cursor: pointer;
-    transition: background 150ms, color 150ms;
+    transition: background 150ms;
   }
-  .btn-filter-mobile:hover { background: #1E3A8A; color: #ffffff; }
+  .btn-filter-mobile:hover { background: #eff4ff; }
+
+  /* Responsive : tabs empilés sur très petit écran */
+  @media (max-width: 540px) {
+    .catalogue-header-bar { flex-direction: column; align-items: stretch; }
+    .header-search-wrap { max-width: 100%; }
+    .header-tabs { justify-content: flex-end; }
+  }
 
   .catalogue-body { display: flex; gap: 1.75rem; align-items: flex-start; }
 
-  /* SIDEBAR */
+  /* ══════════════════════════════════════════════════════════════
+     SIDEBAR — Filtres accordéon (inspiré Image 2)
+     Structure :
+       - Carte blanche avec ombre légère, collée en sticky
+       - Bouton burger (≡) en haut à droite pour refermer
+       - Chaque section = accordéon : header cliquable + contenu
+         qui s'ouvre/ferme avec une animation height
+       - Icône Lucide + label + chevron dans chaque header
+       - Séparateur fin entre chaque section
+
+     Sections :
+       1. "Filtres appliqués" → recherche + résumé filtres actifs
+       2. "Catégories"        → arbre MPTT avec checkboxes visuelles
+       3. "Promotions"        → checkbox unique
+     ══════════════════════════════════════════════════════════════ */
+
+  /* Conteneur sticky principal */
   .filter-sidebar {
-    width: 230px; flex-shrink: 0; position: sticky; top: 80px;
-    background: #ffffff; border: 1px solid #E2E8F0; border-radius: 1rem;
-    padding: 1.25rem; box-shadow: 0 2px 12px rgba(13,31,92,0.06);
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 80px;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(13,31,92,0.06);
+    overflow: hidden;             /* Clips les contenus animés */
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  /* Scrollbar discrète dans la sidebar */
+  .filter-sidebar::-webkit-scrollbar { width: 4px; }
+  .filter-sidebar::-webkit-scrollbar-track { background: transparent; }
+  .filter-sidebar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 99px; }
+
+  /* ── En-tête de la sidebar ────────────────────────────────────
+     Contient le titre "Filtres" et le bouton burger (mobile) ou
+     icône sliders (desktop) à droite. */
+  .filter-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid #E2E8F0;
   }
   .filter-sidebar-title {
-    font-family: 'Poppins', sans-serif; font-size: 0.9375rem; font-weight: 700;
-    color: #0D1F5C; margin-bottom: 1.25rem;
-    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0D1F5C;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
-  .filter-group {
-    margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #E2E8F0;
+  /* Bouton burger "≡" — ferme la sidebar sur mobile */
+  .filter-burger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 0.5rem;
+    border: 1px solid #E2E8F0;
+    background: transparent;
+    cursor: pointer;
+    color: #4A5568;
+    transition: background 150ms, color 150ms;
+    flex-shrink: 0;
   }
-  .filter-group:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-  .filter-group-label {
-    font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 700;
-    color: #8898AA; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.625rem;
+  .filter-burger-btn:hover { background: #eff4ff; color: #1E3A8A; }
+
+  /* ── Section accordéon ────────────────────────────────────────
+     Chaque .filter-section est une section pliable.
+     Le header est cliquable et contient :
+       - icône + label (gauche)
+       - chevron qui tourne 180° quand ouvert (droite)
+     Le contenu (.filter-section-body) se masque/affiche via JS. */
+  .filter-section {
+    border-bottom: 1px solid #E2E8F0;
   }
+  .filter-section:last-child { border-bottom: none; }
+
+  /* Header cliquable de la section */
+  .filter-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    background: #F4F7FC;          /* Fond légèrement grisé comme Image 2 */
+    transition: background 150ms;
+    gap: 0.625rem;
+  }
+  .filter-section-header:hover { background: #eff4ff; }
+
+  /* Groupe icône + label dans le header */
+  .filter-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0D1F5C;
+  }
+  /* Icône de la section — dans un cercle gris clair */
+  .filter-section-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #4A5568;
+  }
+
+  /* Chevron droite — tourne 180° quand la section est ouverte */
+  .filter-section-chevron {
+    color: #8898AA;
+    transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+  }
+  /* Classe .open ajoutée par JS sur .filter-section-header */
+  .filter-section-header.open .filter-section-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Corps de la section — masqué par défaut, affiché via JS
+     L'animation utilise max-height pour un effet smooth */
+  .filter-section-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+                padding 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 1rem;
+  }
+  .filter-section-body.open {
+    max-height: 600px;            /* Valeur haute — jamais atteinte en pratique */
+    padding: 0.625rem 1rem 0.875rem;
+  }
+
+  /* ── Champ de recherche dans la sidebar ──────────────────────
+     Input avec icône loupe à gauche, fond --bg, focus bleu. */
   .filter-search-wrap { position: relative; }
   .filter-search-wrap input {
-    width: 100%; font-family: 'Poppins', sans-serif; font-size: 0.8rem; color: #0F1923;
-    background: #F4F7FC; border: 1.5px solid #E2E8F0; border-radius: 0.5rem;
-    padding: 0.45rem 0.75rem 0.45rem 2rem; outline: none; transition: border-color 150ms;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    color: #0F1923;
+    background: #F4F7FC;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.75rem 0.45rem 2rem;
+    outline: none;
+    transition: border-color 150ms;
   }
   .filter-search-wrap input:focus { border-color: #1E3A8A; background: #fff; }
   .filter-search-wrap svg {
     position: absolute; left: 0.6rem; top: 50%;
     transform: translateY(-50%); color: #8898AA; pointer-events: none;
   }
-  .cat-link {
-    display: block; font-family: 'Poppins', sans-serif; font-size: 0.8rem;
-    font-weight: 500; color: #4A5568; padding: 0.3rem 0.5rem; border-radius: 0.375rem;
-    text-decoration: none; transition: background 130ms, color 130ms; line-height: 1.4;
+
+  /* ── Liens de catégorie ───────────────────────────────────────
+     Chaque catégorie = ligne avec checkbox visuelle + label + flèche.
+     Reprend l'Image 2 : checkbox carrée à gauche, texte, chevron droit. */
+  .cat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background 120ms;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4A5568;
   }
-  .cat-link:hover { background: #eff4ff; color: #1E3A8A; }
-  .cat-link.active { background: #eff4ff; color: #1E3A8A; font-weight: 700; }
-  .cat-link.sub { padding-left: 1.25rem; font-size: 0.775rem; color: #8898AA; }
-  .cat-link.sub:hover, .cat-link.sub.active { color: #1E3A8A; }
-  .cat-link.sub.active { font-weight: 600; }
-  .filter-checkbox { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-  .filter-checkbox input[type="checkbox"] { width: 15px; height: 15px; accent-color: #F97316; cursor: pointer; }
-  .filter-checkbox span { font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 500; color: #4A5568; }
+  .cat-item:hover { background: #f9fafb; color: #0F1923; }
+  .cat-item.active {
+    background: #eff4ff;
+    color: #1E3A8A;
+    font-weight: 600;
+  }
+
+  /* Checkbox visuelle carrée — cochée quand .active */
+  .cat-checkbox {
+    width: 15px;
+    height: 15px;
+    border: 1.5px solid #CBD5E0;
+    border-radius: 3px;
+    flex-shrink: 0;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 150ms, background 150ms;
+  }
+  .cat-item.active .cat-checkbox {
+    background: #1E3A8A;
+    border-color: #1E3A8A;
+  }
+  /* Coche SVG — visible uniquement quand active */
+  .cat-checkbox-check {
+    display: none;
+    color: #ffffff;
+  }
+  .cat-item.active .cat-checkbox-check { display: block; }
+
+  /* Nom de la catégorie — prend tout l'espace */
+  .cat-item-name { flex: 1; line-height: 1.4; }
+
+  /* Flèche droite > pour les catégories avec sous-items */
+  .cat-item-arrow { color: #CBD5E0; flex-shrink: 0; }
+  .cat-item.active .cat-item-arrow { color: #1E3A8A; }
+
+  /* Sous-catégories : indentation + trait vertical gauche */
+  .cat-sub-group {
+    margin-left: 1.25rem;
+    border-left: 2px solid #E2E8F0;
+    padding-left: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .cat-item.sub {
+    font-size: 0.775rem;
+    color: #8898AA;
+    padding: 0.35rem 0.5rem;
+  }
+  .cat-item.sub:hover { color: #0F1923; }
+  .cat-item.sub.active { color: #1E3A8A; }
+
+  /* Séparateur fin entre "Toutes" et les catégories */
+  .cat-divider { height: 1px; background: #E2E8F0; margin: 0.375rem 0; }
+
+  /* ── Catégorie mère collapsible ────────────────────────────────
+     Structure :
+       .cat-parent-wrap
+         .cat-item-row     → ligne principale (lien + bouton chevron)
+           .cat-item-link  → lien cliquable vers la catégorie mère
+           .cat-collapse-btn → bouton chevron séparé (collapse seul)
+         .cat-sub-group    → sous-catégories, masquées par défaut */
+  .cat-parent-wrap { margin-bottom: 1px; }
+
+  /* Ligne principale : lien flex + bouton chevron bout à bout */
+  .cat-item-row {
+    display: flex;
+    align-items: center;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: background 120ms;
+  }
+  .cat-item-row:hover { background: #f9fafb; }
+  .cat-item-row.active { background: #eff4ff; }
+
+  /* Lien vers la catégorie mère — prend tout l'espace sauf le bouton */
+  .cat-item-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1;
+    padding: 0.45rem 0.5rem;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4A5568;
+    min-width: 0;
+  }
+  .cat-item-link.active { color: #1E3A8A; font-weight: 600; }
+
+  /* Bouton chevron — à droite, n'affecte pas le lien */
+  .cat-collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #CBD5E0;
+    border-radius: 0.375rem;
+    transition: color 150ms, background 150ms;
+    margin-right: 2px;
+  }
+  .cat-collapse-btn:hover { color: #1E3A8A; background: #eff4ff; }
+  /* Chevron tourne 180° quand ouvert */
+  .cat-collapse-btn svg { transition: transform 220ms cubic-bezier(0.4,0,0.2,1); }
+  .cat-collapse-btn.open svg { transform: rotate(180deg); }
+
+  /* Sous-catégories collapsibles — cachées par défaut
+     Transition smooth via max-height */
+  .cat-sub-group {
+    margin-left: 1.125rem;
+    border-left: 2px solid #E2E8F0;
+    padding-left: 0.5rem;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 260ms cubic-bezier(0.4,0,0.2,1);
+  }
+  /* Ouverte via JS (toggleCatParent) ou Django (sous-cat active) */
+  .cat-sub-group.open { max-height: 400px; }
+
+  /* ── Checkbox promotions ──────────────────────────────────────
+     Reprend le style de cat-item pour cohérence visuelle. */
+  .filter-promo-label {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    cursor: pointer;
+    padding: 0.3rem 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4A5568;
+  }
+  .filter-promo-label input[type="checkbox"] {
+    width: 15px; height: 15px;
+    accent-color: #1E3A8A;        /* Bleu charte — cohérent avec cat-checkbox actif */
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ── Bouton réinitialiser ─────────────────────────────────────
+     En bas de la sidebar, style outline neutre. */
   .filter-reset {
-    display: flex; align-items: center; justify-content: center; gap: 0.375rem;
-    width: 100%; padding: 0.45rem; font-family: 'Poppins', sans-serif; font-size: 0.775rem;
-    font-weight: 600; color: #8898AA; background: transparent; border: 1px solid #E2E8F0;
-    border-radius: 0.5rem; text-decoration: none; margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.75rem 0 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: #8898AA;
+    background: transparent;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    text-decoration: none;
     transition: color 150ms, border-color 150ms;
+    cursor: pointer;
   }
   .filter-reset:hover { color: #1E3A8A; border-color: #1E3A8A; }
+
+  /* Zone padding en bas de la sidebar */
+  .filter-sidebar-footer { padding: 0 1rem 1rem; }
 
   /* GRID */
   .products-main { flex: 1; min-width: 0; }
@@ -197,18 +671,141 @@
 
 <div class="catalogue-wrap">
 
-  <div class="catalogue-header">
-    <h1>Catalogue</h1>
-    <p>{{ total_count }} produit{{ total_count|pluralize }}</p>
-  </div>
+  <!-- ══════════════════════════════════════════════════════════════
+       EN-TÊTE CATALOGUE
+       Structure :
+         [Gauche]  Barre de recherche arrondie avec icône Lucide "Search"
+         [Droite]  Tab "Tous les produits" (actif, gradient violet-bleu)
+                   Tab "Catégories" (rouge, dropdown)
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="catalogue-header-bar">
 
+    <!-- ── Barre de recherche ─────────────────────────────────────
+         Champ texte pleine largeur avec icône loupe (Lucide Search).
+         Déclenche un filtre sur la touche Entrée via applyFilter(). -->
+    <div class="header-search-wrap">
+      <!-- Icône Lucide "search" -->
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="search"
+        class="header-search-input"
+        placeholder="Rechercher un produit…"
+        value="{{ search }}"
+        onkeydown="if(event.key==='Enter'){ const p=new URLSearchParams(window.location.search); p.delete('page'); p.delete('categorie'); if(this.value) p.set('search',this.value); else p.delete('search'); window.location.href='?'+p.toString(); }"
+        aria-label="Rechercher un produit"
+      />
+    </div>
+
+    <!-- ── Tabs de navigation ─────────────────────────────────────
+         Deux boutons-pilules à droite de la barre de recherche. -->
+    <div class="header-tabs">
+
+      <!-- Tab "Tous les produits" — réinitialise search et catégorie, conserve uniquement le tri -->
+      <a href="?ordering={{ ordering }}"
+         class="header-tab header-tab-primary"
+         aria-label="Voir tous les produits">
+        <!-- Lucide "sparkles" — étoile scintillante -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l1.88 5.76a1 1 0 00.95.69H21l-5 3.63a1 1 0 00-.36 1.12L17.52 20 12 16.37 6.48 20l1.88-5.8a1 1 0 00-.36-1.12L3 9.45h6.17a1 1 0 00.95-.69z"/>
+        </svg>
+        Tous les produits
+      </a>
+
+      <!-- Tab 2 : "Catégories" — rouge, ouvre un dropdown de sélection rapide
+           Icône Lucide "layout-grid" (grille de tuiles)
+           Le chevron tourne à l'ouverture du menu. -->
+      <div class="header-tab-secondary-wrap">
+        <button
+          class="header-tab header-tab-secondary"
+          onclick="toggleCatDropdown()"
+          aria-haspopup="true"
+          aria-expanded="false"
+          id="cat-tab-btn"
+          aria-label="Filtrer par catégorie">
+          <!-- Lucide "layout-grid" — grille de catégories -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          Catégories
+          <!-- Lucide "chevron-down" — tourne à l'ouverture -->
+          <svg class="tab-chevron" id="cat-chevron"
+               width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        <!-- ── Dropdown des catégories ──────────────────────────────
+             Affiché/masqué via toggleCatDropdown().
+             Contient "Toutes les catégories" + arbre MPTT des catégories. -->
+        <div class="header-cat-dropdown" id="cat-dropdown" role="menu">
+
+          <!-- Lien "Toutes les catégories" — supprime le filtre catégorie -->
+          <a href="?ordering={{ ordering }}{% if search %}&search={{ search }}{% endif %}"
+             class="hcat-link {% if not categorie_active %}active{% endif %}"
+             role="menuitem">
+            <!-- Lucide "layers" — toutes couches = toutes catégories -->
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+            Toutes les catégories
+          </a>
+
+          <div class="hcat-divider"></div>
+
+          <!-- Boucle sur les catégories racines (sans parent) et leurs enfants -->
+          {% for cat in categories %}{% if not cat.parent %}
+          <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}"
+             class="hcat-link {% if categorie_active.slug == cat.slug %}active{% endif %}"
+             role="menuitem">
+            {{ cat.nom }}
+          </a>
+          <!-- Sous-catégories indentées -->
+          {% for sous in cat.sous_categories.all %}
+          <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}"
+             class="hcat-link sub {% if categorie_active.slug == sous.slug %}active{% endif %}"
+             role="menuitem">
+            └ {{ sous.nom }}
+          </a>
+          {% endfor %}
+          {% endif %}{% endfor %}
+
+        </div><!-- /cat-dropdown -->
+      </div><!-- /header-tab-secondary-wrap -->
+
+    </div><!-- /header-tabs -->
+  </div><!-- /catalogue-header-bar -->
+
+  <!-- ── Sous-barre de contrôles ────────────────────────────────
+       Bouton "Filtres" (mobile uniquement) + sélecteur de tri. -->
   <div class="catalogue-controls">
+    <!-- Bouton filtre visible uniquement < 1024px -->
     <button class="btn-filter-mobile" onclick="openFilters()">
+      <!-- Lucide "sliders" — curseurs de filtre -->
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
       </svg>
       Filtres
     </button>
+
+    <!-- Sélecteur de tri — déclenche un rechargement de page via applyFilter() -->
     <div class="catalogue-sort">
       <label for="sort-select">Trier par</label>
       <select id="sort-select" onchange="applyFilter('ordering', this.value)">
@@ -224,49 +821,205 @@
 
   <div class="catalogue-body">
 
+    <!-- ══════════════════════════════════════════════════════════════
+         SIDEBAR FILTRES — Structure accordéon
+         3 sections pliables :
+           1. "Filtres appliqués" → champ recherche + résumé
+           2. "Catégories"        → arbre MPTT avec checkboxes
+           3. "Promotions"        → checkbox unique
+         Chaque section s'ouvre/ferme via toggleSection() (JS bas de page).
+         ══════════════════════════════════════════════════════════════ -->
     <aside class="filter-sidebar" id="filter-sidebar">
-      <div class="filter-sidebar-title">
-        Filtres
-        <button onclick="closeFilters()" style="display:none;width:28px;height:28px;border-radius:50%;border:1px solid #E2E8F0;background:transparent;cursor:pointer;align-items:center;justify-content:center;color:#8898AA;" class="filter-sidebar-close">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+      <!-- En-tête de la sidebar : titre + bouton burger (mobile) -->
+      <div class="filter-sidebar-header">
+        <div class="filter-sidebar-title">
+          <!-- Lucide "sliders-horizontal" — icône filtres -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+            <line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
+          Filtres
+        </div>
+        <!-- Bouton ≡ — ferme la sidebar sur mobile (overlay) -->
+        <button class="filter-burger-btn filter-sidebar-close"
+                onclick="closeFilters()"
+                style="display:none;"
+                aria-label="Fermer les filtres">
+          <!-- Lucide "menu" — 3 traits horizontaux -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
       </div>
 
-      <div class="filter-group">
-        <div class="filter-group-label">Recherche</div>
-        <div class="filter-search-wrap">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" placeholder="Nom du produit…" value="{{ search }}"
-                 onkeydown="if(event.key==='Enter') applyFilter('search', this.value)" />
+      <!-- ── Section Catégories ─────────────────────────────────────
+           Ouverte par défaut. Chaque catégorie mère est collapsible :
+           clic sur le chevron → affiche/masque ses sous-catégories.
+           La catégorie mère reste cliquable (lien) séparément du chevron. -->
+      <div class="filter-section">
+        <div class="filter-section-header open"
+             onclick="toggleSection(this)"
+             aria-expanded="true">
+          <span class="filter-section-label">
+            <span class="filter-section-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </span>
+            Catégories
+          </span>
+          <svg class="filter-section-chevron" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </div>
-      </div>
+        <div class="filter-section-body open">
 
-      <div class="filter-group">
-        <div class="filter-group-label">Catégorie</div>
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <a href="?ordering={{ ordering }}" class="cat-link {% if not categorie_active %}active{% endif %}">Toutes les catégories</a>
+          <!-- "Toutes les catégories" — supprime le filtre catégorie -->
+          <a href="?ordering={{ ordering }}{% if search %}&search={{ search }}{% endif %}"
+             class="cat-item {% if not categorie_active %}active{% endif %}">
+            <span class="cat-checkbox">
+              <svg class="cat-checkbox-check" width="9" height="9" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="3.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <span class="cat-item-name">Toutes les catégories</span>
+          </a>
+
+          <div class="cat-divider"></div>
+
+          <!-- Boucle sur catégories racines.
+               Chaque mère est un bloc .cat-parent-wrap :
+                 - ligne principale = lien vers la catégorie + bouton chevron séparé
+                 - .cat-sub-group = sous-catégories, masquées par défaut
+                   sauf si une sous-catégorie est active (auto-expand via Django) -->
           {% for cat in categories %}{% if not cat.parent %}
-          <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}" class="cat-link {% if categorie_active.slug == cat.slug %}active{% endif %}">{{ cat.nom }}</a>
-          {% for sous in cat.sous_categories.all %}
-          <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}" class="cat-link sub {% if categorie_active.slug == sous.slug %}active{% endif %}">└ {{ sous.nom }}</a>
-          {% endfor %}
+
+          <div class="cat-parent-wrap">
+
+            <!-- Ligne catégorie mère : lien (gauche) + chevron collapse (droite) -->
+            <div class="cat-item-row {% if categorie_active.slug == cat.slug %}active{% endif %}">
+
+              <!-- Lien vers la catégorie mère -->
+              <a href="?categorie={{ cat.slug }}&ordering={{ ordering }}"
+                 class="cat-item-link {% if categorie_active.slug == cat.slug %}active{% endif %}">
+                <span class="cat-checkbox">
+                  <svg class="cat-checkbox-check" width="9" height="9" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="3.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="cat-item-name">{{ cat.nom }}</span>
+              </a>
+
+              <!-- Bouton chevron collapse — visible seulement si sous-catégories -->
+              {% if cat.sous_categories.all %}
+              <button class="cat-collapse-btn {% for sous in cat.sous_categories.all %}{% if categorie_active.slug == sous.slug %}open{% endif %}{% endfor %}"
+                      onclick="toggleCatParent(this)"
+                      aria-label="Afficher les sous-catégories de {{ cat.nom }}">
+                <!-- Lucide "chevron-down" — tourne à l'ouverture -->
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {% endif %}
+
+            </div>
+
+            <!-- Sous-catégories : cachées par défaut, ouvertes si une est active -->
+            {% if cat.sous_categories.all %}
+            <div class="cat-sub-group {% for sous in cat.sous_categories.all %}{% if categorie_active.slug == sous.slug %}open{% endif %}{% endfor %}">
+              {% for sous in cat.sous_categories.all %}
+              <a href="?categorie={{ sous.slug }}&ordering={{ ordering }}"
+                 class="cat-item sub {% if categorie_active.slug == sous.slug %}active{% endif %}">
+                <span class="cat-checkbox">
+                  <svg class="cat-checkbox-check" width="9" height="9" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="3.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="cat-item-name">{{ sous.nom }}</span>
+              </a>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+          </div><!-- /cat-parent-wrap -->
+
           {% endif %}{% endfor %}
+
         </div>
       </div>
 
-      <div class="filter-group">
-        <div class="filter-group-label">Promotions</div>
-        <label class="filter-checkbox">
-          <input type="checkbox" {% if request.GET.promo %}checked{% endif %}
-                 onchange="applyFilter('promo', this.checked ? '1' : '')" />
-          <span>Promotions uniquement</span>
-        </label>
+      <!-- ── Section 3 : Promotions ──────────────────────────────────
+           Section simple avec une seule checkbox. -->
+      <div class="filter-section">
+        <div class="filter-section-header {% if request.GET.promo %}open{% endif %}"
+             onclick="toggleSection(this)"
+             aria-expanded="{% if request.GET.promo %}true{% else %}false{% endif %}">
+          <span class="filter-section-label">
+            <!-- Lucide "percent" — icône promotions -->
+            <span class="filter-section-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="5" x2="5" y2="19"/>
+                <circle cx="6.5" cy="6.5" r="2.5"/>
+                <circle cx="17.5" cy="17.5" r="2.5"/>
+              </svg>
+            </span>
+            Promotions
+          </span>
+          <svg class="filter-section-chevron" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="filter-section-body {% if request.GET.promo %}open{% endif %}">
+          <label class="filter-promo-label">
+            <input type="checkbox"
+                   {% if request.GET.promo %}checked{% endif %}
+                   onchange="applyFilter('promo', this.checked ? '1' : '')" />
+            Promotions uniquement
+          </label>
+        </div>
       </div>
 
-      <a href="{% url 'products:liste' %}" class="filter-reset">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-        Réinitialiser les filtres
-      </a>
+      <!-- Bouton réinitialiser tous les filtres -->
+      <div class="filter-sidebar-footer">
+        <a href="{% url 'products:liste' %}" class="filter-reset">
+          <!-- Lucide "rotate-ccw" — flèche de réinitialisation -->
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+          </svg>
+          Réinitialiser les filtres
+        </a>
+      </div>
+
     </aside>
 
     <div class="products-main">
@@ -350,6 +1103,48 @@
 
 {% block extra_scripts %}
 <script>
+  /* ── toggleCatParent : ouvre/ferme les sous-catégories d'une mère ── */
+  function toggleCatParent(btn) {
+    const wrap     = btn.closest('.cat-parent-wrap');
+    const subGroup = wrap ? wrap.querySelector('.cat-sub-group') : null;
+    if (!subGroup) return;
+    const isOpen = subGroup.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  /* ── toggleSection : ouvre/ferme une section accordéon de la sidebar ── */
+  function toggleSection(header) {
+    const isOpen = header.classList.toggle('open');
+    const body   = header.nextElementSibling;
+    if (body) body.classList.toggle('open', isOpen);
+    header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  /* ── toggleCatDropdown : ouvre/ferme le dropdown Catégories (header-bar) ── */
+  function toggleCatDropdown() {
+    const dropdown = document.getElementById('cat-dropdown');
+    const chevron  = document.getElementById('cat-chevron');
+    const btn      = document.getElementById('cat-tab-btn');
+    const isOpen   = dropdown.classList.toggle('open');
+    chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  /* Ferme le dropdown Catégories si clic en dehors */
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.header-tab-secondary-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      const dropdown = document.getElementById('cat-dropdown');
+      const chevron  = document.getElementById('cat-chevron');
+      const btn      = document.getElementById('cat-tab-btn');
+      if (dropdown) dropdown.classList.remove('open');
+      if (chevron)  chevron.style.transform = 'rotate(0deg)';
+      if (btn)      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ── openFilters / closeFilters : tiroir sidebar mobile ── */
   function openFilters() {
     document.getElementById('filter-sidebar').classList.add('open');
     document.getElementById('filter-overlay').style.display = 'block';
@@ -360,12 +1155,18 @@
     document.getElementById('filter-overlay').style.display = 'none';
     document.body.style.overflow = '';
   }
+
+  /* ── applyFilter : met à jour les params URL et recharge ── */
   function applyFilter(key, value) {
     const params = new URLSearchParams(window.location.search);
     params.delete('page');
+    /* La recherche efface toujours le filtre catégorie actif */
+    if (key === 'search') params.delete('categorie');
     if (value) { params.set(key, value); } else { params.delete(key); }
     window.location.href = '?' + params.toString();
   }
+
+  /* ── addToCart : appel API REST + toast de confirmation ── */
   function addToCart(produitId) {
     {% if user.is_authenticated %}
     apiPost('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 })
