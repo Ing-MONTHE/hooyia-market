@@ -163,13 +163,15 @@
   {% if user.is_authenticated %}
   <script>
   document.addEventListener('DOMContentLoaded', async () => {
+    // Skip si on est sur la page panier — Cart.load() gère le badge lui-même
+    if (typeof Cart !== 'undefined') return;
     try {
       const data = await API.get('/api/panier/', { silentError: true });
       const badge = document.getElementById('cart-badge');
       if (!badge) return;
-      const n = data && data.nombre_articles ? data.nombre_articles : 0;
-      if (n > 0) { badge.textContent = n; badge.style.display = 'flex'; }
-      else { badge.style.display = 'none'; }
+      const n = (data && data.nombre_articles) ? data.nombre_articles : 0;
+      badge.textContent = n;
+      badge.style.display = 'flex';
     } catch(e) {}
   });
   </script>
