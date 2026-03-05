@@ -116,3 +116,19 @@ class AvisAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, f"{count} avis invalidé(s). Les notes moyennes ont été recalculées.")
     invalider_avis_selectionnes.short_description = "✗ Invalider les avis sélectionnés"
+
+from .models import AvisApp
+
+@admin.register(AvisApp)
+class AvisAppAdmin(admin.ModelAdmin):
+    list_display  = ['utilisateur', 'note', 'commentaire', 'is_valide', 'date_creation']
+    list_filter   = ['is_valide', 'note']
+    actions       = ['valider', 'invalider']
+
+    @admin.action(description="Valider les avis sélectionnés")
+    def valider(self, request, queryset):
+        queryset.update(is_valide=True)
+
+    @admin.action(description="Invalider les avis sélectionnés")
+    def invalider(self, request, queryset):
+        queryset.update(is_valide=False)

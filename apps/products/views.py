@@ -13,6 +13,26 @@ def est_admin(user):
     return user.is_authenticated and user.is_staff
 
 
+# ===============================================================
+# VUE — Page "Laisser un avis sur la plateforme"
+# ===============================================================
+
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/compte/connexion/')
+def avis_plateforme(request):
+    """
+    Page dédiée pour laisser un avis sur la plateforme HooYia Market.
+    Accessible uniquement aux utilisateurs connectés.
+    La soumission se fait via l'API POST /api/avis-app/creer/ en JS.
+    """
+    from apps.reviews.models import AvisApp
+    deja_soumis = AvisApp.objects.filter(utilisateur=request.user).exists()
+    return render(request, 'products/avis_plateforme.html', {
+        'deja_soumis': deja_soumis,
+    })
+
+
 # ═══════════════════════════════════════════════════════════════
 # VUE — Page d'accueil
 # ═══════════════════════════════════════════════════════════════

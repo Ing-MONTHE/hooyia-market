@@ -16,10 +16,8 @@ Endpoints générés par le router :
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .api_views import AvisViewSet
+from .api_views import AvisAppListView, AvisAppCreerView
 
-# ── Enregistrement sur r'' ────────────────────────────────────────────────────
-# Le préfixe 'api/avis/' vient de config/urls.py → on n'ajoute PAS de préfixe ici.
-# Cohérent avec products/api_urls.py qui fait la même chose.
 router = DefaultRouter()
 router.register(r'', AvisViewSet, basename='avis')
 

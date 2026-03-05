@@ -1,335 +1,1043 @@
 {% extends 'base.html' %}
 {% load static %}
+{% comment %} ===============================================================
+   HooYia Market — products/detail.html
+
+   PAGE : Fiche produit complète
+
+   SECTIONS :
+     1. Breadcrumb        — fil d'Ariane : Accueil / Catalogue / Nom produit
+     2. Skeleton loader   — affiché pendant le chargement AJAX
+     3. Galerie images    — image principale + miniatures cliquables
+     4. Bloc infos        — nom, étoiles, prix (barré + promo), stock, quantité, CTA
+     5. Description       — texte complet
+     6. Avis clients      — liste des avis + formulaire de dépôt
+     7. Produits similaires — grille 4 colonnes, même catégorie, chargée via API
+
+   DONNÉES DJANGO :
+     {{ produit }}   — instance Produit (slug, nom, pour le SEO et le lien admin)
+     {{ admin_id }}  — ID du vendeur, pour ouvrir le chat
+     {{ user }}      — utilisateur connecté (rôle, is_staff, is_vendeur…)
+
+   API CALLS JS :
+     GET /api/produits/?slug=<SLUG>            -> lookup par slug
+     GET /api/produits/<id>/                   -> détail complet
+     GET /api/avis/?produit=<id>               -> liste des avis
+     GET /api/produits/?categorie_id=X         -> produits similaires
+     POST /api/panier/ajouter/                 -> ajouter au panier
+     POST /api/avis/                           -> soumettre un avis
+     POST /api/chat/creer/                     -> ouvrir une conversation
+
+   CHARTE COULEURS (cohérente avec home.html / navbar.html) :
+     #0D1F5C  brand deep    — titres principaux
+     #1E3A8A  brand main    — liens, boutons secondaires outline
+     #F97316  accent orange — CTA panier, badges promo, prix promo
+     #F4F7FC  fond global   — fond de page
+     #FFFFFF  surface       — cartes
+     #E2E8F0  bordure       — séparateurs
+     #0F1923  texte         — corps principal
+     #8898AA  texte muet    — méta, catégories, dates
+
+   RÈGLE BOUTON UNIQUE :
+     1 seul bouton orange (#F97316) visible à la fois :
+       -> "Ajouter au panier" = CTA principal permanent
+       -> "Publier l'avis"    = visible UNIQUEMENT quand le formulaire est ouvert
+         (donc jamais simultanément avec le CTA panier)
+
+   RESPONSIVE :
+     < 768px  : colonne unique (galerie puis infos)
+     768px+   : 2 colonnes (galerie gauche / infos droite)
+     1024px+  : 55%/45%, similaires en grille 4 colonnes
+=============================================================== {% endcomment %}
 
 {% block title %}{{ produit.nom }} — HooYia Market{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs font-body text-ink/40 mb-6">
-    <a href="/" class="hover:text-brand-600 transition-colors">Accueil</a>
-    <span>/</span>
-    <a href="/produits/" class="hover:text-brand-600 transition-colors">Catalogue</a>
-    <span>/</span>
-    <span class="text-ink/70">{{ produit.nom }}</span>
+{% comment %} ==============================================================
+   STYLES SPÉCIFIQUES — FICHE PRODUIT
+   Nommage :
+     .dp-*       -> layout global ("detail page")
+     .gallery-*  -> galerie images
+     .info-*     -> bloc informations produit
+     .qty-*      -> sélecteur de quantité
+     .reviews-*  -> section avis
+     .similar-*  -> section produits similaires
+     .sim-*      -> cartes individuelles des similaires
+============================================================== {% endcomment %}
+<style>
+
+  /* == LAYOUT GLOBAL ==
+     Fond #F4F7FC comme home.html. */
+  .dp-root {
+    background: #F4F7FC;
+    min-height: calc(100vh - 72px);
+    padding: 1.5rem 0 5rem;
+  }
+  .dp-container { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+
+
+  /* == BREADCRUMB ==
+     Fil d'Ariane sobre. Hover -> bleu #1E3A8A. */
+  .dp-breadcrumb {
+    display: flex; align-items: center; gap: .375rem;
+    font-family: 'Poppins', sans-serif; font-size: .8125rem;
+    color: #8898AA; margin-bottom: 1.75rem; flex-wrap: wrap;
+  }
+  .dp-breadcrumb a { color: #8898AA; text-decoration: none; transition: color 150ms; }
+  .dp-breadcrumb a:hover { color: #1E3A8A; }
+  .dp-breadcrumb-sep     { color: #CBD5E0; }
+  .dp-breadcrumb-current { color: #4A5568; font-weight: 500; }
+
+
+  /* == SKELETON LOADER ==
+     2 colonnes imitant la mise en page réelle.
+     Même animation pulse que les autres pages. */
+  .dp-skeleton { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+  @media (min-width: 768px) { .dp-skeleton { grid-template-columns: 1fr 1fr; } }
+  .skel-box {
+    background: #E2E8F0; border-radius: .75rem;
+    animation: skel-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+
+  /* == LAYOUT PRINCIPAL : GALERIE + INFOS ==
+     55%/45% sur desktop. Empilement sur mobile. */
+  .dp-main { display: grid; grid-template-columns: 1fr; gap: 2.5rem; margin-bottom: 4rem; }
+  @media (min-width: 768px)  { .dp-main { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+  @media (min-width: 1024px) { .dp-main { grid-template-columns: 55% 45%; } }
+
+
+  /* == GALERIE ==
+     .gallery-main-wrap  -> conteneur carré (aspect-ratio 1:1)
+     .gallery-main-img   -> object-contain + padding (ne crope pas)
+     .gallery-badge-promo -> badge "-X%" en haut à gauche
+     .gallery-edit-btn   -> bouton admin en haut à droite
+     .gallery-thumbs     -> rangée de miniatures (scroll horizontal)
+     .gallery-thumb-btn  -> miniature (.active = bordure orange #F97316) */
+  .gallery-main-wrap {
+    position: relative; background: #fff;
+    border: 1px solid #E2E8F0; border-radius: 1.25rem;
+    aspect-ratio: 1/1; overflow: hidden;
+    box-shadow: 0 2px 16px rgba(13,31,92,.07);
+    transition: box-shadow 200ms;
+  }
+  .gallery-main-wrap:hover { box-shadow: 0 6px 24px rgba(13,31,92,.11); }
+  .gallery-main-img {
+    width: 100%; height: 100%; object-fit: contain; padding: 1.5rem;
+    transition: opacity 200ms ease; /* transition lors du changement via setImage() */
+  }
+  /* Badge promo — même style que .pcard-promo-badge dans home.html */
+  .gallery-badge-promo {
+    position: absolute; top: 1rem; left: 1rem;
+    background: #F97316; color: #fff;
+    font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 700;
+    padding: .3rem .7rem; border-radius: .5rem; line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(249,115,22,.35);
+  }
+  /* Bouton Modifier — admin uniquement, coin supérieur droit */
+  .gallery-edit-btn {
+    position: absolute; top: 1rem; right: 1rem;
+    background: rgba(255,255,255,.92); border: 1px solid #E2E8F0;
+    border-radius: .625rem; padding: .375rem .75rem;
+    font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 600;
+    color: #0F1923; text-decoration: none; backdrop-filter: blur(4px);
+    transition: background 150ms, box-shadow 150ms;
+  }
+  .gallery-edit-btn:hover { background: #fff; box-shadow: 0 4px 12px rgba(13,31,92,.12); }
+  /* Miniatures */
+  .gallery-thumbs {
+    display: flex; gap: .5rem; margin-top: .875rem;
+    overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none;
+  }
+  .gallery-thumbs::-webkit-scrollbar { display: none; }
+  .gallery-thumb-btn {
+    flex-shrink: 0; width: 64px; height: 64px;
+    border-radius: .625rem; overflow: hidden;
+    border: 2px solid #E2E8F0; background: #fff;
+    cursor: pointer; padding: 0;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .gallery-thumb-btn:hover { transform: translateY(-2px); border-color: #1E3A8A; }
+  .gallery-thumb-btn.active { border-color: #F97316; } /* Active = bordure orange */
+  .gallery-thumb-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+
+  /* == BLOC INFORMATIONS ==
+     Hiérarchie visuelle :
+       Label catégorie -> Titre -> Étoiles -> Prix -> Desc courte
+       -> Stock -> Quantité + CTA -> Contact vendeur -> Description longue */
+
+  /* Label catégorie */
+  .info-cat-label {
+    font-family: 'Poppins', sans-serif; font-size: .6875rem; font-weight: 700;
+    color: #8898AA; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 .5rem;
+  }
+  /* Titre */
+  .info-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.375rem, 2.5vw, 1.875rem);
+    font-weight: 800; color: #0D1F5C; line-height: 1.25; margin: 0 0 .875rem;
+  }
+  /* Étoiles + compteur */
+  .info-rating-row { display: flex; align-items: center; gap: .5rem; margin-bottom: 1.25rem; }
+  /* Étoiles affichage produit — SVG Lucide, amber */
+  .info-stars-wrap { display:flex; align-items:center; gap:2px; }
+  .info-stars-wrap svg { width:16px; height:16px; flex-shrink:0; }
+  .info-reviews-count { font-family:'Poppins',sans-serif; font-size:.8125rem; color:#8898AA; margin-left:.375rem; }
+  /* Prix */
+  .info-price-row { display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .info-price-current {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800; color: #0D1F5C; line-height: 1;
+  }
+  /* Prix promo -> passage en orange */
+  .info-price-current.is-promo { color: #F97316; }
+  .info-price-old {
+    font-family: 'Poppins', sans-serif; font-size: 1.125rem;
+    color: #CBD5E0; text-decoration: line-through; font-weight: 500; line-height: 1;
+  }
+  /* Description courte */
+  .info-desc-short {
+    font-family: 'Poppins', sans-serif; font-size: .875rem;
+    color: #4A5568; line-height: 1.7; margin-bottom: 1rem;
+  }
+  /* Badge de stock */
+  .info-stock {
+    display: flex; align-items: center; gap: .375rem;
+    font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 500;
+    padding: .45rem .875rem; border-radius: .625rem; width: fit-content; margin-bottom: 1.5rem;
+  }
+  .info-stock.in-stock    { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+  .info-stock.out-of-stock { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+  /* Séparateur */
+  .info-divider { height: 1px; background: #E2E8F0; margin: .25rem 0 1.25rem; }
+
+  /* Ligne quantité + bouton panier */
+  .info-action-row { display: flex; align-items: stretch; gap: .75rem; margin-bottom: .875rem; }
+
+  /* Sélecteur de quantité */
+  .qty-picker {
+    display: flex; align-items: center;
+    border: 1.5px solid #E2E8F0; border-radius: .625rem;
+    overflow: hidden; background: #fff; flex-shrink: 0;
+    transition: border-color 200ms;
+  }
+  .qty-picker:focus-within { border-color: #1E3A8A; }
+  .qty-btn {
+    width: 40px; height: 48px; display: flex; align-items: center; justify-content: center;
+    background: #F4F7FC; border: none; cursor: pointer; font-size: 1.375rem; font-weight: 700; color: #1E3A8A;
+    font-family: 'Poppins', sans-serif; line-height: 1; user-select: none;
+    transition: background 150ms, color 150ms;
+  }
+  .qty-btn:hover { background: #E2E8F0; color: #0D1F5C; }
+  .qty-input {
+    width: 48px; text-align: center; border: none; outline: none;
+    font-family: 'Poppins', sans-serif; font-size: .9375rem; font-weight: 600;
+    color: #0D1F5C; background: transparent; padding: 0; -moz-appearance: textfield;
+  }
+  .qty-input::-webkit-inner-spin-button,
+  .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* * CTA "Ajouter au panier" — BOUTON ORANGE UNIQUE de la vue *
+     Respecte la règle : 1 seul bouton orange par section.
+     Même design que .btn-primary de custom.css, adapté en flex. */
+  .btn-add-cart {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem;
+    height: 48px; background: #F97316; color: #fff; border: none;
+    border-radius: .625rem; font-family: 'Poppins', sans-serif;
+    font-size: .9375rem; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(249,115,22,.3);
+    transition: background 180ms, transform 150ms, box-shadow 180ms;
+  }
+  .btn-add-cart:hover:not(:disabled) {
+    background: #ea6000; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(249,115,22,.45);
+  }
+  /* Épuisé : gris neutre, non cliquable */
+  .btn-add-cart:disabled { background: #CBD5E0; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* Bouton "Contacter le vendeur" — outline bleu, secondaire */
+  .btn-contact-seller {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
+    height: 44px; background: transparent; color: #1E3A8A;
+    border: 1.5px solid #BFDBFE; border-radius: .625rem;
+    font-family: 'Poppins', sans-serif; font-size: .875rem; font-weight: 500;
+    cursor: pointer; text-decoration: none; margin-bottom: 1.25rem;
+    transition: background 150ms, border-color 150ms;
+  }
+  .btn-contact-seller:hover { background: #EFF6FF; border-color: #1E3A8A; }
+
+  /* Description longue */
+  .info-desc-long { border-top: 1px solid #E2E8F0; padding-top: 1.25rem; }
+  .info-desc-long h3 {
+    font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+    color: #0D1F5C; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 .625rem;
+  }
+  .info-desc-long p {
+    font-family: 'Poppins', sans-serif; font-size: .875rem; color: #4A5568; line-height: 1.75; margin: 0;
+  }
+
+
+  /* == SECTION AVIS ==
+     Carte blanche cohérente avec les .card du projet.
+     .reviews-header   -> titre + bouton "Laisser un avis"
+     .reviews-form-wrap -> formulaire collapsible (masqué par défaut)
+     .review-card       -> carte individuelle */
+  .reviews-section {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 1.25rem;
+    padding: 2rem; margin-bottom: 3.5rem;
+    box-shadow: 0 2px 12px rgba(13,31,92,.05);
+  }
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+  .reviews-title  { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700; color: #0D1F5C; margin: 0; }
+  /* Bouton secondaire outline */
+  .btn-leave-review {
+    display: inline-flex; align-items: center; gap: .375rem;
+    padding: .5rem 1rem; border: 1.5px solid #1E3A8A; border-radius: .5rem;
+    background: transparent; color: #1E3A8A;
+    font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 600;
+    cursor: pointer; transition: background 150ms;
+  }
+  .btn-leave-review:hover { background: #EFF6FF; }
+  /* Formulaire collapsible */
+  .reviews-form-wrap {
+    background: #F8FAFF; border: 1px solid #BFDBFE;
+    border-radius: .875rem; padding: 1.25rem; margin-bottom: 1.5rem;
+  }
+  .reviews-form-title { font-family: 'Poppins', sans-serif; font-size: .875rem; font-weight: 700; color: #0D1F5C; margin: 0 0 1rem; }
+  /* Sélecteur étoiles Lucide SVG — demi-étoiles supportées */
+  .star-picker {
+    display: flex; gap: .25rem; margin-bottom: 1.25rem; align-items: center;
+  }
+  /* Chaque étoile = 2 demi-zones cliquables côte à côte */
+  .star-item {
+    position: relative; width: 36px; height: 36px; cursor: pointer; flex-shrink: 0;
+  }
+  .star-item svg {
+    width: 36px; height: 36px; display: block;
+    transition: transform 120ms;
+    pointer-events: none;
+  }
+  .star-item:hover svg { transform: scale(1.15); }
+  .star-half-left, .star-half-right { display: none; }
+  .star-click-zone {
+    position: absolute; inset: 0; cursor: pointer;
+  }
+  /* Couleurs selon état : vide / demi / pleine */
+  .star-item svg .star-bg   { fill: #E2E8F0; stroke: #CBD5E0; }
+  .star-item svg .star-fill { fill: none;    stroke: none; }
+  /* Pleine */
+  .star-item.full svg .star-bg   { fill: #F59E0B; stroke: #F59E0B; }
+  .star-item.full svg .star-fill { fill: none; }
+  /* Demi (clip gauche) */
+  .star-item.half svg .star-bg   { fill: #E2E8F0; stroke: #CBD5E0; }
+  .star-item.half svg .star-fill { fill: #F59E0B; stroke: #F59E0B; clip-path: inset(0 50% 0 0); }
+  /* Label note sélectionnée */
+  .star-note-label {
+    font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 600;
+    color: #F59E0B; margin-left: .5rem; min-width: 40px;
+  }
+  /* Carte avis */
+  .review-card { padding: 1.125rem 0; border-bottom: 1px solid #F0F4FA; }
+  .review-card:last-child { border-bottom: none; padding-bottom: 0; }
+  .review-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .625rem; gap: .75rem; }
+  .review-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1.5px solid #E2E8F0; }
+  .review-avatar-initials {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #1E3A8A, #0D1F5C); color: #fff;
+    font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .review-author { font-family: 'Poppins', sans-serif; font-size: .875rem; font-weight: 600; color: #0F1923; }
+  .review-date   { font-family: 'Poppins', sans-serif; font-size: .75rem; color: #8898AA; margin-top: 1px; }
+  .review-stars  { font-size: .875rem; color: #F59E0B; letter-spacing: .05em; flex-shrink: 0; }
+  .review-text   { font-family: 'Poppins', sans-serif; font-size: .875rem; color: #4A5568; line-height: 1.65; }
+  /* Empty state */
+  .reviews-empty { text-align: center; padding: 2.5rem 1rem; font-family: 'Poppins', sans-serif; font-size: .875rem; color: #8898AA; }
+  .reviews-empty svg { margin: 0 auto .75rem; display: block; opacity: .3; }
+
+
+  /* == PRODUITS SIMILAIRES ==
+     Mêmes cartes que home.html (.pcard) pour la cohérence visuelle.
+     GET /api/produits/?categorie_id=X — filtré côté JS, max 4 résultats.
+     Grille : 2 col (mobile) -> 4 col (desktop). */
+  .similar-section { margin-bottom: 3rem; }
+  .similar-eyebrow {
+    font-family: 'Poppins', sans-serif; font-size: .75rem; font-weight: 700;
+    color: #F97316; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .375rem;
+  }
+  .similar-title { font-family: 'Poppins', sans-serif; font-size: clamp(1.125rem,2.5vw,1.375rem); font-weight: 700; color: #0D1F5C; margin: 0 0 1.75rem; }
+  .similar-title span { color: #F97316; }
+  .similar-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.25rem; }
+  @media (min-width: 768px)  { .similar-grid { grid-template-columns: repeat(3,1fr); } }
+  @media (min-width: 1024px) { .similar-grid { grid-template-columns: repeat(4,1fr); } }
+  /* Carte similaire — reprend exactement .pcard de home.html */
+  .sim-card {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: .75rem;
+    overflow: hidden; transition: box-shadow 200ms, transform 200ms;
+    text-decoration: none; color: inherit; display: flex; flex-direction: column;
+  }
+  .sim-card:hover { box-shadow: 0 8px 28px rgba(13,31,92,.11); transform: translateY(-3px); }
+  .sim-card-img-wrap { position: relative; aspect-ratio: 1/1; background: #F4F7FC; overflow: hidden; }
+  .sim-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+  .sim-card:hover .sim-card-img { transform: scale(1.04); }
+  .sim-promo-badge {
+    position: absolute; top: .5rem; left: .5rem;
+    background: #F97316; color: #fff;
+    font-family: 'Poppins', sans-serif; font-size: .6875rem; font-weight: 700;
+    padding: .2rem .5rem; border-radius: .375rem;
+  }
+  .sim-card-body { padding: .875rem; flex: 1; display: flex; flex-direction: column; gap: .25rem; }
+  .sim-card-cat  { font-family: 'Poppins', sans-serif; font-size: .6875rem; font-weight: 600; color: #8898AA; text-transform: uppercase; letter-spacing: .05em; }
+  .sim-card-name { font-family: 'Poppins', sans-serif; font-size: .8125rem; font-weight: 600; color: #0F1923; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+  .sim-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: .625rem; padding-top: .625rem; border-top: 1px solid #F4F7FC; gap: .375rem; }
+  .sim-card-price     { font-family: 'Poppins', sans-serif; font-size: .9375rem; font-weight: 700; color: #0D1F5C; line-height: 1; }
+  .sim-card-price-old { font-family: 'Poppins', sans-serif; font-size: .75rem; color: #CBD5E0; text-decoration: line-through; line-height: 1; margin-top: 2px; }
+  /* Bouton panier rapide (1 unité) sur la carte similaire */
+  .sim-cart-btn {
+    width: 32px; height: 32px; border-radius: .5rem;
+    background: #F4F7FC; border: 1px solid #E2E8F0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #0D1F5C; flex-shrink: 0;
+    transition: background 150ms, border-color 150ms, color 150ms;
+  }
+  .sim-cart-btn:hover { background: #F97316; border-color: #F97316; color: #fff; }
+
+  /* == ÉTAT ERREUR == */
+  .dp-not-found { text-align: center; padding: 5rem 1rem; }
+  .dp-not-found p { font-family: 'Poppins', sans-serif; font-size: 1.125rem; color: #8898AA; margin: 0 0 1.5rem; }
+
+</style>
+
+
+{% comment %} == CONTENU PRINCIPAL == {% endcomment %}
+<div class="dp-root">
+<div class="dp-container">
+
+  {% comment %} -- 1. BREADCRUMB -- {% endcomment %}
+  <nav class="dp-breadcrumb" aria-label="Fil d'Ariane">
+    <a href="{% url 'products:accueil' %}">Accueil</a>
+    <span class="dp-breadcrumb-sep">></span>
+    <a href="{% url 'products:liste' %}">Catalogue</a>
+    <span class="dp-breadcrumb-sep">></span>
+    {% comment %} Rendu Django (SEO) + mis à jour en JS {% endcomment %}
+    <span class="dp-breadcrumb-current" id="bc-nom">{{ produit.nom }}</span>
   </nav>
 
-  <!-- Skeleton -->
-  <div id="skeleton-detail" class="grid lg:grid-cols-2 gap-12 animate-pulse">
-    <div class="bg-cream-warm rounded-2xl h-96"></div>
-    <div class="space-y-4">
-      <div class="h-4 bg-cream-warm rounded w-1/3"></div>
-      <div class="h-8 bg-cream-warm rounded w-3/4"></div>
-      <div class="h-4 bg-cream-warm rounded w-1/2"></div>
-      <div class="h-16 bg-cream-warm rounded"></div>
-      <div class="h-12 bg-cream-warm rounded"></div>
+  {% comment %} -- 2. SKELETON LOADER -- masqué par afficherProduit() {% endcomment %}
+  <div id="dp-skeleton" class="dp-skeleton" aria-hidden="true">
+    <div>
+      <div class="skel-box" style="aspect-ratio:1/1;margin-bottom:.875rem;"></div>
+      <div style="display:flex;gap:.5rem;">
+        {% for _ in "1234" %}<div class="skel-box" style="width:64px;height:64px;border-radius:.625rem;flex-shrink:0;"></div>{% endfor %}
+      </div>
+    </div>
+    <div style="padding-top:.5rem;display:flex;flex-direction:column;gap:.75rem;">
+      <div class="skel-box" style="height:11px;width:30%;border-radius:5px;"></div>
+      <div class="skel-box" style="height:28px;width:80%;border-radius:7px;"></div>
+      <div class="skel-box" style="height:13px;width:45%;border-radius:5px;"></div>
+      <div class="skel-box" style="height:38px;width:42%;border-radius:7px;margin-top:.5rem;"></div>
+      <div class="skel-box" style="height:13px;width:65%;border-radius:5px;"></div>
+      <div class="skel-box" style="height:13px;width:55%;border-radius:5px;"></div>
+      <div class="skel-box" style="height:48px;border-radius:.625rem;margin-top:.5rem;"></div>
     </div>
   </div>
 
-  <!-- Contenu réel -->
-  <div id="product-detail" class="hidden">
-    <div class="grid lg:grid-cols-2 gap-12">
+  {% comment %} -- CONTENU PRODUIT (masqué jusqu'au fetch) -- {% endcomment %}
+  <div id="dp-content" style="display:none;">
 
-      <!-- ── GALERIE ── -->
+    {% comment %} == 3 + 4. GALERIE + INFOS == {% endcomment %}
+    <div class="dp-main">
+
+      {% comment %} -- 3. GALERIE -- {% endcomment %}
       <div>
-        <div class="relative bg-cream-warm rounded-2xl overflow-hidden mb-3 aspect-square">
-          <img id="main-image" src="" alt="{{ produit.nom }}"
-            class="w-full h-full object-contain p-4 transition-opacity duration-200"
-            onerror="this.src='/static/img/logo.svg'" />
-          <span id="promo-badge" class="hidden absolute top-4 left-4 bg-brand-500 text-white text-sm font-mono font-bold px-3 py-1 rounded-xl"></span>
+        <div class="gallery-main-wrap">
+          <img id="gallery-main-img" src="" alt="{{ produit.nom }}"
+               class="gallery-main-img"
+               onerror="this.src='{% static 'img/logo.svg' %}'" />
+          <span id="gallery-promo-badge" class="gallery-badge-promo" style="display:none;"></span>
           {% if user.is_staff %}
-          <div class="absolute top-4 right-4">
-            <a id="edit-link" href="#" class="bg-white/90 text-ink text-xs font-body font-medium px-3 py-1.5 rounded-lg shadow hover:bg-white transition-colors">
-              ✏️ Modifier
-            </a>
-          </div>
+          <a id="gallery-edit-btn" href="#" class="gallery-edit-btn">edit Modifier</a>
           {% endif %}
         </div>
-        <div id="thumbnails" class="flex gap-2 overflow-x-auto pb-1"></div>
+        <div id="gallery-thumbs" class="gallery-thumbs"
+             role="list" aria-label="Images du produit"></div>
       </div>
 
-      <!-- ── INFOS PRODUIT ── -->
-      <div class="flex flex-col">
-        <p id="cat-nom" class="text-xs font-body text-ink/40 uppercase tracking-wider mb-2"></p>
-        <h1 id="prod-nom" class="font-display text-3xl text-ink leading-tight mb-3">{{ produit.nom }}</h1>
-
-        <div class="flex items-center gap-2 mb-4">
-          <div id="stars" class="text-amber-400 text-lg"></div>
-          <span id="nb-avis" class="text-sm text-ink/40 font-body"></span>
+      {% comment %} -- 4. INFOS -- {% endcomment %}
+      <div style="display:flex;flex-direction:column;">
+        <p id="info-cat"   class="info-cat-label"></p>
+        <h1 id="info-title" class="info-title">{{ produit.nom }}</h1>
+        <div class="info-rating-row">
+          <div id="info-stars" class="info-stars-wrap"></div>
+          <span id="info-reviews-count" class="info-reviews-count"></span>
         </div>
-
-        <div class="flex items-baseline gap-3 mb-6">
-          <span id="prix-actuel" class="font-display text-4xl font-bold text-ink"></span>
-          <span id="prix-barre" class="hidden text-xl text-ink/30 line-through font-body"></span>
+        <div class="info-price-row">
+          <span id="info-price-current" class="info-price-current"></span>
+          <span id="info-price-old"     class="info-price-old" style="display:none;"></span>
         </div>
+        <p   id="info-desc-short" class="info-desc-short"></p>
+        <div id="info-stock"      class="info-stock" aria-live="polite"></div>
+        <div class="info-divider"></div>
 
-        <p id="desc-courte" class="text-ink/60 font-body text-sm leading-relaxed mb-6"></p>
-        <div id="stock-info" class="flex items-center gap-2 mb-6 text-sm font-body"></div>
-
-        <div class="flex items-center gap-3 mb-4">
-          {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
-          <div class="flex items-center border border-cream-border rounded-xl overflow-hidden">
-            <button onclick="changeQty(-1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">−</button>
-            <input type="number" id="qty" value="1" min="1" class="w-14 text-center border-none outline-none font-body text-sm bg-white py-3" />
-            <button onclick="changeQty(1)" class="px-4 py-3 text-ink/60 hover:bg-cream-warm transition-colors font-body text-lg leading-none">+</button>
+        {% comment %} Quantité + CTA — masqués pour admins/vendeurs {% endcomment %}
+        {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
+        <div class="info-action-row">
+          <div class="qty-picker" role="group" aria-label="Quantité">
+            <button class="qty-btn" type="button" onclick="changeQty(-1)" aria-label="Diminuer">-</button>
+            <input  type="number" id="qty-input" class="qty-input" value="1" min="1" />
+            <button class="qty-btn" type="button" onclick="changeQty(1)"  aria-label="Augmenter">+</button>
           </div>
-          <button onclick="ajouterAuPanier()" id="btn-panier" class="btn-primary flex-1 py-3 text-base">
+          {% comment %} * BOUTON ORANGE UNIQUE * {% endcomment %}
+          <button id="btn-add-cart" class="btn-add-cart" type="button" onclick="ajouterAuPanier()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+            </svg>
             Ajouter au panier
           </button>
-          {% endif %}
         </div>
+        {% endif %}
 
-        <!-- ── Bouton Contacter le vendeur ── -->
+        {% comment %} Bouton contact vendeur — clients authentifiés uniquement {% endcomment %}
         {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
         {% if admin_id %}
-        <button onclick="contacterVendeur()" id="btn-contact"
-          class="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-brand-300 text-brand-600 font-body font-medium text-sm hover:bg-brand-50 transition-colors">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        <button id="btn-contact-seller" class="btn-contact-seller" type="button" onclick="contacterVendeur()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
           </svg>
           Contacter le vendeur
         </button>
         {% endif %}
         {% endif %}
 
-        <div class="mt-6 pt-6 border-t border-cream-border">
-          <h3 class="font-display text-lg text-ink mb-3">Description</h3>
-          <div id="description" class="text-ink/60 font-body text-sm leading-relaxed"></div>
+        <div class="info-desc-long">
+          <h3>Description</h3>
+          <p id="info-desc-long"></p>
         </div>
       </div>
-    </div>
+    </div>{% comment %} fin .dp-main {% endcomment %}
 
-    <!-- ── AVIS ── -->
-    <section class="mt-16 pt-10 border-t border-cream-border">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-display text-2xl text-ink">Avis clients</h2>
+
+    {% comment %} == 5. AVIS CLIENTS == {% endcomment %}
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <h2 class="reviews-title">Avis clients</h2>
         {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
-        <button onclick="toggleAvisForm()" class="btn-secondary py-2 px-4 text-sm">Laisser un avis</button>
+        <button id="btn-leave-review" class="btn-leave-review" type="button" onclick="toggleAvisForm()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Laisser un avis
+        </button>
         {% endif %}
       </div>
 
+      {% comment %} Formulaire collapsible (masqué par défaut) {% endcomment %}
       {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
-      <div id="avis-form" class="hidden card p-6 mb-6">
-        <h3 class="font-body font-semibold text-ink mb-4">Votre avis</h3>
-        <div class="flex gap-2 mb-4" id="star-rating">
+      <div id="reviews-form-wrap" class="reviews-form-wrap" style="display:none;">
+        <p class="reviews-form-title">Votre avis</p>
+
+        {% comment %} Sélecteur étoiles SVG Lucide — demi-étoiles supportées (0.5 à 5) {% endcomment %}
+        <div class="star-picker" id="star-picker" role="group" aria-label="Note de 0.5 à 5">
           {% for i in "12345" %}
-          <button type="button" data-note="{{ forloop.counter }}" onclick="setNote({{ forloop.counter }})"
-            class="star-btn text-3xl text-cream-border hover:text-amber-400 transition-colors">★</button>
+          <div class="star-item" id="star-{{ forloop.counter }}" data-index="{{ forloop.counter }}">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              {% comment %} Couche de fond (étoile vide) {% endcomment %}
+              <polygon class="star-bg"
+                points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                stroke-width="1.5" stroke-linejoin="round"/>
+              {% comment %} Couche de remplissage (demi ou pleine) {% endcomment %}
+              <polygon class="star-fill"
+                points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                stroke-width="0"/>
+            </svg>
+            {% comment %} Zone gauche = demi-étoile, zone droite = étoile entière {% endcomment %}
+            <div class="star-click-zone" data-index="{{ forloop.counter }}"></div>
+          </div>
           {% endfor %}
+          <span class="star-note-label" id="star-note-label">—</span>
         </div>
-        <textarea id="avis-commentaire" rows="3" placeholder="Partagez votre expérience…" class="field text-sm mb-4"></textarea>
-        <button onclick="soumettreAvis()" class="btn-primary py-2 px-6 text-sm">Publier l'avis</button>
+
+        {% comment %} Textarea large pour l'avis {% endcomment %}
+        <textarea id="avis-commentaire" rows="5"
+                  placeholder="Partagez votre expérience avec ce produit…"
+                  style="width:100%; border:1.5px solid #E2E8F0; border-radius:.625rem;
+                         padding:.875rem 1rem; font-family:'Poppins',sans-serif;
+                         font-size:.875rem; color:#0F1923; background:#fff; resize:vertical;
+                         min-height:110px; outline:none; margin-bottom:1.25rem;
+                         transition:border-color 150ms, box-shadow 150ms;"
+                  onfocus="this.style.borderColor='#1E3A8A';this.style.boxShadow='0 0 0 3px rgba(30,58,138,.08)'"
+                  onblur="this.style.borderColor='#E2E8F0';this.style.boxShadow='none'"></textarea>
+
+        {% comment %} Bouton "Publier l'avis" — classe btn btn-primary du design system {% endcomment %}
+        <button type="button" onclick="soumettreAvis()" id="btn-publier-avis"
+                class="btn btn-primary"
+                style="padding:.625rem 1.5rem; font-size:.875rem; display:inline-flex; align-items:center; gap:.375rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Publier l'avis
+        </button>
       </div>
       {% endif %}
 
-      <div id="avis-list" class="space-y-4">
-        <p class="text-ink/30 font-body text-sm">Chargement des avis…</p>
+      <div id="reviews-list">
+        <p style="color:#8898AA;font-family:'Poppins',sans-serif;font-size:.875rem;padding:1rem 0;">Chargement des avis…</p>
       </div>
-    </section>
+    </div>
+
+
+    {% comment %} == 6. PRODUITS SIMILAIRES ==
+       Masqué par défaut — affiché par renderSimilaires() si résultats.
+       GET /api/produits/?categorie_id=X&statut=actif — filtré JS, max 4. {% endcomment %}
+    <div class="similar-section" id="similar-section" style="display:none;">
+      <p class="similar-eyebrow">Recommandations</p>
+      <h2 class="similar-title">Vous pourriez <span>aimer</span></h2>
+      <div id="similar-grid" class="similar-grid"></div>
+      <div style="text-align:center;margin-top:2rem;">
+        <a id="similar-see-more" href="{% url 'products:liste' %}"
+           class="btn btn-secondary btn-lg"
+           style="display:inline-flex;align-items:center;gap:.375rem;">
+          Voir plus dans cette catégorie
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  </div>{% comment %} fin #dp-content {% endcomment %}
+
+  {% comment %} Message erreur "Produit introuvable" {% endcomment %}
+  <div id="dp-not-found" style="display:none;" class="dp-not-found">
+    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0"
+         stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+         style="margin:0 auto 1rem;display:block;">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      <line x1="11" y1="8" x2="11" y2="12"/><line x1="11" y1="16" x2="11.01" y2="16"/>
+    </svg>
+    <p>Produit introuvable.</p>
+    <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg"><- Retour au catalogue</a>
   </div>
-</div>
+
+</div>{% comment %} fin .dp-container {% endcomment %}
+</div>{% comment %} fin .dp-root {% endcomment %}
+
 {% endblock %}
 
+
+{% comment %} ==============================================================
+   SCRIPTS — FICHE PRODUIT
+   Variables Django -> JS :
+     SLUG     -> lookup produit par slug
+     ADMIN_ID -> ouvrir la conversation chat
+   Flux : loadProduit() -> afficherProduit() -> loadAvis() + loadSimilaires()
+============================================================== {% endcomment %}
 {% block extra_scripts %}
 <script src="{% static 'js/products.js' %}"></script>
 <script>
-// ── Variables Django transmises au JS
-const SLUG = '{{ produit.slug }}';
+const SLUG     = '{{ produit.slug }}';
 const ADMIN_ID = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
-let produitData = null;
-let noteSelectionnee = 0;
-let maxStock = 999;
 
-// ── Chargement du produit
+let produitData      = null;
+let noteSelectionnee = 0;
+let maxStock         = 999;
+let categorieId      = null;
+
+
+/* -- CHARGEMENT DU PRODUIT ----------------------------------
+   2 étapes : slug exact -> fallback recherche textuelle. */
 async function loadProduit() {
   try {
-    // 1. Cherche par slug exact (filtre dédié)
     let p = null;
-    const bySlug = await API.get(`/api/produits/?slug=${encodeURIComponent(SLUG)}`, { silentError: true });
-    const slugResults = bySlug?.results ?? bySlug;
-    if (Array.isArray(slugResults) && slugResults.length > 0) {
-      p = slugResults[0];
-    }
-    // 2. Fallback: recherche textuelle dans le nom/slug
+    const r1 = await API.get(`/api/produits/?slug=${encodeURIComponent(SLUG)}`, { silentError: true });
+    const l1  = r1?.results ?? r1;
+    if (Array.isArray(l1) && l1.length) p = l1[0];
+
     if (!p) {
-      const bySearch = await API.get(`/api/produits/?search=${encodeURIComponent(SLUG)}`, { silentError: true });
-      const searchResults = bySearch?.results ?? bySearch;
-      if (Array.isArray(searchResults)) {
-        p = searchResults.find(x => x.slug === SLUG);
-      }
+      const r2 = await API.get(`/api/produits/?search=${encodeURIComponent(SLUG)}`, { silentError: true });
+      const l2  = r2?.results ?? r2;
+      if (Array.isArray(l2)) p = l2.find(x => x.slug === SLUG);
     }
     if (!p) throw new Error('not found');
 
-    // 3. Charge le détail complet via l'ID
     const detail = await API.get(`/api/produits/${p.id}/`);
-    if (!detail || detail.detail) throw new Error('not found');
+    if (!detail || detail.detail) throw new Error('detail');
+
     produitData = detail;
-    maxStock = detail.stock;
+    maxStock    = detail.stock;
+    categorieId = detail.categorie_id || detail.categorie;
+
     afficherProduit(detail);
     loadAvis(detail.id);
-  } catch(e) {
-    document.getElementById('skeleton-detail').innerHTML = `
-      <div class="col-span-2 text-center py-20">
-        <p class="font-display text-xl text-ink/30">Produit introuvable</p>
-        <a href="/produits/" class="text-brand-600 text-sm font-body mt-2 inline-block">← Retour au catalogue</a>
-      </div>`;
+    if (categorieId) loadSimilaires(detail.id, categorieId);
+  } catch {
+    document.getElementById('dp-skeleton').style.display  = 'none';
+    document.getElementById('dp-not-found').style.display = 'block';
   }
 }
 
+
+/* -- AFFICHAGE DU PRODUIT ---------------------------------- */
 function afficherProduit(p) {
-  document.getElementById('skeleton-detail').classList.add('hidden');
-  document.getElementById('product-detail').classList.remove('hidden');
+  document.getElementById('dp-skeleton').style.display = 'none';
+  document.getElementById('dp-content').style.display  = 'block';
 
-  const imgs = p.images || [];
-  document.getElementById('main-image').src = imgs.length ? imgs[0].image : '/static/img/logo.svg';
+  // Galerie
+  const imgs    = p.images || [];
+  const mainImg = document.getElementById('gallery-main-img');
+  mainImg.src   = imgs.length ? imgs[0].image : '{% static "img/logo.svg" %}';
+  mainImg.alt   = p.nom;
 
-  // Miniatures
-  const thumbs = document.getElementById('thumbnails');
+  const thumbsCont = document.getElementById('gallery-thumbs');
   if (imgs.length > 1) {
-    thumbs.innerHTML = imgs.map((img, i) => `
-      <button onclick="setImage('${img.image}')"
-        class="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 ${i===0?'border-brand-500':'border-cream-border'} hover:border-brand-400 transition-colors">
-        <img src="${img.image}" class="w-full h-full object-cover" onerror="this.src='/static/img/logo.svg'" />
-      </button>`).join('');
+    thumbsCont.innerHTML = imgs.map((img, i) => `
+      <button class="gallery-thumb-btn ${i === 0 ? 'active' : ''}"
+              onclick="setImage('${img.image}', this)" type="button" role="listitem">
+        <img src="${img.image}" alt="${p.nom}" onerror="this.src='{% static 'img/logo.svg' %}'" />
+      </button>`
+    ).join('');
   }
 
-  document.getElementById('cat-nom').textContent    = p.categorie_nom || '';
-  document.getElementById('prod-nom').textContent   = p.nom;
-  document.getElementById('desc-courte').textContent = p.description_courte || '';
-  document.getElementById('description').textContent = p.description || '';
-
-  const prix = p.prix_promo || p.prix;
-  document.getElementById('prix-actuel').textContent = formatPrix(prix) + ' CFA';
-  if (p.prix_promo) {
-    document.getElementById('prix-barre').textContent = formatPrix(p.prix) + ' CFA';
-    document.getElementById('prix-barre').classList.remove('hidden');
-    document.getElementById('promo-badge').textContent = `-${p.pourcentage_remise}%`;
-    document.getElementById('promo-badge').classList.remove('hidden');
+  if (p.prix_promo && p.pourcentage_remise > 0) {
+    const badge = document.getElementById('gallery-promo-badge');
+    badge.textContent = `-${p.pourcentage_remise}%`;
+    badge.style.display = 'block';
   }
 
+  const editBtn = document.getElementById('gallery-edit-btn');
+  if (editBtn) editBtn.href = `/produits/modifier/${p.id}/`;
+
+  // Textes
+  document.getElementById('info-cat').textContent        = p.categorie_nom || '';
+  document.getElementById('info-title').textContent      = p.nom;
+  document.getElementById('info-desc-short').textContent = p.description_courte || '';
+  document.getElementById('info-desc-long').textContent  = p.description || '';
+  document.getElementById('bc-nom').textContent          = p.nom;
+
+  // Étoiles
   const note = Math.round(parseFloat(p.note_moyenne) || 0);
-  document.getElementById('stars').textContent   = '★'.repeat(note) + '☆'.repeat(5 - note);
-  document.getElementById('nb-avis').textContent = `${p.nombre_avis} avis`;
-
-  const stockEl = document.getElementById('stock-info');
-  if (p.stock > 0) {
-    stockEl.innerHTML = `<span class="text-green-600">✓</span><span class="text-green-600 font-medium">En stock</span><span class="text-ink/30">(${p.stock} dispo)</span>`;
-  } else {
-    stockEl.innerHTML = `<span class="text-red-400 font-medium">Épuisé</span>`;
-    const btnPanier = document.getElementById('btn-panier');
-    if (btnPanier) {
-      btnPanier.disabled = true;
-      btnPanier.classList.add('opacity-50', 'cursor-not-allowed');
+  /* Génère les étoiles SVG Lucide (supporte les demi-étoiles) */
+  function buildStarsSVG(note, total=5) {
+    const STAR = `<polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke-linejoin="round" stroke-width="1.5"/>`;
+    let html = '';
+    for (let i = 1; i <= total; i++) {
+      if (note >= i) {
+        /* Pleine */
+        html += `<svg viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B">${STAR}</svg>`;
+      } else if (note >= i - 0.5) {
+        /* Demi — clip gauche */
+        const id = 'hclip' + i + Math.random().toString(36).slice(2,5);
+        html += `<svg viewBox="0 0 24 24" stroke="#F59E0B">
+          <defs><clipPath id="${id}"><rect x="0" y="0" width="12" height="24"/></clipPath></defs>
+          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="#E2E8F0" stroke="#E2E8F0" stroke-linejoin="round" stroke-width="1.5"/>
+          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="#F59E0B" stroke="#F59E0B" stroke-linejoin="round" stroke-width="1.5" clip-path="url(#${id})"/>
+        </svg>`;
+      } else {
+        /* Vide */
+        html += `<svg viewBox="0 0 24 24" fill="#E2E8F0" stroke="#E2E8F0">${STAR}</svg>`;
+      }
     }
+    return html;
   }
 
-  const editLink = document.getElementById('edit-link');
-  if (editLink) editLink.href = `/produits/modifier/${p.id}/`;
+  document.getElementById('info-stars').innerHTML         = buildStarsSVG(parseFloat(p.note_moyenne) || 0);
+  document.getElementById('info-reviews-count').textContent = `(${p.nombre_avis} avis)`;
+
+  // Prix
+  const pEl    = document.getElementById('info-price-current');
+  const pOldEl = document.getElementById('info-price-old');
+  pEl.textContent = formatPrix(p.prix_promo || p.prix) + ' F CFA';
+  if (p.prix_promo) {
+    pEl.classList.add('is-promo');
+    pOldEl.textContent  = formatPrix(p.prix) + ' F CFA';
+    pOldEl.style.display = 'inline';
+  }
+
+  // Stock
+  const sEl = document.getElementById('info-stock');
+  if (p.stock > 0) {
+    sEl.className = 'info-stock in-stock';
+    sEl.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      En stock <span style="opacity:.65;font-size:.75rem;">(${p.stock} disponible${p.stock > 1 ? 's' : ''})</span>`;
+  } else {
+    sEl.className = 'info-stock out-of-stock';
+    sEl.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Épuisé`;
+    const btn = document.getElementById('btn-add-cart');
+    if (btn) { btn.disabled = true; btn.textContent = 'Produit épuisé'; }
+  }
 }
 
-function setImage(src) {
-  const img = document.getElementById('main-image');
-  img.style.opacity = '0.5';
+
+/* -- CHANGEMENT IMAGE PRINCIPALE --------------------------- */
+function setImage(src, thumbBtn) {
+  const img = document.getElementById('gallery-main-img');
+  img.style.opacity = '0.35';
   setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 150);
+  document.querySelectorAll('.gallery-thumb-btn').forEach(b => b.classList.remove('active'));
+  if (thumbBtn) thumbBtn.classList.add('active');
 }
 
+
+/* -- SÉLECTEUR QUANTITÉ ------------------------------------ */
 function changeQty(delta) {
-  const input = document.getElementById('qty');
-  input.value = Math.max(1, Math.min(maxStock, parseInt(input.value) + delta));
+  const input = document.getElementById('qty-input');
+  input.value = Math.max(1, Math.min(maxStock, (parseInt(input.value) || 1) + delta));
 }
 
+
+/* -- AJOUTER AU PANIER ------------------------------------- */
 async function ajouterAuPanier() {
   if (!produitData) return;
+  const btn = document.getElementById('btn-add-cart');
+  const qty = parseInt(document.getElementById('qty-input').value) || 1;
+  btn.disabled    = true;
+  btn.textContent = 'Ajout en cours…';
   try {
-    await API.post('/api/panier/ajouter/', { produit_id: produitData.id, quantite: parseInt(document.getElementById('qty').value) });
+    await API.post('/api/panier/ajouter/', { produit_id: produitData.id, quantite: qty });
     window.toast && window.toast('Produit ajouté au panier !', 'success');
     const badge = document.getElementById('cart-badge');
-    if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent) || 0) + 1; }
-  } catch(e) {}
+    if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent) || 0) + qty; }
+  } catch {}
+  btn.disabled  = false;
+  btn.innerHTML = `
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+    </svg>
+    Ajouter au panier`;
 }
 
-// ── Avis
-async function loadAvis(produitId) {
-  try {
-    const data = await API.get(`/api/avis/?produit=${produitId}`, { silentError: true });
-    const avis = data.results || data;
-    const container = document.getElementById('avis-list');
-    if (!avis.length) { container.innerHTML = `<p class="text-ink/30 font-body text-sm">Aucun avis pour le moment.</p>`; return; }
-    container.innerHTML = avis.map(a => {
-      const nom = a.auteur_nom || a.nom_utilisateur || 'Anonyme';
-      const initiale = nom[0].toUpperCase();
-      const avatar = a.auteur_photo
-        ? `<img src="${a.auteur_photo}" alt="${nom}" class="h-9 w-9 rounded-full object-cover border border-cream-border">`
-        : `<span class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-sm font-semibold text-brand-600">${initiale}</span>`;
-      const date = a.date_creation ? new Date(a.date_creation).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'}) : '';
-      return `
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3">
-            ${avatar}
-            <div>
-              <span class="font-body font-semibold text-sm text-ink">${nom}</span>
-              ${date ? `<p class="text-xs text-ink/40 font-body mt-0.5">${date}</p>` : ''}
-            </div>
-          </div>
-          <span class="text-amber-400 text-base">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</span>
-        </div>
-        <p class="text-ink/60 font-body text-sm leading-relaxed">${a.commentaire || ''}</p>
-      </div>`;
-    }).join('');
-  } catch(e) {}
-}
 
-function toggleAvisForm() { document.getElementById('avis-form').classList.toggle('hidden'); }
-
-function setNote(n) {
-  noteSelectionnee = n;
-  document.querySelectorAll('.star-btn').forEach((btn, i) => {
-    btn.className = 'star-btn text-3xl transition-colors ' + (i < n ? 'text-amber-400' : 'text-cream-border hover:text-amber-400');
-  });
-}
-
-async function soumettreAvis() {
-  if (!noteSelectionnee) {
-    window.toast && window.toast('Veuillez sélectionner une note (1 à 5 étoiles).', 'error');
-    return;
-  }
-  if (!produitData) return;
-  try {
-    await API.post('/api/avis/', {
-      produit: produitData.id,
-      note: noteSelectionnee,
-      commentaire: document.getElementById('avis-commentaire').value
-    }, { silentError: true });
-    window.toast && window.toast('Avis soumis, en attente de validation.', 'success');
-    toggleAvisForm();
-    // Recharge les avis pour refléter le nouvel avis
-    chargerAvis();
-  } catch(e) {
-    // API.js enrichit l'erreur avec .message (déjà extrait via extractErrorMessage)
-    const msg = (e && e.message) ? e.message : 'Une erreur est survenue.';
-    window.toast && window.toast(msg, 'error');
-  }
-}
-
+/* -- CONTACTER LE VENDEUR ---------------------------------- */
 async function contacterVendeur() {
   if (!ADMIN_ID) return;
-  const btn = document.getElementById('btn-contact');
+  const btn = document.getElementById('btn-contact-seller');
   if (btn) { btn.disabled = true; btn.textContent = 'Connexion…'; }
   try {
     const conv = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID }, { silentError: true });
-    window.location.href = '/chat/' + conv.id + '/';
-  } catch(e) {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = 'Contacter le vendeur';
-    }
-    const msg = (e && e.message) ? e.message : 'Impossible d\u2019ouvrir la conversation.';
-    window.toast && window.toast(msg, 'error');
+    window.location.href = `/chat/${conv.id}/`;
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Contacter le vendeur'; }
+    window.toast && window.toast(err?.message || 'Impossible d\'ouvrir la conversation.', 'error');
   }
 }
+
+
+/* -- AVIS CLIENTS ------------------------------------------ */
+async function loadAvis(produitId) {
+  try {
+    const data = await API.get(`/api/avis/?produit=${produitId}`, { silentError: true });
+    renderAvis(data.results || data);
+  } catch {
+    document.getElementById('reviews-list').innerHTML =
+      '<p style="color:#8898AA;font-family:Poppins,sans-serif;font-size:.875rem;">Impossible de charger les avis.</p>';
+  }
+}
+
+function renderAvis(avis) {
+  const cont = document.getElementById('reviews-list');
+  if (!avis?.length) {
+    cont.innerHTML = `
+      <div class="reviews-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Aucun avis pour l'instant. Soyez le premier !
+      </div>`;
+    return;
+  }
+  cont.innerHTML = avis.map(a => {
+    const nom    = a.auteur_nom || a.nom_utilisateur || 'Anonyme';
+    const avatar = a.auteur_photo
+      ? `<img src="${a.auteur_photo}" class="review-avatar" alt="${nom}" />`
+      : `<div class="review-avatar-initials">${nom[0].toUpperCase()}</div>`;
+    const date = a.date_creation
+      ? new Date(a.date_creation).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })
+      : '';
+    return `
+    <div class="review-card">
+      <div class="review-card-header">
+        <div style="display:flex;align-items:center;gap:.625rem;flex:1;min-width:0;">
+          ${avatar}
+          <div><p class="review-author">${nom}</p>${date ? `<p class="review-date">${date}</p>` : ''}</div>
+        </div>
+        <span class="review-stars">${'*'.repeat(a.note)}${'*'.repeat(5-a.note)}</span>
+      </div>
+      ${a.commentaire ? `<p class="review-text">${a.commentaire}</p>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleAvisForm() {
+  const wrap = document.getElementById('reviews-form-wrap');
+  const open = wrap.style.display === 'none';
+  wrap.style.display = open ? 'block' : 'none';
+  const btn = document.getElementById('btn-leave-review');
+  if (btn) btn.textContent = open ? 'x Annuler' : '+ Laisser un avis';
+}
+
+/* -- SÉLECTEUR ÉTOILES : demi-étoiles + toggle --
+   noteSelectionnee : 0, 0.5, 1, 1.5, 2 … 5
+   pickStar(index, 'half') -> note = index - 0.5
+   pickStar(index, 'full') -> note = index
+   Toggle : cliquer la même note = remettre à 0   */
+
+/* Un seul clic sur l'étoile : moitié gauche = demi, moitié droite = entière */
+document.addEventListener('click', function(e) {
+  const zone = e.target.closest('.star-click-zone');
+  if (!zone) return;
+  const index = parseInt(zone.dataset.index);
+  const rect  = zone.getBoundingClientRect();
+  const side  = (e.clientX - rect.left) < rect.width / 2 ? 'half' : 'full';
+  pickStar(index, side);
+});
+
+function pickStar(index, side) {
+  const newNote = side === 'half' ? index - 0.5 : index;
+  /* Toggle : re-cliquer la même valeur retire 0.5, pas tout */
+  if (noteSelectionnee === newNote) {
+    noteSelectionnee = Math.max(0, newNote - 0.5);
+  } else {
+    noteSelectionnee = newNote;
+  }
+  renderStars(noteSelectionnee);
+}
+
+function renderStars(note) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('star-' + i);
+    if (!el) continue;
+    el.classList.remove('full', 'half');
+    if (note >= i)           el.classList.add('full');
+    else if (note >= i - 0.5) el.classList.add('half');
+  }
+  const label = document.getElementById('star-note-label');
+  if (label) label.textContent = note > 0 ? note + ' / 5' : '—';
+}
+
+function setNote(n) { pickStar(n, 'full'); }
+
+async function soumettreAvis() {
+  if (!noteSelectionnee) { window.toast && window.toast('Sélectionnez une note.', 'error'); return; }
+  if (!produitData) return;
+  try {
+    await API.post('/api/avis/', {
+      produit:     produitData.id,
+      note:        noteSelectionnee,
+      commentaire: document.getElementById('avis-commentaire').value
+    }, { silentError: true });
+    window.toast && window.toast('Avis soumis ! Merci.', 'success');
+    toggleAvisForm();
+    loadAvis(produitData.id);
+  } catch (err) { window.toast && window.toast(err?.message || 'Erreur.', 'error'); }
+}
+
+
+/* -- RECOMMANDATIONS : 2 produits par catégorie, toutes catégories --
+   1. Récupère toutes les catégories via /api/categories/
+   2. Pour chaque catégorie, récupère 3 produits actifs
+   3. Filtre le produit courant, prend 2 par catégorie max
+   4. Affiche tout dans la grille                              */
+async function loadSimilaires(currentId, catId) {
+  try {
+    /* Récupère toutes les catégories */
+    const catData = await API.get('/api/categories/?limit=50', { silentError: true });
+    const categories = catData.results || catData;
+    if (!categories?.length) return;
+
+    /* Pour chaque catégorie, récupère 2-3 produits en parallèle */
+    const requests = categories.map(cat =>
+      API.get(`/api/produits/?categorie_id=${cat.id}&statut=actif&limit=3`, { silentError: true })
+        .then(d => (d.results || d).filter(p => p.id !== currentId).slice(0, 2))
+        .catch(() => [])
+    );
+    const results = await Promise.all(requests);
+
+    /* Aplatit et déduplique */
+    const seen = new Set();
+    const produits = results.flat().filter(p => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id); return true;
+    });
+
+    if (!produits.length) return;
+    renderSimilaires(produits, catId);
+  } catch {}
+}
+
+function renderSimilaires(produits, catId) {
+  const grid = document.getElementById('similar-grid');
+  grid.innerHTML = produits.map(p => {
+    const imgs   = p.images || [];
+    const src    = imgs.length ? imgs[0].image : '{% static "img/logo.svg" %}';
+    const prix   = p.prix_promo || p.prix;
+    const promo  = !!p.prix_promo;
+    return `
+    <a href="/produits/${p.slug}/" class="sim-card">
+      <div class="sim-card-img-wrap">
+        <img src="${src}" alt="${p.nom}" class="sim-card-img"
+             onerror="this.src='{% static 'img/logo.svg' %}'" loading="lazy" />
+        ${promo ? `<span class="sim-promo-badge">-${p.pourcentage_remise||''  }%</span>` : ''}
+      </div>
+      <div class="sim-card-body">
+        <span class="sim-card-cat">${p.categorie_nom||''}</span>
+        <span class="sim-card-name">${p.nom}</span>
+        <div class="sim-card-footer">
+          <div>
+            <div class="sim-card-price">${formatPrix(prix)} F CFA</div>
+            ${promo ? `<div class="sim-card-price-old">${formatPrix(p.prix)} F CFA</div>` : ''}
+          </div>
+          <button class="sim-cart-btn" type="button"
+                  onclick="event.preventDefault();event.stopPropagation();addToCartQuick(${p.id})"
+                  aria-label="Ajouter au panier">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>`;
+  }).join('');
+  const seeMore = document.getElementById('similar-see-more');
+  if (seeMore) seeMore.href = `/produits/?categorie_id=${catId}`;
+  document.getElementById('similar-section').style.display = 'block';
+}
+
+async function addToCartQuick(id) {
+  try {
+    await API.post('/api/panier/ajouter/', { produit_id: id, quantite: 1 });
+    window.toast && window.toast('Produit ajouté au panier !', 'success');
+    const badge = document.getElementById('cart-badge');
+    if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent)||0)+1; }
+  } catch {}
+}
+
+
+/* -- HELPER ------------------------------------------------ */
+function formatPrix(val) { return parseInt(val).toLocaleString('fr-FR'); }
+
 
 loadProduit();
 </script>

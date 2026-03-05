@@ -175,3 +175,40 @@ class AvisViewSet(viewsets.ModelViewSet):
             {'detail': f'Avis #{avis.id} invalidé. Note moyenne du produit recalculée.'},
             status=status.HTTP_200_OK
         )
+
+# ===============================================================
+# VIEWS — AvisApp
+# GET  /api/avis-app/         -> liste publique (is_valide=True)
+# POST /api/avis-app/creer/   -> créer un avis (authentifié)
+# ===============================================================
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import AvisApp
+from .serializers import AvisAppListSerializer, AvisAppCreerSerializer
+
+
+class AvisAppListView(generics.ListAPIView):
+    """Liste publique des avis validés sur la plateforme."""
+    serializer_class   = AvisAppListSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return AvisApp.objects.filter(is_valide=True).order_by('-date_creation')[:6]
+
+
+class AvisAppCreerView(APIView):
+    """Crée un avis sur la plateforme (utilisateur connecté uniquement)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = AvisAppCreerSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Avis soumis, en attente de validation.'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        """Vérifie si l'utilisateur a déjà soumis un avis."""
+        existe = AvisApp.objects.filter(utilisateur=request.user).exists()
+        return Response({'deja_soumis': existe})

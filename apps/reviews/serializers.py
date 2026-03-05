@@ -198,3 +198,53 @@ class AvisCreerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Vous avez déjà laissé un avis sur ce produit."
             )
+
+# ===============================================================
+# SERIALIZER — AvisApp (avis sur la plateforme)
+# ===============================================================
+
+from .models import AvisApp
+
+class AvisAppListSerializer(serializers.ModelSerializer):
+    """Lecture publique — affiché sur la home page."""
+    auteur_nom   = serializers.CharField(source='utilisateur.get_full_name', read_only=True)
+    auteur_user  = serializers.CharField(source='utilisateur.username', read_only=True)
+    auteur_photo = serializers.SerializerMethodField()
+
+    def get_auteur_photo(self, obj):
+        request = self.context.get('request')
+        try:
+            photo = obj.utilisateur.photo_profil
+            if photo and request:
+                return request.build_absolute_uri(photo.url)
+        except Exception:
+            pass
+        return None
+
+    class Meta:
+        model  = AvisApp
+        fields = ['id', 'auteur_nom', 'auteur_user', 'auteur_photo', 'note', 'commentaire', 'date_creation']
+        read_only_fields = fields
+
+
+class AvisAppCreerSerializer(serializers.ModelSerializer):
+    """Création d'un avis app par l'utilisateur connecté."""
+
+    class Meta:
+        model  = AvisApp
+        fields = ['note', 'commentaire']
+
+    def validate(self, data):
+        utilisateur = self.context['request'].user
+        if AvisApp.objects.filter(utilisateur=utilisateur).exists():
+            raise serializers.ValidationError("Vous avez déjà laissé un avis sur la plateforme.")
+        return data
+
+    def create(self, validated_data):
+        try:
+            return AvisApp.objects.create(
+                utilisateur=self.context['request'].user,
+                **validated_data
+            )
+        except IntegrityError:
+            raise serializers.ValidationError("Vous avez déjà laissé un avis sur la plateforme.")

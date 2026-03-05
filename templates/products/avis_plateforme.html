@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+{% comment %}
+   HooYia Market - avis_plateforme.html
+   Page dédiée pour laisser un avis sur la plateforme.
+   Accessible via /avis-plateforme/ (login requis).
+   Soumission via POST /api/avis-app/creer/
+{% endcomment %}
+
+{% block title %}Laisser un avis — HooYia Market{% endblock %}
+
+{% block content %}
+<style>
+  .avis-page-wrap {
+    min-height: 70vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 1.5rem;
+    background: #F4F7FC;
+  }
+  .avis-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 4px 24px rgba(13,31,92,.07);
+  }
+  .avis-card-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: linear-gradient(135deg,#EFF6FF,#DBEAFE);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .avis-card-title {
+    font-family: 'Poppins',sans-serif; font-size: 1.375rem;
+    font-weight: 800; color: #0D1F5C; margin: 0 0 .375rem;
+  }
+  .avis-card-sub {
+    font-family: 'Poppins',sans-serif; font-size: .875rem;
+    color: #8898AA; margin: 0 0 2rem; line-height: 1.6;
+  }
+  /* Sélecteur étoiles */
+  .star-row { display: flex; gap: .375rem; margin-bottom: 1.5rem; align-items: center; }
+  .star-item-ap {
+    position: relative; width: 40px; height: 40px; cursor: pointer; flex-shrink: 0;
+  }
+  .star-item-ap svg { width: 40px; height: 40px; display: block; pointer-events: none; transition: transform 120ms; }
+  .star-item-ap:hover svg { transform: scale(1.12); }
+  .star-click-ap { position: absolute; inset: 0; cursor: pointer; }
+  .star-item-ap svg .s-bg   { fill: #E2E8F0; stroke: #CBD5E0; }
+  .star-item-ap svg .s-fill { fill: none; stroke: none; }
+  .star-item-ap.full svg .s-bg   { fill: #F59E0B; stroke: #F59E0B; }
+  .star-item-ap.half svg .s-bg   { fill: #E2E8F0; stroke: #CBD5E0; }
+  .star-item-ap.half svg .s-fill { fill: #F59E0B; stroke: #F59E0B; clip-path: inset(0 50% 0 0); }
+  .star-note-ap {
+    font-family:'Poppins',sans-serif; font-size:.875rem; font-weight:700;
+    color:#F59E0B; margin-left:.5rem;
+  }
+  /* Textarea */
+  .avis-textarea {
+    width: 100%; border: 1.5px solid #E2E8F0; border-radius: .625rem;
+    padding: .875rem 1rem; font-family: 'Poppins',sans-serif;
+    font-size: .875rem; color: #0F1923; background: #fff;
+    resize: vertical; min-height: 130px; outline: none;
+    margin-bottom: 1.5rem;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .avis-textarea:focus {
+    border-color: #1E3A8A;
+    box-shadow: 0 0 0 3px rgba(30,58,138,.08);
+  }
+  .avis-textarea::placeholder { color: #8898AA; }
+  /* Message succès */
+  .avis-success {
+    text-align: center; padding: 1.5rem 0;
+  }
+  .avis-success-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #ECFDF5; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 1rem;
+  }
+</style>
+
+<div class="avis-page-wrap">
+  <div class="avis-card">
+
+    {% if deja_soumis %}
+    {% comment %} -- Déjà soumis -- {% endcomment %}
+    <div class="avis-success">
+      <div class="avis-success-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10B981"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2 style="font-family:'Poppins',sans-serif;font-size:1.125rem;font-weight:700;color:#0D1F5C;margin:0 0 .5rem;">
+        Avis déjà soumis
+      </h2>
+      <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0 0 1.5rem;">
+        Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !
+      </p>
+      <a href="{% url 'products:accueil' %}" class="btn btn-primary"
+         style="display:inline-flex;align-items:center;gap:.375rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour à l'accueil
+      </a>
+    </div>
+
+    {% else %}
+    {% comment %} -- Formulaire -- {% endcomment %}
+
+    <div class="avis-card-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+
+    <h1 class="avis-card-title">Votre avis compte</h1>
+    <p class="avis-card-sub">
+      Partagez votre expérience avec HooYia Market.<br>
+      Votre avis sera affiché sur la page d'accueil après validation.
+    </p>
+
+    {% comment %} Sélecteur étoiles {% endcomment %}
+    <div class="star-row" id="star-row-ap">
+      {% for i in "12345" %}
+      <div class="star-item-ap" id="star-ap-{{ forloop.counter }}">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <polygon class="s-bg" points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon class="s-fill" points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke-width="0"/>
+        </svg>
+        <div class="star-click-ap" data-index="{{ forloop.counter }}"></div>
+      </div>
+      {% endfor %}
+      <span class="star-note-ap" id="star-label-ap">Sélectionnez une note</span>
+    </div>
+
+    <textarea id="commentaire-ap" class="avis-textarea"
+              placeholder="Décrivez votre expérience avec HooYia Market…"></textarea>
+
+    <div id="msg-ap" style="display:none;margin-bottom:1rem;padding:.75rem 1rem;border-radius:.5rem;
+         font-family:'Poppins',sans-serif;font-size:.875rem;"></div>
+
+    <button type="button" id="btn-soumettre-ap" onclick="soumettreAvisApp()"
+            class="btn btn-primary"
+            style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.9375rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Soumettre mon avis
+    </button>
+
+    <p style="text-align:center;margin-top:1rem;font-family:'Poppins',sans-serif;font-size:.8125rem;color:#8898AA;">
+      <a href="{% url 'products:accueil' %}" style="color:#1E3A8A;text-decoration:none;">
+        &larr; Retour à l'accueil
+      </a>
+    </p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+let noteAp = 0;
+
+/* Event delegation — un clic sur une étoile */
+document.addEventListener('click', function(e) {
+  const zone = e.target.closest('.star-click-ap');
+  if (!zone) return;
+  const index = parseInt(zone.dataset.index);
+  const rect  = zone.getBoundingClientRect();
+  const side  = (e.clientX - rect.left) < rect.width / 2 ? 'half' : 'full';
+  pickStarAp(index, side);
+});
+
+function pickStarAp(index, side) {
+  const newNote = side === 'half' ? index - 0.5 : index;
+  noteAp = (noteAp === newNote) ? Math.max(0, newNote - 0.5) : newNote;
+  renderStarsAp(noteAp);
+}
+
+function renderStarsAp(note) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('star-ap-' + i);
+    if (!el) continue;
+    el.classList.remove('full', 'half');
+    if (note >= i)            el.classList.add('full');
+    else if (note >= i - 0.5) el.classList.add('half');
+  }
+  const label = document.getElementById('star-label-ap');
+  if (label) label.textContent = note > 0 ? note + ' / 5' : 'Sélectionnez une note';
+}
+
+function showMsg(texte, type) {
+  const el = document.getElementById('msg-ap');
+  el.style.display = 'block';
+  el.style.background = type === 'success' ? '#ECFDF5' : '#FEF2F2';
+  el.style.color      = type === 'success' ? '#065F46' : '#991B1B';
+  el.style.border     = type === 'success' ? '1px solid #A7F3D0' : '1px solid #FECACA';
+  el.textContent = texte;
+}
+
+async function soumettreAvisApp() {
+  if (!noteAp || noteAp < 1) {
+    showMsg('Veuillez sélectionner une note (1 à 5 étoiles).', 'error'); return;
+  }
+  const commentaire = document.getElementById('commentaire-ap').value.trim();
+  if (!commentaire) {
+    showMsg('Veuillez écrire un commentaire.', 'error'); return;
+  }
+
+  const btn = document.getElementById('btn-soumettre-ap');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  try {
+    await API.post('/api/avis-app/creer/', {
+      note: Math.round(noteAp),  /* API Django attend un entier 1-5 */
+      commentaire: commentaire
+    });
+    showMsg('Merci ! Votre avis est en attente de validation par notre équipe.', 'success');
+    btn.style.display = 'none';
+    document.getElementById('commentaire-ap').disabled = true;
+    document.getElementById('star-row-ap').style.pointerEvents = 'none';
+  } catch(e) {
+    showMsg(e?.message || 'Une erreur est survenue. Réessayez.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      Soumettre mon avis`;
+  }
+}
+</script>
+{% endblock %}
+{% endblock %}

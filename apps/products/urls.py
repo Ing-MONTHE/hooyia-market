@@ -5,6 +5,7 @@ app_name = 'products'
 
 urlpatterns = [
     path('',                              views.accueil,          name='accueil'),
+    path('avis-plateforme/',              views.avis_plateforme,  name='avis_plateforme'),
     path('produits/',                     views.liste_produits,   name='liste'),
     path('produits/autocomplete/',        views.autocomplete_search, name='autocomplete'),
     path('produits/ajouter/',             views.ajouter_produit,  name='ajouter'),

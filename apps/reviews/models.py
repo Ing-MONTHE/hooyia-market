@@ -106,3 +106,55 @@ class Avis(models.Model):
         nom_user    = self.utilisateur.username if self.utilisateur else "Anonyme"
         nom_produit = self.produit.nom if self.produit else "Produit supprimé"
         return f"Avis de {nom_user} sur {nom_produit} — {self.note}/5"
+
+
+# ===============================================================
+# AVIS APPLICATION
+# Avis laissé par un utilisateur sur la plateforme HooYia Market.
+# Indépendant des produits — concerne l'expérience globale du site.
+# ===============================================================
+
+class AvisApp(models.Model):
+    """
+    Témoignage d'un utilisateur sur la plateforme (pas sur un produit).
+    Affiché sur la home page dans la section "Ce qu'ils disent".
+
+    Modération :
+      is_valide=False par défaut → admin valide avant affichage public.
+    """
+
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='avis_app',
+        verbose_name="Auteur"
+    )
+
+    note = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1, message="Note minimale : 1."),
+            MaxValueValidator(5, message="Note maximale : 5."),
+        ],
+        verbose_name="Note (1 à 5)"
+    )
+
+    commentaire = models.TextField(verbose_name="Commentaire")
+
+    is_valide = models.BooleanField(
+        default=False,
+        verbose_name="Validé (affiché sur la home)"
+    )
+
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Avis sur l'application"
+        verbose_name_plural = "Avis sur l'application"
+        ordering = ['-date_creation']
+        # Un utilisateur = un seul avis sur l'app
+        unique_together = ('utilisateur',)
+
+    def __str__(self):
+        nom = self.utilisateur.username if self.utilisateur else "Anonyme"
+        return f"AvisApp de {nom} — {self.note}/5"
