@@ -899,7 +899,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!ok) return;
     try {
       await API.delete('/api/panier/vider/');
-      await reloadPanier();
+      // Réinitialiser l'ordre mémorisé
+      window._cartItemOrder = [];
+      // Forcer l'état vide immédiatement sans attendre l'API
+      renderCartPage({ est_vide: true, items: [], nombre_articles: 0, total: '0' });
       window.toast && window.toast('Panier vidé.', 'success');
     } catch(e) {}
   };
