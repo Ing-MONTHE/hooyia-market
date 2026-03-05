@@ -1,221 +1,432 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — users/profile.html
+   Page de profil utilisateur (et dashboard admin).
+
+   DEUX VUES selon user.is_staff :
+   ┌──────────────────────────────────────────────────────────┐
+   │  VUE UTILISATEUR NORMAL                                  │
+   │  Sidebar gauche (1/3) + Contenu droit (2/3)              │
+   │    Sidebar : avatar initiales, badges, nav rapide        │
+   │    Contenu : infos perso, adresses, commandes récentes   │
+   ├──────────────────────────────────────────────────────────┤
+   │  VUE ADMIN (is_staff)                                    │
+   │  En-tête + Grid 3 colonnes                               │
+   │    Gauche  : infos perso, accès rapides                  │
+   │    Droite  : KPI cards + dernières commandes + stock bas │
+   └──────────────────────────────────────────────────────────┘
+
+   STYLES : 100% inline + classes custom.css :
+     .btn-primary, .btn-secondary, .btn-sm, .btn-ghost
+     .card, .badge, .badge-*, .input-field
+
+   ICÔNES Lucide (SVG inline) :
+     User        → avatar fallback / champ identité
+     Mail        → email
+     Phone       → téléphone
+     Camera      → bouton changement photo
+     ClipboardList → commandes
+     ShoppingCart  → panier
+     MessageSquare → messages
+     MapPin      → adresses
+     LogOut      → déconnexion
+     LayoutDashboard → dashboard admin
+     Plus        → ajouter adresse
+     CheckCircle → email vérifié
+     XCircle     → email non vérifié
+     ShieldCheck → badge admin
+     Store       → badge vendeur
+     Trash2      → supprimer adresse
+     BarChart2   → stats KPI
+     AlertTriangle → stock faible
+
+   SCRIPTS (extra_scripts) :
+     - loadAdminStats()      : KPI admin via API
+     - loadCommandesRecentes() : commandes user via API
+     - confirm suppression adresse via showConfirm() global
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
 {% block title %}Mon Profil — HooYia Market{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+{% comment %} CONTENEUR PAGE — padding standard, max-width 1200px {% endcomment %}
+<div style="max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem;">
+
 
   {% if user.is_staff %}
-  <!-- ════════════════════════════════════════════════════════
-       VUE ADMINISTRATEUR
-  ════════════════════════════════════════════════════════ -->
+  {% comment %}
+  ════════════════════════════════════════════════════════════════
+     VUE ADMINISTRATEUR
+     En-tête avec identité + badge Admin
+     Grid 3 colonnes : infos/accès rapides | KPI + tableaux
+  ════════════════════════════════════════════════════════════════
+  {% endcomment %}
 
-  <div class="flex items-center gap-4 mb-8">
-    <div class="h-16 w-16 rounded-2xl bg-brand-600 flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
+  {% comment %} ── EN-TÊTE ADMIN ── {% endcomment %}
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
+
+    {% comment %} Avatar initiales — fond brand-600 {% endcomment %}
+    <div style="width:60px;height:60px;border-radius:16px;background:var(--brand-600);
+                display:flex;align-items:center;justify-content:center;
+                font-size:1.375rem;font-weight:700;color:#fff;flex-shrink:0;">
       {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
     </div>
+
     <div>
-      <div class="flex items-center gap-2">
-        <h1 class="font-display text-2xl text-ink">{{ user.get_full_name }}</h1>
-        <span class="px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-body font-semibold">Administrateur</span>
+      <div style="display:flex;align-items:center;gap:.625rem;flex-wrap:wrap;">
+        <h1 style="font-size:1.375rem;font-weight:800;color:var(--brand-600);margin:0;">
+          {{ user.get_full_name }}
+        </h1>
+        {% comment %} Badge Administrateur {% endcomment %}
+        <span class="badge badge-brand" style="display:inline-flex;align-items:center;gap:.3rem;">
+          {% comment %} Lucide — ShieldCheck {% endcomment %}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          Administrateur
+        </span>
       </div>
-      <p class="text-ink/50 font-body text-sm">{{ user.email }}</p>
+      <p style="font-size:.875rem;color:var(--text-muted);margin:.25rem 0 0 0;">{{ user.email }}</p>
     </div>
   </div>
 
-  <div class="grid lg:grid-cols-3 gap-6">
+  {% comment %} ── GRID ADMIN 3 COLONNES ── {% endcomment %}
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;">
 
-    <!-- ── COLONNE GAUCHE : Infos + Stats ── -->
-    <div class="space-y-5">
+    {% comment %} ── COLONNE GAUCHE ADMIN ── {% endcomment %}
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-      <!-- Informations personnelles -->
-      <div class="card p-5">
-        <h2 class="font-display text-base text-ink mb-4">Informations</h2>
+      {% comment %} Infos personnelles admin {% endcomment %}
+      <div class="card" style="padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0 0 1.25rem 0;">
+          Informations
+        </h2>
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" name="action" value="update_profil" />
-          <div class="space-y-3">
+          <div style="display:flex;flex-direction:column;gap:.875rem;">
             <div>
-              <label class="label text-xs">Prénom</label>
-              <input type="text" name="prenom" value="{{ user.prenom }}" class="field text-sm" />
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Prénom</label>
+              <input type="text" name="prenom" value="{{ user.prenom }}" class="input-field" style="font-size:.875rem;" />
             </div>
             <div>
-              <label class="label text-xs">Nom</label>
-              <input type="text" name="nom" value="{{ user.nom }}" class="field text-sm" />
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Nom</label>
+              <input type="text" name="nom" value="{{ user.nom }}" class="input-field" style="font-size:.875rem;" />
             </div>
             <div>
-              <label class="label text-xs">Téléphone</label>
-              <input type="text" name="telephone" value="{{ user.telephone }}" class="field text-sm" />
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Téléphone</label>
+              <input type="text" name="telephone" value="{{ user.telephone }}" class="input-field" style="font-size:.875rem;" />
             </div>
           </div>
-          <button type="submit" class="btn-primary w-full py-2 text-sm mt-4">Mettre à jour</button>
+          <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:1rem;justify-content:center;">
+            Mettre à jour
+          </button>
         </form>
       </div>
 
-      <!-- Accès rapides admin -->
-      <div class="card p-5">
-        <h2 class="font-display text-base text-ink mb-4">Accès rapides</h2>
-        <div class="space-y-2">
-          <a href="{% url 'products:admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">📊</span> Dashboard admin
+      {% comment %} Accès rapides admin {% endcomment %}
+      <div class="card" style="padding:1.5rem;">
+        <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0 0 1rem 0;">
+          Accès rapides
+        </h2>
+        <nav style="display:flex;flex-direction:column;gap:.25rem;">
+
+          <a href="{% url 'products:admin_dashboard' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:var(--text-secondary);transition:background 150ms;"
+             onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">
+            {% comment %} Lucide — LayoutDashboard {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard admin
           </a>
-          <a href="{% url 'products:admin_dashboard' %}#ajouter-produit" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">➕</span> Ajouter un produit
+
+          <a href="{% url 'orders:historique' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:var(--text-secondary);transition:background 150ms;"
+             onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">
+            {% comment %} Lucide — ClipboardList {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            Voir les commandes
           </a>
-          <a href="{% url 'products:admin_dashboard' %}#commandes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">🛒</span> Voir les commandes
-          </a>
-          <a href="{% url 'products:admin_dashboard' %}#utilisateurs" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">👥</span> Gérer utilisateurs
-          </a>
-          <a href="{% url 'products:admin_dashboard' %}#messages" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <span class="text-lg">💬</span> Messages clients
-          </a>
-        </div>
-      </div>
 
-    </div>
-
-    <!-- ── COLONNE DROITE : Stats + Tableau de bord ── -->
-    <div class="lg:col-span-2 space-y-5">
-
-      <!-- Stats KPI -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="card p-4 text-center" id="kpi-produits">
-          <p class="font-display text-2xl text-brand-600" id="nb-produits">—</p>
-          <p class="text-xs font-body text-ink/40 mt-1">Produits</p>
-        </div>
-        <div class="card p-4 text-center">
-          <p class="font-display text-2xl text-ink" id="nb-commandes">—</p>
-          <p class="text-xs font-body text-ink/40 mt-1">Commandes</p>
-        </div>
-        <div class="card p-4 text-center">
-          <p class="font-display text-2xl text-ink" id="nb-utilisateurs">—</p>
-          <p class="text-xs font-body text-ink/40 mt-1">Utilisateurs</p>
-        </div>
-        <div class="card p-4 text-center">
-          <p class="font-display text-2xl text-ink" id="nb-avis">—</p>
-          <p class="text-xs font-body text-ink/40 mt-1">Avis</p>
-        </div>
-      </div>
-
-      <!-- Dernières commandes -->
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-display text-base text-ink">Dernières commandes</h2>
-          <a href="{% url 'orders:historique' %}" class="text-xs text-brand-600 font-body hover:underline">Voir tout →</a>
-        </div>
-        <div id="dernières-commandes">
-          <p class="text-ink/30 font-body text-sm animate-pulse">Chargement…</p>
-        </div>
-      </div>
-
-      <!-- Produits stock faible -->
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-display text-base text-ink">⚠ Stock faible</h2>
-          <a href="{% url 'products:liste' %}" class="text-xs text-brand-600 font-body hover:underline">Voir le catalogue →</a>
-        </div>
-        <div id="stock-faible">
-          <p class="text-ink/30 font-body text-sm animate-pulse">Chargement…</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  {% else %}
-  <!-- ════════════════════════════════════════════════════════
-       VUE UTILISATEUR NORMAL
-  ════════════════════════════════════════════════════════ -->
-
-  <div class="grid lg:grid-cols-3 gap-8">
-
-    <!-- ── COLONNE GAUCHE : Avatar + Infos ── -->
-    <div class="space-y-5">
-
-      <!-- Avatar + nom -->
-      <div class="card p-6 text-center">
-        <form method="POST" enctype="multipart/form-data" id="photo-form">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="update_profil" />
-          <div class="relative inline-block mb-4">
-            {% if user.photo_profil %}
-            <img src="{{ user.photo_profil.url }}" alt="Photo de profil"
-              class="h-24 w-24 rounded-2xl object-cover mx-auto" />
-            {% else %}
-            <div class="h-24 w-24 rounded-2xl bg-brand-600 flex items-center justify-center text-3xl font-bold text-white mx-auto">
-              {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
-            </div>
-            {% endif %}
-            <button type="button" onclick="document.getElementById('photo-input').click()"
-              class="absolute -bottom-1 -right-1 bg-white border border-cream-border rounded-lg p-1.5 shadow hover:bg-cream-warm transition-colors">
-              <svg class="h-3.5 w-3.5 text-ink/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-            </button>
-            <input type="file" id="photo-input" name="photo_profil" accept="image/*" class="hidden"
-              onchange="document.getElementById('photo-form').submit()" />
-          </div>
-        </form>
-
-        <h2 class="font-display text-xl text-ink">{{ user.get_full_name }}</h2>
-        <p class="text-ink/40 font-body text-sm">{{ user.email }}</p>
-
-        <div class="mt-3 flex justify-center gap-2">
-          {% if user.email_verifie %}
-          <span class="px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-body">✓ Email vérifié</span>
-          {% else %}
-          <span class="px-2.5 py-0.5 rounded-full bg-red-100 text-red-500 text-xs font-body">Email non vérifié</span>
-          {% endif %}
-          {% if user.is_vendeur %}
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-body">Vendeur</span>
-          {% endif %}
-        </div>
-
-        <div class="mt-4 pt-4 border-t border-cream-border text-left">
-          <p class="text-xs text-ink/30 font-body">Membre depuis</p>
-          <p class="text-sm font-body text-ink">{{ user.date_inscription|date:"d F Y" }}</p>
-        </div>
-      </div>
-
-      <!-- Navigation rapide -->
-      <div class="card p-4">
-        <nav class="space-y-1">
-          <a href="{% url 'orders:historique' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Mes commandes
-          </a>
-          <a href="{% url 'cart:panier' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            Mon panier
-          </a>
-          <a href="/chat/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream-warm transition-colors text-sm font-body text-ink/70">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            Mes messages
-          </a>
-          <a href="{% url 'users:deconnexion' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm font-body text-red-400">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <a href="{% url 'users:deconnexion' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:#ef4444;transition:background 150ms;"
+             onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+            {% comment %} Lucide — LogOut {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Déconnexion
           </a>
+
         </nav>
       </div>
 
     </div>
+    {% comment %} ── FIN colonne gauche admin ── {% endcomment %}
 
-    <!-- ── COLONNE DROITE : Formulaires ── -->
-    <div class="lg:col-span-2 space-y-6">
 
-      <!-- Infos personnelles -->
-      <div class="card p-6">
-        <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Informations personnelles</h2>
+    {% comment %} ── COLONNE DROITE ADMIN ── {% endcomment %}
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
+      {% comment %}
+      ── KPI CARDS — 4 métriques clés (chargées via JS)
+         Valeurs initialisées à "—" puis remplies par loadAdminStats()
+      {% endcomment %}
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
+
+        <div class="card" style="padding:1.25rem;text-align:center;">
+          <p id="nb-produits" style="font-size:1.75rem;font-weight:800;color:var(--brand-500);margin:0 0 .25rem 0;">—</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Produits</p>
+        </div>
+        <div class="card" style="padding:1.25rem;text-align:center;">
+          <p id="nb-commandes" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Commandes</p>
+        </div>
+        <div class="card" style="padding:1.25rem;text-align:center;">
+          <p id="nb-utilisateurs" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Utilisateurs</p>
+        </div>
+        <div class="card" style="padding:1.25rem;text-align:center;">
+          <p id="nb-avis" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Avis</p>
+        </div>
+
+      </div>
+
+      {% comment %} Dernières commandes (chargées via API) {% endcomment %}
+      <div class="card" style="padding:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;">Dernières commandes</h2>
+          <a href="{% url 'orders:historique' %}" style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+            Voir tout →
+          </a>
+        </div>
+        <div id="dernières-commandes">
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
+        </div>
+      </div>
+
+      {% comment %} Produits stock faible (chargés via API) {% endcomment %}
+      <div class="card" style="padding:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;display:flex;align-items:center;gap:.5rem;">
+            {% comment %} Lucide — AlertTriangle {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Stock faible
+          </h2>
+          <a href="{% url 'products:liste' %}" style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+            Catalogue →
+          </a>
+        </div>
+        <div id="stock-faible">
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
+        </div>
+      </div>
+
+    </div>
+    {% comment %} ── FIN colonne droite admin ── {% endcomment %}
+
+  </div>
+  {% comment %} ── FIN grid admin ── {% endcomment %}
+
+
+  {% else %}
+  {% comment %}
+  ════════════════════════════════════════════════════════════════
+     VUE UTILISATEUR NORMAL
+     Sidebar gauche (fixe, 300px) + Contenu droit (flex:1)
+  ════════════════════════════════════════════════════════════════
+  {% endcomment %}
+
+  <div style="display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start;">
+
+
+    {% comment %}
+    ══════════════════════════════════════════════════════════════
+       SIDEBAR GAUCHE
+       1. Carte avatar (photo profil ou initiales, badges, date)
+       2. Carte navigation rapide
+    ══════════════════════════════════════════════════════════════
+    {% endcomment %}
+    <div style="display:flex;flex-direction:column;gap:1.25rem;position:sticky;top:1.5rem;">
+
+      {% comment %} ── CARTE AVATAR ── {% endcomment %}
+      <div class="card" style="padding:1.5rem;text-align:center;">
+
+        {% comment %}
+        ── PHOTO DE PROFIL ou INITIALES
+           Si user.photo_profil : affiche la photo
+           Sinon : carré arrondi brand-600 avec les initiales
+           Bouton Camera en overlay bas-droit pour changer la photo
+        {% endcomment %}
+        <form method="POST" enctype="multipart/form-data" id="photo-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_profil" />
+
+          <div style="position:relative;display:inline-block;margin-bottom:1rem;">
+            {% if user.photo_profil %}
+              <img src="{{ user.photo_profil.url }}" alt="Photo de profil"
+                   style="width:88px;height:88px;border-radius:18px;object-fit:cover;" />
+            {% else %}
+              {% comment %} Fallback initiales — fond brand-600 {% endcomment %}
+              <div style="width:88px;height:88px;border-radius:18px;background:var(--brand-600);
+                          display:flex;align-items:center;justify-content:center;
+                          font-size:1.75rem;font-weight:700;color:#fff;">
+                {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+              </div>
+            {% endif %}
+
+            {% comment %} Bouton Camera — overlay bas-droit {% endcomment %}
+            <button type="button" onclick="document.getElementById('photo-input').click()"
+              aria-label="Changer la photo de profil"
+              style="position:absolute;bottom:-6px;right:-6px;width:28px;height:28px;
+                     border-radius:8px;background:var(--surface);border:1.5px solid var(--border);
+                     display:flex;align-items:center;justify-content:center;
+                     cursor:pointer;box-shadow:var(--shadow-sm);transition:background 150ms;"
+              onmouseover="this.style.background='var(--surface-3)'"
+              onmouseout="this.style.background='var(--surface)'">
+              {% comment %} Lucide — Camera {% endcomment %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </button>
+
+            <input type="file" id="photo-input" name="photo_profil" accept="image/*"
+                   style="display:none;" onchange="document.getElementById('photo-form').submit()" />
+          </div>
+        </form>
+
+        {% comment %} Nom et email {% endcomment %}
+        <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0 0 .25rem 0;">
+          {{ user.get_full_name }}
+        </h2>
+        <p style="font-size:.8125rem;color:var(--text-muted);margin:0 0 .875rem 0;">{{ user.email }}</p>
+
+        {% comment %} Badges statuts — email vérifié + vendeur {% endcomment %}
+        <div style="display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.875rem;">
+
+          {% if user.email_verifie %}
+            <span class="badge badge-success" style="display:inline-flex;align-items:center;gap:.3rem;">
+              {% comment %} Lucide — CheckCircle {% endcomment %}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Email vérifié
+            </span>
+          {% else %}
+            <span class="badge badge-error" style="display:inline-flex;align-items:center;gap:.3rem;">
+              {% comment %} Lucide — XCircle {% endcomment %}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Non vérifié
+            </span>
+          {% endif %}
+
+          {% if user.is_vendeur %}
+            <span class="badge badge-warning" style="display:inline-flex;align-items:center;gap:.3rem;">
+              {% comment %} Lucide — Store {% endcomment %}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Vendeur
+            </span>
+          {% endif %}
+
+        </div>
+
+        {% comment %} Date d'inscription {% endcomment %}
+        <div style="padding-top:.875rem;border-top:1px solid var(--border);">
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .2rem 0;">Membre depuis</p>
+          <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0;">
+            {{ user.date_inscription|date:"d F Y" }}
+          </p>
+        </div>
+
+      </div>
+      {% comment %} ── FIN carte avatar ── {% endcomment %}
+
+
+      {% comment %}
+      ── NAVIGATION RAPIDE
+         Liens vers les sections principales du compte.
+         Déconnexion en rouge en bas.
+      {% endcomment %}
+      <div class="card" style="padding:1rem;">
+        <nav style="display:flex;flex-direction:column;gap:.25rem;">
+
+          <a href="{% url 'orders:historique' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:var(--text-secondary);transition:background 150ms;"
+             onmouseover="this.style.background='var(--surface-3)';this.style.color='var(--brand-600)'"
+             onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
+            {% comment %} Lucide — ClipboardList {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            Mes commandes
+          </a>
+
+          <a href="{% url 'cart:panier' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:var(--text-secondary);transition:background 150ms;"
+             onmouseover="this.style.background='var(--surface-3)';this.style.color='var(--brand-600)'"
+             onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
+            {% comment %} Lucide — ShoppingCart {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Mon panier
+          </a>
+
+          <a href="/chat/"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:var(--text-secondary);transition:background 150ms;"
+             onmouseover="this.style.background='var(--surface-3)';this.style.color='var(--brand-600)'"
+             onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
+            {% comment %} Lucide — MessageSquare {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Mes messages
+          </a>
+
+          <div style="height:1px;background:var(--border);margin:.25rem 0;"></div>
+
+          <a href="{% url 'users:deconnexion' %}"
+             style="display:flex;align-items:center;gap:.75rem;padding:.625rem .75rem;border-radius:.625rem;text-decoration:none;font-size:.875rem;color:#ef4444;transition:background 150ms;"
+             onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+            {% comment %} Lucide — LogOut {% endcomment %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Déconnexion
+          </a>
+
+        </nav>
+      </div>
+      {% comment %} ── FIN navigation rapide ── {% endcomment %}
+
+    </div>
+    {% comment %} ══ FIN SIDEBAR GAUCHE ══ {% endcomment %}
+
+
+    {% comment %}
+    ══════════════════════════════════════════════════════════════
+       CONTENU DROIT
+       1. Informations personnelles (formulaire)
+       2. Adresses de livraison (liste + ajout)
+       3. Commandes récentes (chargées via API)
+    ══════════════════════════════════════════════════════════════
+    {% endcomment %}
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+
+      {% comment %}
+      ── SECTION INFORMATIONS PERSONNELLES
+         Formulaire : prénom, nom, username, téléphone, email (readonly)
+         action=update_profil → géré par la vue users/views.py
+      {% endcomment %}
+      <div class="card" style="padding:1.75rem;">
+
+        <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0 0 1.25rem 0;
+                   padding-bottom:.875rem;border-bottom:1px solid var(--border);">
+          Informations personnelles
+        </h2>
+
+        {% comment %} Messages flash spécifiques au formulaire profil {% endcomment %}
         {% if messages %}
           {% for message in messages %}
-          <div class="mb-4 px-4 py-3 rounded-xl border text-sm font-body
-            {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% else %}bg-red-50 border-red-200 text-red-800{% endif %}">
+          <div style="margin-bottom:1rem;padding:.75rem 1rem;border-radius:.625rem;border:1px solid;font-size:.8125rem;font-weight:500;
+            {% if message.tags == 'success' %}background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25);color:#059669;
+            {% else %}background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626;{% endif %}">
             {{ message }}
           </div>
           {% endfor %}
@@ -224,147 +435,345 @@
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" name="action" value="update_profil" />
-          <div class="grid grid-cols-2 gap-4">
+
+          {% comment %} Grille 2 colonnes pour prénom/nom {% endcomment %}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
             <div>
-              <label class="label" for="id_prenom">Prénom</label>
-              <input type="text" name="prenom" id="id_prenom" value="{{ user.prenom }}" class="field" />
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">Prénom</label>
+              <input type="text" name="prenom" id="id_prenom" value="{{ user.prenom }}" class="input-field" />
             </div>
             <div>
-              <label class="label" for="id_nom">Nom</label>
-              <input type="text" name="nom" id="id_nom" value="{{ user.nom }}" class="field" />
-            </div>
-            <div class="col-span-2">
-              <label class="label" for="id_username">Nom d'utilisateur</label>
-              <input type="text" name="username" id="id_username" value="{{ user.username }}" class="field" />
-            </div>
-            <div class="col-span-2">
-              <label class="label" for="id_telephone">Téléphone</label>
-              <input type="text" name="telephone" id="id_telephone" value="{{ user.telephone }}" class="field" />
-            </div>
-            <div class="col-span-2">
-              <label class="label">Email</label>
-              <input type="email" value="{{ user.email }}" class="field bg-cream-warm cursor-not-allowed" disabled />
-              <p class="text-xs text-ink/30 font-body mt-1">L'email ne peut pas être modifié.</p>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">Nom</label>
+              <input type="text" name="nom" id="id_nom" value="{{ user.nom }}" class="input-field" />
             </div>
           </div>
-          <button type="submit" class="btn-primary py-2.5 px-6 text-sm mt-5">Enregistrer les modifications</button>
+
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+
+            <div>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+                Nom d'utilisateur
+              </label>
+              <div style="position:relative;">
+                {% comment %} Lucide — User {% endcomment %}
+                <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <input type="text" name="username" id="id_username" value="{{ user.username }}"
+                       class="input-field" style="padding-left:2.5rem;" />
+              </div>
+            </div>
+
+            <div>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+                Téléphone
+              </label>
+              <div style="position:relative;">
+                {% comment %} Lucide — Phone {% endcomment %}
+                <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                <input type="text" name="telephone" id="id_telephone" value="{{ user.telephone }}"
+                       placeholder="+237 6XX XXX XXX"
+                       class="input-field" style="padding-left:2.5rem;" />
+              </div>
+            </div>
+
+            {% comment %} Email — readonly, non modifiable {% endcomment %}
+            <div>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+                Adresse email
+              </label>
+              <div style="position:relative;">
+                {% comment %} Lucide — Mail {% endcomment %}
+                <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                <input type="email" value="{{ user.email }}"
+                       class="input-field" style="padding-left:2.5rem;background:var(--surface-2);cursor:not-allowed;"
+                       disabled />
+              </div>
+              <p style="font-size:.75rem;color:var(--text-muted);margin:.375rem 0 0 0;">
+                L'adresse email ne peut pas être modifiée.
+              </p>
+            </div>
+
+          </div>
+
+          {% comment %} CTA — RÈGLE D'OR : 1 seul .btn-primary sur cette section {% endcomment %}
+          <button type="submit" class="btn btn-primary"
+                  style="margin-top:1.5rem;padding:.625rem 1.5rem;">
+            Enregistrer les modifications
+          </button>
+
         </form>
       </div>
+      {% comment %} ── FIN section infos personnelles ── {% endcomment %}
 
-      <!-- Adresses de livraison -->
-      <div class="card p-6">
-        <div class="flex items-center justify-between mb-5 pb-3 border-b border-cream-border">
-          <h2 class="font-display text-lg text-ink">Adresses de livraison</h2>
-          <a href="{% url 'users:ajouter_adresse' %}" class="btn-primary py-1.5 px-4 text-xs">+ Ajouter</a>
+
+      {% comment %}
+      ── SECTION ADRESSES DE LIVRAISON
+         Liste les adresses enregistrées.
+         Adresse par défaut : encadré bleu.
+         Bouton Supprimer avec confirmation via showConfirm() global.
+         Bouton "+ Ajouter" → url users:ajouter_adresse
+      {% endcomment %}
+      <div class="card" style="padding:1.75rem;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
+          <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0;">
+            Adresses de livraison
+          </h2>
+          <a href="{% url 'users:ajouter_adresse' %}" class="btn btn-secondary btn-sm"
+             style="display:inline-flex;align-items:center;gap:.375rem;">
+            {% comment %} Lucide — Plus {% endcomment %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter
+          </a>
         </div>
 
         {% if adresses %}
-        <div class="space-y-3">
-          {% for adr in adresses %}
-          <div class="flex items-start justify-between gap-4 p-4 rounded-xl border {% if adr.is_default %}border-brand-400 bg-brand-50{% else %}border-cream-border{% endif %}">
-            <div>
-              {% if adr.is_default %}
-              <span class="inline-block mb-1 px-2 py-0.5 rounded-full bg-brand-500 text-white text-[10px] font-body font-semibold">Par défaut</span>
-              {% endif %}
-              <p class="font-body font-medium text-sm text-ink">{{ adr.nom_complet }}</p>
-              <p class="text-xs text-ink/50 font-body">{{ adr.adresse }}, {{ adr.ville }}</p>
-              <p class="text-xs text-ink/50 font-body">{{ adr.region }}, {{ adr.pays }}</p>
-              {% if adr.telephone %}<p class="text-xs text-ink/50 font-body">{{ adr.telephone }}</p>{% endif %}
-            </div>
-            <form method="POST" onsubmit="return false" data-confirm-delete>
-              {% csrf_token %}
-              <button type="submit" formaction="{% url 'users:supprimer_adresse' adr.id %}"
-                class="text-xs text-red-400 hover:text-red-600 font-body underline underline-offset-2">
-                Supprimer
-              </button>
-            </form>
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-8">
-          <p class="text-ink/30 font-body text-sm">Aucune adresse enregistrée.</p>
-          <a href="{% url 'users:ajouter_adresse' %}" class="text-brand-600 text-sm font-body underline mt-2 inline-block">Ajouter une adresse</a>
-        </div>
-        {% endif %}
-      </div>
+          <div style="display:flex;flex-direction:column;gap:.75rem;">
+            {% for adr in adresses %}
 
-      <!-- Commandes récentes -->
-      <div class="card p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-display text-lg text-ink">Commandes récentes</h2>
-          <a href="{% url 'orders:historique' %}" class="text-xs text-brand-600 font-body hover:underline">Voir tout →</a>
+            {% comment %}
+            ── CARTE ADRESSE
+               Bordure bleue si adresse par défaut (is_default)
+               Fond légèrement bleuté si par défaut
+            {% endcomment %}
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;
+                        padding:1rem 1.125rem;border-radius:.75rem;border:1.5px solid
+                        {% if adr.is_default %}var(--brand-200){% else %}var(--border){% endif %};
+                        background:{% if adr.is_default %}var(--brand-50){% else %}var(--surface){% endif %};">
+
+              <div style="display:flex;align-items:flex-start;gap:.75rem;">
+                {% comment %} Lucide — MapPin {% endcomment %}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <div>
+                  {% if adr.is_default %}
+                    <span class="badge badge-brand" style="margin-bottom:.375rem;display:inline-block;">Par défaut</span>
+                  {% endif %}
+                  <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0 0 .2rem 0;">
+                    {{ adr.nom_complet }}
+                  </p>
+                  <p style="font-size:.8125rem;color:var(--text-muted);margin:0 0 .1rem 0;">
+                    {{ adr.adresse }}, {{ adr.ville }}
+                  </p>
+                  <p style="font-size:.8125rem;color:var(--text-muted);margin:0;">
+                    {{ adr.region }}, {{ adr.pays }}
+                  </p>
+                  {% if adr.telephone %}
+                    <p style="font-size:.8125rem;color:var(--text-muted);margin:.1rem 0 0 0;">{{ adr.telephone }}</p>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% comment %} Bouton supprimer — déclenche showConfirm() via data-confirm-delete {% endcomment %}
+              <form method="POST" onsubmit="return false" data-confirm-delete style="flex-shrink:0;">
+                {% csrf_token %}
+                <button type="submit" formaction="{% url 'users:supprimer_adresse' adr.id %}"
+                  style="display:flex;align-items:center;gap:.3rem;background:none;border:none;
+                         cursor:pointer;font-size:.8125rem;color:var(--text-muted);
+                         padding:.375rem .5rem;border-radius:.375rem;transition:color 150ms,background 150ms;"
+                  onmouseover="this.style.color='#ef4444';this.style.background='#fef2f2'"
+                  onmouseout="this.style.color='var(--text-muted)';this.style.background='transparent'">
+                  {% comment %} Lucide — Trash2 {% endcomment %}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                  Supprimer
+                </button>
+              </form>
+
+            </div>
+            {% endfor %}
+          </div>
+
+        {% else %}
+          {% comment %} Empty state — aucune adresse enregistrée {% endcomment %}
+          <div style="text-align:center;padding:2.5rem 1rem;">
+            {% comment %} Lucide — MapPin (grand, décoratif) {% endcomment %}
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--border)"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                 style="margin:0 auto 1rem auto;display:block;">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <p style="font-size:.875rem;color:var(--text-muted);margin:0 0 .75rem 0;">
+              Aucune adresse enregistrée.
+            </p>
+            <a href="{% url 'users:ajouter_adresse' %}" class="btn btn-secondary btn-sm">
+              Ajouter une adresse
+            </a>
+          </div>
+        {% endif %}
+
+      </div>
+      {% comment %} ── FIN section adresses ── {% endcomment %}
+
+
+      {% comment %}
+      ── SECTION COMMANDES RÉCENTES
+         Les 3 dernières commandes chargées via API JS (loadCommandesRecentes).
+         Lien "Voir tout" vers l'historique complet.
+      {% endcomment %}
+      <div class="card" style="padding:1.75rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
+          <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0;">
+            Commandes récentes
+          </h2>
+          <a href="{% url 'orders:historique' %}"
+             style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
+             onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+            Voir tout →
+          </a>
         </div>
         <div id="commandes-recentes">
-          <p class="text-ink/30 font-body text-sm animate-pulse">Chargement…</p>
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
         </div>
       </div>
+      {% comment %} ── FIN section commandes ── {% endcomment %}
+
 
     </div>
+    {% comment %} ══ FIN CONTENU DROIT ══ {% endcomment %}
+
   </div>
+  {% comment %} ── FIN grid utilisateur ── {% endcomment %}
+
   {% endif %}
 
 </div>
+{% comment %} ── FIN conteneur page ── {% endcomment %}
+
 {% endblock %}
 
+
+{% comment %}
+════════════════════════════════════════════════════════════════
+   SCRIPTS
+   Deux blocs selon user.is_staff :
+
+   ADMIN :
+     loadAdminStats()   → KPI via API (/api/produits/, /api/commandes/, etc.)
+     loadStockFaible()  → produits avec stock_faible=true
+
+   USER :
+     loadCommandesRecentes() → 3 dernières commandes via /api/commandes/
+
+   COMMUN :
+     Listener suppression adresse → showConfirm() global (base.html)
+════════════════════════════════════════════════════════════════
+{% endcomment %}
 {% block extra_scripts %}
 <script>
 {% if user.is_staff %}
-// ── Dashboard admin : charger les stats
+
+/**
+ * loadAdminStats() — Charge les KPI du dashboard admin
+ * Requêtes parallèles via Promise.allSettled pour éviter
+ * qu'une erreur bloque toutes les autres.
+ */
 async function loadAdminStats() {
   try {
     const [produits, commandes, avis, utilisateurs] = await Promise.allSettled([
-      API.get('/api/produits/?page_size=1', { silentError: true }),
-      API.get('/api/commandes/', { silentError: true }),
-      API.get('/api/avis/', { silentError: true }),
-      API.get('/api/auth/utilisateurs/', { silentError: true }),
+      API.get('/api/produits/?page_size=1',      { silentError: true }),
+      API.get('/api/commandes/',                  { silentError: true }),
+      API.get('/api/avis/',                       { silentError: true }),
+      API.get('/api/auth/utilisateurs/',          { silentError: true }),
     ]);
 
     if (produits.status === 'fulfilled')
-      document.getElementById('nb-produits').textContent = produits.value.count || (produits.value.results||produits.value).length || '—';
+      document.getElementById('nb-produits').textContent =
+        produits.value.count || (produits.value.results || produits.value).length || '—';
+
     if (commandes.status === 'fulfilled') {
       const cmds = commandes.value.results || commandes.value;
-      document.getElementById('nb-commandes').textContent = commandes.value.count || cmds.length || '—';
+      document.getElementById('nb-commandes').textContent =
+        commandes.value.count || cmds.length || '—';
 
-      // Dernières commandes
-      const lastCmds = cmds.slice(0, 5);
-      const COLORS = { en_attente:'bg-yellow-100 text-yellow-700', confirmee:'bg-blue-100 text-blue-700', en_preparation:'bg-purple-100 text-purple-700', expediee:'bg-orange-100 text-orange-700', livree:'bg-green-100 text-green-700', annulee:'bg-red-100 text-red-400' };
-      const LABELS = { en_attente:'En attente', confirmee:'Confirmée', en_preparation:'En préparation', expediee:'Expédiée', livree:'Livrée', annulee:'Annulée' };
-      document.getElementById('dernières-commandes').innerHTML = lastCmds.length
-        ? lastCmds.map(c => `
-          <div class="flex items-center justify-between py-2 border-b border-cream-border last:border-0">
+      // Couleurs et labels des statuts (cohérents avec le design system)
+      const COLORS = {
+        en_attente:    'background:rgba(251,191,36,.15);color:#92400e;',
+        confirmee:     'background:rgba(30,58,138,.1);color:#1e3a8a;',
+        en_preparation:'background:rgba(249,115,22,.12);color:#c2410c;',
+        expediee:      'background:rgba(99,102,241,.1);color:#4338ca;',
+        livree:        'background:rgba(16,185,129,.1);color:#065f46;',
+        annulee:       'background:rgba(239,68,68,.1);color:#991b1b;',
+      };
+      const LABELS = {
+        en_attente:'En attente', confirmee:'Confirmée',
+        en_preparation:'En préparation', expediee:'Expédiée',
+        livree:'Livrée', annulee:'Annulée'
+      };
+
+      document.getElementById('dernières-commandes').innerHTML = cmds.length
+        ? cmds.slice(0, 5).map(c => `
+          <div style="display:flex;align-items:center;justify-content:space-between;
+                      padding:.625rem 0;border-bottom:1px solid var(--border);">
             <div>
-              <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">#${c.reference_courte || c.reference_courte || c.id}</a>
-              <p class="text-xs text-ink/40 font-body">${new Date(c.date_creation).toLocaleDateString('fr-FR')}</p>
+              <a href="/commandes/${c.id}/" style="font-size:.875rem;font-weight:600;
+                 color:var(--text-primary);text-decoration:none;"
+                 onmouseover="this.style.color='var(--brand-500)'"
+                 onmouseout="this.style.color='var(--text-primary)'">
+                #${c.reference_courte || c.id}
+              </a>
+              <p style="font-size:.75rem;color:var(--text-muted);margin:.1rem 0 0 0;">
+                ${new Date(c.date_creation).toLocaleDateString('fr-FR')}
+              </p>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-sm font-body font-semibold text-ink">${parseInt(c.montant_total || 0).toLocaleString('fr-FR')} F</span>
-              <span class="px-2 py-0.5 rounded-full text-xs font-body ${COLORS[c.statut]||'bg-gray-100 text-gray-600'}">${LABELS[c.statut]||c.statut}</span>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <span style="font-size:.875rem;font-weight:600;">${parseInt(c.montant_total||0).toLocaleString('fr-FR')} F</span>
+              <span style="font-size:.75rem;font-weight:600;padding:.2rem .625rem;border-radius:999px;
+                           ${COLORS[c.statut]||'background:var(--surface-3);color:var(--text-muted);'}">
+                ${LABELS[c.statut]||c.statut}
+              </span>
             </div>
           </div>`).join('')
-        : '<p class="text-ink/30 font-body text-sm">Aucune commande.</p>';
+        : '<p style="font-size:.875rem;color:var(--text-muted);">Aucune commande.</p>';
     }
+
     if (avis.status === 'fulfilled')
-      document.getElementById('nb-avis').textContent = avis.value.count || (avis.value.results||avis.value).length || '—';
+      document.getElementById('nb-avis').textContent =
+        avis.value.count || (avis.value.results || avis.value).length || '—';
+
     if (utilisateurs.status === 'fulfilled') {
       const users = utilisateurs.value.results || utilisateurs.value;
-      document.getElementById('nb-utilisateurs').textContent = utilisateurs.value.count || (Array.isArray(users) ? users.length : '—');
+      document.getElementById('nb-utilisateurs').textContent =
+        utilisateurs.value.count || (Array.isArray(users) ? users.length : '—');
     }
   } catch(e) {}
 }
 
-// Stock faible
+/**
+ * loadStockFaible() — Produits avec stock critique
+ */
 async function loadStockFaible() {
   try {
-    const data = await API.get('/api/produits/?stock_faible=true', { silentError: true });
+    const data     = await API.get('/api/produits/?stock_faible=true', { silentError: true });
     const produits = data.results || data;
     document.getElementById('stock-faible').innerHTML = produits.length
       ? produits.slice(0, 5).map(p => `
-        <div class="flex items-center justify-between py-2 border-b border-cream-border last:border-0">
-          <a href="/produits/${p.slug}/" class="text-sm font-body text-ink hover:text-brand-600">${p.nom}</a>
-          <span class="text-xs font-mono font-bold ${p.stock <= 2 ? 'text-red-500' : 'text-amber-500'}">${p.stock} restant${p.stock > 1 ? 's' : ''}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    padding:.625rem 0;border-bottom:1px solid var(--border);">
+          <a href="/produits/${p.slug}/" style="font-size:.875rem;color:var(--text-primary);text-decoration:none;"
+             onmouseover="this.style.color='var(--brand-500)'"
+             onmouseout="this.style.color='var(--text-primary)'">${p.nom}</a>
+          <span style="font-size:.8125rem;font-weight:700;
+                       color:${p.stock <= 2 ? '#ef4444' : '#f59e0b'};">
+            ${p.stock} restant${p.stock > 1 ? 's' : ''}
+          </span>
         </div>`).join('')
-      : '<p class="text-ink/30 font-body text-sm">Aucun produit en stock faible. ✓</p>';
+      : '<p style="font-size:.875rem;color:var(--text-muted);">Aucun produit en stock faible. ✓</p>';
   } catch(e) {}
 }
 
@@ -372,36 +781,68 @@ loadAdminStats();
 loadStockFaible();
 
 {% else %}
-// ── Commandes récentes utilisateur
+
+/**
+ * loadCommandesRecentes() — 3 dernières commandes de l'utilisateur
+ */
 async function loadCommandesRecentes() {
   try {
     const data = await API.get('/api/commandes/', { silentError: true });
     const cmds = (data.results || data).slice(0, 3);
-    const COLORS = { en_attente:'bg-yellow-100 text-yellow-700', confirmee:'bg-blue-100 text-blue-700', en_preparation:'bg-purple-100 text-purple-700', expediee:'bg-orange-100 text-orange-700', livree:'bg-green-100 text-green-700', annulee:'bg-red-100 text-red-400' };
-    const LABELS = { en_attente:'En attente', confirmee:'Confirmée', en_preparation:'En préparation', expediee:'Expédiée', livree:'Livrée', annulee:'Annulée' };
+
+    const COLORS = {
+      en_attente:    'background:rgba(251,191,36,.15);color:#92400e;',
+      confirmee:     'background:rgba(30,58,138,.1);color:#1e3a8a;',
+      en_preparation:'background:rgba(249,115,22,.12);color:#c2410c;',
+      expediee:      'background:rgba(99,102,241,.1);color:#4338ca;',
+      livree:        'background:rgba(16,185,129,.1);color:#065f46;',
+      annulee:       'background:rgba(239,68,68,.1);color:#991b1b;',
+    };
+    const LABELS = {
+      en_attente:'En attente', confirmee:'Confirmée',
+      en_preparation:'En préparation', expediee:'Expédiée',
+      livree:'Livrée', annulee:'Annulée'
+    };
 
     document.getElementById('commandes-recentes').innerHTML = cmds.length
       ? cmds.map(c => `
-        <div class="flex items-center justify-between py-2.5 border-b border-cream-border last:border-0">
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    padding:.75rem 0;border-bottom:1px solid var(--border);">
           <div>
-            <a href="/commandes/${c.id}/" class="text-sm font-body font-medium text-ink hover:text-brand-600">Commande #${c.reference_courte || c.id}</a>
-            <p class="text-xs text-ink/40 font-body">${new Date(c.date_creation).toLocaleDateString('fr-FR')}</p>
+            <a href="/commandes/${c.id}/" style="font-size:.875rem;font-weight:600;
+               color:var(--text-primary);text-decoration:none;"
+               onmouseover="this.style.color='var(--brand-500)'"
+               onmouseout="this.style.color='var(--text-primary)'">
+              Commande #${c.reference_courte || c.id}
+            </a>
+            <p style="font-size:.75rem;color:var(--text-muted);margin:.1rem 0 0 0;">
+              ${new Date(c.date_creation).toLocaleDateString('fr-FR')}
+            </p>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-body font-semibold">${parseInt(c.montant_total || 0).toLocaleString('fr-FR')} F</span>
-            <span class="px-2 py-0.5 rounded-full text-xs font-body ${COLORS[c.statut]||'bg-gray-100'}">${LABELS[c.statut]||c.statut}</span>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <span style="font-size:.875rem;font-weight:600;">${parseInt(c.montant_total||0).toLocaleString('fr-FR')} F</span>
+            <span style="font-size:.75rem;font-weight:600;padding:.2rem .625rem;border-radius:999px;
+                         ${COLORS[c.statut]||'background:var(--surface-3);color:var(--text-muted);'}">
+              ${LABELS[c.statut]||c.statut}
+            </span>
           </div>
         </div>`).join('')
-      : '<p class="text-ink/30 font-body text-sm">Aucune commande pour le moment.</p>';
+      : '<p style="font-size:.875rem;color:var(--text-muted);">Aucune commande pour le moment.</p>';
+
   } catch(e) {
-    document.getElementById('commandes-recentes').innerHTML = '<p class="text-ink/30 font-body text-sm">Impossible de charger les commandes.</p>';
+    document.getElementById('commandes-recentes').innerHTML =
+      '<p style="font-size:.875rem;color:var(--text-muted);">Impossible de charger les commandes.</p>';
   }
 }
 
 loadCommandesRecentes();
 {% endif %}
 
-// Remplacement confirm() natif — suppression adresse
+
+/**
+ * Suppression adresse — écoute les clics sur les boutons formaction
+ * et remplace le confirm() natif par showConfirm() (base.html global)
+ */
 document.addEventListener('click', async function(e) {
   const btn = e.target.closest('[type="submit"][formaction]');
   if (!btn) return;
@@ -409,12 +850,16 @@ document.addEventListener('click', async function(e) {
   if (!form) return;
   e.preventDefault();
   const ok = await showConfirm({
-    title: 'Supprimer cette adresse ?',
-    body: 'Cette adresse de livraison sera définitivement supprimée.',
-    confirmText: '🗑 Supprimer',
-    type: 'danger'
+    title:       'Supprimer cette adresse ?',
+    body:        'Cette adresse de livraison sera définitivement supprimée.',
+    confirmText: 'Supprimer',
+    type:        'danger'
   });
-  if (ok) { form.action = btn.getAttribute('formaction'); form.removeAttribute('data-confirm-delete'); form.submit(); }
+  if (ok) {
+    form.action = btn.getAttribute('formaction');
+    form.removeAttribute('data-confirm-delete');
+    form.submit();
+  }
 });
-  </script>
+</script>
 {% endblock %}

@@ -1,111 +1,302 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Ajouter une adresse — HooYia Market{% endblock %}
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — users/adresse_form.html
+   Formulaire d'ajout d'une adresse de livraison.
+
+   LAYOUT : centré, max-width 560px, même logique que login/register
+     ← lien retour profil
+     Titre + carte formulaire
+
+   CHAMPS :
+     nom_complet  — nom du destinataire (requis)
+     telephone    — numéro camerounais (requis)
+     adresse      — rue, quartier, numéro (requis)
+     ville        — (requis)   ┐ grille 2 colonnes
+     region       — (requis)   ┘
+     code_postal  — (optionnel) ┐ grille 2 colonnes
+     pays         — défaut "Cameroun" ┘
+     is_default   — checkbox adresse par défaut
+
+   RÈGLE D'OR : 1 seul .btn-primary → "Enregistrer l'adresse"
+   Bouton Annuler → .btn-secondary
+
+   ICÔNES Lucide (SVG inline) :
+     User     → nom_complet
+     Phone    → téléphone
+     MapPin   → adresse / ville
+     Map      → région
+     Hash     → code postal
+     Globe    → pays
+     ArrowLeft → retour profil
+     Save      → CTA submit
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+{% block title %}Nouvelle adresse — HooYia Market{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="mb-6">
-    <a href="{% url 'users:profil' %}" class="text-xs font-body text-ink/40 hover:text-brand-600 transition-colors flex items-center gap-1 mb-2">
-      ← Retour au profil
-    </a>
-    <h1 class="font-display text-2xl text-ink">Nouvelle adresse</h1>
+{% comment %} CONTENEUR PAGE — centré, max-width 560px {% endcomment %}
+<div style="max-width:560px;margin:0 auto;padding:2.5rem 1.5rem;">
+
+
+  {% comment %} ── LIEN RETOUR PROFIL ── {% endcomment %}
+  <a href="{% url 'users:profil' %}"
+     style="display:inline-flex;align-items:center;gap:.375rem;
+            font-size:.8125rem;color:var(--text-muted);text-decoration:none;
+            margin-bottom:1.25rem;transition:color 150ms;"
+     onmouseover="this.style.color='var(--brand-500)'"
+     onmouseout="this.style.color='var(--text-muted)'">
+    {% comment %} Lucide — ArrowLeft {% endcomment %}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12 19 5 12 12 5"/>
+    </svg>
+    Retour au profil
+  </a>
+
+
+  {% comment %} ── ENTÊTE ── {% endcomment %}
+  <div style="margin-bottom:1.75rem;">
+    <h1 style="font-family:'Poppins',sans-serif;font-size:1.625rem;font-weight:800;
+               color:var(--brand-600);margin:0 0 .25rem 0;">
+      Nouvelle adresse
+    </h1>
+    <p style="font-size:.875rem;color:var(--text-muted);margin:0;font-family:'Poppins',sans-serif;">
+      Adresse de livraison pour vos commandes.
+    </p>
   </div>
 
+
+  {% comment %} MESSAGES FLASH Django {% endcomment %}
   {% if messages %}
     {% for message in messages %}
-    <div class="mb-4 px-4 py-3 rounded-xl border text-sm font-body
-      {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% else %}bg-red-50 border-red-200 text-red-800{% endif %}">
+    <div style="margin-bottom:1.25rem;padding:.875rem 1rem;border-radius:.75rem;border:1px solid;
+                font-size:.8125rem;font-weight:500;
+                {% if message.tags == 'success' %}background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25);color:#059669;
+                {% else %}background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626;{% endif %}">
       {{ message }}
     </div>
     {% endfor %}
   {% endif %}
 
-  <div class="card p-6">
-    <form method="POST">
-      {% csrf_token %}
-      <div class="space-y-4">
 
-        <div>
-          <label class="label" for="id_nom_complet">Nom complet du destinataire *</label>
+  {% comment %}
+  ── CARTE FORMULAIRE — même style que login/register (fond blanc, ombre légère)
+  {% endcomment %}
+  <div class="card" style="padding:1.75rem;">
+
+    <form method="POST" novalidate style="display:flex;flex-direction:column;gap:1.125rem;">
+      {% csrf_token %}
+
+
+      {% comment %}
+      ── NOM COMPLET DU DESTINATAIRE
+         Préfixe Lucide User — nom affiché sur le colis
+      {% endcomment %}
+      <div>
+        <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+          Nom complet du destinataire <span style="color:var(--accent);">*</span>
+        </label>
+        <div style="position:relative;">
+          {% comment %} Lucide — User {% endcomment %}
+          <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
           <input type="text" name="nom_complet" id="id_nom_complet"
             value="{{ form.nom_complet.value|default:'' }}"
             placeholder="Jean Dupont"
-            class="field {% if form.nom_complet.errors %}error{% endif %}" required />
-          {% if form.nom_complet.errors %}<p class="field-error">{{ form.nom_complet.errors.0 }}</p>{% endif %}
+            autocomplete="name" autofocus required
+            class="input-field"
+            style="padding-left:2.625rem;{% if form.nom_complet.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
         </div>
+        {% if form.nom_complet.errors %}
+          <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ form.nom_complet.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
 
-        <div>
-          <label class="label" for="id_telephone">Téléphone *</label>
+
+      {% comment %}
+      ── TÉLÉPHONE
+         Préfixe Lucide Phone — numéro de contact pour la livraison
+      {% endcomment %}
+      <div>
+        <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+          Téléphone <span style="color:var(--accent);">*</span>
+        </label>
+        <div style="position:relative;">
+          {% comment %} Lucide — Phone {% endcomment %}
+          <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
           <input type="text" name="telephone" id="id_telephone"
             value="{{ form.telephone.value|default:'' }}"
             placeholder="+237 6XX XXX XXX"
-            class="field {% if form.telephone.errors %}error{% endif %}" required />
-          {% if form.telephone.errors %}<p class="field-error">{{ form.telephone.errors.0 }}</p>{% endif %}
+            autocomplete="tel" required
+            class="input-field"
+            style="padding-left:2.625rem;{% if form.telephone.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
         </div>
+        {% if form.telephone.errors %}
+          <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ form.telephone.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
 
-        <div>
-          <label class="label" for="id_adresse">Adresse *</label>
+
+      {% comment %}
+      ── ADRESSE (rue, quartier, numéro)
+         Préfixe Lucide MapPin
+      {% endcomment %}
+      <div>
+        <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+          Adresse <span style="color:var(--accent);">*</span>
+        </label>
+        <div style="position:relative;">
+          {% comment %} Lucide — MapPin {% endcomment %}
+          <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
           <input type="text" name="adresse" id="id_adresse"
             value="{{ form.adresse.value|default:'' }}"
             placeholder="Quartier, rue, numéro…"
-            class="field {% if form.adresse.errors %}error{% endif %}" required />
-          {% if form.adresse.errors %}<p class="field-error">{{ form.adresse.errors.0 }}</p>{% endif %}
+            autocomplete="street-address" required
+            class="input-field"
+            style="padding-left:2.625rem;{% if form.adresse.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+        </div>
+        {% if form.adresse.errors %}
+          <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ form.adresse.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+
+      {% comment %} GRILLE 2 COLONNES — Ville + Région {% endcomment %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Ville <span style="color:var(--accent);">*</span>
+          </label>
+          <input type="text" name="ville" id="id_ville"
+            value="{{ form.ville.value|default:'' }}"
+            placeholder="Yaoundé"
+            autocomplete="address-level2" required
+            class="input-field"
+            style="{% if form.ville.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+          {% if form.ville.errors %}
+            <p style="font-size:.75rem;color:#dc2626;margin-top:.375rem;font-family:'Poppins',sans-serif;">{{ form.ville.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="label" for="id_ville">Ville *</label>
-            <input type="text" name="ville" id="id_ville"
-              value="{{ form.ville.value|default:'' }}"
-              placeholder="Yaoundé"
-              class="field {% if form.ville.errors %}error{% endif %}" required />
-            {% if form.ville.errors %}<p class="field-error">{{ form.ville.errors.0 }}</p>{% endif %}
-          </div>
-          <div>
-            <label class="label" for="id_region">Région *</label>
-            <input type="text" name="region" id="id_region"
-              value="{{ form.region.value|default:'' }}"
-              placeholder="Centre"
-              class="field {% if form.region.errors %}error{% endif %}" required />
-            {% if form.region.errors %}<p class="field-error">{{ form.region.errors.0 }}</p>{% endif %}
-          </div>
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Région <span style="color:var(--accent);">*</span>
+          </label>
+          <input type="text" name="region" id="id_region"
+            value="{{ form.region.value|default:'' }}"
+            placeholder="Centre"
+            class="input-field"
+            style="{% if form.region.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+          {% if form.region.errors %}
+            <p style="font-size:.75rem;color:#dc2626;margin-top:.375rem;font-family:'Poppins',sans-serif;">{{ form.region.errors.0 }}</p>
+          {% endif %}
         </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="label" for="id_code_postal">Code postal <span class="text-ink/30 font-normal">(optionnel)</span></label>
-            <input type="text" name="code_postal" id="id_code_postal"
-              value="{{ form.code_postal.value|default:'' }}"
-              placeholder="237"
-              class="field" />
-          </div>
-          <div>
-            <label class="label" for="id_pays">Pays</label>
-            <input type="text" name="pays" id="id_pays"
-              value="{{ form.pays.value|default:'Cameroun' }}"
-              class="field" />
-          </div>
-        </div>
-
-        <label class="flex items-center gap-3 cursor-pointer pt-2">
-          <input type="checkbox" name="is_default" id="id_is_default"
-            {% if form.is_default.value %}checked{% endif %}
-            class="w-4 h-4 accent-brand-500 rounded" />
-          <div>
-            <span class="font-body font-medium text-sm text-ink">Définir comme adresse par défaut</span>
-            <p class="text-xs text-ink/40 font-body">Pré-remplie automatiquement lors du checkout</p>
-          </div>
-        </label>
 
       </div>
 
-      <div class="flex gap-3 mt-6">
-        <a href="{% url 'users:profil' %}" class="btn-secondary flex-1 py-2.5 text-sm text-center">Annuler</a>
-        <button type="submit" class="btn-primary flex-1 py-2.5 text-sm">Enregistrer l'adresse</button>
+
+      {% comment %} GRILLE 2 COLONNES — Code postal (optionnel) + Pays {% endcomment %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Code postal
+            <span style="font-weight:400;color:var(--text-muted);">(optionnel)</span>
+          </label>
+          <input type="text" name="code_postal" id="id_code_postal"
+            value="{{ form.code_postal.value|default:'' }}"
+            placeholder="237"
+            autocomplete="postal-code"
+            class="input-field" />
+        </div>
+
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Pays
+          </label>
+          <input type="text" name="pays" id="id_pays"
+            value="{{ form.pays.value|default:'Cameroun' }}"
+            autocomplete="country-name"
+            class="input-field" />
+        </div>
+
       </div>
+
+
+      {% comment %}
+      ── CHECKBOX ADRESSE PAR DÉFAUT
+         Style custom : checkbox + label alignés, fond brand-50 subtil au hover
+      {% endcomment %}
+      <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;
+                    padding:.875rem 1rem;border-radius:.75rem;border:1.5px solid var(--border);
+                    background:var(--surface);transition:border-color 150ms,background 150ms;"
+             onmouseover="this.style.borderColor='var(--brand-200)';this.style.background='var(--brand-50)'"
+             onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+        <input type="checkbox" name="is_default" id="id_is_default"
+               {% if form.is_default.value %}checked{% endif %}
+               style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--brand-500);cursor:pointer;" />
+        <div>
+          <span style="font-size:.875rem;font-weight:600;color:var(--text-primary);display:block;margin-bottom:.2rem;">
+            Définir comme adresse par défaut
+          </span>
+          <span style="font-size:.75rem;color:var(--text-muted);">
+            Pré-remplie automatiquement lors du checkout.
+          </span>
+        </div>
+      </label>
+
+
+      {% comment %}
+      ── BOUTONS D'ACTION
+         RÈGLE D'OR : 1 seul .btn-primary → "Enregistrer l'adresse"
+         Annuler → .btn-secondary
+      {% endcomment %}
+      <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+
+        <a href="{% url 'users:profil' %}" class="btn btn-secondary"
+           style="flex:1;justify-content:center;">
+          Annuler
+        </a>
+
+        <button type="submit" class="btn btn-primary"
+                style="flex:1;justify-content:center;display:flex;align-items:center;gap:.5rem;">
+          {% comment %} Lucide — Save {% endcomment %}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Enregistrer l'adresse
+        </button>
+
+      </div>
+
     </form>
   </div>
+  {% comment %} ── FIN carte formulaire ── {% endcomment %}
+
 </div>
+
 {% endblock %}

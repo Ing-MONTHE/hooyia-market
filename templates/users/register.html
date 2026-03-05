@@ -1,179 +1,414 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — users/register.html
+   Page d'inscription — création de compte.
+
+   CHAMPS AFFICHÉS (volontairement réduits pour ne pas surcharger) :
+     - username   → identifiant unique
+     - email      → adresse de connexion + activation
+     - password   → avec indicateur de force (4 barres)
+     - password2  → confirmation
+
+   CHAMPS RETIRÉS (complétables dans le profil après inscription) :
+     - prenom, nom, telephone
+
+   LAYOUT : centré, max-width 420px, même structure que login.html
+     Logo centré → entête → carte formulaire → Google OAuth → mention légale
+
+   RÈGLE D'OR : 1 seul .btn-primary (orange) → "Créer mon compte"
+
+   ICÔNES Lucide (SVG inline) :
+     User        → préfixe champ username
+     Mail        → préfixe champ email
+     Lock        → préfixe champs mot de passe
+     Eye/EyeOff  → toggle visibilité (×2 champs)
+     ArrowRight  → CTA principal
+     AlertCircle → erreurs inline
+     CheckCircle → messages success
+     Info        → bannière info email activation
+
+   STYLES : 100% inline + classes custom.css :
+     .btn-primary, .btn-secondary, .btn-lg, .input-field, .card
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
 {% block title %}Inscription — HooYia Market{% endblock %}
+
+{% comment %} ── flex sur <main> pour centrage vertical ── {% endcomment %}
 {% block main_class %}flex{% endblock %}
 
+
 {% block content %}
-<div style="min-height:calc(100vh - 72px);width:100%;display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--bg);transition:background 200ms;">
-  <div class="animate-slide-up" style="width:100%;max-width:480px;">
 
-    <!-- Logo -->
-    <a href="{% url 'products:accueil' %}" style="display:flex;align-items:center;gap:10px;margin-bottom:2rem;text-decoration:none;">
-      <img src="{% static 'img/logo.svg' %}" alt="HooYia" style="height:38px;width:auto;" />
-    </a>
+{% comment %} CONTENEUR RACINE — centré, hauteur = viewport - navbar {% endcomment %}
+<div style="display:flex;min-height:calc(100vh - 72px);width:100%;align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--bg);">
 
-    <h1 style="font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;">Créer un compte</h1>
-    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:2rem;">
-      Déjà inscrit ?
-      <a href="{% url 'users:connexion' %}" style="color:var(--brand-500);font-weight:600;text-decoration:none;transition:color 150ms;" onmouseover="this.style.color='#0D1F5C'" onmouseout="this.style.color='var(--brand-500)'">Se connecter</a>
-    </p>
+  <div style="width:100%;max-width:420px;">
 
-    <!-- Messages -->
+    {% comment %} ── LOGO — centré, en haut du formulaire, même position que login.html ── {% endcomment %}
+    <div style="text-align:center;margin-bottom:2rem;">
+      <a href="{% url 'products:accueil' %}" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="{% static 'img/logo.svg' %}" alt="HooYia Market" style="height:44px;width:auto;" />
+      </a>
+    </div>
+
+    {% comment %} ── ENTÊTE — Titre + lien vers connexion ── {% endcomment %}
+    <div style="margin-bottom:2rem;">
+      <h1 style="font-family:'Poppins',sans-serif;font-size:1.625rem;font-weight:800;color:var(--brand-600);margin:0 0 .375rem 0;line-height:1.2;">
+        Créer un compte
+      </h1>
+      <p style="font-size:.875rem;color:var(--text-muted);margin:0;font-family:'Poppins',sans-serif;">
+        Déjà inscrit ?
+        <a href="{% url 'users:connexion' %}"
+           style="color:var(--brand-500);font-weight:600;text-decoration:none;transition:color 150ms;"
+           onmouseover="this.style.color='var(--brand-600)'"
+           onmouseout="this.style.color='var(--brand-500)'">
+          Se connecter
+        </a>
+      </p>
+    </div>
+
+
+    {% comment %}
+    ── MESSAGES FLASH Django
+       success=vert | error/warning=rouge | info=bleu
+    {% endcomment %}
     {% if messages %}
       {% for message in messages %}
-      <div style="margin-bottom:1.25rem;padding:.875rem 1rem;border-radius:.875rem;border:1px solid;font-size:.8125rem;font-weight:500;
-        {% if message.tags == 'success' %}background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2);color:#059669;
-        {% else %}background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626;{% endif %}">
-        {{ message }}
+      <div style="margin-bottom:1.25rem;padding:.875rem 1rem;border-radius:.75rem;border:1px solid;font-size:.8125rem;font-weight:500;display:flex;align-items:flex-start;gap:.625rem;
+        {% if message.tags == 'success' %}background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25);color:#059669;
+        {% elif message.tags == 'error' or message.tags == 'warning' %}background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);color:#dc2626;
+        {% else %}background:var(--brand-50);border-color:var(--brand-100);color:var(--brand-500);{% endif %}">
+        {% if message.tags == 'success' %}
+          {% comment %} Lucide — CheckCircle {% endcomment %}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        {% else %}
+          {% comment %} Lucide — AlertCircle {% endcomment %}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% endif %}
+        <span>{{ message }}</span>
       </div>
       {% endfor %}
     {% endif %}
 
-    <form method="POST" novalidate style="display:flex;flex-direction:column;gap:1rem;">
-      {% csrf_token %}
 
-      <!-- Prénom + Nom -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+    {% comment %}
+    ══════════════════════════════════════════════════════════════
+       CARTE FORMULAIRE — fond blanc, ombre légère (même style login)
+    ══════════════════════════════════════════════════════════════
+    {% endcomment %}
+    <div class="card" style="padding:1.75rem;margin-bottom:1.25rem;">
+
+      <form method="POST" novalidate style="display:flex;flex-direction:column;gap:1.25rem;">
+        {% csrf_token %}
+
+
+        {% comment %}
+        ── CHAMP USERNAME
+           Icône Lucide User en préfixe.
+           Identifiant public unique de l'utilisateur sur la plateforme.
+        {% endcomment %}
         <div>
-          <label class="label" for="id_prenom">Prénom</label>
-          <input type="text" name="prenom" id="id_prenom"
-            value="{{ form.prenom.value|default:'' }}"
-            placeholder="Jean"
-            class="field {% if form.prenom.errors %}error{% endif %}" />
-          {% if form.prenom.errors %}<p class="field-error">{{ form.prenom.errors.0 }}</p>{% endif %}
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Nom d'utilisateur
+          </label>
+          <div style="position:relative;">
+            {% comment %} Lucide — User {% endcomment %}
+            <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" name="username" id="id_username"
+              value="{{ form.username.value|default:'' }}"
+              placeholder="username"
+              autocomplete="username" autofocus
+              class="input-field"
+              style="padding-left:2.625rem;{% if form.username.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+          </div>
+          {% if form.username.errors %}
+            <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.username.errors.0 }}
+            </p>
+          {% endif %}
         </div>
+        {% comment %} ── FIN champ username ── {% endcomment %}
+
+
+        {% comment %}
+        ── CHAMP EMAIL
+           Icône Lucide Mail en préfixe.
+           Utilisé pour la connexion et l'email d'activation du compte.
+        {% endcomment %}
         <div>
-          <label class="label" for="id_nom">Nom</label>
-          <input type="text" name="nom" id="id_nom"
-            value="{{ form.nom.value|default:'' }}"
-            placeholder="Dupont"
-            class="field {% if form.nom.errors %}error{% endif %}" />
-          {% if form.nom.errors %}<p class="field-error">{{ form.nom.errors.0 }}</p>{% endif %}
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Adresse email
+          </label>
+          <div style="position:relative;">
+            {% comment %} Lucide — Mail {% endcomment %}
+            <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+            <input type="email" name="email" id="id_email"
+              value="{{ form.email.value|default:'' }}"
+              placeholder="example@gmail.com"
+              autocomplete="email"
+              class="input-field"
+              style="padding-left:2.625rem;{% if form.email.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+          </div>
+          {% if form.email.errors %}
+            <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.email.errors.0 }}
+            </p>
+          {% endif %}
         </div>
-      </div>
+        {% comment %} ── FIN champ email ── {% endcomment %}
 
-      <!-- Username -->
-      <div>
-        <label class="label" for="id_username">Nom d'utilisateur</label>
-        <input type="text" name="username" id="id_username"
-          value="{{ form.username.value|default:'' }}"
-          placeholder="jean_dupont"
-          autocomplete="username"
-          class="field {% if form.username.errors %}error{% endif %}" />
-        {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
-      </div>
 
-      <!-- Email -->
-      <div>
-        <label class="label" for="id_email">Adresse email</label>
-        <input type="email" name="email" id="id_email"
-          value="{{ form.email.value|default:'' }}"
-          placeholder="jean@exemple.com"
-          autocomplete="email"
-          class="field {% if form.email.errors %}error{% endif %}" />
-        {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
-      </div>
+        {% comment %}
+        ── CHAMP MOT DE PASSE
+           Icône Lock en préfixe + toggle Eye/EyeOff en suffixe.
+           Indicateur de force : 4 barres colorées (rouge → orange → jaune → vert).
+           updateStrength() recalcule le score à chaque saisie.
+        {% endcomment %}
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Mot de passe
+          </label>
+          <div style="position:relative;">
+            {% comment %} Lucide — Lock {% endcomment %}
+            <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" name="password" id="id_password"
+              placeholder="8 caractères minimum"
+              autocomplete="new-password"
+              class="input-field"
+              style="padding-left:2.625rem;padding-right:2.75rem;{% if form.password.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}"
+              oninput="updateStrength(this.value)" />
 
-      <!-- Téléphone -->
-      <div>
-        <label class="label" for="id_telephone">
-          Téléphone <span style="font-weight:400;color:var(--text-muted);">(optionnel)</span>
-        </label>
-        <input type="text" name="telephone" id="id_telephone"
-          value="{{ form.telephone.value|default:'' }}"
-          placeholder="+237 6XX XXX XXX"
-          class="field {% if form.telephone.errors %}error{% endif %}" />
-        {% if form.telephone.errors %}<p class="field-error">{{ form.telephone.errors.0 }}</p>{% endif %}
-      </div>
+            {% comment %} Toggle Eye/EyeOff — même logique que login.html {% endcomment %}
+            <button type="button" onclick="togglePwd('id_password','eye1','eyeoff1')"
+              aria-label="Afficher ou masquer le mot de passe"
+              style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;border-radius:4px;transition:color 150ms;"
+              onmouseover="this.style.color='var(--brand-500)'"
+              onmouseout="this.style.color='var(--text-muted)'">
+              {% comment %} Lucide — Eye {% endcomment %}
+              <svg id="eye1" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {% comment %} Lucide — EyeOff {% endcomment %}
+              <svg id="eyeoff1" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
 
-      <!-- Mot de passe -->
-      <div>
-        <label class="label" for="id_password">Mot de passe</label>
-        <div style="position:relative;">
-          <input type="password" name="password" id="id_password"
-            placeholder="8 caractères minimum"
-            autocomplete="new-password"
-            class="field {% if form.password.errors %}error{% endif %}" style="padding-right:2.75rem;"
-            oninput="updateStrength(this.value)" />
-          <button type="button" onclick="togglePwd('id_password',this)"
-            style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;"
-            onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-          </button>
+          {% comment %}
+          ── INDICATEUR DE FORCE MOT DE PASSE
+             4 barres horizontales — couleur selon score (0→4) :
+             score 1 → rouge  (#ef4444)
+             score 2 → orange (#f97316)
+             score 3 → jaune  (#eab308)
+             score 4 → vert   (#10b981)
+             updateStrength() calcule : longueur ≥8, majuscule, chiffre, spécial
+          {% endcomment %}
+          <div style="display:flex;gap:4px;margin-top:.5rem;">
+            <div id="bar-1" style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;"></div>
+            <div id="bar-2" style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;"></div>
+            <div id="bar-3" style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;"></div>
+            <div id="bar-4" style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;"></div>
+          </div>
+
+          {% if form.password.errors %}
+            <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.password.errors.0 }}
+            </p>
+          {% endif %}
         </div>
-        <!-- Strength bars -->
-        <div style="display:flex;gap:4px;margin-top:.5rem;">
-          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-1"></div>
-          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-2"></div>
-          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-3"></div>
-          <div style="height:3px;flex:1;border-radius:99px;background:var(--border);transition:background 200ms;" id="bar-4"></div>
+        {% comment %} ── FIN champ mot de passe ── {% endcomment %}
+
+
+        {% comment %}
+        ── CHAMP CONFIRMATION MOT DE PASSE
+           Icône Lock en préfixe + toggle Eye/EyeOff indépendant (eye2/eyeoff2).
+           IDs séparés pour ne pas interférer avec le toggle du 1er champ.
+        {% endcomment %}
+        <div>
+          <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
+            Confirmer le mot de passe
+          </label>
+          <div style="position:relative;">
+            {% comment %} Lucide — Lock {% endcomment %}
+            <span style="position:absolute;left:.875rem;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-muted);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" name="password2" id="id_password2"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              class="input-field"
+              style="padding-left:2.625rem;padding-right:2.75rem;{% if form.password2.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
+
+            <button type="button" onclick="togglePwd('id_password2','eye2','eyeoff2')"
+              aria-label="Afficher ou masquer la confirmation"
+              style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;border-radius:4px;transition:color 150ms;"
+              onmouseover="this.style.color='var(--brand-500)'"
+              onmouseout="this.style.color='var(--text-muted)'">
+              {% comment %} Lucide — Eye {% endcomment %}
+              <svg id="eye2" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {% comment %} Lucide — EyeOff {% endcomment %}
+              <svg id="eyeoff2" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          {% if form.password2.errors %}
+            <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ form.password2.errors.0 }}
+            </p>
+          {% endif %}
+
+          {% comment %} Erreurs globales du formulaire (ex: mots de passe non identiques) {% endcomment %}
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <p style="display:flex;align-items:center;gap:.375rem;margin-top:.375rem;font-size:.75rem;color:#dc2626;font-family:'Poppins',sans-serif;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ error }}
+              </p>
+            {% endfor %}
+          {% endif %}
         </div>
-        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
-      </div>
+        {% comment %} ── FIN champ confirmation ── {% endcomment %}
 
-      <!-- Confirm password -->
-      <div>
-        <label class="label" for="id_password2">Confirmer le mot de passe</label>
-        <div style="position:relative;">
-          <input type="password" name="password2" id="id_password2"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            class="field {% if form.password2.errors %}error{% endif %}" style="padding-right:2.75rem;" />
-          <button type="button" onclick="togglePwd('id_password2',this)"
-            style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;"
-            onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-          </button>
-        </div>
-        {% if form.password2.errors %}<p class="field-error">{{ form.password2.errors.0 }}</p>{% endif %}
-        {% if form.non_field_errors %}{% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}{% endif %}
-      </div>
 
-      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:.25rem;">
-        Créer mon compte
-      </button>
+        {% comment %}
+        ── CTA PRINCIPAL — RÈGLE D'OR : 1 SEUL .btn-primary par vue
+           Icône Lucide ArrowRight en suffixe
+        {% endcomment %}
+        <button type="submit" class="btn btn-primary btn-lg"
+                style="width:100%;margin-top:.25rem;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+          Créer mon compte
+          {% comment %} Lucide — ArrowRight {% endcomment %}
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
 
-      <div style="display:flex;align-items:center;gap:.75rem;margin:.25rem 0;">
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:.75rem;color:var(--text-muted);">ou</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-      </div>
+      </form>
+    </div>
+    {% comment %} ── FIN carte formulaire ── {% endcomment %}
 
-      <a href="{% url 'users:google_login' %}"
-        style="width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:.875rem;background:var(--surface);font-size:.875rem;font-weight:600;color:var(--text-primary);cursor:pointer;text-decoration:none;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .15s,box-shadow .15s;"
-        onmouseover="this.style.borderColor='#4285F4';this.style.boxShadow='0 2px 8px rgba(66,133,244,.2)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-        <svg height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        S'inscrire avec Google
-      </a>
-    </form>
 
-    <!-- Info email -->
-    <div style="margin-top:1.25rem;display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 1rem;background:rgba(30,58,138,.06);border:1px solid rgba(30,58,138,.12);border-radius:.875rem;">
-      <svg width="18" height="18" fill="none" stroke="var(--brand-500)" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      <p style="font-size:.75rem;color:var(--brand-500);line-height:1.6;">Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les spams) pour activer votre compte.</p>
+    {% comment %} ── SÉPARATEUR "ou continuer avec" ── {% endcomment %}
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span style="font-size:.75rem;color:var(--text-muted);white-space:nowrap;font-family:'Poppins',sans-serif;">ou continuer avec</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
     </div>
 
-    <p style="text-align:center;font-size:.75rem;color:var(--text-muted);margin-top:1.25rem;">
-      En créant un compte, vous acceptez nos conditions d'utilisation.
+    {% comment %} GOOGLE OAUTH — fond blanc, bordure neutre {% endcomment %}
+    <a href="{% url 'users:google_login' %}"
+       style="width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:.75rem;background:var(--surface);font-size:.875rem;font-weight:600;color:var(--text-primary);text-decoration:none;font-family:'Poppins',sans-serif;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow-sm);"
+       onmouseover="this.style.borderColor='#4285F4';this.style.boxShadow='0 2px 10px rgba(66,133,244,.15)'"
+       onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='var(--shadow-sm)'">
+      <svg width="18" height="18" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      S'inscrire avec Google
+    </a>
+
+
+    {% comment %}
+    ── BANNIÈRE INFO EMAIL ACTIVATION
+       Informe l'utilisateur qu'un email de validation sera envoyé.
+       Fond bleu brand très léger — informatif, non alarmant.
+       Icône Lucide Mail pour le contexte visuel.
+    {% endcomment %}
+    <div style="margin-top:1rem;display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 1rem;background:rgba(30,58,138,.05);border:1px solid rgba(30,58,138,.12);border-radius:.75rem;">
+      {% comment %} Lucide — Mail {% endcomment %}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <p style="font-size:.75rem;color:var(--brand-500);line-height:1.6;margin:0;font-family:'Poppins',sans-serif;">
+        Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les spams) pour activer votre compte.
+      </p>
+    </div>
+
+    {% comment %} ── Mention légale ── {% endcomment %}
+    <p style="text-align:center;font-size:.75rem;color:var(--text-muted);margin-top:1.25rem;font-family:'Poppins',sans-serif;line-height:1.6;">
+      En créant un compte, vous acceptez nos
+      <a href="#" style="color:var(--brand-500);text-decoration:none;">conditions d'utilisation</a>.
     </p>
+
   </div>
 </div>
+
 {% endblock %}
 
+
+{% comment %}
+════════════════════════════════════════════════════════════════
+   SCRIPTS
+   togglePwd(fieldId, eyeId, eyeOffId)
+     Générique — accepte des IDs d'icônes en paramètre pour gérer
+     les 2 toggles indépendants (pwd + pwd2) sans conflit.
+
+   updateStrength(val)
+     Calcule un score 0→4 et colore les 4 barres en conséquence :
+       critère 1 : longueur ≥ 8
+       critère 2 : au moins une majuscule
+       critère 3 : au moins un chiffre
+       critère 4 : au moins un caractère spécial
+════════════════════════════════════════════════════════════════
+{% endcomment %}
 {% block extra_scripts %}
 <script>
-function togglePwd(fieldId, btn) {
-  const input = document.getElementById(fieldId);
-  input.type = input.type === 'password' ? 'text' : 'password';
+/**
+ * togglePwd() — Toggle visibilité + swap icônes Eye/EyeOff
+ * Générique : prend les IDs des icônes en paramètre (2 champs indépendants)
+ *
+ * @param {string} fieldId   — ID de l'input[type=password]
+ * @param {string} eyeId     — ID de l'icône Eye (visible quand pwd masqué)
+ * @param {string} eyeOffId  — ID de l'icône EyeOff (visible quand pwd affiché)
+ */
+function togglePwd(fieldId, eyeId, eyeOffId) {
+  const input   = document.getElementById(fieldId);
+  const eye     = document.getElementById(eyeId);
+  const eyeOff  = document.getElementById(eyeOffId);
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (eye)    eye.style.display    = 'none';
+    if (eyeOff) eyeOff.style.display = 'block';
+  } else {
+    input.type = 'password';
+    if (eye)    eye.style.display    = 'block';
+    if (eyeOff) eyeOff.style.display = 'none';
+  }
 }
+
+/**
+ * updateStrength() — Indicateur de force du mot de passe
+ * Met à jour les 4 barres #bar-1 à #bar-4 selon le score calculé.
+ *
+ * @param {string} val — valeur courante de l'input password
+ */
 function updateStrength(val) {
-  const bars = [1,2,3,4].map(i => document.getElementById('bar-' + i));
-  const score = [val.length >= 8, /[A-Z]/.test(val), /[0-9]/.test(val), /[^A-Za-z0-9]/.test(val)].filter(Boolean).length;
-  const colors = ['#ef4444','#f97316','#eab308','#10b981'];
-  bars.forEach((b, i) => {
-    b.style.background = i < score ? colors[score - 1] : 'var(--border)';
+  const bars   = [1, 2, 3, 4].map(i => document.getElementById('bar-' + i));
+  const score  = [
+    val.length >= 8,              // Longueur suffisante
+    /[A-Z]/.test(val),            // Majuscule
+    /[0-9]/.test(val),            // Chiffre
+    /[^A-Za-z0-9]/.test(val)      // Caractère spécial
+  ].filter(Boolean).length;
+
+  // Couleur selon le score : rouge → orange → jaune → vert
+  const colors = ['#ef4444', '#f97316', '#eab308', '#10b981'];
+
+  bars.forEach((bar, i) => {
+    bar.style.background = i < score ? colors[score - 1] : 'var(--border)';
   });
 }
 </script>
