@@ -52,30 +52,46 @@
 
   /* ── Lien de navigation de base ── */
   .nav-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.375rem 0.625rem;
+    padding: 0.375rem 0.5rem;
+    padding-bottom: 0.25rem;
     font-size: 0.875rem;
     font-weight: 500;
     color: #0D1F5C;
-    border-radius: 0.5rem;
     text-decoration: none;
-    transition: background 150ms, color 150ms;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
     background: transparent;
     border: none;
+    border-radius: 0;
+    /* Soulignement via pseudo-element pour animation smooth */
+    position: relative;
   }
-  .nav-link:hover,
-  .nav-link.active {
-    background: #eff4ff;  /* brand-50 */
-    color: #1E3A8A;       /* brand-500 */
+  /* Barre de soulignement animée */
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    right: 50%;
+    height: 2px;
+    background: #1E3A8A;
+    transition: left 200ms ease, right 200ms ease;
+    border-radius: 2px;
   }
-  /* Lien actif : indicateur visuel de la page courante */
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+  .nav-link:hover { color: #1E3A8A; background: transparent; }
+  /* Lien actif : soulignement permanent + texte bold */
   .nav-link.active {
     font-weight: 600;
+    color: #1E3A8A;
   }
 
   /* ── Dropdown générique ──
@@ -485,7 +501,7 @@
          aria-label="HooYia Market — Accueil">
         <img src="{% static 'img/logo.svg' %}"
              alt="HooYia Market"
-             style="height:38px;width:auto;display:block;" />
+             style="height:46px;width:auto;display:block;" />
       </a>
 
       {# ── GROUPE CENTRAL : liens + recherche — centré dans la navbar ── #}
@@ -496,12 +512,6 @@
         {# Accueil #}
         <a href="{% url 'products:accueil' %}"
            class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">
-          {# Lucide : Home #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
           Accueil
         </a>
 
@@ -510,12 +520,6 @@
            ou passées directement par les vues dans {{ categories }}. {% endcomment %}
         <div class="nav-dropdown-wrap">
           <button class="nav-link" aria-haspopup="true" aria-expanded="false">
-            {# Lucide : LayoutGrid #}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-            </svg>
             Catégories
             {# Lucide : ChevronDown #}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -565,13 +569,6 @@
         <a href="{% url 'products:liste' %}?promo=true"
            class="nav-link {% if request.GET.promo %}active{% endif %}"
            style="color:#F97316;">
-          {# Lucide : Percent #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="5" x2="5" y2="19"/>
-            <circle cx="6.5" cy="6.5" r="2.5"/>
-            <circle cx="17.5" cy="17.5" r="2.5"/>
-          </svg>
           Promotions
         </a>
 
