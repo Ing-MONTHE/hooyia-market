@@ -1,157 +1,505 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — orders/confirm.html
+   Page de confirmation après passage de commande (étape 3/3 du tunnel)
+
+   STRUCTURE DE LA PAGE :
+     [ Hero succès ]            ← icône check vert + titre + message
+     [ Skeleton ]               ← affiché pendant le chargement AJAX
+     [ Détail commande ]        ← peuplé par loadCommande()
+       ├── Carte infos          ← référence, badge statut, timeline FSM
+       │     ├── Adresse de livraison (snapshot)
+       │     └── Mode de paiement
+       ├── Carte articles       ← lignes commande + total
+       └── Carte avis           ← visible uniquement si statut == 'livree'
+     [ Actions ]                ← "Voir mes commandes" + "Continuer mes achats"
+
+   TIMELINE FSM :
+     5 étapes : En attente → Confirmée → En préparation → Expédiée → Livrée
+     L'étape active et les précédentes sont colorées en brand-500.
+     Si annulée : badge rouge, timeline masquée.
+
+   SECTION AVIS :
+     Affichée uniquement si commande.statut === 'livree'.
+     Étoiles cliquables (1→5) + textarea + bouton "Envoyer mon avis".
+     POST vers /api/avis/ avec { produit, note, commentaire }.
+     Un avis par produit — si déjà laissé : "Avis déjà envoyé ✓".
+
+   ICÔNES : Lucide Icons — SVG inline, stroke="currentColor"
+     - CheckCircle  → hero succès
+     - MapPin       → adresse livraison
+     - CreditCard   → paiement
+     - Package      → articles commandés
+     - Star         → étoiles notation avis
+     - ShoppingBag  → continuer les achats
+     - ClipboardList → voir mes commandes
+     - Truck        → étapes timeline
+     - X            → annulée
+
+   VARIABLES DJANGO UTILISÉES :
+     {{ commande.id }} — ID de la commande pour l'appel API
+
+   JAVASCRIPT (bloc extra_scripts) :
+     loadCommande()     — GET /api/commandes/<id>/ et appelle afficherCommande()
+     afficherCommande() — peuple toutes les zones dynamiques
+     soumettreAvis()    — POST /api/avis/ avec validation étoiles
+{% endcomment %}
+
 {% block title %}Commande confirmée — HooYia Market{% endblock %}
+{% block meta_description %}Votre commande a bien été enregistrée sur HooYia Market.{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-  <!-- Succès -->
-  <div class="text-center mb-10">
-    <div class="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-      <svg class="h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-      </svg>
+<style>
+  /* ── Hero gradient ── */
+  .confirm-hero {
+    background: linear-gradient(160deg, #0a1744 0%, #1E3A8A 50%, #2563eb 100%);
+    border-radius: 16px;
+    padding: 36px 24px;
+    text-align: center;
+    color: white;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(13,31,92,0.35);
+  }
+  /* Cercle décoratif haut-droite */
+  .confirm-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  /* Accent orange bas-gauche */
+  .confirm-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(249,115,22,0.2);
+    filter: blur(20px);
+  }
+  .confirm-hero-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 0 8px rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.2);
+    position: relative; z-index: 1;
+  }
+  .confirm-ref-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    padding: 7px 20px;
+    font-size: 0.9rem; font-weight: 800;
+    margin-top: 14px; letter-spacing: 0.1em;
+    color: white;
+    position: relative; z-index: 1;
+    backdrop-filter: blur(4px);
+  }
+  /* ── Grille infos (livraison + paiement) ── */
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 540px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-bloc {
+    background: var(--surface-2);
+    border-radius: 12px; padding: 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .info-bloc-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: white; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  /* ── Ligne article ── */
+  .ligne-article {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 10px 0;
+  }
+  .ligne-article + .ligne-article { border-top: 1px solid var(--border); }
+  /* ── Badge statut ── */
+  .statut-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  /* ── Skeleton ── */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .skeleton {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 400px 100%; animation: shimmer 1.4s infinite;
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  /* ── Étoiles avis ── */
+  .star-rating { display: flex; gap: 6px; }
+  .star-btn { background: none; border: none; cursor: pointer; padding: 2px; transition: transform 0.15s; }
+  .star-btn:hover { transform: scale(1.2); }
+  .avis-produit-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .avis-produit-item:last-child { border-bottom: none; }
+</style>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-8">
+
+  
+  <div id="skeleton" class="space-y-4">
+    <div class="card p-8 text-center space-y-3">
+      <div class="skeleton h-16 w-16 rounded-full mx-auto"></div>
+      <div class="skeleton h-6 w-48 rounded mx-auto"></div>
+      <div class="skeleton h-4 w-64 rounded mx-auto"></div>
     </div>
-    <h1 class="font-display text-3xl text-ink mb-2">Commande confirmée !</h1>
-    <p class="text-ink/50 font-body">Merci pour votre achat. Vous recevrez une confirmation par email.</p>
+    <div class="card p-6 space-y-3">
+      <div class="skeleton h-4 w-full rounded"></div>
+      <div class="skeleton h-4 w-5/6 rounded"></div>
+      <div class="skeleton h-4 w-3/4 rounded"></div>
+    </div>
   </div>
 
-  <!-- Skeleton -->
-  <div id="skeleton" class="card p-6 animate-pulse space-y-4">
-    <div class="h-4 bg-cream-warm rounded w-1/3"></div>
-    <div class="h-3 bg-cream-warm rounded w-1/2"></div>
-    <div class="h-3 bg-cream-warm rounded w-2/3"></div>
-  </div>
+  
+  <div id="commande-detail" class="hidden space-y-4">
 
-  <!-- Détail commande -->
-  <div id="commande-detail" class="hidden space-y-6">
-
-    <!-- Infos principales -->
-    <div class="card p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-display text-lg text-ink">Commande <span id="ref-commande" class="text-brand-600"></span></h2>
-        <span id="statut-badge" class="px-3 py-1 rounded-full text-xs font-body font-semibold"></span>
+    
+    <div class="confirm-hero">
+      <div class="confirm-hero-icon">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
       </div>
-
-      <!-- Statut timeline -->
-      <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1" id="timeline"></div>
-
-      <!-- Adresse livraison -->
-      <div class="grid md:grid-cols-2 gap-4 pt-4 border-t border-cream-border">
-        <div>
-          <p class="text-xs font-body text-ink/40 uppercase tracking-wider mb-2">Livraison</p>
-          <div id="adresse-livraison" class="font-body text-sm text-ink/70 space-y-0.5"></div>
-        </div>
-        <div>
-          <p class="text-xs font-body text-ink/40 uppercase tracking-wider mb-2">Paiement</p>
-          <div id="paiement-info" class="font-body text-sm text-ink/70"></div>
-        </div>
+      <h1 style="font-size:1.65rem; font-weight:800; margin-bottom:8px; color:#ffffff; text-shadow:0 2px 12px rgba(0,0,0,0.4); position:relative; z-index:1;">Commande enregistrée !</h1>
+      <p style="color:rgba(255,255,255,0.85); font-size:0.875rem; position:relative; z-index:1;">Merci pour votre achat. Confirmation email en cours.</p>
+      <div class="confirm-ref-pill" id="ref-commande">—</div>
+      <div style="margin-top:10px;" id="statut-badge-wrap">
+        <span id="statut-badge" class="statut-badge" style="background:rgba(255,255,255,0.18); color:white; border:1.5px solid rgba(255,255,255,0.35);">—</span>
       </div>
     </div>
 
-    <!-- Articles -->
-    <div class="card p-6">
-      <h3 class="font-display text-lg text-ink mb-4">Articles commandés</h3>
-      <div id="lignes-commande" class="space-y-3"></div>
-      <div class="h-px bg-cream-border my-4"></div>
-      <div class="flex justify-between font-body font-semibold text-ink">
-        <span>Total payé</span>
-        <span id="total-commande" class="text-brand-600"></span>
+    
+    <div class="info-grid">
+
+      <div class="info-bloc">
+        <div class="info-bloc-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Livraison</p>
+          <div id="adresse-livraison" class="text-sm text-ink space-y-0.5"></div>
+        </div>
+      </div>
+
+      <div class="info-bloc">
+        <div class="info-bloc-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <rect width="22" height="16" x="1" y="4" rx="2" ry="2"/>
+            <line x1="1" x2="23" y1="10" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Paiement</p>
+          <div id="paiement-info" class="text-sm text-ink space-y-0.5"></div>
+        </div>
+      </div>
+
+    </div>
+
+    
+    <div class="card p-5">
+      <div class="flex items-center gap-2 mb-4 pb-3 border-b border-cream-border">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <h3 class="font-semibold text-ink text-sm">Articles commandés</h3>
+      </div>
+      <div id="lignes-commande"></div>
+      <div class="h-px bg-cream-border my-3"></div>
+      <div class="flex justify-between items-center">
+        <span class="font-bold text-ink">Total payé</span>
+        <span id="total-commande" class="font-bold text-accent text-xl">—</span>
       </div>
     </div>
 
-    <!-- Actions -->
+    
+    <div class="card p-5 hidden" id="section-avis">
+      <div class="flex items-center gap-2 mb-3 pb-3 border-b border-cream-border">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <h3 class="font-semibold text-ink text-sm">Laisser un avis</h3>
+      </div>
+      <p class="text-xs text-text-muted mb-3">Votre commande a été livrée. Partagez votre expérience !</p>
+      <div id="avis-produits"></div>
+    </div>
+
+    
     <div class="flex flex-col sm:flex-row gap-3">
-      <a href="{% url 'orders:historique' %}" class="btn-secondary flex-1 py-3 text-center text-sm">
+      <a href="{% url 'orders:historique' %}" class="btn btn-secondary flex-1 flex items-center justify-center gap-2 py-3">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <line x1="9" x2="15" y1="12" y2="12"/><line x1="9" x2="15" y1="16" y2="16"/>
+        </svg>
         Voir mes commandes
       </a>
-      <a href="{% url 'products:liste' %}" class="btn-primary flex-1 py-3 text-center text-sm">
+      <a href="{% url 'products:liste' %}" class="btn btn-primary flex-1 flex items-center justify-center gap-2 py-3">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
         Continuer mes achats
       </a>
     </div>
 
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
+{% comment %} ═══════════════════════════════════════════════════════════════
+   JAVASCRIPT — Logique de la page confirm.html
+
+   Fonctions :
+     formatFCFA(n)        — formate un nombre → "X XXX FCFA"
+     loadCommande()       — GET /api/commandes/<id>/ → appelle afficherCommande()
+     afficherCommande(c)  — peuple toutes les zones dynamiques de la page
+     renderAvis(lignes)   — construit la zone de notation étoiles par produit
+     soumettreAvis(pid,n) — POST /api/avis/ avec note + commentaire
+{% endcomment %}
 <script>
 const COMMANDE_ID = {{ commande.id }};
 
-const STATUTS = ['en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree'];
+// ── Mapping statuts FSM ───────────────────────────────────────────────────────
+const STATUTS_ORDRE  = ['en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree'];
 const STATUTS_LABELS = {
-  en_attente: 'En attente', confirmee: 'Confirmée',
-  en_preparation: 'En préparation', expediee: 'Expédiée', livree: 'Livrée', annulee: 'Annulée'
+  en_attente    : 'En attente',
+  confirmee     : 'Confirmée',
+  en_preparation: 'En préparation',
+  expediee      : 'Expédiée',
+  livree        : 'Livrée',
+  annulee       : 'Annulée',
 };
-const STATUTS_COLORS = {
-  en_attente: 'bg-yellow-100 text-yellow-700',
-  confirmee: 'bg-blue-100 text-blue-700',
-  en_preparation: 'bg-purple-100 text-purple-700',
-  expediee: 'bg-orange-100 text-orange-700',
-  livree: 'bg-green-100 text-green-700',
-  annulee: 'bg-red-100 text-red-700',
+// Couleurs des badges statut (fond + texte)
+const STATUTS_BADGE = {
+  en_attente    : 'background:#fffbeb; color:#92400e;',
+  confirmee     : 'background:#eff6ff; color:#1d4ed8;',
+  en_preparation: 'background:#f5f3ff; color:#6d28d9;',
+  expediee      : 'background:#fff7ed; color:#c2410c;',
+  livree        : 'background:#f0fdf4; color:#166534;',
+  annulee       : 'background:#fef2f2; color:#991b1b;',
 };
 
+// ── Utilitaire formatage FCFA ─────────────────────────────────────────────────
+function formatFCFA(n) {
+  return parseInt(n || 0).toLocaleString('fr-FR') + ' FCFA';
+}
+
+// ── Chargement de la commande via API ─────────────────────────────────────────
 async function loadCommande() {
   try {
     const data = await API.get(`/api/commandes/${COMMANDE_ID}/`);
-    afficherCommande(data);
-  } catch(e) {}
+    try {
+      afficherCommande(data);
+    } catch(err) {
+      // Erreur JS interne — afficher le détail pour debug
+      document.getElementById('skeleton').classList.add('hidden');
+      document.getElementById('commande-detail').classList.remove('hidden');
+      console.error('afficherCommande error:', err);
+    }
+  } catch(e) {
+    document.getElementById('skeleton').innerHTML =
+      '<p class="text-sm text-center py-4" style="color:var(--error)">Impossible de charger la commande.</p>';
+  }
 }
 
+// ── Peuplement de la page ─────────────────────────────────────────────────────
 function afficherCommande(c) {
   document.getElementById('skeleton').classList.add('hidden');
   document.getElementById('commande-detail').classList.remove('hidden');
 
   // Référence + badge statut
-  document.getElementById('ref-commande').textContent = `#${c.reference || c.id}`;
+  const refCourte = c.reference_courte || (c.reference || '').slice(0, 8).toUpperCase() || c.id;
+  document.getElementById('ref-commande').textContent = `#${refCourte}`;
+
   const badge = document.getElementById('statut-badge');
   badge.textContent = STATUTS_LABELS[c.statut] || c.statut;
-  badge.className = `px-3 py-1 rounded-full text-xs font-body font-semibold ${STATUTS_COLORS[c.statut] || 'bg-gray-100 text-gray-600'}`;
+  badge.setAttribute('style', STATUTS_BADGE[c.statut] || 'background:#f3f4f6; color:#374151;');
 
-  // Timeline
-  const timeline = document.getElementById('timeline');
-  const idx = STATUTS.indexOf(c.statut);
-  timeline.innerHTML = STATUTS.map((s, i) => `
-    <div class="flex items-center gap-1 flex-shrink-0">
-      <div class="flex flex-col items-center gap-1">
-        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-          ${i <= idx ? 'bg-brand-500 text-white' : 'bg-cream-border text-ink/30'}">
-          ${i < idx ? '✓' : i + 1}
-        </div>
-        <span class="text-[10px] font-body ${i <= idx ? 'text-brand-600' : 'text-ink/30'}">${STATUTS_LABELS[s]}</span>
-      </div>
-      ${i < STATUTS.length - 1 ? `<div class="w-8 h-px mb-5 ${i < idx ? 'bg-brand-400' : 'bg-cream-border'}"></div>` : ''}
-    </div>`).join('');
-
-  // Adresse
+  // Adresse de livraison
   document.getElementById('adresse-livraison').innerHTML = `
-    <p class="font-medium text-ink">${c.adresse_livraison_nom || ''}</p>
+    <p class="font-semibold text-ink">${c.adresse_livraison_nom || '—'}</p>
     <p>${c.adresse_livraison_telephone || ''}</p>
     <p>${c.adresse_livraison_adresse || ''}</p>
     <p>${c.adresse_livraison_ville || ''}, ${c.adresse_livraison_region || ''}</p>
     <p>${c.adresse_livraison_pays || ''}</p>`;
 
-  // Paiement
+  // Mode de paiement
   const p = c.paiement;
-  const statutColor = p && p.statut === 'reussi' ? 'text-green-600 font-medium' : 'text-ink/40';
   document.getElementById('paiement-info').innerHTML = p
-    ? `<p class="font-medium text-ink">${p.mode_affiche || p.mode}</p><p class="${statutColor}">${p.statut_affiche || p.statut}</p>`
-    : `<p>Paiement à la livraison</p>`;
+    ? `<p class="font-semibold text-ink">${p.mode_affiche || p.mode}</p>
+       <p class="${p.statut === 'reussi' ? 'text-green-600 font-medium' : ''}">${p.statut_affiche || p.statut}</p>`
+    : `<p class="font-semibold text-ink">Paiement à la livraison</p><p>En attente</p>`;
 
   // Lignes commande
   const lignes = c.lignes || [];
-  document.getElementById('lignes-commande').innerHTML = lignes.map(l => `
-    <div class="flex justify-between items-center text-sm font-body">
-      <span class="text-ink/70">${l.produit_nom} <span class="text-ink/40">×${l.quantite}</span></span>
-      <span class="text-ink font-medium">${parseInt(l.sous_total || l.prix_unitaire * l.quantite || 0).toLocaleString('fr-FR')} FCFA</span>
-    </div>`).join('') || '<p class="text-ink/30 text-sm">Aucune ligne.</p>';
+  document.getElementById('lignes-commande').innerHTML = lignes.length
+    ? lignes.map(l => `
+        <div class="flex justify-between items-center gap-2 text-sm py-1">
+          <span class="text-text-secondary flex-1 line-clamp-1">
+            ${l.produit_nom}
+            <span class="text-text-muted ml-1">×${l.quantite}</span>
+          </span>
+          <span class="font-semibold text-ink flex-shrink-0">${formatFCFA(parseFloat(l.prix_unitaire) * l.quantite)}</span>
+        </div>`).join('')
+    : '<p class="text-sm text-text-muted">Aucun article.</p>';
 
   // Total
-  document.getElementById('total-commande').textContent = parseInt(c.montant_total || c.total || 0).toLocaleString('fr-FR') + ' FCFA';
+  document.getElementById('total-commande').textContent = formatFCFA(c.montant_total);
+
+  // Section avis — uniquement si commande livrée
+  if (c.statut === 'livree' && lignes.length) {
+    document.getElementById('section-avis').classList.remove('hidden');
+    renderAvis(lignes);
+  }
 }
 
+// ── Construction de la zone avis par produit ──────────────────────────────────
+// Une ligne par produit avec étoiles cliquables + textarea + bouton envoyer.
+function renderAvis(lignes) {
+  const container = document.getElementById('avis-produits');
+  container.innerHTML = lignes.map(l => `
+    <div class="avis-produit-item" id="avis-item-${l.produit}">
+      <p class="font-semibold text-sm text-ink mb-2 line-clamp-1">${l.produit_nom}</p>
+
+      <div class="star-rating mb-2" id="stars-${l.produit}">${renderEtoiles(l.produit)}</div>
+
+      <textarea id="comment-${l.produit}" rows="2" placeholder="Votre commentaire (optionnel)…"
+                class="input-field text-sm resize-none mt-1"></textarea>
+
+      <button onclick="soumettreAvis(${l.produit})"
+              id="btn-avis-${l.produit}"
+              class="btn btn-secondary mt-2 text-xs py-1.5">
+        Envoyer mon avis
+      </button>
+    </div>`).join('');
+}
+
+// ── Étoiles de notation ───────────────────────────────────────────────────────
+// Génère 5 boutons étoiles SVG, gère le hover et la sélection.
+function renderEtoiles(produitId) {
+  return [1,2,3,4,5].map(n => `
+    <button type="button" class="star-btn" data-note="${n}" data-produit="${produitId}"
+            onclick="noterEtoile(${produitId}, ${n})"
+            onmouseenter="hoverEtoiles(${produitId}, ${n})"
+            onmouseleave="resetHoverEtoiles(${produitId})">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d1d5db"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </button>`).join('');
+}
+
+// Note sélectionnée par produit { produitId: note }
+const notesSelectionnees = {};
+
+function noterEtoile(produitId, note) {
+  notesSelectionnees[produitId] = note;
+  // Mettre à jour le visuel des étoiles
+  document.querySelectorAll(`#stars-${produitId} .star-btn`).forEach(btn => {
+    const n = parseInt(btn.dataset.note);
+    const svg = btn.querySelector('svg');
+    if (n <= note) {
+      svg.setAttribute('fill', '#f59e0b');
+      svg.setAttribute('stroke', '#f59e0b');
+    } else {
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', '#d1d5db');
+    }
+  });
+}
+
+function hoverEtoiles(produitId, note) {
+  document.querySelectorAll(`#stars-${produitId} .star-btn`).forEach(btn => {
+    const n = parseInt(btn.dataset.note);
+    const svg = btn.querySelector('svg');
+    if (n <= note) svg.setAttribute('fill', '#fcd34d');
+  });
+}
+
+function resetHoverEtoiles(produitId) {
+  const note = notesSelectionnees[produitId] || 0;
+  noterEtoile(produitId, note); // Remet l'état sélectionné
+}
+
+// ── Envoi d'un avis ───────────────────────────────────────────────────────────
+// POST /api/avis/ avec { produit, note, commentaire }
+// En cas de succès : remplace le formulaire par un message de confirmation.
+async function soumettreAvis(produitId) {
+  const note = notesSelectionnees[produitId];
+  if (!note) {
+    window.toast && window.toast('Veuillez sélectionner une note (étoiles).', 'error');
+    return;
+  }
+
+  const commentaire = document.getElementById(`comment-${produitId}`)?.value.trim() || '';
+  const btn = document.getElementById(`btn-avis-${produitId}`);
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+
+  try {
+    await API.post('/api/avis/', {
+      produit     : produitId,
+      note        : note,
+      commentaire : commentaire,
+    }, { silentError: true });
+
+    // Succès → remplacer le formulaire par un message vert
+    document.getElementById(`avis-item-${produitId}`).innerHTML = `
+      <div class="flex items-center gap-2 py-2 text-sm text-green-700 font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Avis envoyé — Merci !
+      </div>`;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer mon avis';
+    const msg = (e && e.message) ? e.message : 'Erreur lors de l\'envoi. Réessayez.';
+    window.toast && window.toast(msg, 'error');
+  }
+}
+
+// ── Initialisation ────────────────────────────────────────────────────────────
 loadCommande();
 </script>
 {% endblock %}

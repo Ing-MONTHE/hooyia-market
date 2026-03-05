@@ -100,16 +100,18 @@ class CommandeCreerAPIView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         else:
-            # Format 2 : adresse inline → on crée un objet temporaire non sauvegardé
-            # (la commande fait un snapshot des champs, pas besoin de persister)
-            adresse = AdresseLivraison(
+            # Format 2 : adresse inline → on la sauvegarde en DB pour réutilisation future
+            # Si une adresse identique existe déjà pour cet utilisateur, on la réutilise
+            adresse, created = AdresseLivraison.objects.get_or_create(
                 utilisateur = request.user,
-                nom_complet = data.get('adresse_livraison_nom', ''),
-                telephone   = data.get('adresse_livraison_telephone', ''),
                 adresse     = data.get('adresse_livraison_adresse', ''),
                 ville       = data.get('adresse_livraison_ville', ''),
                 region      = data.get('adresse_livraison_region', ''),
                 pays        = data.get('adresse_livraison_pays', 'Cameroun'),
+                defaults={
+                    'nom_complet': data.get('adresse_livraison_nom', ''),
+                    'telephone'  : data.get('adresse_livraison_telephone', ''),
+                }
             )
 
         # ── Création de la commande ──────────────────────────────────────────

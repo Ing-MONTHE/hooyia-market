@@ -1,218 +1,718 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — orders/checkout.html
+   Page de finalisation de commande (tunnel d'achat — étape 2/2)
+
+   STRUCTURE DE LA PAGE :
+     [ Barre de progression tunnel ]  ← étapes visuelles Panier → Livraison → Confirmation
+     [ Colonne principale 2/3 ]       [ Récapitulatif sticky 1/3 ]
+       ├── Adresses enregistrées        ├── Liste articles panier (loadRecap)
+       ├── Formulaire adresse           ├── Sous-total / Livraison / Total
+       ├── Note vendeur                 └── CTA "Confirmer" (btn-primary unique)
+       └── Mode de paiement
+
+   RÈGLE D'OR : 1 seul .btn-primary sur cette page → "Confirmer la commande"
+   Tous les autres boutons utilisent .btn-secondary ou .btn-ghost.
+
+   ICÔNES : Lucide Icons — SVG inline, stroke="currentColor"
+     - MapPin        → section adresse de livraison
+     - Phone         → champ téléphone
+     - User          → champ nom complet
+     - MessageSquare → section note vendeur
+     - CreditCard    → section mode de paiement
+     - Truck         → livraison gratuite + option paiement livraison
+     - Package       → en-tête récapitulatif
+     - ShieldCheck   → bouton confirmer (sécurité + confiance)
+     - ChevronDown   → select adresses enregistrées
+     - ArrowLeft     → retour panier
+     - Lock          → note sécurité
+
+   VARIABLES DJANGO UTILISÉES :
+     {{ user }}              — utilisateur connecté (prenom, nom, telephone)
+     {{ user.adresses.all }} — adresses de livraison enregistrées
+     {{ request }}           — état de connexion
+
+   JAVASCRIPT (bloc extra_scripts) :
+     loadRecap()       — charge le panier via API.get('/api/panier/'), peuple les items
+     remplirAdresse()  — pré-remplit le formulaire depuis une adresse enregistrée
+     passerCommande()  — valide le formulaire et POST vers /api/commandes/creer/
+     formatFCFA()      — formatte un nombre en "X XXX FCFA"
+{% endcomment %}
+
 {% block title %}Finaliser ma commande — HooYia Market{% endblock %}
+{% block meta_description %}Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-  <h1 class="font-display text-3xl text-ink mb-8">Finaliser ma commande</h1>
+<style>
+  /* ── Barre de progression du tunnel d'achat ──
+     3 étapes : Panier (done) → Livraison (active) → Confirmation (à venir) */
+  .step-bar { display: flex; align-items: center; }
+  .step-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; font-weight: 500; color: var(--text-muted);
+  }
+  .step-item.active { color: var(--brand-600); }
+  .step-item.done   { color: #16a34a; }
+  .step-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    background: transparent; transition: background 0.2s, color 0.2s;
+  }
+  .step-item.active .step-circle { background: var(--brand-600); border-color: var(--brand-600); color: white; }
+  .step-item.done   .step-circle { background: #16a34a;          border-color: #16a34a;          color: white; }
+  /* Trait reliant les étapes */
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; max-width: 60px; }
+  .step-line.done { background: #16a34a; }
 
-  <div class="grid lg:grid-cols-3 gap-8">
+  /* ── Option de paiement sélectionnable ── */
+  .payment-option {
+    border: 2px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .payment-option:hover { border-color: var(--brand-500); background: var(--brand-50); }
+  .payment-option:has(input[type="radio"]:checked) { border-color: var(--brand-500); background: var(--brand-50); }
+  .payment-option input[type="radio"] { accent-color: var(--brand-500); width: 18px; height: 18px; flex-shrink: 0; }
 
-    <!-- ── FORMULAIRE ── -->
-    <div class="lg:col-span-2 space-y-6">
+  /* ── Ligne article dans le récapitulatif ── */
+  .recap-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .recap-item + .recap-item { border-top: 1px solid var(--border); }
+  .recap-item-img {
+    width: 44px; height: 44px; border-radius: 8px;
+    object-fit: cover; background: var(--surface-2); flex-shrink: 0;
+  }
+  .recap-item-placeholder {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: var(--surface-2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+  }
+  /* Badge quantité sur les items */
+  .qty-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--brand-100); color: var(--brand-600);
+    font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+  }
+  /* Livraison gratuite */
+  .shipping-free {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: #f0fdf4;
+    border: 1px solid #bbf7d0; border-radius: 8px;
+    font-size: 0.8rem; color: #166534; font-weight: 500;
+  }
+  /* Note de sécurité */
+  .security-note {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; color: var(--text-secondary);
+    justify-content: center; margin-top: 12px; font-weight: 500;
+  }
+  /* Skeleton de chargement */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .skeleton {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  /* Spinner pour le bouton pendant traitement */
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spinner { animation: spin 1s linear infinite; }
+  /* Bouton désactivé pendant le traitement */
+  #btn-commande:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+</style>
 
-      <!-- Adresse de livraison -->
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+  <div class="mb-8 lg:mb-10">
+    <h1 class="text-2xl lg:text-3xl font-bold text-brand-600">Finaliser ma commande</h1>
+    <p class="text-sm text-text-secondary mt-1">Renseignez votre adresse de livraison et choisissez votre mode de paiement.</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+    <div class="lg:col-span-2 space-y-5">
+
+      {% comment %} ── SECTION 1 : Adresse de livraison
+         Modes : onglet "Mes adresses" (cartes radio) ou "Nouvelle adresse" (saisie manuelle).
+         Champs pré-remplis par loadRecap() depuis le profil + selectionnerAdresse() depuis les cartes. {% endcomment %}
       <div class="card p-6">
-        <h2 class="font-display text-lg text-ink mb-5 pb-3 border-b border-cream-border">Adresse de livraison</h2>
-        <div class="grid grid-cols-2 gap-4">
-
-          <div class="col-span-2">
-            <label class="label" for="nom">Nom complet du destinataire *</label>
-            <input type="text" id="nom" placeholder="Jean Dupont" class="field" required />
+        <div class="flex items-center gap-3 mb-5 pb-4 border-b border-cream-border">
+          <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
           </div>
-
-          <div class="col-span-2">
-            <label class="label" for="telephone">Téléphone *</label>
-            <input type="text" id="telephone" placeholder="+237 6XX XXX XXX" class="field" required />
-          </div>
-
-          <div class="col-span-2">
-            <label class="label" for="adresse">Adresse *</label>
-            <input type="text" id="adresse" placeholder="Quartier, rue, N° de porte…" class="field" required />
-          </div>
-
           <div>
-            <label class="label" for="ville">Ville *</label>
-            <input type="text" id="ville" placeholder="Yaoundé" class="field" required />
+            <h2 class="font-semibold text-ink text-base">Adresse de livraison</h2>
+            <p class="text-xs text-text-muted">Où devons-nous livrer votre commande ?</p>
           </div>
-
-          <div>
-            <label class="label" for="region">Région *</label>
-            <input type="text" id="region" placeholder="Centre" class="field" required />
-          </div>
-
-          <div class="col-span-2">
-            <label class="label" for="pays">Pays</label>
-            <input type="text" id="pays" value="Cameroun" class="field" />
-          </div>
-
         </div>
 
-        <!-- Remplir depuis une adresse enregistrée -->
-        {% if user.adresses.all %}
-        <div class="mt-4 pt-4 border-t border-cream-border">
-          <label class="label">Utiliser une adresse enregistrée</label>
-          <select id="adresse-saved" onchange="remplirAdresse(this)" class="field text-sm">
-            <option value="">— Choisir —</option>
-            {% for adr in user.adresses.all %}
-            <option value="{{ adr.id }}"
-              data-nom="{{ user.prenom }} {{ user.nom }}"
-              data-telephone="{{ adr.telephone|default:user.telephone }}"
-              data-adresse="{{ adr.adresse }}"
-              data-ville="{{ adr.ville }}"
-              data-region="{{ adr.region }}"
-              data-pays="{{ adr.pays }}">
-              {{ adr.adresse }}, {{ adr.ville }}
-            </option>
-            {% endfor %}
-          </select>
+        {% if adresses %}
+        <div class="mb-5">
+          
+          <div class="flex mb-4 rounded-xl overflow-hidden border border-brand-200" id="addr-tabs">
+            <button type="button" onclick="switchAddrTab('saved')" id="tab-saved"
+                    style="flex:1; padding:10px 16px; font-size:0.875rem; font-weight:600; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; background:var(--brand-500); color:white; border-radius:0;">
+              
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+              </svg>
+              Mes adresses
+            </button>
+            <button type="button" onclick="switchAddrTab('new')" id="tab-new"
+                    style="flex:1; padding:10px 16px; font-size:0.875rem; font-weight:600; border:none; border-left:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; background:white; color:var(--text-secondary); border-radius:0;">
+              
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              Nouvelle adresse
+            </button>
+          </div>
+
+          
+          <div id="panel-saved" class="p-4 bg-brand-50 rounded-xl border border-brand-200">
+            <label class="block text-xs font-semibold text-brand-600 mb-2 uppercase tracking-wide">
+              Sélectionner une adresse
+            </label>
+            <div class="space-y-2">
+              {% for adr in adresses %}
+              
+              <label class="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors
+                            {% if adr.is_default %}border-brand-500 bg-white{% else %}border-transparent bg-white hover:border-brand-200{% endif %}"
+                     id="adr-card-{{ adr.id }}">
+                <input type="radio" name="adresse-choice" value="{{ adr.id }}"
+                       {% if adr.is_default %}checked{% endif %}
+                       onchange="selectionnerAdresse(this)"
+                       data-nom="{{ user.prenom }} {{ user.nom }}"
+                       data-telephone="{{ adr.telephone|default:user.telephone }}"
+                       data-adresse="{{ adr.adresse }}"
+                       data-ville="{{ adr.ville }}"
+                       data-region="{{ adr.region }}"
+                       data-pays="{{ adr.pays }}"
+                       class="mt-0.5 flex-shrink-0" style="accent-color: var(--brand-500);" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-ink">
+                    {{ adr.adresse }}{% if adr.is_default %} <span class="badge badge-brand text-xs ml-1">Par défaut</span>{% endif %}
+                  </p>
+                  <p class="text-xs text-text-muted mt-0.5">{{ adr.ville }}, {{ adr.region }} — {{ adr.pays }}</p>
+                  {% if adr.telephone %}<p class="text-xs text-text-muted">{{ adr.telephone }}</p>{% endif %}
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div id="panel-new" class="hidden p-4 bg-surface-2 rounded-xl border border-border">
+            <p class="text-xs text-text-muted font-medium">
+              Remplissez les champs ci-dessous pour une nouvelle adresse de livraison.
+            </p>
+          </div>
         </div>
         {% endif %}
-      </div>
 
-      <!-- Note client -->
-      <div class="card p-6">
-        <h2 class="font-display text-lg text-ink mb-3">Note pour le vendeur</h2>
-        <textarea id="note-client" rows="3" placeholder="Instructions spéciales, précisions de livraison…" class="field text-sm"></textarea>
-      </div>
-
-      <!-- Paiement -->
-      <div class="card p-6">
-        <h2 class="font-display text-lg text-ink mb-4 pb-3 border-b border-cream-border">Mode de paiement</h2>
-        <label class="flex items-center gap-3 p-3 rounded-xl border border-brand-400 bg-brand-50 cursor-pointer">
-          <input type="radio" name="paiement" value="livraison" checked class="accent-brand-500 w-4 h-4" />
-          <div>
-            <p class="font-body font-medium text-sm text-ink">Paiement à la livraison</p>
-            <p class="font-body text-xs text-ink/40">Payez en cash à la réception de votre commande</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            {% comment %} Champ nom — pré-rempli depuis user.prenom + user.nom par loadRecap() {% endcomment %}
+            <label for="nom" class="block text-sm font-medium text-ink mb-1.5">
+              Nom complet du destinataire <span class="text-accent">*</span>
+            </label>
+            <div class="relative">
+              
+              <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-muted">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <input type="text" id="nom" placeholder="Ex : Jean-Pierre Nkomo"
+                     class="input-field pl-10" required autocomplete="name" />
+            </div>
           </div>
-        </label>
+
+          
+          <div class="sm:col-span-2">
+            {% comment %} Champ téléphone — pré-rempli depuis user.telephone {% endcomment %}
+            <label for="telephone" class="block text-sm font-medium text-ink mb-1.5">
+              Numéro de téléphone <span class="text-accent">*</span>
+            </label>
+            <div class="relative">
+              
+              <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-muted">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 13 19.79 19.79 0 0 1 1 4.18 2 2 0 0 1 2.96 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 17l.92-.08Z"/>
+                </svg>
+              </div>
+              <input type="tel" id="telephone" placeholder="+237 6XX XXX XXX"
+                     class="input-field pl-10" required autocomplete="tel" />
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="adresse" class="block text-sm font-medium text-ink mb-1.5">
+              Adresse précise <span class="text-accent">*</span>
+            </label>
+            <input type="text" id="adresse" placeholder="Quartier, rue, numéro de porte…"
+                   class="input-field" required autocomplete="street-address" />
+          </div>
+
+          <div>
+            <label for="ville" class="block text-sm font-medium text-ink mb-1.5">
+              Ville <span class="text-accent">*</span>
+            </label>
+            <input type="text" id="ville" placeholder="Ex : Yaoundé"
+                   class="input-field" required autocomplete="address-level2" />
+          </div>
+
+          
+          <div>
+            <label for="region" class="block text-sm font-medium text-ink mb-1.5">
+              Région <span class="text-accent">*</span>
+            </label>
+            <input type="text" id="region" placeholder="Ex : Centre"
+                   class="input-field" required autocomplete="address-level1" />
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="pays" class="block text-sm font-medium text-ink mb-1.5">Pays</label>
+            <input type="text" id="pays" value="Cameroun"
+                   class="input-field bg-surface-2 text-text-secondary" autocomplete="country-name" />
+          </div>
+
+        </div>
       </div>
+
+        {% comment %} ── SECTION 2 : Mode de paiement
+         Option active : livraison (cash). Orange Money + MTN MoMo désactivés (prévu Phase 6).
+         .payment-option utilise :has(input:checked) CSS pour la sélection visuelle. {% endcomment %}
+      <div class="card p-6">
+
+        <div class="flex items-center gap-3 mb-5 pb-4 border-b border-cream-border">
+          <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
+            
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+              <rect width="22" height="16" x="1" y="4" rx="2" ry="2"/>
+              <line x1="1" x2="23" y1="10" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="font-semibold text-ink text-base">Mode de paiement</h2>
+            <p class="text-xs text-text-muted">Choisissez comment vous souhaitez régler.</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+
+          <label class="payment-option">
+            <input type="radio" name="paiement" value="livraison" checked />
+            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+              
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600">
+                <path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-sm text-ink">Paiement à la livraison</p>
+              <p class="text-xs text-text-muted mt-0.5">Payez en cash à la réception de votre commande</p>
+            </div>
+            <span class="badge badge-success text-xs hidden sm:inline-flex">Disponible</span>
+          </label>
+
+          <label class="payment-option opacity-50 cursor-not-allowed" title="Bientôt disponible">
+            <input type="radio" name="paiement" value="orange_money" disabled />
+            <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-sm text-ink">Orange Money</p>
+              <p class="text-xs text-text-muted mt-0.5">Paiement mobile — Cameroun</p>
+            </div>
+            <span class="badge badge-muted text-xs hidden sm:inline-flex">Bientôt</span>
+          </label>
+
+          
+          <label class="payment-option opacity-50 cursor-not-allowed" title="Bientôt disponible">
+            <input type="radio" name="paiement" value="mtn_momo" disabled />
+            <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
+                <rect width="20" height="14" x="2" y="5" rx="2"/>
+                <line x1="2" x2="22" y1="10" y2="10"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-sm text-ink">MTN Mobile Money</p>
+              <p class="text-xs text-text-muted mt-0.5">Paiement mobile — Cameroun</p>
+            </div>
+            <span class="badge badge-muted text-xs hidden sm:inline-flex">Bientôt</span>
+          </label>
+
+        </div>
+        
+
+      </div>
+      
 
     </div>
 
-    <!-- ── RÉCAPITULATIF ── -->
-    <div>
-      <div class="card p-6 sticky top-24">
-        <h2 class="font-display text-lg text-ink mb-4">Récapitulatif</h2>
+    {% comment %} ── RÉCAPITULATIF STICKY
+       sticky top-24 : reste visible pendant le scroll du formulaire
+       Peuplé par loadRecap() au chargement : skeleton → items réels
+       1 seul .btn.btn-primary sur cette page (règle d'or). {% endcomment %}
+    <div class="lg:col-span-1">
+      <div class="card p-5 sticky top-24">
 
-        <!-- Items -->
-        <div id="recap-items" class="space-y-3 mb-4">
-          <p class="text-ink/30 font-body text-xs animate-pulse">Chargement…</p>
+        
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-cream-border">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M16.5 9.4 7.55 4.24"/>
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.29 7 12 12 20.71 7"/>
+            <line x1="12" x2="12" y1="22" y2="12"/>
+          </svg>
+          <h2 class="font-semibold text-ink text-base">Votre commande</h2>
         </div>
 
-        <div class="h-px bg-cream-border my-3"></div>
+        
+        <div id="recap-items" class="space-y-0 mb-4 min-h-[80px]">
+          <div class="recap-item">
+            <div class="skeleton recap-item-placeholder"></div>
+            <div class="flex-1 space-y-1.5">
+              <div class="skeleton h-3 w-3/4 rounded"></div>
+              <div class="skeleton h-3 w-1/2 rounded"></div>
+            </div>
+          </div>
+          <div class="recap-item">
+            <div class="skeleton recap-item-placeholder"></div>
+            <div class="flex-1 space-y-1.5">
+              <div class="skeleton h-3 w-2/3 rounded"></div>
+              <div class="skeleton h-3 w-1/3 rounded"></div>
+            </div>
+          </div>
+        </div>
 
-        <div class="space-y-2 font-body text-sm">
-          <div class="flex justify-between text-ink/60">
+        
+        <div class="shipping-free mb-4">
+          
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+          Livraison <strong class="ml-1">gratuite</strong>
+        </div>
+
+        <div class="h-px bg-cream-border mb-4"></div>
+
+        
+        <div class="space-y-2.5 text-sm">
+
+          <div class="flex justify-between items-center text-text-secondary">
             <span>Sous-total</span>
-            <span id="recap-sous-total">—</span>
+            <span id="recap-sous-total" class="font-medium text-ink">—</span>
           </div>
-          <div class="flex justify-between text-ink/60">
-            <span>Livraison</span>
-            <span class="text-green-600 font-medium">Gratuite</span>
-          </div>
-          <div class="h-px bg-cream-border my-2"></div>
-          <div class="flex justify-between font-semibold text-ink text-base">
-            <span>Total</span>
-            <span id="recap-total">—</span>
-          </div>
-        </div>
 
+          <div class="flex justify-between items-center text-text-secondary">
+            <span>Livraison</span>
+            <span class="text-green-600 font-semibold">Gratuite</span>
+          </div>
+
+          <div class="h-px bg-cream-border"></div>
+
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-ink text-base">Total</span>
+            <span id="recap-total" class="font-bold text-accent text-lg">—</span>
+          </div>
+
+        </div>
+        
+
+        
         <button onclick="passerCommande()" id="btn-commande"
-          class="btn-primary w-full py-3 text-base mt-5">
-          Confirmer la commande
+                class="btn btn-primary w-full mt-5">
+          <svg id="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <span id="btn-label">Confirmer la commande</span>
         </button>
 
-        <p class="text-center text-xs text-ink/30 font-body mt-3">
-          En confirmant, vous acceptez nos conditions de vente.
-        </p>
+        
+        <div class="security-note">
+          
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Commande sécurisée — <a href="#" class="underline text-brand-500 hover:text-brand-600 ml-1 font-semibold">Conditions de vente</a>
+        </div>
+
+        
+        <div class="text-center mt-3">
+          <a href="/panier/" class="btn btn-ghost text-xs flex items-center justify-center gap-1">
+            
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 19-7-7 7-7"/><line x1="19" x2="5" y1="12" y2="12"/>
+            </svg>
+            Modifier le panier
+          </a>
+        </div>
+
       </div>
+      
     </div>
+    
 
   </div>
+  
+
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
+
+{#   loadRecap()       — charge le panier via API, peuple #recap-items          #}
+
 <script>
-// ── Chargement du récapitulatif panier
+// ════════════════════════════════════════════════════════════════════════════
+// JAVASCRIPT — orders/checkout.html
+//
+// formatFCFA(n)       — formate un nombre → "X XXX FCFA"
+// loadRecap()         — GET /api/panier/ → peuple #recap-items + pré-remplit les champs
+// switchAddrTab(mode) — bascule entre onglets "Mes adresses" / "Nouvelle adresse"
+// selectionnerAdresse(radio) — injecte une adresse enregistrée dans les champs
+// passerCommande()    — valide les champs + POST /api/commandes/creer/ + redirection
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Utilitaire : formatage FCFA ──────────────────────────────────────────────
+// Ex : 15000 → "15 000 FCFA"
+function formatFCFA(montant) {
+  return parseInt(montant).toLocaleString('fr-FR') + ' FCFA';
+}
+
+// ── Chargement du récapitulatif panier ───────────────────────────────────────
+// 1. Vérifie que le panier n'est pas vide (redirige vers /panier/ si oui)
+// 2. Pré-remplit le nom et téléphone depuis le profil Django (valeurs template)
+// 3. Pré-remplit depuis l'adresse par défaut si le select existe
+// 4. Peuple #recap-items avec image miniature, nom, quantité, prix
+// 5. Met à jour #recap-sous-total et #recap-total
 async function loadRecap() {
   try {
     const data = await API.get('/api/panier/');
+
+    // Panier vide → retour au panier
     if (data.est_vide) { window.location.href = '/panier/'; return; }
 
-    // Pré-remplir nom/téléphone depuis le profil
-    document.getElementById('nom').value = '{{ user.prenom }} {{ user.nom }}'.trim();
-    document.getElementById('telephone').value = '{{ user.telephone|default:"" }}';
+    // Pré-remplir nom et téléphone depuis le profil Django (injecté par le template)
+    const nomComplet = '{{ user.prenom }} {{ user.nom }}'.trim();
+    const telephone  = '{{ user.telephone|default:"" }}';
+    if (nomComplet)  document.getElementById('nom').value       = nomComplet;
+    if (telephone)   document.getElementById('telephone').value = telephone;
 
+    // Pré-remplir depuis l'adresse enregistrée par défaut (si elle existe)
+    // On cherche le radio "adresse-choice" coché par défaut et on l'applique
+    const defaultRadio = document.querySelector('input[name="adresse-choice"]:checked');
+    if (defaultRadio) selectionnerAdresse(defaultRadio);
+
+    // Construire les lignes d'articles dans le récapitulatif
     const items = data.items || [];
-    document.getElementById('recap-items').innerHTML = items.map(item => `
-      <div class="flex justify-between items-start gap-2 text-sm font-body">
-        <span class="text-ink/70 line-clamp-1 flex-1">${item.produit_nom} <span class="text-ink/40">×${item.quantite}</span></span>
-        <span class="text-ink font-medium flex-shrink-0">${parseInt(item.sous_total).toLocaleString('fr-FR')} F</span>
-      </div>`).join('');
+    const itemsHTML = items.map(item => {
+      // Image : miniature si disponible, sinon placeholder avec icône Image
+      const imgHTML = item.image_url
+        ? `<img src="${item.image_url}" alt="${item.produit_nom}" class="recap-item-img" loading="lazy" />`
+        : `<div class="recap-item-placeholder">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+               <circle cx="9" cy="9" r="2"/>
+               <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+             </svg>
+           </div>`;
 
+      return `
+        <div class="recap-item">
+          ${imgHTML}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-ink line-clamp-1">${item.produit_nom}</p>
+            <p class="text-xs text-text-muted mt-0.5">${formatFCFA(item.prix_snapshot)} / unité</p>
+          </div>
+          <div class="flex flex-col items-end gap-1 flex-shrink-0">
+            <span class="qty-badge">×${item.quantite}</span>
+            <span class="text-sm font-semibold text-ink">${formatFCFA(item.sous_total)}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('recap-items').innerHTML = itemsHTML;
+
+    // Mettre à jour les totaux
     const total = parseFloat(data.total);
-    document.getElementById('recap-sous-total').textContent = total.toLocaleString('fr-FR') + ' FCFA';
-    document.getElementById('recap-total').textContent      = total.toLocaleString('fr-FR') + ' FCFA';
-  } catch(e) {
-    if (e && e.status === 401) { window.location.href = '/compte/connexion/?next=/commandes/'; }
+    document.getElementById('recap-sous-total').textContent = formatFCFA(total);
+    document.getElementById('recap-total').textContent      = formatFCFA(total);
+
+  } catch (e) {
+    // 401 : non connecté → redirection vers login avec next
+    if (e && e.status === 401) {
+      window.location.href = '/compte/connexion/?next=/commandes/checkout/';
+    } else {
+      document.getElementById('recap-items').innerHTML =
+        '<p class="text-sm text-center py-4" style="color:var(--error)">Impossible de charger le panier. Actualisez la page.</p>';
+    }
   }
 }
 
-// ── Remplir depuis adresse enregistrée
-function remplirAdresse(select) {
-  const opt = select.options[select.selectedIndex];
-  if (!opt.value) return;
-  document.getElementById('nom').value       = opt.dataset.nom;
-  document.getElementById('telephone').value = opt.dataset.telephone;
-  document.getElementById('adresse').value   = opt.dataset.adresse;
-  document.getElementById('ville').value     = opt.dataset.ville;
-  document.getElementById('region').value    = opt.dataset.region;
-  document.getElementById('pays').value      = opt.dataset.pays;
+// ── Switch entre onglets : "Mes adresses" / "Nouvelle adresse" ──────────────
+// Gère l'affichage des 2 panneaux et le style des onglets.
+// En mode "saved" : les champs formulaire sont remplis depuis la carte sélectionnée
+// En mode "new"   : les champs sont vidés pour saisie manuelle
+function switchAddrTab(mode) {
+  const tabSaved   = document.getElementById('tab-saved');
+  const tabNew     = document.getElementById('tab-new');
+  const panelSaved = document.getElementById('panel-saved');
+  const panelNew   = document.getElementById('panel-new');
+  if (!tabSaved) return;
+
+  if (mode === 'saved') {
+    tabSaved.style.background = 'var(--brand-500)'; tabSaved.style.color = 'white';
+    tabNew.style.background   = 'white';             tabNew.style.color   = 'var(--text-secondary)';
+    panelSaved.classList.remove('hidden');
+    panelNew.classList.add('hidden');
+    const checked = document.querySelector('input[name="adresse-choice"]:checked');
+    if (checked) selectionnerAdresse(checked);
+  } else {
+    tabNew.style.background   = 'var(--brand-500)'; tabNew.style.color   = 'white';
+    tabSaved.style.background = 'white';             tabSaved.style.color = 'var(--text-secondary)';
+    panelNew.classList.remove('hidden');
+    panelSaved.classList.add('hidden');
+    ['nom','telephone','adresse','ville','region'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('nom').focus();
+  }
 }
 
-// ── Valider et passer la commande
+// ── Sélectionner une adresse enregistrée (via carte radio) ───────────────────
+// Déclenché onchange sur chaque radio input dans les cartes d'adresses.
+// Injecte les data-* dans les champs du formulaire + feedback visuel sur les cartes.
+function selectionnerAdresse(radio) {
+  // Retirer la mise en avant de toutes les cartes
+  document.querySelectorAll('input[name="adresse-choice"]').forEach(r => {
+    const card = document.getElementById('adr-card-' + r.value);
+    if (card) card.style.borderColor = 'transparent';
+  });
+  // Mettre en avant la carte sélectionnée
+  const card = document.getElementById('adr-card-' + radio.value);
+  if (card) card.style.borderColor = 'var(--brand-500)';
+
+  // Injecter les valeurs dans les champs du formulaire
+  const champs = {
+    nom: radio.dataset.nom, telephone: radio.dataset.telephone,
+    adresse: radio.dataset.adresse, ville: radio.dataset.ville,
+    region: radio.dataset.region, pays: radio.dataset.pays
+  };
+  Object.entries(champs).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val) el.value = val;
+  });
+}
+
+// ── Valider et passer la commande ─────────────────────────────────────────────
+// 1. Lit les valeurs du formulaire
+// 2. Vérifie que les champs obligatoires sont remplis (flash rouge si manquants)
+// 3. Désactive le bouton et affiche un spinner pendant le traitement
+// 4. POST vers /api/commandes/creer/ via API.post()
+// 5. Succès → redirige vers /commandes/<id>/
+// 6. Erreur → réactive le bouton et affiche le message d'erreur via window.toast
 async function passerCommande() {
+  // Lecture des valeurs
   const nom       = document.getElementById('nom').value.trim();
   const telephone = document.getElementById('telephone').value.trim();
   const adresse   = document.getElementById('adresse').value.trim();
   const ville     = document.getElementById('ville').value.trim();
   const region    = document.getElementById('region').value.trim();
   const pays      = document.getElementById('pays').value.trim();
-  const note      = document.getElementById('note-client').value.trim();
+  const note      = '';
+  const paiement  = document.querySelector('input[name="paiement"]:checked')?.value || 'livraison';
 
-  if (!nom || !telephone || !adresse || !ville || !region) {
-    window.toast && window.toast('Veuillez remplir tous les champs obligatoires.', 'error');
+  // Validation — champs obligatoires
+  const requis = { nom, telephone, adresse, ville, region };
+  const manquants = Object.keys(requis).filter(k => !requis[k]);
+  if (manquants.length) {
+    window.toast && window.toast('Veuillez remplir tous les champs obligatoires (*).', 'error');
+    manquants.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.borderColor = '#dc2626';
+        el.focus();
+        setTimeout(() => { el.style.borderColor = ''; }, 3000);
+      }
+    });
     return;
   }
 
-  const btn = document.getElementById('btn-commande');
-  btn.disabled = true;
-  btn.textContent = 'Traitement…';
+  // Désactiver le bouton et afficher le spinner
+  const btn   = document.getElementById('btn-commande');
+  const label = document.getElementById('btn-label');
+  const icon  = document.getElementById('btn-icon');
+  btn.disabled     = true;
+  label.textContent = 'Traitement en cours…';
+  icon.classList.add('spinner');
 
   try {
+    // POST vers l'API de création de commande
     const data = await API.post('/api/commandes/creer/', {
-      adresse_livraison_nom      : nom,
-      adresse_livraison_telephone: telephone,
-      adresse_livraison_adresse  : adresse,
-      adresse_livraison_ville    : ville,
-      adresse_livraison_region   : region,
-      adresse_livraison_pays     : pays,
-      note_client                : note,
-      mode_paiement              : 'livraison',
+      adresse_livraison_nom       : nom,
+      adresse_livraison_telephone : telephone,
+      adresse_livraison_adresse   : adresse,
+      adresse_livraison_ville     : ville,
+      adresse_livraison_region    : region,
+      adresse_livraison_pays      : pays,
+      note_client                 : note,
+      mode_paiement               : paiement,
     }, { silentError: true });
+
+    // Succès → redirection vers la page de confirmation
     window.location.href = `/commandes/${data.id}/`;
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Confirmer la commande';
+
+  } catch (e) {
+    // Réactiver le bouton
+    btn.disabled     = false;
+    label.textContent = 'Confirmer la commande';
+    icon.classList.remove('spinner');
+
     const msg = (e && e.message) ? e.message : 'Une erreur est survenue. Veuillez réessayer.';
     window.toast && window.toast(msg, 'error');
   }
 }
 
+// ── Initialisation ───────────────────────────────────────────────────────────
 loadRecap();
 </script>
 {% endblock %}

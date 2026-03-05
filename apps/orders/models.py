@@ -190,10 +190,20 @@ class Commande(models.Model):
     def livrer(self):
         """
         Marque la commande comme livrée.
+        Met le paiement à 'reussi' (paiement à la livraison = payé à réception).
         Déclenche le signal → rappel laisser un avis (3j après) via Celery.
         """
         from django.utils import timezone
         self.date_livraison = timezone.now()
+        # Paiement à la livraison : marquer comme réussi dès que livré
+        try:
+            paiement = self.paiement
+            if paiement.statut != Paiement.StatutPaiement.REUSSI:
+                paiement.statut = Paiement.StatutPaiement.REUSSI
+                paiement.date_paiement = timezone.now()
+                paiement.save(update_fields=['statut', 'date_paiement'])
+        except Exception:
+            pass  # Pas de paiement associé — ne pas bloquer la transition
 
     @transition(
         field=statut,

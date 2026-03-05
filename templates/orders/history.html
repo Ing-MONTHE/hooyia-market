@@ -1,61 +1,187 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — orders/history.html
+   Historique des commandes de l'utilisateur connecté.
+
+   STRUCTURE :
+     [ En-tête : titre + compteur ]
+     [ Skeleton 3 lignes ]          ← pendant le chargement AJAX
+     [ Empty state ]                ← si aucune commande
+     [ Liste des commandes ]        ← card par commande, peuplée par JS
+
+   CARTE COMMANDE :
+     - Référence courte + badge statut coloré
+     - Résumé produits (1er produit + "X autres")
+     - Date + nb articles + montant total
+     - Actions : "Voir le détail" (btn-secondary) + "Annuler" (rouge, conditionnel)
+
+   BADGES STATUT (plan de redesign) :
+     En attente      → jaune pâle
+     Confirmée       → bleu pâle
+     En préparation  → violet pâle
+     Expédiée        → orange pâle
+     Livrée          → vert pâle
+     Annulée         → rouge pâle
+
+   ICÔNES : Lucide Icons — SVG inline
+     - ShoppingBag  → empty state
+     - Package      → icône par défaut commande
+     - Calendar     → date commande
+     - ChevronRight → lien détail
+
+   JAVASCRIPT :
+     loadCommandes()      — GET /api/commandes/ → renderCommande() par item
+     renderCommande(c)    — construit le HTML d'une carte commande
+     annulerCommande(id)  — POST /api/commandes/<id>/annuler/ avec confirmation
+{% endcomment %}
+
 {% block title %}Mes commandes — HooYia Market{% endblock %}
+{% block meta_description %}Historique de vos commandes sur HooYia Market{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="flex items-center justify-between mb-8">
-    <h1 class="font-display text-3xl text-ink">Mes commandes</h1>
+<style>
+  /* ── Badge statut ── */
+  .statut-badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+  }
+  /* ── Skeleton ── */
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .skeleton {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 400px 100%; animation: shimmer 1.4s infinite;
+  }
+  /* ── Carte commande ── */
+  .commande-card {
+    background: white; border-radius: 14px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .commande-card:hover {
+    border-color: var(--brand-200);
+    box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+  }
+  .commande-card-body { padding: 16px 18px; }
+  .commande-card-footer {
+    padding: 10px 18px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  /* ── Icône commande (fond brand) ── */
+  .commande-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--brand-50);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+</style>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+  {# En-tête #}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-brand-600">Mes commandes</h1>
+      <p class="text-sm text-text-muted mt-0.5" id="commandes-count"></p>
+    </div>
+    <a href="{% url 'products:liste' %}" class="btn btn-secondary flex items-center gap-2 text-sm">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+        <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      Catalogue
+    </a>
   </div>
 
-  <!-- Skeleton -->
-  <div id="skeleton" class="space-y-4 animate-pulse">
-    {% for i in "1234" %}
-    <div class="card p-5 flex gap-4">
-      <div class="bg-cream-warm rounded-xl w-16 h-16 flex-shrink-0"></div>
-      <div class="flex-1 space-y-2">
-        <div class="h-3 bg-cream-warm rounded w-1/3"></div>
-        <div class="h-3 bg-cream-warm rounded w-1/2"></div>
+  {# Skeleton — 3 cartes fictives pendant le chargement #}
+  <div id="skeleton" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for i in "123456" %}
+    <div class="commande-card">
+      <div class="commande-card-body space-y-3">
+        <div class="flex justify-between items-start">
+          <div class="skeleton h-4 w-24 rounded"></div>
+          <div class="skeleton h-5 w-20 rounded-full"></div>
+        </div>
+        <div class="skeleton h-3 w-full rounded"></div>
+        <div class="skeleton h-3 w-2/3 rounded"></div>
+        <div class="flex justify-between items-center pt-1">
+          <div class="skeleton h-3 w-16 rounded"></div>
+          <div class="skeleton h-5 w-20 rounded"></div>
+        </div>
       </div>
-      <div class="h-8 bg-cream-warm rounded w-24"></div>
+      <div class="commande-card-footer">
+        <div class="skeleton h-7 w-24 rounded-lg"></div>
+      </div>
     </div>
     {% endfor %}
   </div>
 
-  <!-- Vide -->
-  <div id="empty" class="hidden text-center py-24">
-    <svg class="h-20 w-20 text-ink/10 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-    </svg>
-    <p class="font-display text-2xl text-ink/30 mb-2">Aucune commande</p>
-    <p class="text-ink/40 font-body text-sm mb-6">Vous n'avez pas encore passé de commande.</p>
-    <a href="{% url 'products:liste' %}" class="btn-primary py-3 px-6">Voir le catalogue</a>
+  {# Empty state #}
+  <div id="empty" class="hidden text-center py-20">
+    <div class="w-20 h-20 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+        <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </div>
+    <h2 class="text-xl font-bold text-ink mb-2">Aucune commande</h2>
+    <p class="text-sm text-text-muted mb-6 max-w-xs mx-auto">
+      Vous n'avez pas encore passé de commande. Découvrez notre catalogue !
+    </p>
+    <a href="{% url 'products:liste' %}" class="btn btn-primary">Voir le catalogue</a>
   </div>
 
-  <!-- Liste commandes -->
-  <div id="commandes-list" class="hidden space-y-4"></div>
+  {# Liste commandes — peuplée par JS #}
+  <div id="commandes-list" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
 </div>
+
 {% endblock %}
+
 
 {% block extra_scripts %}
 <script>
+// ── Mapping statuts ───────────────────────────────────────────────────────────
 const STATUTS_LABELS = {
-  en_attente: 'En attente', confirmee: 'Confirmée',
-  en_preparation: 'En préparation', expediee: 'Expédiée',
-  livree: 'Livrée', annulee: 'Annulée'
+  en_attente    : 'En attente',
+  confirmee     : 'Confirmée',
+  en_preparation: 'En préparation',
+  expediee      : 'Expédiée',
+  livree        : 'Livrée',
+  annulee       : 'Annulée',
 };
-const STATUTS_COLORS = {
-  en_attente:     'bg-yellow-100 text-yellow-700',
-  confirmee:      'bg-blue-100 text-blue-700',
-  en_preparation: 'bg-purple-100 text-purple-700',
-  expediee:       'bg-orange-100 text-orange-700',
-  livree:         'bg-green-100 text-green-700',
-  annulee:        'bg-red-100 text-red-400',
+// Couleurs inline des badges statut (plan de redesign)
+const STATUTS_STYLE = {
+  en_attente    : 'background:#fffbeb; color:#92400e;',
+  confirmee     : 'background:#eff6ff; color:#1d4ed8;',
+  en_preparation: 'background:#f5f3ff; color:#6d28d9;',
+  expediee      : 'background:#fff7ed; color:#c2410c;',
+  livree        : 'background:#f0fdf4; color:#166534;',
+  annulee       : 'background:#fef2f2; color:#991b1b;',
+};
+// Icône SVG par statut (Lucide inline)
+const STATUTS_ICON = {
+  en_attente    : '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  confirmee     : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  en_preparation: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+  expediee      : '<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  livree        : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  annulee       : '<circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>',
 };
 
+// ── Chargement des commandes ──────────────────────────────────────────────────
 async function loadCommandes() {
   try {
     const data = await API.get('/api/commandes/', { silentError: true });
@@ -68,70 +194,119 @@ async function loadCommandes() {
       return;
     }
 
+    // Compteur dans l'en-tête
+    document.getElementById('commandes-count').textContent =
+      `${commandes.length} commande${commandes.length > 1 ? 's' : ''}`;
+
     const list = document.getElementById('commandes-list');
     list.classList.remove('hidden');
     list.innerHTML = commandes.map(c => renderCommande(c)).join('');
 
   } catch(e) {
-    if (e && e.status === 401) { window.location.href = '/compte/connexion/?next=/commandes/historique/'; }
+    if (e && e.status === 401) {
+      window.location.href = '/compte/connexion/?next=/commandes/historique/';
+    }
   }
 }
 
+// ── Construction du HTML d'une carte commande ─────────────────────────────────
 function renderCommande(c) {
-  const lignes = c.lignes || [];
-  const premiereProduit = lignes[0] ? lignes[0].produit_nom : 'Commande';
-  const autreProduits = lignes.length > 1 ? ` + ${lignes.length - 1} autre${lignes.length > 2 ? 's' : ''}` : '';
-  const date = new Date(c.date_creation).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const peutAnnuler = ['en_attente', 'confirmee'].includes(c.statut);
+  const lignes         = c.lignes || [];
+  const premierProduit = lignes[0]?.produit_nom || 'Commande';
+  const autresProduits = lignes.length > 1
+    ? `<span style="color:var(--text-muted); font-size:0.75rem;"> +${lignes.length-1} autre${lignes.length>2?'s':''}</span>`
+    : '';
+  const date      = new Date(c.date_creation).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+  const montant   = parseInt(c.montant_total || 0).toLocaleString('fr-FR');
+  const refCourte = c.reference_courte || (c.reference||'').slice(0,8).toUpperCase() || c.id;
+  const statut    = c.statut || 'en_attente';
+  const icon      = STATUTS_ICON[statut] || STATUTS_ICON.en_attente;
 
   return `
-  <div class="card p-5">
-    <div class="flex items-start justify-between gap-4 flex-wrap">
+  <div class="commande-card" style="display:flex; flex-direction:column;">
 
-      <div class="flex-1">
-        <div class="flex items-center gap-3 mb-2">
-          <p class="font-body font-semibold text-ink text-sm">Commande #${c.reference || c.id}</p>
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-body font-semibold ${STATUTS_COLORS[c.statut] || 'bg-gray-100 text-gray-600'}">
-            ${STATUTS_LABELS[c.statut] || c.statut}
-          </span>
+    <div class="commande-card-body" style="flex:1;">
+
+      <!-- En-tête : ref + badge -->
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="commande-icon" style="width:36px; height:36px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+              ${icon}
+            </svg>
+          </div>
+          <span style="font-weight:700; font-size:0.85rem; color:var(--ink);">#${refCourte}</span>
         </div>
-        <p class="text-sm font-body text-ink/60 line-clamp-1">${premiereProduit}${autreProduits}</p>
-        <p class="text-xs font-body text-ink/30 mt-1">${date}</p>
+        <span class="statut-badge" style="${STATUTS_STYLE[statut]||''}">${STATUTS_LABELS[statut]||statut}</span>
       </div>
 
-      <div class="text-right flex-shrink-0">
-        <p class="font-display font-bold text-ink">${parseInt(c.montant_total || c.total || 0).toLocaleString('fr-FR')} FCFA</p>
-        <p class="text-xs text-ink/40 font-body">${lignes.length} article${lignes.length > 1 ? 's' : ''}</p>
+      <!-- Produit -->
+      <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;"
+         class="line-clamp-2">${premierProduit}${autresProduits}</p>
+
+      <!-- Séparateur -->
+      <div style="height:1px; background:var(--border); margin-bottom:10px;"></div>
+
+      <!-- Date + articles + montant -->
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-size:0.72rem; color:var(--text-muted); display:flex; flex-direction:column; gap:2px;">
+          <span>${date}</span>
+          <span>${lignes.length} article${lignes.length>1?'s':''}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:800; font-size:1rem; color:var(--ink);">${montant}</div>
+          <div style="font-size:0.7rem; color:var(--text-muted);">FCFA</div>
+        </div>
       </div>
 
     </div>
 
-    <div class="flex items-center gap-3 mt-4 pt-4 border-t border-cream-border">
-      <a href="/commandes/${c.id}/" class="btn-secondary py-1.5 px-4 text-xs">
+    <!-- Footer actions -->
+    <div class="commande-card-footer">
+      <a href="/commandes/${c.id}/" class="btn btn-secondary text-xs py-1.5 flex items-center gap-1.5">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
         Voir le détail
       </a>
-      ${peutAnnuler ? `
-      <button onclick="annulerCommande(${c.id}, this)"
-        class="py-1.5 px-4 text-xs font-body font-medium text-red-400 border border-red-200 rounded-xl hover:bg-red-50 transition-colors">
+      ${c.peut_etre_annulee ? `
+      <button onclick="annulerCommande(${c.id}, this)" class="btn text-xs py-1.5 flex items-center gap-1"
+              style="color:#dc2626; border-color:#fecaca; background:white;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>
+        </svg>
         Annuler
       </button>` : ''}
     </div>
+
   </div>`;
 }
 
-async async function annulerCommande(commandeId, btn) {
-  const ok = await showConfirm({ title: 'Annuler cette commande ?', body: 'Cette action est irréversible. La commande sera annulée.', confirmText: '✕ Annuler la commande', type: 'warning' });
+// ── Annulation d'une commande ─────────────────────────────────────────────────
+async function annulerCommande(commandeId, btn) {
+  const ok = await (window.showConfirm
+    ? window.showConfirm('Annuler la commande', 'Cette action est irréversible. Confirmer ?', 'Oui, annuler')
+    : Promise.resolve(confirm('Confirmer l\'annulation ?')));
   if (!ok) return;
+
   btn.disabled = true;
   try {
     await API.post(`/api/commandes/${commandeId}/annuler/`, {});
-    window.toast && window.toast('Commande annulée.', 'success');
-    loadCommandes();
+    window.toast && window.toast('Commande annulée avec succès.', 'success');
+    loadCommandes(); // Recharger la liste
   } catch(e) {
     btn.disabled = false;
+    const msg = (e && e.message) ? e.message : 'Impossible d\'annuler.';
+    window.toast && window.toast(msg, 'error');
   }
 }
 
+// ── Init ──────────────────────────────────────────────────────────────────────
 loadCommandes();
 </script>
 {% endblock %}

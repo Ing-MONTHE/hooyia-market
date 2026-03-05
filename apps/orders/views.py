@@ -34,8 +34,11 @@ def checkout(request):
     Les données du panier sont chargées via GET /api/panier/.
     La commande est créée via POST /api/commandes/.
     """
+    # Adresses enregistrées de l'utilisateur (pour le select du formulaire)
+    adresses = request.user.adresses.order_by('-is_default', '-date_creation')
     context = {
-        'titre': 'Finaliser ma commande — HooYia Market',
+        'titre'   : 'Finaliser ma commande — HooYia Market',
+        'adresses': adresses,
     }
     return render(request, 'orders/checkout.html', context)
 
