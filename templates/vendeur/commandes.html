@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — vendeur/commandes.html
+   Commandes contenant les produits du vendeur.
+
+   CONTEXTE Django :
+     commandes : queryset filtré (toutes ou par statut)
+     statut    : filtre actif
+
+   ICÔNES Lucide : ClipboardList, ChevronRight
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+{% block title %}Mes Commandes — HooYia Market{% endblock %}
+
+{% block content %}
+
+<div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+
+  {% comment %} ── EN-TÊTE ── {% endcomment %}
+  <div style="margin-bottom:1.75rem;">
+    <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:var(--brand-600);margin:0 0 .25rem 0;">
+      Mes commandes
+    </h1>
+    <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
+      {{ commandes|length }} commande{{ commandes|length|pluralize }}
+      {% if statut %} · filtre : <strong>{{ statut }}</strong>{% endif %}
+    </p>
+  </div>
+
+
+  {% comment %} ── FILTRES STATUT ── {% endcomment %}
+  <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+    {% for label, val in statuts %}
+    <a href="{% url 'products:vendeur_commandes' %}{% if val %}?statut={{ val }}{% endif %}"
+       style="padding:.5rem 1rem;border-radius:999px;font-size:.8125rem;font-weight:600;
+              text-decoration:none;transition:all 150ms;border:1.5px solid;
+              {% if statut == val %}background:var(--brand-600);border-color:var(--brand-600);color:#fff;
+              {% else %}background:var(--surface);border-color:var(--border);color:var(--text-secondary);{% endif %}"
+       onmouseover="if('{{ statut }}'!='{{ val }}'){this.style.borderColor='var(--brand-500)';this.style.color='var(--brand-500)';}"
+       onmouseout="if('{{ statut }}'!='{{ val }}'){this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)';}">
+      {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+
+  {% comment %} ── LISTE COMMANDES ── {% endcomment %}
+  {% if commandes %}
+  <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+    {% for commande in commandes %}
+    <div class="card" style="padding:1.25rem 1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+
+        {% comment %} Infos commande gauche {% endcomment %}
+        <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+
+          <div>
+            <p style="font-size:.875rem;font-weight:700;color:var(--text-primary);margin:0 0 .2rem 0;">
+              #{{ commande.reference_courte|default:commande.id }}
+            </p>
+            <p style="font-size:.75rem;color:var(--text-muted);margin:0;">
+              {{ commande.date_creation|date:"d/m/Y à H\hi" }}
+            </p>
+          </div>
+
+          {% comment %} Client {% endcomment %}
+          <div style="padding-left:1.5rem;border-left:1px solid var(--border);">
+            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .1rem 0;">Client</p>
+            <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0;">
+              {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
+            </p>
+          </div>
+
+          {% comment %} Produits commandés (du vendeur uniquement) {% endcomment %}
+          <div style="padding-left:1.5rem;border-left:1px solid var(--border);">
+            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .3rem 0;">Produits</p>
+            <div style="display:flex;flex-direction:column;gap:.15rem;">
+              {% for ligne in commande.lignes.all %}
+                {% if ligne.produit.vendeur == request.user %}
+                <p style="font-size:.8125rem;color:var(--text-primary);margin:0;">
+                  {{ ligne.quantite }}× {{ ligne.nom_produit_snapshot|default:ligne.produit.nom }}
+                </p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+
+        {% comment %} Droite : montant + badge statut + lien {% endcomment %}
+        <div style="display:flex;align-items:center;gap:1rem;">
+
+          <div style="text-align:right;">
+            <p style="font-size:1rem;font-weight:700;color:var(--text-primary);margin:0 0 .3rem 0;">
+              {{ commande.montant_total|floatformat:0 }} FCFA
+            </p>
+
+            {% if commande.statut == 'livree' %}
+              <span class="badge badge-success">Livrée</span>
+            {% elif commande.statut == 'annulee' %}
+              <span class="badge badge-error">Annulée</span>
+            {% elif commande.statut == 'en_attente' %}
+              <span class="badge badge-warning">En attente</span>
+            {% elif commande.statut == 'confirmee' %}
+              <span class="badge badge-brand">Confirmée</span>
+            {% elif commande.statut == 'en_preparation' %}
+              <span class="badge badge-accent">En préparation</span>
+            {% elif commande.statut == 'expediee' %}
+              <span class="badge badge-brand">Expédiée</span>
+            {% else %}
+              <span class="badge badge-muted">{{ commande.statut }}</span>
+            {% endif %}
+          </div>
+
+          {% comment %} Lucide — ChevronRight {% endcomment %}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+  {% comment %} Empty state {% endcomment %}
+  <div class="card" style="padding:3rem;text-align:center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem auto;display:block;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    <p style="font-size:.9375rem;color:var(--text-muted);margin:0;">
+      Aucune commande{% if statut %} avec ce statut{% endif %}.
+    </p>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

@@ -16,4 +16,7 @@ urlpatterns = [
     path('administration/categories/',   views.gestion_categories, name='gestion_categories'),
     path('administration/categories/supprimer/<int:cat_id>/', views.supprimer_categorie, name='supprimer_categorie'),
     path('administration/categories/api/', views.api_categories_crud, name='api_categories_crud'),
+    path('vendeur/',                      views.vendeur_dashboard,  name='vendeur_dashboard'),
+    path('vendeur/produits/',             views.vendeur_produits,   name='vendeur_produits'),
+    path('vendeur/commandes/',            views.vendeur_commandes,  name='vendeur_commandes'),
 ]

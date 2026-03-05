@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — vendeur/produits.html
+   Liste des produits du vendeur avec filtre par statut.
+
+   CONTEXTE Django :
+     produits : queryset filtré (tous ou par statut)
+     statut   : filtre actif ('actif','epuise','inactif','')
+
+   ICÔNES Lucide : Package, Plus, Edit, Trash2, Image
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+{% block title %}Mes Produits — HooYia Market{% endblock %}
+
+{% block content %}
+
+<div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+
+  {% comment %} ── EN-TÊTE ── {% endcomment %}
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;">
+    <div>
+      <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:var(--brand-600);margin:0 0 .25rem 0;">
+        Mes produits
+      </h1>
+      <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
+        {{ produits|length }} produit{{ produits|length|pluralize }}
+        {% if statut %} · filtre : <strong>{{ statut }}</strong>{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'products:ajouter' %}" class="btn btn-primary"
+       style="display:inline-flex;align-items:center;gap:.5rem;">
+      {% comment %} Lucide — Plus {% endcomment %}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un produit
+    </a>
+  </div>
+
+
+  {% comment %} ── FILTRES STATUT ── {% endcomment %}
+  <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+
+    {% for label, val in statuts %}
+    <a href="{% url 'products:vendeur_produits' %}{% if val %}?statut={{ val }}{% endif %}"
+       style="padding:.5rem 1rem;border-radius:999px;font-size:.8125rem;font-weight:600;
+              text-decoration:none;transition:all 150ms;border:1.5px solid;
+              {% if statut == val %}
+                background:var(--brand-600);border-color:var(--brand-600);color:#fff;
+              {% else %}
+                background:var(--surface);border-color:var(--border);color:var(--text-secondary);
+              {% endif %}"
+       onmouseover="if('{{ statut }}'!='{{ val }}'){this.style.borderColor='var(--brand-500)';this.style.color='var(--brand-500)';}"
+       onmouseout="if('{{ statut }}'!='{{ val }}'){this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)';}">
+      {{ label }}
+    </a>
+    {% endfor %}
+
+  </div>
+
+
+  {% comment %} ── TABLEAU PRODUITS ── {% endcomment %}
+  {% if produits %}
+  <div class="card" style="overflow:hidden;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--surface-3);border-bottom:1px solid var(--border);">
+          <th style="padding:.75rem 1.25rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Produit</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Prix</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Stock</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Statut</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Créé le</th>
+          <th style="padding:.75rem 1.25rem;text-align:right;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produit in produits %}
+        <tr style="border-bottom:1px solid var(--border);transition:background 150ms;"
+            onmouseover="this.style.background='var(--surface-2)'"
+            onmouseout="this.style.background='transparent'">
+
+          {% comment %} Colonne produit — miniature + nom + catégorie {% endcomment %}
+          <td style="padding:.875rem 1.25rem;">
+            <div style="display:flex;align-items:center;gap:.875rem;">
+              {% with img=produit.images.all|first %}
+              {% if img %}
+                <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                     style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;" />
+              {% else %}
+                <div style="width:44px;height:44px;border-radius:10px;background:var(--surface-3);
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  {% comment %} Lucide — Image {% endcomment %}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+              {% endif %}
+              {% endwith %}
+              <div>
+                <a href="{% url 'products:detail' produit.slug %}"
+                   style="font-size:.875rem;font-weight:600;color:var(--text-primary);text-decoration:none;"
+                   onmouseover="this.style.color='var(--brand-500)'"
+                   onmouseout="this.style.color='var(--text-primary)'">
+                  {{ produit.nom }}
+                </a>
+                <p style="font-size:.75rem;color:var(--text-muted);margin:.1rem 0 0 0;">
+                  {{ produit.categorie.nom }}
+                </p>
+              </div>
+            </div>
+          </td>
+
+          <td style="padding:.875rem 1rem;font-size:.875rem;font-weight:600;color:var(--text-primary);">
+            {{ produit.prix_actuel|floatformat:0 }} F
+          </td>
+
+          <td style="padding:.875rem 1rem;">
+            <span style="font-size:.875rem;font-weight:600;
+                         color:{% if produit.stock <= 2 %}#ef4444{% elif produit.stock <= 10 %}#f59e0b{% else %}var(--text-primary){% endif %};">
+              {{ produit.stock }}
+            </span>
+          </td>
+
+          <td style="padding:.875rem 1rem;">
+            {% if produit.statut == 'actif' %}
+              <span class="badge badge-success">Actif</span>
+            {% elif produit.statut == 'epuise' %}
+              <span class="badge badge-error">Épuisé</span>
+            {% elif produit.statut == 'inactif' %}
+              <span class="badge badge-muted">Inactif</span>
+            {% else %}
+              <span class="badge badge-muted">{{ produit.statut }}</span>
+            {% endif %}
+          </td>
+
+          <td style="padding:.875rem 1rem;font-size:.8125rem;color:var(--text-muted);">
+            {{ produit.date_creation|date:"d/m/Y" }}
+          </td>
+
+          {% comment %} Actions — Modifier + Supprimer {% endcomment %}
+          <td style="padding:.875rem 1.25rem;text-align:right;">
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:.5rem;">
+              <a href="{% url 'products:modifier' produit.id %}"
+                 style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;
+                        border-radius:8px;background:var(--surface-3);border:1px solid var(--border);
+                        color:var(--text-secondary);text-decoration:none;transition:all 150ms;"
+                 title="Modifier"
+                 onmouseover="this.style.borderColor='var(--brand-500)';this.style.color='var(--brand-500)'"
+                 onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
+                {% comment %} Lucide — Edit {% endcomment %}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+              <a href="{% url 'products:supprimer' produit.id %}"
+                 style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;
+                        border-radius:8px;background:var(--surface-3);border:1px solid var(--border);
+                        color:var(--text-secondary);text-decoration:none;transition:all 150ms;"
+                 title="Supprimer"
+                 onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fef2f2'"
+                 onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)';this.style.background='var(--surface-3)'">
+                {% comment %} Lucide — Trash2 {% endcomment %}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  {% comment %} Empty state {% endcomment %}
+  <div class="card" style="padding:3rem;text-align:center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem auto;display:block;"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    <p style="font-size:.9375rem;color:var(--text-muted);margin:0 0 1.25rem 0;">
+      Aucun produit{% if statut %} avec ce statut{% endif %}.
+    </p>
+    <a href="{% url 'products:ajouter' %}" class="btn btn-primary">
+      Ajouter mon premier produit
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

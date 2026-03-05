@@ -536,6 +536,109 @@ def admin_dashboard(request):
 from django.http import JsonResponse
 from django.db.models import Q
 
+# ═══════════════════════════════════════════════════════════════
+# ESPACE VENDEUR — Vues dédiées aux utilisateurs is_vendeur=True
+# Chaque vue vérifie : authentifié + is_vendeur (ou is_staff).
+# Les données sont injectées dans le contexte Django (pas d'API JS)
+# pour une première version simple et fonctionnelle.
+# ═══════════════════════════════════════════════════════════════
+
+def est_vendeur(user):
+    """Guard : utilisateur authentifié ET vendeur (ou admin)."""
+    return user.is_authenticated and (user.is_vendeur or user.is_staff)
+
+
+@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+def vendeur_dashboard(request):
+    """
+    Tableau de bord vendeur.
+    Contexte injecté :
+      - nb_produits      : nombre de produits actifs du vendeur
+      - nb_commandes     : nombre de commandes contenant ses produits
+      - ca_total         : chiffre d'affaires total (somme montants livrés)
+      - produits_recents : 5 derniers produits créés
+      - commandes_recentes: 5 dernières commandes
+    """
+    from apps.orders.models import Commande, LigneCommande
+    from django.db.models import Sum, Count
+
+    produits_qs = Produit.objects.filter(vendeur=request.user)
+
+    # Commandes contenant au moins un produit du vendeur
+    commandes_qs = Commande.objects.filter(
+        lignes__produit__vendeur=request.user
+    ).distinct()
+
+    # CA total sur commandes livrées
+    ca = commandes_qs.filter(statut='livree').aggregate(
+        total=Sum('montant_total')
+    )['total'] or 0
+
+    context = {
+        'nb_produits':       produits_qs.filter(statut='actif').count(),
+        'nb_commandes':      commandes_qs.count(),
+        'ca_total':          ca,
+        'produits_recents':  produits_qs.order_by('-date_creation')[:5],
+        'commandes_recentes': commandes_qs.order_by('-date_creation')[:5],
+    }
+    return render(request, 'vendeur/dashboard.html', context)
+
+
+@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+def vendeur_produits(request):
+    """
+    Liste de tous les produits du vendeur avec filtres statut.
+    Contexte :
+      - produits  : queryset filtré selon ?statut=
+      - statut    : valeur du filtre actif
+    """
+    statut = request.GET.get('statut', '')
+    produits_qs = (
+        Produit.objects
+        .filter(vendeur=request.user)
+        .prefetch_related('images')
+        .select_related('categorie')
+        .order_by('-date_creation')
+    )
+    if statut:
+        produits_qs = produits_qs.filter(statut=statut)
+
+    context = {
+        'produits': produits_qs,
+        'statut':   statut,
+    }
+    return render(request, 'vendeur/produits.html', context)
+
+
+@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+def vendeur_commandes(request):
+    """
+    Commandes contenant les produits du vendeur, avec filtre statut.
+    Contexte :
+      - commandes : queryset filtré
+      - statut    : valeur du filtre actif
+    """
+    from apps.orders.models import Commande
+
+    statut = request.GET.get('statut', '')
+    commandes_qs = (
+        Commande.objects
+        .filter(lignes__produit__vendeur=request.user)
+        .distinct()
+        .select_related('utilisateur')
+        .prefetch_related('lignes__produit')
+        .order_by('-date_creation')
+    )
+    if statut:
+        commandes_qs = commandes_qs.filter(statut=statut)
+
+    context = {
+        'commandes': commandes_qs,
+        'statut':    statut,
+    }
+    return render(request, 'vendeur/commandes.html', context)
+
+
 def autocomplete_search(request):
     q = request.GET.get('q', '').strip()
     if len(q) < 2:
