@@ -318,6 +318,41 @@
     background: #eff4ff;
     color: #1E3A8A;
   }
+  /* ── Avatar utilisateur (navbar) ──────────────────────────
+     Photo de profil circulaire si disponible, sinon initiale
+     sur fond brand-600. Taille 28×28px pour s'intégrer
+     dans la hauteur du bouton .nav-link (34px).
+  ────────────────────────────────────────────────────────── */
+  .nav-avatar-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--brand-200, #b8d0fb);
+    flex-shrink: 0;
+  }
+  .nav-avatar-initial {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--brand-600, #0D1F5C);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+  /* Badge panier — toujours visible même à 0 ──────────────── */
+  #cart-badge {
+    display: flex !important;
+    min-width: 16px;
+  }
+
+
   /* ── Cart tooltip ── */
   .nav-cart-btn { position: relative; }
   .nav-cart-tooltip {
@@ -575,15 +610,17 @@
 
         {# Compte ▼ — dropdown profil #}
         <div class="nav-dropdown-wrap">
-          <button class="nav-link" aria-haspopup="true" aria-expanded="false">
-            {# Lucide : UserCircle #}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {# Prénom ou username tronqué à 12 chars pour garder la navbar compacte #}
-            {{ user.prenom|default:user.username|truncatechars:12 }}
+          <button class="nav-link nav-user-btn" aria-haspopup="true" aria-expanded="false">
+            {# Avatar : photo de profil si disponible, sinon initiale sur fond brand #}
+            {% if user.photo_profil %}
+            <img src="{{ user.photo_profil.url }}"
+                 alt="{{ user.prenom|default:user.username }}"
+                 class="nav-avatar-img" />
+            {% else %}
+            <span class="nav-avatar-initial">
+              {{ user.prenom|default:user.username|first|upper }}
+            </span>
+            {% endif %}
             {# Lucide : ChevronDown #}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -690,6 +727,34 @@
 
         {% endif %}
 
+        {% comment %} ── Cloche Notifications ── {% endcomment %}
+        {% if user.is_authenticated %}
+        <div class="nav-dropdown-wrap" id="notif-wrap">
+          <button class="nav-icon-btn" id="notif-btn" aria-label="Notifications" style="position:relative;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="nav-badge" id="notif-badge" style="{% if not notif_count or notif_count == 0 %}display:none;{% endif %}">{{ notif_count|default:0 }}</span>
+          </button>
+          <div class="nav-dropdown-menu align-right" id="notif-dropdown" style="min-width:320px;max-width:360px;padding:0;">
+            <div style="padding:12px 16px 10px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:#0D1F5C;">Notifications</span>
+              <button onclick="marquerToutesLues()" style="font-size:11px;color:#F97316;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;">Tout marquer lu</button>
+            </div>
+            <div id="notif-list" style="max-height:320px;overflow-y:auto;">
+              <div style="padding:24px 16px;text-align:center;color:#8898AA;font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" style="margin:0 auto 8px;display:block;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                Chargement…
+              </div>
+            </div>
+            <div style="padding:10px 16px;border-top:1px solid #E2E8F0;text-align:center;">
+              <a href="/notifications/" style="font-size:12px;color:#1E3A8A;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-decoration:none;">Voir toutes les notifications →</a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
         {% comment %} ── Panier ──
            Visible pour tous (connecté ou non).
            Caché pour les admins/vendeurs qui ne font pas d'achats. {% endcomment %}
@@ -702,11 +767,7 @@
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
           </svg>
-          {% if cart_count > 0 %}
-          <span class="nav-badge" id="cart-badge">{{ cart_count }}</span>
-          {% else %}
-          <span class="nav-badge" id="cart-badge" style="display:none;">0</span>
-          {% endif %}
+          <span class="nav-badge" id="cart-badge">{{ cart_count|default:"0" }}</span>
           <span class="nav-cart-tooltip">Panier</span>
         </a>
         {% endif %}
@@ -1101,4 +1162,69 @@
     var d=document.documentElement.classList.contains('dark'),moon=document.getElementById('icon-moon'),sun=document.getElementById('icon-sun');
     if(d){if(moon)moon.style.display='none'; if(sun)sun.style.display='block';}
   })();
+
+  // ── Notifications dropdown ──
+  (function(){
+    var loaded = false;
+    var wrap = document.getElementById('notif-wrap');
+    if (!wrap) return;
+    wrap.addEventListener('mouseenter', function(){
+      if (loaded) return;
+      loaded = true;
+      loadNotifs();
+    });
+    wrap.addEventListener('focusin', function(){
+      if (loaded) return;
+      loaded = true;
+      loadNotifs();
+    });
+  })();
+
+  async function loadNotifs() {
+    if (!window.API) return;
+    try {
+      var data = await API.get('/api/notifications/', { silentError: true });
+      var items = data.results || data;
+      var list = document.getElementById('notif-list');
+      if (!list) return;
+      if (!items.length) {
+        list.innerHTML = '<div style="padding:24px 16px;text-align:center;color:#8898AA;font-size:12.5px;font-family:\'Plus Jakarta Sans\',sans-serif;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" style="margin:0 auto 8px;display:block;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Aucune notification</div>';
+        return;
+      }
+      var ICONS = { commande:'🛒', avis:'⭐', stock:'⚠️', systeme:'🔔' };
+      list.innerHTML = items.slice(0,8).map(function(n){
+        var icon = ICONS[n.type_notif] || '🔔';
+        var rel  = timeAgo(n.date_creation);
+        var bg   = n.is_read ? '' : 'background:#f8f9ff;border-left:3px solid #F97316;';
+        return '<a href="'+(n.lien||'#')+'" onclick="marquerLue('+n.id+',this)" style="display:flex;align-items:flex-start;gap:10px;padding:11px 16px;text-decoration:none;transition:background .12s;'+bg+'" onmouseover="this.style.background=\'#f4f7fc\'" onmouseout="this.style.background=\''+(n.is_read?'':'#f8f9ff')+'\'"><span style="font-size:16px;flex-shrink:0;margin-top:1px;">'+icon+'</span><div style="flex:1;min-width:0;"><p style="font-size:12.5px;font-weight:'+(n.is_read?'500':'600')+';color:#0F1923;font-family:\'Plus Jakarta Sans\',sans-serif;margin:0;line-height:1.4;white-space:normal;">'+escapeHtml(n.titre)+'</p><p style="font-size:11.5px;color:#8898AA;margin:2px 0 0;font-family:\'Plus Jakarta Sans\',sans-serif;line-height:1.4;white-space:normal;">'+escapeHtml(n.message.substring(0,80))+(n.message.length>80?'…':'')+'</p><p style="font-size:10.5px;color:#CBD5E0;margin-top:3px;font-family:\'Plus Jakarta Sans\',sans-serif;">'+rel+'</p></div></a>';
+      }).join('');
+      // Mettre à jour le badge
+      var nonLues = items.filter(function(n){ return !n.is_read; }).length;
+      var badge = document.getElementById('notif-badge');
+      if (badge) { badge.textContent = nonLues; badge.style.display = nonLues > 0 ? 'flex' : 'none'; }
+    } catch(e) {}
+  }
+
+  async function marquerLue(id, el) {
+    try { await API.patch('/api/notifications/'+id+'/lire/', {}); } catch(e) {}
+  }
+
+  async function marquerToutesLues() {
+    try {
+      await API.post('/api/notifications/marquer-toutes-lues/', {}, { silentError: true });
+      var badge = document.getElementById('notif-badge');
+      if (badge) badge.style.display = 'none';
+      loadNotifs();
+    } catch(e) {}
+  }
+
+  function timeAgo(iso) {
+    var d = new Date(iso), now = new Date(), diff = now - d;
+    if (diff < 60000) return 'À l\'instant';
+    if (diff < 3600000) return Math.floor(diff/60000)+' min';
+    if (diff < 86400000) return Math.floor(diff/3600000)+'h';
+    if (diff < 604800000) return Math.floor(diff/86400000)+'j';
+    return d.toLocaleDateString('fr-FR', {day:'numeric',month:'short'});
+  }
+  function escapeHtml(s) { var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 </script>

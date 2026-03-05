@@ -519,7 +519,7 @@
                 {% endif %}
               </div>
               <button class="pcard-cart-btn"
-                      onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
+                      onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"
                       aria-label="Ajouter {{ produit.nom }} au panier">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -653,7 +653,7 @@
                 {% endif %}
               </div>
               <button class="pcard-cart-btn"
-                      onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }})"
+                      onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"
                       aria-label="Ajouter {{ produit.nom }} au panier">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -979,28 +979,22 @@
    *
    * @param {number} produitId - L'ID du produit à ajouter
    *
-   * Utilise window.apiPost() défini dans static/js/api.js.
+   * Utilise API.post() défini dans static/js/api.js.
    * Affiche un toast de confirmation via window.toast() (toast.html).
    */
-  function addToCart(produitId) {
+  async function addToCart(produitId, produitNom) {
     {% if user.is_authenticated %}
-    apiPost('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 })
-      .then(data => {
-        if (data && data.success !== false) {
-          toast('Produit ajouté au panier !', 'success');
-          // Mise à jour du badge panier dans la navbar
-          const badge = document.getElementById('cart-badge');
-          if (badge && data.cart_count !== undefined) {
-            badge.textContent = data.cart_count;
-            badge.style.display = data.cart_count > 0 ? 'flex' : 'none';
-          }
-        } else {
-          toast(data?.message || 'Impossible d\'ajouter ce produit.', 'error');
-        }
-      })
-      .catch(() => toast('Erreur réseau. Réessayez.', 'error'));
+    try {
+      await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
+      const nom = produitNom ? `"${produitNom}"` : 'ce produit';
+      toast(`Le produit ${nom} a été ajouté au panier`, 'success');
+      const badge = document.getElementById('cart-badge');
+      if (badge) {
+        badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+        badge.style.display = 'flex';
+      }
+    } catch(e) { /* API.post gère déjà le toast d'erreur */ }
     {% else %}
-    {% comment %} Redirection vers connexion si non connecté {% endcomment %}
     window.location.href = "{% url 'users:connexion' %}?next={{ request.path }}";
     {% endif %}
   }

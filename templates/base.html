@@ -157,6 +157,24 @@
      notifications.js : polling des notifications non lues (badge navbar)
                         chargé uniquement si l'utilisateur est connecté {% endcomment %}
   <script src="{% static 'js/api.js' %}"></script>
+  {% comment %} ══ BADGE PANIER TEMPS RÉEL ══
+     Charge le nombre d'articles du panier via l'API au chargement
+     de chaque page, pour que le badge navbar soit toujours à jour. {% endcomment %}
+  {% if user.is_authenticated %}
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const data = await API.get('/api/panier/', { silentError: true });
+      const badge = document.getElementById('cart-badge');
+      if (!badge) return;
+      const n = data && data.nombre_articles ? data.nombre_articles : 0;
+      if (n > 0) { badge.textContent = n; badge.style.display = 'flex'; }
+      else { badge.style.display = 'none'; }
+    } catch(e) {}
+  });
+  </script>
+  {% endif %}
+
   {% if user.is_authenticated %}
   <script src="{% static 'js/notifications.js' %}"></script>
   {% endif %}
@@ -329,6 +347,9 @@
        <script src="..."></script>
      endblock {% endcomment %}
   {% block extra_scripts %}{% endblock %}
+
+  {% comment %} ══ TOAST SYSTEM — Notifications JS globales (window.toast) {% endcomment %}
+  {% include 'partials/toast.html' %}
 
 </body>
 </html>

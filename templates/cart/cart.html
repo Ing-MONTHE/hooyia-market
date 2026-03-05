@@ -1,91 +1,910 @@
 {% extends 'base.html' %}
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — cart/cart.html
+   Phase 3, Étape 7 — Redesign du Panier
+
+   RÔLE :
+     Page principale du panier d'achat. Coquille HTML statique —
+     toutes les données sont chargées dynamiquement via API.
+
+   ÉTATS DE LA PAGE (gérés par JS) :
+     #state-skeleton  → shimmer pendant le chargement de l'API
+     #state-empty     → panier vide (empty state + CTA catalogue)
+     #state-content   → panier avec articles (2 colonnes)
+
+   LAYOUT DESKTOP (lg+) :
+     ┌────────────────────────────┬──────────────────────┐
+     │  Liste des articles (2/3)  │  Récap sticky (1/3)  │
+     └────────────────────────────┴──────────────────────┘
+
+   LAYOUT MOBILE (<lg) :
+     Colonne unique + barre sticky fixe en bas (total + CTA)
+
+   DESIGN TOKENS UTILISÉS (custom.css) :
+     --bg (#F4F7FC)          Fond global de la page
+     --surface (#fff)        Fond des cartes
+     --brand-600 (#0D1F5C)   Titres, header récapitulatif
+     --brand-500 (#1E3A8A)   Liens secondaires
+     --accent (#F97316)      CTA principal (1 seul par vue !)
+     --accent-dark           Hover du CTA
+     --border (#E2E8F0)      Bordures et séparateurs
+     --shadow-md             Ombre du bloc récapitulatif
+     --shadow-accent         Ombre orange du bouton CTA
+
+   ICÔNES : Lucide Icons (SVG inline 24×24, stroke-width="2")
+
+   DONNÉES API :
+     GET  /api/panier/             → charge le panier
+     PATCH /api/panier/items/<id>/ → modifie la quantité
+     DELETE /api/panier/items/<id>/→ supprime un article
+     DELETE /api/panier/vider/     → vide tout le panier
+
+   LOGIQUE JS (cart.js + inline bas de page) :
+     Cart.load()            → fetch API + appelle renderCartPage()
+     Cart.updateQty(id,qty) → PATCH puis reload
+     Cart.removeItem(id)    → DELETE puis reload
+     Cart.vider()           → confirm() + DELETE puis reload
+     renderCartPage(data)   → bascule entre les 3 états HTML
+     renderCartItem(item)   → génère le HTML d'une ligne article
+{% endcomment %}
 {% load static %}
+
 
 {% block title %}Mon Panier — HooYia Market{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* ══════════════════════════════════════════════════════════
+     STYLES SPÉCIFIQUES — cart/cart.html
+     Les classes globales (.card, .btn-primary, .field…)
+     sont définies dans static/css/custom.css
+  ══════════════════════════════════════════════════════════ */
+
+  /* ── Breadcrumb ─────────────────────────────────────────
+     Fil d'Ariane : Accueil › Catalogue › Mon Panier
+     Liens en texte-muted, page courante en texte-secondary
+  ── */
+  .cart-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 28px;
+  }
+  .cart-breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .cart-breadcrumb a:hover { color: var(--brand-600); }
+  .cart-breadcrumb .sep { font-size: 10px; color: var(--border); margin: 0 2px; }
+  .cart-breadcrumb .current { color: var(--text-secondary); font-weight: 500; }
+
+  /* ── En-tête de la liste articles ───────────────────────
+     Titre "Mon Panier" + compteur articles + bouton "Vider"
+  ── */
+  .cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-header-left { display: flex; align-items: baseline; gap: 12px; }
+  .cart-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--brand-600);
+    letter-spacing: -0.3px;
+  }
+  .cart-count-label {
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-muted);
+  }
+
+  /* Bouton "Vider" — action destructive, style discret
+     Icône : Lucide Trash2 (SVG inline)
+  */
+  .btn-vider {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #f87171;
+    background: none;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .btn-vider:hover { background: #fff5f5; border-color: #f87171; color: #dc2626; }
+
+  /* ── Carte article du panier ─────────────────────────────
+     Structure d'une ligne :
+     [img 84×84] | [nom + prix/u + badge épuisé + stepper] | [sous-total]
+     Animation d'entrée à chaque (re)rendu de la liste.
+  ── */
+  .cart-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: box-shadow var(--transition), border-color var(--transition);
+    animation: itemIn 0.25s ease both;
+  }
+  .cart-item:hover { box-shadow: var(--shadow-md); border-color: var(--border-2); }
+  @keyframes itemIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Vignette image — hover scale subtil */
+  .item-img-wrap {
+    flex-shrink: 0;
+    width: 84px; height: 84px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .item-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  .item-img-wrap:hover img { transform: scale(1.04); }
+
+  /* Informations textuelles de l'article */
+  .item-info { flex: 1; min-width: 0; }
+  .item-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .item-name:hover { color: var(--brand-500); }
+  .item-prix-unit { font-size: 12px; color: var(--text-muted); font-family: 'Poppins', sans-serif; margin-top: 4px; }
+
+  /* Badge "Épuisé" — icône Lucide AlertTriangle + texte rouge */
+  .item-epuise-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #ef4444;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-top: 5px;
+  }
+
+  /* ── Contrôleur de quantité [−] [n] [+] ─────────────────
+     Icônes : Lucide Minus / Plus (SVG inline dans renderCartItem)
+     [−] qty=1 → passage à 0 = suppression automatique
+     [+] désactivé quand quantite >= stock_disponible
+  ── */
+  .qty-controls { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .qty-stepper {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid var(--border-2);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .qty-btn {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--text-primary);
+    transition: background var(--transition), color var(--transition);
+    flex-shrink: 0; user-select: none;
+  }
+  .qty-btn:hover:not(:disabled) { background: var(--brand-50); color: var(--brand-600); }
+  .qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .qty-value {
+    min-width: 36px; text-align: center;
+    font-size: 14px; font-family: 'Poppins', sans-serif; font-weight: 600;
+    color: var(--text-primary);
+    border-left: 1.5px solid var(--border-2); border-right: 1.5px solid var(--border-2);
+    height: 34px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Lien "Supprimer" — texte souligné, vire au rouge au hover */
+  .btn-remove-item {
+    font-size: 12px; font-family: 'Poppins', sans-serif; font-weight: 500;
+    color: var(--text-secondary); background: none; border: none; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+    transition: color var(--transition); padding: 0;
+  }
+  .btn-remove-item:hover { color: #ef4444; }
+
+  /* Sous-total de la ligne (prix_snapshot × quantité) */
+  .item-subtotal { flex-shrink: 0; text-align: right; }
+  .item-subtotal-price {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* ── Récapitulatif de commande (colonne droite sticky) ────
+     Reste visible en scrollant grâce à position:sticky.
+     top: 88px = hauteur navbar (72px) + marge (16px)
+     Sur mobile (<lg), masqué au profit de la barre fixe en bas.
+  ── */
+  .recap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 88px;
+  }
+
+  /* En-tête bleu marine du récap */
+  .recap-header { background: var(--brand-600); padding: 18px 24px; }
+  .recap-header-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: white; letter-spacing: 0.3px;
+  }
+
+  .recap-body { padding: 20px 24px; }
+
+  /* Ligne de détail : label à gauche, valeur à droite */
+  .recap-line {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13.5px; font-family: 'Poppins', sans-serif; padding: 7px 0;
+  }
+  .recap-line-label { color: var(--text-secondary); }
+  .recap-line-value { color: var(--text-primary); font-weight: 500; }
+
+  /* Badge vert "Gratuite" pour la livraison */
+  .badge-free {
+    font-size: 11px; font-weight: 600;
+    color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0;
+    border-radius: 6px; padding: 2px 7px;
+  }
+
+  .recap-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* Ligne du total final — mise en avant visuelle */
+  .recap-total-line { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 4px; }
+  .recap-total-label { font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; color: var(--brand-600); }
+  .recap-total-value { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 800; color: var(--brand-600); letter-spacing: -0.5px; }
+
+  /* CTA principal — règle d'or : 1 seul bouton orange par vue
+     Icône : Lucide ArrowRight (SVG inline)
+  */
+  .btn-commander {
+    width: 100%; padding: 14px 20px;
+    background: var(--accent); color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 18px;
+    transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+    box-shadow: var(--shadow-accent); text-decoration: none;
+  }
+  .btn-commander:hover { background: var(--accent-dark); box-shadow: 0 6px 20px rgba(249,115,22,0.45); transform: translateY(-1px); }
+  .btn-commander:active { transform: translateY(0); }
+
+  /* Lien retour catalogue — ghost, discret */
+  .btn-continue {
+    display: block; text-align: center;
+    font-size: 12.5px; font-family: 'Poppins', sans-serif;
+    color: var(--text-muted); text-decoration: none;
+    margin-top: 14px; transition: color var(--transition);
+  }
+  .btn-continue:hover { color: var(--brand-500); }
+
+  /* Mention sécurité — icône Lucide Shield + texte muted */
+  .recap-security {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border); background: var(--bg);
+  }
+  .recap-security span { font-size: 11.5px; color: var(--text-secondary); font-family: 'Poppins', sans-serif; }
+
+  /* ── Empty State — panier vide ──────────────────────────
+     Centré verticalement. Icône Lucide ShoppingBag dans un
+     cercle à bordure pointillée. CTA unique orange.
+  ── */
+  .empty-state { text-align: center; padding: 80px 24px; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .empty-icon-wrap {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--brand-50); border: 2px dashed var(--brand-200);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .empty-title {
+    font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 700;
+    color: var(--brand-600); margin-bottom: 8px;
+  }
+  .empty-subtitle {
+    font-size: 14px; font-family: 'Poppins', sans-serif;
+    color: var(--text-secondary); line-height: 1.6; margin-bottom: 28px;
+    max-width: 300px; margin-left: auto; margin-right: auto;
+  }
+  .btn-empty-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 28px; background: var(--accent); color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+    box-shadow: var(--shadow-accent);
+  }
+  .btn-empty-cta:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,0.45); }
+
+  /* ── Skeleton shimmer ────────────────────────────────────
+     Affiche la structure de la page pendant le chargement API.
+     Gradient animé qui défile de droite à gauche.
+  ── */
+  .skeleton-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px; display: flex; gap: 16px; align-items: flex-start;
+  }
+  .sk-block {
+    background: linear-gradient(90deg, var(--bg) 25%, #e8edf5 50%, var(--bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite; border-radius: 8px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* ── Barre mobile sticky (bas d'écran, < 1024px) ─────────
+     Remplace le récapitulatif sidebar sur mobile.
+     Affiche le total et le CTA de façon compacte.
+     Actionnée par renderCartPage() quand le panier est chargé.
+  ── */
+  .mobile-recap-bar {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-top: 1px solid var(--border);
+    padding: 14px 20px; z-index: 50;
+    box-shadow: 0 -4px 20px rgba(13,31,92,0.1);
+  }
+  .mobile-recap-inner {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    max-width: 480px; margin: 0 auto;
+  }
+  .mobile-total-label { font-size: 12px; color: var(--text-muted); font-family: 'Poppins', sans-serif; }
+  .mobile-total-value { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 800; color: var(--brand-600); }
+  .btn-mobile-commander {
+    padding: 11px 22px; background: var(--accent); color: white;
+    border: none; border-radius: 10px;
+    font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer; text-decoration: none;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    box-shadow: 0 3px 12px rgba(249,115,22,0.35); transition: background var(--transition);
+  }
+  .btn-mobile-commander:hover { background: var(--accent-dark); }
+
+  /* ── Responsive ──────────────────────────────────────────
+     Desktop  (≥1024px) : sidebar récap visible, barre mobile cachée
+     Mobile   (<1024px) : sidebar masquée, barre fixe bas activée,
+                          padding bas pour ne pas être masqué par la barre
+  ── */
+  @media (max-width: 1023px) {
+    .recap-sidebar { display: none !important; }
+    .mobile-recap-bar { display: flex; }
+    #state-content { padding-bottom: 90px; }
+  }
+  @media (min-width: 1024px) {
+    .mobile-recap-bar { display: none !important; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
 
-  <h1 class="font-display text-3xl text-ink mb-8">Mon Panier</h1>
+  {% comment %} ── Breadcrumb — Fil d'Ariane ── {% endcomment %}
+  <nav class="cart-breadcrumb" aria-label="Fil d'Ariane">
+    <a href="{% url 'products:accueil' %}">Accueil</a>
+    <span class="sep">›</span>
+    <a href="{% url 'products:liste' %}">Catalogue</a>
+    <span class="sep">›</span>
+    <span class="current">Mon Panier</span>
+  </nav>
 
-  <!-- Skeleton -->
-  <div id="skeleton" class="grid lg:grid-cols-3 gap-8 animate-pulse">
-    <div class="lg:col-span-2 space-y-4">
-      {% for i in "123" %}
-      <div class="card p-5 flex gap-4">
-        <div class="bg-cream-warm rounded-xl w-20 h-20 flex-shrink-0"></div>
-        <div class="flex-1 space-y-2">
-          <div class="h-3 bg-cream-warm rounded w-2/3"></div>
-          <div class="h-3 bg-cream-warm rounded w-1/3"></div>
-          <div class="h-3 bg-cream-warm rounded w-1/4"></div>
+  {% comment %} ════════════════════════════════════════════════════
+     ÉTAT 1 : SKELETON LOADER
+     Affiché immédiatement au chargement de la page.
+     Reproduit la structure réelle (3 articles + récap)
+     pour éviter le layout shift.
+     Masqué par renderCartPage() dès que l'API répond.
+  ════════════════════════════════════════════════════ {% endcomment %}
+  <div id="state-skeleton">
+    <div class="grid lg:grid-cols-3 gap-8">
+
+      {% comment %} Squelettes des 3 articles {% endcomment %}
+      <div class="lg:col-span-2 space-y-4">
+        {% for i in "123" %}
+        <div class="skeleton-item">
+          <div class="sk-block flex-shrink-0" style="width:84px;height:84px;border-radius:12px;"></div>
+          <div class="flex-1 space-y-3 pt-1">
+            <div class="sk-block h-4 rounded" style="width:65%;"></div>
+            <div class="sk-block h-3 rounded" style="width:35%;"></div>
+            <div class="sk-block h-8 rounded-lg" style="width:110px;margin-top:12px;"></div>
+          </div>
+          <div class="sk-block flex-shrink-0 h-5 rounded" style="width:70px;"></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% comment %} Squelette du bloc récapitulatif {% endcomment %}
+      <div class="lg:col-span-1">
+        <div style="border-radius:20px;overflow:hidden;border:1px solid var(--border);">
+          <div class="sk-block" style="height:60px;border-radius:0;"></div>
+          <div style="padding:20px 24px;">
+            <div class="sk-block h-4 rounded mb-3" style="width:80%;"></div>
+            <div class="sk-block h-4 rounded mb-3" style="width:60%;"></div>
+            <div class="sk-block h-4 rounded mb-5" style="width:70%;"></div>
+            <div class="sk-block h-12 rounded-xl"></div>
+          </div>
         </div>
       </div>
-      {% endfor %}
+
     </div>
-    <div class="card p-6 h-48 bg-cream-warm rounded-2xl"></div>
   </div>
 
-  <!-- Panier vide -->
-  <div id="empty-cart" class="hidden text-center py-24">
-    <svg class="h-20 w-20 text-ink/10 mx-auto mb-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-    </svg>
-    <p class="font-display text-2xl text-ink/30 mb-2">Votre panier est vide</p>
-    <p class="text-ink/40 font-body text-sm mb-6">Découvrez notre catalogue et ajoutez des produits.</p>
-    <a href="{% url 'products:liste' %}" class="btn-primary py-3 px-6">Voir le catalogue</a>
-  </div>
+  {% comment %} ════════════════════════════════════════════════════
+     ÉTAT 2 : PANIER VIDE
+     Affiché par renderCartPage() quand data.est_vide = true.
+     Design centré : icône ShoppingBag (Lucide) dans un cercle
+     pointillé + message d'invitation + CTA catalogue.
+  ════════════════════════════════════════════════════ {% endcomment %}
+  <div id="state-empty" class="hidden">
+    <div class="empty-state">
 
-  <!-- Contenu panier -->
-  <div id="cart-content" class="hidden grid lg:grid-cols-3 gap-8">
-
-    <!-- ── LISTE DES ARTICLES ── -->
-    <div class="lg:col-span-2">
-      <div class="flex items-center justify-between mb-4">
-        <p id="cart-count" class="text-sm font-body text-ink/50"></p>
-        <button onclick="Cart.vider()" class="text-xs font-body text-red-400 hover:text-red-600 transition-colors underline underline-offset-2">
-          Vider le panier
-        </button>
+      {% comment %} Icône Lucide : ShoppingBag {% endcomment %}
+      <div class="empty-icon-wrap" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+             stroke="#7096d1" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
       </div>
 
-      <div id="items-list" class="space-y-3"></div>
+      <h2 class="empty-title">Votre panier est vide</h2>
+      <p class="empty-subtitle">
+        Vous n'avez encore rien ajouté à votre panier.<br>
+        Découvrez notre catalogue et faites-vous plaisir !
+      </p>
+
+      {% comment %} CTA unique — règle d'or : 1 seul btn orange par vue
+         Icône Lucide : ShoppingCart {% endcomment %}
+      <a href="{% url 'products:liste' %}" class="btn-empty-cta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
+        </svg>
+        Voir le catalogue
+      </a>
+
     </div>
+  </div>
 
-    <!-- ── RÉCAPITULATIF ── -->
-    <div class="lg:col-span-1">
-      <div class="card p-6 sticky top-24">
-        <h2 class="font-display text-lg text-ink mb-5">Récapitulatif</h2>
+  {% comment %} ════════════════════════════════════════════════════
+     ÉTAT 3 : PANIER AVEC ARTICLES
+     Layout 2/3 + 1/3 sur desktop.
+     Colonne gauche  : en-tête + liste articles (injectée par JS)
+     Colonne droite  : récapitulatif sticky (top: 88px)
+     Sur mobile      : colonne unique + barre fixe en bas
+  ════════════════════════════════════════════════════ {% endcomment %}
+  <div id="state-content" class="hidden">
+    <div class="grid lg:grid-cols-3 gap-8">
 
-        <div class="space-y-3 mb-5 font-body text-sm">
-          <div class="flex justify-between text-ink/60">
-            <span>Sous-total</span>
-            <span id="subtotal">—</span>
+      {% comment %} ── Colonne gauche : liste des articles ── {% endcomment %}
+      <div class="lg:col-span-2">
+
+        <div class="cart-header">
+          <div class="cart-header-left">
+            <h1 class="cart-title">Mon Panier</h1>
+            {% comment %} Injecté par renderCartPage() : "3 articles" {% endcomment %}
+            <span id="cart-count" class="cart-count-label"></span>
           </div>
-          <div class="flex justify-between text-ink/60">
-            <span>Livraison</span>
-            <span class="text-green-600 font-medium">Gratuite</span>
-          </div>
-          <div class="h-px bg-cream-border my-2"></div>
-          <div class="flex justify-between font-semibold text-ink text-base">
-            <span>Total</span>
-            <span id="total-price">—</span>
-          </div>
+
+          {% comment %} Vider tout — confirm() dans Cart.vider()
+             Icône Lucide : Trash2 {% endcomment %}
+          <button onclick="Cart.vider()" class="btn-vider" aria-label="Vider tout le panier">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+            Vider
+          </button>
         </div>
 
-        <a href="{% url 'orders:passer_commande' %}" id="btn-commander"
-          class="btn-primary w-full py-3 text-base text-center block">
-          Passer la commande →
-        </a>
+        {% comment %} Liste des articles — injectée par renderCartItem() en bas de page {% endcomment %}
+        <div id="items-list" class="space-y-3" role="list" aria-label="Articles dans votre panier"></div>
 
-        <a href="{% url 'products:liste' %}" class="block text-center text-xs text-ink/40 font-body mt-4 hover:text-brand-600 transition-colors">
-          ← Continuer mes achats
-        </a>
       </div>
-    </div>
 
+      {% comment %} ── Colonne droite : récapitulatif sticky ── {% endcomment %}
+      <div class="lg:col-span-1 recap-sidebar">
+        <div class="recap-card" role="complementary" aria-label="Récapitulatif de commande">
+
+          {% comment %} Header bleu marine {% endcomment %}
+          <div class="recap-header">
+            <p class="recap-header-title">Récapitulatif</p>
+          </div>
+
+          <div class="recap-body">
+
+            {% comment %} Sous-total — injecté par renderCartPage() {% endcomment %}
+            <div class="recap-line">
+              <span class="recap-line-label">Sous-total</span>
+              <span class="recap-line-value" id="subtotal">—</span>
+            </div>
+
+            {% comment %} Livraison gratuite {% endcomment %}
+            <div class="recap-line">
+              <span class="recap-line-label">Livraison</span>
+              <span class="badge-free">Gratuite</span>
+            </div>
+
+            <div class="recap-divider"></div>
+
+            {% comment %} Total final — injecté par renderCartPage() {% endcomment %}
+            <div class="recap-total-line">
+              <span class="recap-total-label">Total</span>
+              <span class="recap-total-value" id="total-price">—</span>
+            </div>
+
+            {% comment %} CTA unique — règle d'or : 1 seul btn orange par vue
+               Icône Lucide : ArrowRight {% endcomment %}
+            <a href="{% url 'orders:passer_commande' %}" id="btn-commander" class="btn-commander">
+              Passer la commande
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </a>
+
+            {% comment %} Retour catalogue — lien ghost {% endcomment %}
+            <a href="{% url 'products:liste' %}" class="btn-continue">← Continuer mes achats</a>
+
+          </div>
+
+          {% comment %} Mention sécurité — Icône Lucide : ShieldCheck {% endcomment %}
+          <div class="recap-security">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="#10b981" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Paiement 100% sécurisé</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% comment %} ── Barre mobile sticky (bas d'écran, < 1024px)
+   Remplace la sidebar récap sur mobile.
+   Affichée par renderCartPage() si le panier contient des articles.
+   Icône Lucide : ArrowRight {% endcomment %}
+<div id="mobile-recap-bar" class="mobile-recap-bar" aria-hidden="true">
+  <div class="mobile-recap-inner">
+    <div>
+      <p class="mobile-total-label">Total</p>
+      <p class="mobile-total-value" id="mobile-total-price">—</p>
+    </div>
+    <a href="{% url 'orders:passer_commande' %}" class="btn-mobile-commander">
+      Commander
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="{% static 'js/cart.js' %}"></script>
+
+<script>
+{% comment %} ══════════════════════════════════════════════════════════════
+   LOGIQUE DE RENDU — Surcharge de Cart.load()
+   ─────────────────────────────────────────────
+   cart.js appelle render(data) en closure interne.
+   On ne peut pas monkey-patcher Cart.render depuis l'extérieur.
+   Solution : on surcharge Cart.load() entièrement pour appeler
+   notre renderCartPage() après le fetch.
+
+   Toutes les autres méthodes (updateQty, removeItem, vider)
+   appellent Cart.load() en interne → elles bénéficieront
+   automatiquement de notre rendu à chaque action.
+══════════════════════════════════════════════════════════════ {% endcomment %}
+
+/* ── Utilitaires ─────────────────────────────────────────────── */
+
+/**
+ * formatPrix(val) → "12 500 FCFA"
+ * Formate un montant décimal en prix affiché (fr-FR + FCFA).
+ */
+function formatPrix(val) {
+  return parseInt(val || 0).toLocaleString('fr-FR') + ' FCFA';
+}
+
+/**
+ * escapeHtml(str) → chaîne sécurisée XSS
+ * Utilisé sur toute donnée venant de l'API (noms, slugs…).
+ */
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+/* ── Rendu principal ─────────────────────────────────────────── */
+
+/**
+ * renderCartPage(data)
+ * ────────────────────
+ * Bascule entre les 3 états HTML de la page selon le contenu du panier.
+ *
+ * @param {Object} data         Réponse de GET /api/panier/
+ *   .est_vide        {boolean} true si panier vide
+ *   .items           {Array}   liste des PanierItems
+ *   .nombre_articles {number}  somme des quantités
+ *   .total           {string}  montant total (décimal)
+ */
+function renderCartPage(data) {
+  const skeleton  = document.getElementById('state-skeleton');
+  const empty     = document.getElementById('state-empty');
+  const content   = document.getElementById('state-content');
+  const mobileBar = document.getElementById('mobile-recap-bar');
+
+  /* Masquer le skeleton dans tous les cas */
+  if (skeleton) skeleton.classList.add('hidden');
+
+  /* ── Panier vide ── */
+  if (data.est_vide || !data.items || data.items.length === 0) {
+    if (empty)   empty.classList.remove('hidden');
+    if (content) content.classList.add('hidden');
+    if (mobileBar) { mobileBar.style.display = 'none'; mobileBar.setAttribute('aria-hidden', 'true'); }
+    const badge = document.getElementById('cart-badge');
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+
+  /* ── Panier avec articles ── */
+  if (empty)   empty.classList.add('hidden');
+  if (content) content.classList.remove('hidden');
+
+  /* Compteur d'articles dans l'en-tête */
+  const countEl = document.getElementById('cart-count');
+  if (countEl) {
+    const n = data.nombre_articles;
+    countEl.textContent = `${n} article${n > 1 ? 's' : ''}`;
+  }
+
+  /* Injecter la liste des articles */
+  const list = document.getElementById('items-list');
+  // Maintenir l'ordre stable des articles — l'API peut retourner
+  // les items dans un ordre différent après updateQty/removeItem.
+  // On mémorise l'ordre de la première apparition de chaque item.id
+  if (!window._cartItemOrder) window._cartItemOrder = [];
+  data.items.forEach(item => {
+    if (!window._cartItemOrder.includes(item.id)) {
+      window._cartItemOrder.push(item.id);
+    }
+  });
+  const sorted = [...data.items].sort((a, b) => {
+    return window._cartItemOrder.indexOf(a.id) - window._cartItemOrder.indexOf(b.id);
+  });
+  if (list) list.innerHTML = sorted.map(item => renderCartItem(item)).join('');
+
+  /* Totaux desktop + mobile */
+  const total    = parseFloat(data.total || 0);
+  const totalFmt = formatPrix(total);
+
+  const elSub    = document.getElementById('subtotal');
+  const elTotal  = document.getElementById('total-price');
+  const elMobile = document.getElementById('mobile-total-price');
+  if (elSub)    elSub.textContent    = totalFmt;
+  if (elTotal)  elTotal.textContent  = totalFmt;
+  if (elMobile) elMobile.textContent = totalFmt;
+
+  /* Barre mobile — visible si panier non vide */
+  if (mobileBar) { mobileBar.style.display = 'flex'; mobileBar.setAttribute('aria-hidden', 'false'); }
+
+  /* Badge panier navbar */
+  const badge = document.getElementById('cart-badge');
+  if (badge) {
+    const n = data.nombre_articles;
+    badge.textContent  = n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+  }
+}
+
+/* ── Rendu d'une ligne article ───────────────────────────────── */
+
+/**
+ * renderCartItem(item)
+ * ────────────────────
+ * Génère le HTML d'une carte article (.cart-item).
+ * Icônes : Lucide Minus, Plus, AlertTriangle (SVG inline)
+ *
+ * @param {Object} item           Un élément de data.items
+ *   .id               {number}   ID du PanierItem (pour les appels API)
+ *   .produit_nom      {string}   Nom du produit
+ *   .produit_slug     {string}   Slug URL du produit
+ *   .image_principale {string}   URL de l'image principale
+ *   .prix_snapshot    {string}   Prix capturé à l'ajout (décimal)
+ *   .sous_total       {string}   prix_snapshot × quantite (décimal)
+ *   .quantite         {number}   Quantité dans le panier
+ *   .stock_disponible {number}   Stock restant (désactive le [+] si atteint)
+ *   .produit_statut   {string}   'actif' | 'epuise' | 'inactif' | 'archive'
+ */
+function renderCartItem(item) {
+  const img       = item.image_principale || '/static/img/logo.svg';
+  const nom       = item.produit_nom || 'Produit supprimé';
+  const slug      = item.produit_slug || '#';
+  const prixUnit  = parseFloat(item.prix_snapshot || 0);
+  const sousTotal = parseFloat(item.sous_total || 0);
+  const stockMax  = item.stock_disponible || 99;
+  const epuise    = item.produit_statut === 'epuise' || stockMax === 0;
+
+  /* Badge épuisé — Icône Lucide : AlertTriangle */
+  const badgeEpuise = epuise ? `
+    <span class="item-epuise-badge" role="alert">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Produit épuisé
+    </span>` : '';
+
+  return `
+  <div class="cart-item" id="item-${item.id}" role="listitem">
+
+    <!-- Vignette image — lien vers la fiche produit -->
+    <a href="/produits/${escapeHtml(slug)}/" class="item-img-wrap" aria-label="Voir ${escapeHtml(nom)}">
+      <img src="${escapeHtml(img)}"
+           alt="${escapeHtml(nom)}"
+           loading="lazy"
+           onerror="this.src='/static/img/logo.svg'" />
+    </a>
+
+    <!-- Informations produit -->
+    <div class="item-info">
+      <a href="/produits/${escapeHtml(slug)}/" class="item-name">${escapeHtml(nom)}</a>
+      <p class="item-prix-unit">${formatPrix(prixUnit)} / unité</p>
+      ${badgeEpuise}
+
+      <!-- Contrôleur quantité [−] [n] [+] + lien Supprimer
+           Icônes : Lucide Minus / Plus -->
+      <div class="qty-controls">
+        <div class="qty-stepper" role="group" aria-label="Quantité de ${escapeHtml(nom)}">
+          <button class="qty-btn"
+            onclick="Cart.updateQty(${item.id}, ${item.quantite - 1})"
+            aria-label="Diminuer la quantité">
+            <!-- Lucide : Minus -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <span class="qty-value" aria-live="polite" aria-atomic="true">${item.quantite}</span>
+          <button class="qty-btn"
+            onclick="Cart.updateQty(${item.id}, ${Math.min(item.quantite + 1, stockMax)})"
+            aria-label="Augmenter la quantité"
+            ${item.quantite >= stockMax ? 'disabled' : ''}>
+            <!-- Lucide : Plus -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+        <button class="btn-remove-item"
+          onclick="Cart.removeItem(${item.id})"
+          aria-label="Supprimer ${escapeHtml(nom)} du panier">
+          Supprimer
+        </button>
+      </div>
+    </div>
+
+    <!-- Sous-total de la ligne (prix_snapshot × quantité) -->
+    <div class="item-subtotal">
+      <p class="item-subtotal-price">${formatPrix(sousTotal)}</p>
+    </div>
+
+  </div>`;
+}
+
+/* ── Initialisation ──────────────────────────────────────────── */
+/*
+ * Surcharge de Cart.load() pour pointer vers renderCartPage().
+ * Appelé une fois au DOMContentLoaded, puis automatiquement
+ * par updateQty, removeItem et vider qui appellent Cart.load().
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof Cart === 'undefined' || typeof API === 'undefined') return;
+
+  // Fonction centrale de chargement + rendu — utilisée par toutes les actions
+  async function reloadPanier() {
+    try {
+      const data = await API.get('/api/panier/', { silentError: true });
+      renderCartPage(data);
+    } catch(e) {
+      if (e && e.status === 401) {
+        window.location.href = '/compte/connexion/?next=/panier/';
+      }
+    }
+  }
+
+  // Surcharge Cart.load (appelé par DOMContentLoaded et badge base.html)
+  Cart.load = reloadPanier;
+
+  // Surcharge updateQty — cart.js appelle load() en closure, pas Cart.load
+  Cart.updateQty = async function(itemId, nouvelleQty) {
+    if (nouvelleQty < 0) return;
+    try {
+      await API.patch(`/api/panier/items/${itemId}/`, { quantite: nouvelleQty });
+      await reloadPanier();
+      if (nouvelleQty === 0) window.toast && window.toast('Article supprimé.', 'success');
+    } catch(e) {}
+  };
+
+  // Surcharge removeItem
+  Cart.removeItem = async function(itemId) {
+    try {
+      await API.delete(`/api/panier/items/${itemId}/`);
+      await reloadPanier();
+      window.toast && window.toast('Article supprimé du panier.', 'success');
+    } catch(e) {}
+  };
+
+  // Surcharge vider
+  Cart.vider = async function() {
+    const ok = await showConfirm({ title: 'Vider le panier ?', body: 'Tous les articles seront supprimés.', confirmText: '🗑 Vider le panier', type: 'warning' });
+    if (!ok) return;
+    try {
+      await API.delete('/api/panier/vider/');
+      await reloadPanier();
+      window.toast && window.toast('Panier vidé.', 'success');
+    } catch(e) {}
+  };
+
+  reloadPanier();
+});
+</script>
 {% endblock %}
