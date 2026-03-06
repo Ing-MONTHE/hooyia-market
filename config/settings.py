@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'daphne',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
 
     # API REST
     'rest_framework',
@@ -262,6 +264,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 # Les images uploadées (photos produits) sont stockées ici
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ═══════════════════════════════════════════════
+# CLOUDINARY — Stockage des images (production)
+# ═══════════════════════════════════════════════
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    config('CLOUDINARY_API_KEY',    default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+if config('CLOUDINARY_CLOUD_NAME', default=''):
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # ═══════════════════════════════════════════════
