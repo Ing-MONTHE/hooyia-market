@@ -66,6 +66,12 @@
          <link rel="stylesheet" href="..." />
        endblock ── {% endcomment %}
   {% block extra_head %}{% endblock %}
+  {# ── Dark mode init — avant le rendu pour éviter le flash ── #}
+  <script>
+    (function(){
+      try { if(localStorage.getItem('hooyia-site-theme')==='dark') document.documentElement.classList.add('dark'); } catch(e){}
+    })();
+  </script>
 </head>
 
 {% comment %} ── Body

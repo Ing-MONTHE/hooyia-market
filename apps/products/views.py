@@ -19,7 +19,40 @@ def est_admin(user):
 
 from django.contrib.auth.decorators import login_required
 
+def conditions_utilisation(request):
+    return render(request, 'legal/conditions.html')
+
+
+def politique_confidentialite(request):
+    return render(request, 'legal/politique.html')
+
+
 @login_required(login_url='/compte/connexion/')
+@login_required(login_url='/compte/connexion/')
+def contact(request):
+    return render(request, 'legal/contact.html')
+
+
+def faq(request):
+    return render(request, 'legal/faq.html')
+
+
+def assistance(request):
+    return render(request, 'legal/assistance.html')
+
+
+def apropos(request):
+    return render(request, 'legal/apropos.html')
+
+
+def mentions_legales(request):
+    u = request.user
+    if not (u.is_staff or u.is_superuser or getattr(u, 'is_admin', False) or getattr(u, 'is_vendeur', False)):
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
+    return render(request, 'legal/mentions.html')
+
+
 def avis_plateforme(request):
     """
     Page dédiée pour laisser un avis sur la plateforme HooYia Market.
@@ -75,11 +108,13 @@ def accueil(request):
         [:8]
     )
 
+    u = request.user
     context = {
         'categories':        categories,
         'produits_vedette':  produits_vedette,
         'nouveaux_arrivages': nouveaux_arrivages,
         'titre':             'HooYia Market — Électronique & Informatique',
+        'est_admin': u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
     }
     return render(request, 'home.html', context)
 
@@ -148,6 +183,7 @@ def liste_produits(request):
     params.pop('page', None)
     params_str = params.urlencode()
 
+    u = request.user
     context = {
         'categories'      : categories,
         'categorie_active': categorie_active,
@@ -158,6 +194,7 @@ def liste_produits(request):
         'total_count'     : paginator.count,
         'search'          : search,
         'ordering'        : ordering,
+        'est_admin': u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
     }
     return render(request, 'products/list.html', context)
 

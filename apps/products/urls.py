@@ -5,6 +5,13 @@ app_name = 'products'
 
 urlpatterns = [
     path('',                              views.accueil,          name='accueil'),
+    path('conditions-utilisation/',       views.conditions_utilisation,    name='conditions'),
+    path('politique-confidentialite/',    views.politique_confidentialite, name='politique'),
+    path('mentions-legales/',              views.mentions_legales,          name='mentions'),
+    path('a-propos/',                      views.apropos,                   name='apropos'),
+    path('assistance/',                    views.assistance,                name='assistance'),
+    path('faq/',                           views.faq,                       name='faq'),
+    path('contact/',                      views.contact,                   name='contact'),
     path('avis-plateforme/',              views.avis_plateforme,  name='avis_plateforme'),
     path('produits/',                     views.liste_produits,   name='liste'),
     path('produits/autocomplete/',        views.autocomplete_search, name='autocomplete'),

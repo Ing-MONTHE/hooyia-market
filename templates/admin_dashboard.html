@@ -64,6 +64,17 @@
 {% block footer %}{% endblock %}
 
 {% block extra_head %}
+{# Init dark mode dashboard — clé indépendante hooyia-dash-theme #}
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('hooyia-dash-theme');
+      /* Annule le dark appliqué par base.html (hooyia-site-theme) */
+      document.documentElement.classList.remove('dark');
+      if(t === 'dark') document.documentElement.classList.add('dark');
+    } catch(e){}
+  })();
+</script>
 {% comment %} ── Google Fonts : Sora + Plus Jakarta Sans ──
    Sora       : display, titres, KPI — caractère fort et moderne
    Plus Jakarta Sans : corps, labels, boutons — lisible et propre
@@ -138,6 +149,186 @@
   --font-display: 'Sora', sans-serif;
   --font-body:    'Plus Jakarta Sans', sans-serif;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Variables remplacées
+════════════════════════════════════════════════════════════════ */
+html.dark {
+  --bg:           #0F1117;
+  --surface:      #1A1D27;
+  --surface-2:    #22263A;
+  --border:       #2E3350;
+  --border-2:     #3A4060;
+  --text:         #E8ECF4;
+  --text-2:       #9BA8C0;
+  --text-muted:   #5E6A88;
+  --brand-light:  #1a2240;
+  --green-light:  #052e1c;
+  --red-light:    #2d0d0d;
+  --yellow-light: #2d1f04;
+  --blue-light:   #0d1f42;
+  --purple-light: #1e1040;
+  --cyan-light:   #042830;
+  --accent-light: #2d1500;
+  --sh-xs: 0 1px 3px rgba(0,0,0,.4);
+  --sh-sm: 0 2px 8px rgba(0,0,0,.5);
+  --sh-md: 0 4px 16px rgba(0,0,0,.6);
+  --sh-lg: 0 8px 32px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+
+/* Sidebar dark */
+html.dark .da-sidebar { background: #12151f !important; border-color: var(--border) !important; }
+html.dark .da-topbar  { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-logo-badge { background: rgba(249,115,22,.2) !important; color: #fb923c !important; }
+html.dark .da-profile-dropdown { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-dd-item { color: var(--text-2) !important; }
+html.dark .da-dd-item:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .da-dd-divider { border-color: var(--border) !important; }
+
+/* Cards & sections */
+html.dark .da-card,
+html.dark .dash-card,
+html.dark [class*="card"],
+html.dark [class*="-card"] { background: var(--surface) !important; border-color: var(--border) !important; }
+
+/* Tables */
+html.dark table  { color: var(--text) !important; }
+html.dark thead tr { background: var(--surface-2) !important; }
+html.dark th     { background: var(--surface-2) !important; color: var(--text-muted) !important; border-color: var(--border) !important; }
+html.dark td     { border-color: var(--border) !important; color: var(--text) !important; }
+html.dark tr:hover td { background: var(--surface-2) !important; }
+
+/* Inputs & search */
+html.dark input,
+html.dark textarea,
+html.dark select { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text) !important; }
+html.dark input::placeholder { color: var(--text-muted) !important; }
+
+/* Sidebar items */
+html.dark .sb-item { color: var(--text-2) !important; }
+html.dark .sb-item:hover { background: rgba(255,255,255,.06) !important; color: var(--text) !important; }
+html.dark .sb-item.active { background: rgba(99,102,241,.18) !important; color: #a5b4fc !important; }
+html.dark .sb-section-label { color: var(--text-muted) !important; }
+html.dark .sb-divider { border-color: var(--border) !important; }
+html.dark .da-online-badge { background: rgba(16,185,129,.15) !important; color: #34d399 !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Surcharges complètes avec bons contrastes
+════════════════════════════════════════════════════════════════ */
+
+/* ── Remplacer les couleurs brand illisibles sur fond sombre ── */
+html.dark { --brand-deep: #C7D9FF; --brand-main: #93C5FD; }
+
+/* ── body & fond global ── */
+html.dark body { background: var(--bg) !important; color: var(--text) !important; }
+
+/* ── Topbar ── */
+html.dark .da-topbar { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-topbar-btn { color: var(--text-2) !important; }
+html.dark .da-topbar-btn:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+
+/* ── Sidebar ── */
+html.dark .da-sidebar { background: #12151f !important; border-color: var(--border) !important; }
+html.dark .sb-item { color: var(--text-2) !important; }
+html.dark .sb-item:hover { background: rgba(255,255,255,.05) !important; color: var(--text) !important; }
+html.dark .sb-item.active { background: rgba(147,197,253,.12) !important; color: #93C5FD !important; }
+html.dark .sb-item.active svg { stroke: #93C5FD !important; }
+html.dark .sb-section-label { color: var(--text-muted) !important; }
+html.dark .sb-divider { border-color: var(--border) !important; }
+html.dark .da-logo-badge { background: rgba(249,115,22,.18) !important; color: #fb923c !important; }
+html.dark .da-online-badge { background: rgba(16,185,129,.15) !important; color: #34d399 !important; }
+
+/* ── Cards ── */
+html.dark .da-card { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: none !important; }
+html.dark .da-card-head { background: var(--surface) !important; border-bottom-color: var(--border) !important; }
+html.dark .da-card-head h3 { color: #C7D9FF !important; }
+html.dark .da-card-action { color: #93C5FD !important; }
+html.dark .da-card-action:hover { color: var(--accent) !important; }
+
+/* ── KPI Cards ── */
+html.dark .kpi-card { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: none !important; }
+html.dark .kpi-value { color: #E8ECF4 !important; }
+html.dark .kpi-label { color: #7A8BA8 !important; }
+
+/* ── Titres de section ── */
+html.dark .da-section-title { color: #E8ECF4 !important; }
+html.dark .da-section-subtitle { color: var(--text-muted) !important; }
+
+/* ── Tables ── */
+html.dark .da-table { color: var(--text) !important; border-color: var(--border) !important; }
+html.dark .da-table th { background: var(--surface-2) !important; color: #7A8BA8 !important; border-color: var(--border) !important; font-weight: 700; }
+html.dark .da-table td { border-color: var(--border) !important; color: var(--text) !important; }
+html.dark .da-table tr:hover td { background: rgba(255,255,255,.03) !important; }
+html.dark .da-table .bold { color: var(--text) !important; }
+html.dark .da-loading { color: var(--text-muted) !important; background: var(--surface-2) !important; }
+
+/* ── Inputs & Search ── */
+html.dark input:not([type="range"]),
+html.dark textarea,
+html.dark select { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text) !important; }
+html.dark input::placeholder, html.dark textarea::placeholder { color: var(--text-muted) !important; }
+
+/* ── Actions rapides (qa) ── */
+html.dark .qa:not(.orange) { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .qa:not(.orange):hover { background: #2a2f45 !important; color: var(--text) !important; }
+html.dark .qa-text { color: var(--text-2) !important; }
+html.dark .qa.blue { background: rgba(147,197,253,.08) !important; border-color: rgba(147,197,253,.2) !important; }
+html.dark .qa.blue .qa-text { color: #93C5FD !important; }
+html.dark .qa.blue .qa-ic { background: rgba(147,197,253,.15) !important; color: #93C5FD !important; }
+
+/* ── Profil dropdown ── */
+html.dark .da-profile-dropdown { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: 0 8px 24px rgba(0,0,0,.5) !important; }
+html.dark .da-dd-item { color: var(--text-2) !important; }
+html.dark .da-dd-item:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .da-dd-divider { border-color: var(--border) !important; }
+html.dark .da-profile-name { color: var(--text) !important; }
+html.dark .da-profile-role { color: var(--text-muted) !important; }
+
+/* ── Boutons ── */
+html.dark .btn-secondary { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .btn-secondary:hover { border-color: #93C5FD !important; color: #93C5FD !important; }
+html.dark .btn-ghost { color: var(--text-2) !important; }
+html.dark .btn-ghost:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .filter-btn { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .filter-btn.active { background: rgba(147,197,253,.12) !important; border-color: #93C5FD !important; color: #93C5FD !important; }
+html.dark .pag-btn { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .pag-btn.active { background: #2563EB !important; border-color: #2563EB !important; color: #fff !important; }
+
+/* ── Modales ── */
+html.dark .modal-overlay { background: rgba(0,0,0,.75) !important; }
+html.dark .modal-box { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .modal-title { color: var(--text) !important; }
+
+/* ── Notifications dropdown ── */
+html.dark .da-notif-dropdown { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-notif-item:hover { background: var(--surface-2) !important; }
+html.dark .da-notif-title { color: var(--text) !important; }
+html.dark .da-notif-msg { color: var(--text-2) !important; }
+
+/* ── Éléments inline JS-générés (JS génère du HTML avec inline styles) ── */
+html.dark [style*="background:#fff"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background:#FFF"],
+html.dark [style*="background:#FFFFFF"],
+html.dark [style*="background: white"],
+html.dark [style*="background:white"] { background: var(--surface) !important; }
+
+html.dark [style*="color:#0D1F5C"],
+html.dark [style*="color:#0F1923"],
+html.dark [style*="color:#1E3A8A"] { color: #C7D9FF !important; }
+html.dark [style*="color:#4A5568"] { color: var(--text-2) !important; }
+html.dark [style*="color:#8898AA"],
+html.dark [style*="color:#6B7280"] { color: var(--text-muted) !important; }
+
+html.dark [style*="border:1px solid #E2E8F0"],
+html.dark [style*="border-bottom:1px solid #E2E8F0"],
+html.dark [style*="border-color:#E2E8F0"] { border-color: var(--border) !important; }
+
+html.dark [style*="background:#F4F7FC"],
+html.dark [style*="background:#F8FAFF"],
+html.dark [style*="background:#F8FAFC"],
+html.dark [style*="background:#EFF6FF"] { background: var(--surface-2) !important; }
 
 /* ════════════════════════════════════════════════════════════════
    RESET & BASE
@@ -1333,32 +1524,84 @@ html, body {
     {% comment %} ── Zone droite : actions topbar ── {% endcomment %}
     <div class="da-topbar-right">
 
-      {% comment %} ── Bouton recherche rapide ── {% endcomment %}
-      <button class="da-topbar-btn" title="Recherche rapide (Ctrl+K)"
-              onclick="focusSearch()">
-        {# Icône Lucide : Search #}
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.75"
-             stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-      </button>
+      {# ── Barre de recherche globale ── #}
+      <div id="global-search-wrap" style="position:relative;">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:0 12px;height:40px;transition:border-color 150ms;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="global-search-input" type="text" placeholder="Rechercher…"
+                 autocomplete="off"
+                 style="border:none;background:transparent;outline:none;font-size:13px;color:var(--text);width:180px;"
+                 oninput="onGlobalSearch(this.value)"
+                 onfocus="document.getElementById('global-search-wrap').querySelector('div').style.borderColor='rgba(99,102,241,.4)'"
+                 onblur="setTimeout(function(){closeGlobalSearch();document.getElementById('global-search-wrap').querySelector('div').style.borderColor='rgba(0,0,0,.08)'},200)" />
 
-      {% comment %} ── Bouton notifications ──
-         Badge orange avec le nombre de commandes en attente. {% endcomment %}
-      <button class="da-topbar-btn" title="Notifications"
-              onclick="navTo('commandes')">
-        {# Icône Lucide : Bell #}
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.75"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </div>
+        <div id="global-search-results" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:600;overflow:hidden;max-height:360px;overflow-y:auto;"></div>
+      </div>
+
+      {# ── Bouton Dark Mode Dashboard ── #}
+      <button class="da-topbar-btn" id="dash-dark-btn" title="Mode sombre"
+              onclick="dashToggleDark()" aria-label="Basculer le mode sombre">
+        {# Lucide Moon — visible en mode clair #}
+        <svg id="dash-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
-        {# Badge — mis à jour par JS au chargement #}
-        <span class="da-notif-badge" id="topbar-notif-badge" style="display:none;">0</span>
+        {# Lucide Sun — visible en mode sombre #}
+        <svg id="dash-icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
+             style="display:none;">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
       </button>
+      <script>
+        function dashToggleDark() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('hooyia-dash-theme', isDark ? 'dark' : 'light'); } catch(e){}
+          _syncDashDarkIcons();
+        }
+        function _syncDashDarkIcons() {
+          var isDark = document.documentElement.classList.contains('dark');
+          var moon = document.getElementById('dash-icon-moon'), sun = document.getElementById('dash-icon-sun');
+          if(moon) moon.style.display = isDark ? 'none' : 'block';
+          if(sun)  sun.style.display  = isDark ? 'block' : 'none';
+        }
+        /* Sync à l'init — le localStorage est lu dans base.html avant le rendu */
+        document.addEventListener('DOMContentLoaded', _syncDashDarkIcons);
+      </script>
+      {# ── Dropdown Notifications ── #}
+      <div class="da-notif-wrap" id="notif-wrap" style="position:relative;">
+        <button class="da-topbar-btn" title="Notifications" id="notif-bell-btn"
+                onclick="toggleNotifDropdown(event)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <span class="da-notif-badge" id="topbar-notif-badge" style="display:none;">0</span>
+        </button>
+        <div id="notif-dropdown" style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:500;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);">
+            <span style="font-weight:700;font-size:14px;color:var(--text);">Notifications</span>
+            <button onclick="navTo('notifications');closeNotifDropdown();" style="font-size:11.5px;color:var(--brand);background:none;border:none;cursor:pointer;font-weight:600;">Voir tout</button>
+          </div>
+          <div id="notif-dropdown-list" style="max-height:340px;overflow-y:auto;padding:8px 0;">
+            <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Chargement…</div>
+          </div>
+        </div>
+      </div>
+      <script>
+        /* Stubs — les vraies fonctions sont définies plus bas dans la page */
+        function toggleNotifDropdown(e)  { if(window._toggleNotif)  window._toggleNotif(e); }
+        function closeNotifDropdown()    { if(window._closeNotif)   window._closeNotif(); }
+        function onGlobalSearch(v)       { if(window._onGlobalSearch) window._onGlobalSearch(v); }
+        function closeGlobalSearch()     { if(window._closeGlobalSearch) window._closeGlobalSearch(); }
+      </script>
 
       {% comment %} ── Lien vers le site public ── {% endcomment %}
       <a class="da-topbar-btn" href="{% url 'products:accueil' %}"
@@ -3355,8 +3598,8 @@ html, body {
      RECHERCHE RAPIDE — Ctrl+K
   ══════════════════════════════════════════════════════════════ */
   window.focusSearch = function() {
-    // TODO Section B : ouvrir modal de recherche rapide
-    console.log('Recherche rapide — à implémenter en Section B');
+    var inp = document.getElementById('global-search-input');
+    if (inp) { inp.focus(); inp.select(); }
   };
 
   /* Raccourci clavier Ctrl+K / Cmd+K */
@@ -3366,6 +3609,118 @@ html, body {
       window.focusSearch();
     }
   });
+
+  /* ── Recherche globale ── */
+  var _searchTimer = null;
+
+  window._closeGlobalSearch = window.closeGlobalSearch = function() {
+    var el = document.getElementById('global-search-results');
+    if (el) el.style.display = 'none';
+  };
+
+  window._navAndClear = function(section) {
+    navTo(section);
+    window.closeGlobalSearch();
+    var inp = document.getElementById('global-search-input');
+    if (inp) inp.value = '';
+  };
+
+  window._closeNotif = function() {
+    var dd = document.getElementById('notif-dropdown');
+    if (dd) dd.style.display = 'none';
+  };
+
+  window._toggleNotif = function(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('notif-dropdown');
+    var open = dd.style.display === 'block';
+    dd.style.display = open ? 'none' : 'block';
+    if (!open) window._loadNotifDropdown();
+  };
+
+  window._loadNotifDropdown = async function() {
+    var list = document.getElementById('notif-dropdown-list');
+    if (!list) return;
+    try {
+      var data = await API.get('/api/notifications/?page=1&page_size=8');
+      var items = data.results || data;
+      if (!items.length) {
+        list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Aucune notification</div>';
+        return;
+      }
+      list.innerHTML = items.map(function(n) {
+        var dotColor = n.is_read ? 'var(--text-muted)' : 'var(--brand)';
+        var bg = n.is_read ? '' : 'background:rgba(99,102,241,.05);';
+        return '<div style="display:flex;gap:10px;padding:10px 16px;' + bg + 'border-bottom:1px solid var(--border);">'
+          + '<div style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;margin-top:5px;"></div>'
+          + '<div style="flex:1;">'
+          +   '<div style="font-size:13px;font-weight:600;color:var(--text);">' + escHtml(n.titre || '') + '</div>'
+          +   '<div style="font-size:12px;color:var(--text-2);margin-top:2px;">' + escHtml((n.message || '').slice(0, 70)) + '</div>'
+          +   '<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">' + timeAgo(n.date_creation) + '</div>'
+          + '</div></div>';
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Erreur de chargement</div>';
+    }
+  };
+
+  /* Click-outside pour fermer les dropdowns */
+  document.addEventListener('click', function(e) {
+    var notifWrap = document.getElementById('notif-wrap');
+    if (notifWrap && !notifWrap.contains(e.target)) window._closeNotif();
+    var searchWrap = document.getElementById('global-search-wrap');
+    if (searchWrap && !searchWrap.contains(e.target)) window._closeGlobalSearch();
+  });
+
+  window._onGlobalSearch = window.onGlobalSearch = function(q) {
+    clearTimeout(_searchTimer);
+    var el = document.getElementById('global-search-results');
+    if (!q || q.length < 2) { if (el) el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.innerHTML = '<div style="padding:14px 16px;font-size:12.5px;color:var(--text-muted);">Recherche…</div>';
+    _searchTimer = setTimeout(async function() {
+      try {
+        var enc = encodeURIComponent(q);
+        var [produits, commandes] = await Promise.all([
+          API.get('/api/produits/?search=' + enc + '&page_size=4'),
+          API.get('/api/commandes/?search=' + enc + '&page_size=4'),
+        ]);
+        var html = '';
+        var prods = (produits.results || produits).slice(0, 4);
+        var cmds  = (commandes.results || commandes).slice(0, 4);
+
+        if (prods.length) {
+          html += '<div style="padding:6px 12px 4px;font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;">Produits</div>';
+          html += prods.map(function(p) {
+            return '<div onclick="window._navAndClear(\'produits\')" style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
+              + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
+              + '<div><div style="font-size:13px;color:var(--text);">' + escHtml(p.nom) + '</div>'
+              + '<div style="font-size:11px;color:var(--text-muted);">' + (p.prix_actuel || p.prix || '') + ' FCFA · stock: ' + (p.stock || 0) + '</div></div>'
+              + '</div>';
+          }).join('');
+        }
+
+        if (cmds.length) {
+          html += '<div style="padding:6px 12px 4px;font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border);margin-top:4px;">Commandes</div>';
+          html += cmds.map(function(c) {
+            return '<div onclick="window._navAndClear(\'commandes\')" style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
+              + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>'
+              + '<div><div style="font-size:13px;color:var(--text);">#' + escHtml(c.reference_courte || (c.reference||'').slice(0,8).toUpperCase()) + ' · ' + escHtml(c.client_nom || '—') + '</div>'
+              + '<div style="font-size:11px;color:var(--text-muted);">' + (c.montant_total||'') + ' FCFA · ' + escHtml(c.statut||'') + '</div></div>'
+              + '</div>';
+          }).join('');
+        }
+
+        if (!prods.length && !cmds.length) {
+          html = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Aucun résultat pour « ' + escHtml(q) + ' »</div>';
+        }
+
+        el.innerHTML = html;
+      } catch(err) {
+        el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Erreur de recherche</div>';
+      }
+    }, 300);
+  };
 
   /* ══════════════════════════════════════════════════════════════
      INITIALISATION au chargement du DOM
@@ -4685,11 +5040,23 @@ html, body {
       var data  = await API.get(url);
       var items = data.results || data;
 
-      /* KPIs stock (chargés depuis overview si disponible) */
+      /* KPIs stock — depuis _ovData si dispo, sinon appel API overview */
       if (window._ovData) {
         setEl('kpi-stock-total',  window._ovData.produits_total || '—');
         setEl('kpi-stock-faible', window._ovData.stock_faible  || '—');
         setEl('kpi-stock-zero',   window._ovData.stock_epuise  || '—');
+      } else {
+        try {
+          var ov = await API.get('/api/stats/overview/');
+          window._ovData = ov;
+          setEl('kpi-stock-total',  ov.produits_total || '—');
+          setEl('kpi-stock-faible', ov.stock_faible   || '—');
+          setEl('kpi-stock-zero',   ov.stock_epuise   || '—');
+        } catch(e2) {
+          setEl('kpi-stock-total',  '—');
+          setEl('kpi-stock-faible', '—');
+          setEl('kpi-stock-zero',   '—');
+        }
       }
 
       renderStocksTable(items);
@@ -4960,7 +5327,7 @@ html, body {
   ══════════════════════════════════════════════════════════════ */
   window.loadMessages = async function() {
     try {
-      var data  = await API.get('/api/conversations/');
+      var data  = await API.get('/api/chat/');
       var items = data.results || data;
       var tbody = document.getElementById('tbl-messages');
       if (!tbody) return;
@@ -4971,13 +5338,14 @@ html, body {
       }
 
       tbody.innerHTML = items.map(function(c) {
-        var parts = (c.participants || []).map(function(p) { return escHtml(p.username || p); }).join(' ↔ ');
+        var interlocuteur = c.interlocuteur ? escHtml(c.interlocuteur.username) : '—';
+        var dernierMsg = c.dernier_message ? escHtml((c.dernier_message.contenu || '').slice(0, 60)) : '—';
         var nonLus = c.messages_non_lus || 0;
         return '<tr>'
-          + '<td style="font-weight:600;color:var(--text);">' + parts + '</td>'
-          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml((c.dernier_message || '—').slice(0, 60)) + '</td>'
+          + '<td style="font-weight:600;color:var(--text);">' + interlocuteur + '</td>'
+          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + dernierMsg + '</td>'
           + '<td>' + (nonLus > 0 ? '<span class="st st-pend">' + nonLus + '</span>' : '—') + '</td>'
-          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(c.date_modification || c.date_creation) + '</td>'
+          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(c.date_creation) + '</td>'
           + '</tr>';
       }).join('');
     } catch(e) {

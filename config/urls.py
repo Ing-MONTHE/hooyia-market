@@ -32,6 +32,7 @@ urlpatterns = [
 
     # ── Stats Dashboard ──────────────────────────────────────
     path('api/stats/overview/', StatsOverviewView.as_view(), name='stats-overview'),
+    path('api/audit/',          include('apps.audit.api_urls')),
 ]
 
 if settings.DEBUG:

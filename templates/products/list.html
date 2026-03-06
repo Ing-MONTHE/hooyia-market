@@ -1055,6 +1055,7 @@
                 <div class="pcard-price">{{ produit.prix_actuel|floatformat:0 }} FCFA</div>
                 {% if produit.prix_promo %}<div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>{% endif %}
               </div>
+              {% if not est_admin %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier" aria-label="Ajouter {{ produit.nom }} au panier">
@@ -1063,6 +1064,7 @@
                   <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
                 </svg>
               </button>
+              {% endif %}
             </div>
           </div>
         </a>

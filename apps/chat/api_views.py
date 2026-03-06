@@ -43,18 +43,19 @@ class ConversationListeAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         """
-        Retourne uniquement les conversations où l'utilisateur est participant.
-        Filtre Q : participant1 OU participant2.
-        select_related + prefetch_related pour éviter les requêtes N+1.
+        Retourne les conversations selon le rôle :
+        - Admin / Staff : toutes les conversations
+        - Utilisateur : seulement ses conversations
         """
         user = self.request.user
-        return Conversation.objects.filter(
-            Q(participant1=user) | Q(participant2=user)
-        ).select_related(
+        qs = Conversation.objects.select_related(
             'participant1', 'participant2'
         ).prefetch_related(
-            'messages__expediteur'   # Pré-charge les messages + leur expéditeur
+            'messages__expediteur'
         ).order_by('-date_creation')
+        if user.is_staff or getattr(user, 'is_admin', False):
+            return qs
+        return qs.filter(Q(participant1=user) | Q(participant2=user))
 
 
 class ConversationCreerAPIView(APIView):

@@ -501,7 +501,7 @@
          aria-label="HooYia Market — Accueil">
         <img src="{% static 'img/logo.svg' %}"
              alt="HooYia Market"
-             style="height:46px;width:auto;display:block;" />
+             style="height:46px;width:auto;display:block;border-radius:10px;" />
       </a>
 
       {# ── GROUPE CENTRAL : liens + recherche — centré dans la navbar ── #}
@@ -1091,13 +1091,23 @@
     }
   });
   function toggleDarkMode() {
-    var h=document.documentElement,d=h.classList.contains('dark'),moon=document.getElementById('icon-moon'),sun=document.getElementById('icon-sun');
-    h.classList.toggle('dark',!d); if(moon)moon.style.display=d?'block':'none'; if(sun)sun.style.display=d?'none':'block';
+    var isDark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('hooyia-site-theme', isDark ? 'dark' : 'light'); } catch(e){}
+    _syncDarkIcons();
   }
-  (function(){
-    var d=document.documentElement.classList.contains('dark'),moon=document.getElementById('icon-moon'),sun=document.getElementById('icon-sun');
-    if(d){if(moon)moon.style.display='none'; if(sun)sun.style.display='block';}
-  })();
+  function _syncDarkIcons() {
+    var isDark = document.documentElement.classList.contains('dark');
+    /* Navbar */
+    var moon = document.getElementById('icon-moon'), sun = document.getElementById('icon-sun');
+    if(moon) moon.style.display = isDark ? 'none' : 'block';
+    if(sun)  sun.style.display  = isDark ? 'block' : 'none';
+    /* Dashboard */
+    var dmoon = document.getElementById('dash-icon-moon'), dsun = document.getElementById('dash-icon-sun');
+    if(dmoon) dmoon.style.display = isDark ? 'none' : 'block';
+    if(dsun)  dsun.style.display  = isDark ? 'block' : 'none';
+  }
+  /* Init au chargement */
+  (function(){ _syncDarkIcons(); })();
 
   // ── Notifications dropdown ──
   (function(){

@@ -518,6 +518,7 @@
                 <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
                 {% endif %}
               </div>
+              {% if not est_admin %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"
@@ -528,6 +529,7 @@
                   <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
                 </svg>
               </button>
+              {% endif %}
             </div>
           </div>
         </a>
@@ -652,6 +654,7 @@
                 <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
                 {% endif %}
               </div>
+              {% if not est_admin %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"
@@ -662,6 +665,7 @@
                   <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
                 </svg>
               </button>
+              {% endif %}
             </div>
           </div>
         </a>
@@ -842,6 +846,7 @@
         </div>
         <p class="section-sub">Retours authentiques de notre communauté d'acheteurs et vendeurs.</p>
       </div>
+      {% if not est_admin %}
       <a href="{% url 'products:avis_plateforme' %}" class="btn btn-secondary btn-lg"
          style="display:inline-flex;align-items:center;gap:.375rem;white-space:nowrap;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -850,6 +855,7 @@
         </svg>
         Laisser un avis
       </a>
+      {% endif %}
     </div>
 
     <div class="reviews-home-grid" id="reviews-home-grid">
@@ -925,9 +931,7 @@
             </svg>
             <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;">
               Aucun avis pour le moment.
-              <a href="{% url 'products:avis_plateforme' %}" style="color:#1E3A8A;text-decoration:underline;">
-                Soyez le premier !
-              </a>
+              {% if not est_admin %}<a href="{% url 'products:avis_plateforme' %}" style="color:#1E3A8A;text-decoration:underline;">Soyez le premier !</a>{% endif %}
             </p>
           </div>`;
         return;

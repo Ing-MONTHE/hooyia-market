@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQ — HooYia Market{% endblock %}
+
+{% block content %}
+<style>
+  .faq-wrap { max-width:860px; margin:48px auto 80px; padding:0 24px; }
+
+  .faq-hero {
+    background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 100%);
+    border-radius:16px; padding:52px 48px; color:#fff; margin-bottom:40px;
+    position:relative; overflow:hidden; text-align:center;
+  }
+  .faq-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E"); pointer-events:none; }
+  .faq-hero-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#BAE6FD; margin-bottom:14px; position:relative; }
+  .faq-hero h1 { font-size:clamp(1.8rem,4vw,2.5rem); font-weight:900; margin:0 0 14px; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.25); position:relative; }
+  .faq-hero p { font-size:15px; color:#BFDBFE; max-width:500px; margin:0 auto 28px; line-height:1.7; position:relative; }
+  .faq-search { display:flex; gap:0; max-width:460px; margin:0 auto; position:relative; }
+  .faq-search input { flex:1; padding:13px 18px; border:none; border-radius:10px 0 0 10px; font-size:14px; outline:none; color:#0D1F5C; }
+  .faq-search button { background:#F97316; color:#fff; border:none; padding:13px 22px; border-radius:0 10px 10px 0; font-weight:700; font-size:14px; cursor:pointer; }
+
+  /* Filtres catégories */
+  .faq-filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+  .faq-filter { padding:8px 18px; border-radius:20px; border:1.5px solid #E2E8F0; background:#fff; font-size:13px; font-weight:600; color:#6B7280; cursor:pointer; transition:all 150ms; }
+  .faq-filter:hover, .faq-filter.active { background:#1E3A8A; border-color:#1E3A8A; color:#fff; }
+
+  /* Sections FAQ */
+  .faq-group { margin-bottom:40px; }
+  .faq-group-title { font-size:1.1rem; font-weight:800; color:#0D1F5C; margin:0 0 16px; display:flex; align-items:center; gap:10px; }
+  .faq-group-title::before { content:''; display:block; width:4px; height:22px; background:#F97316; border-radius:2px; }
+
+  /* Accordion */
+  .faq-item { border:1px solid #E2E8F0; border-radius:12px; margin-bottom:10px; overflow:hidden; background:#fff; }
+  .faq-item.hidden { display:none; }
+  .faq-q { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; cursor:pointer; user-select:none; }
+  .faq-q:hover { background:#F8FAFC; }
+  .faq-q-text { font-size:14.5px; font-weight:600; color:#0D1F5C; }
+  .faq-q-icon { flex-shrink:0; width:22px; height:22px; border-radius:50%; background:#EFF6FF; display:flex; align-items:center; justify-content:center; transition:transform 200ms, background 150ms; }
+  .faq-item.open .faq-q-icon { transform:rotate(180deg); background:#1E3A8A; }
+  .faq-item.open .faq-q-icon svg { stroke:#fff; }
+  .faq-a { display:none; padding:0 20px 18px; font-size:14px; color:#374151; line-height:1.75; border-top:1px solid #F1F5F9; }
+  .faq-item.open .faq-a { display:block; }
+  .faq-a a { color:#1E3A8A; font-weight:600; text-decoration:none; }
+  .faq-a a:hover { text-decoration:underline; }
+
+  /* No results */
+  #faq-no-results { display:none; text-align:center; padding:48px 0; color:#6B7280; font-size:15px; }
+
+  /* CTA contact */
+  .faq-cta { background:#FFF7ED; border:1px solid #FED7AA; border-radius:14px; padding:32px; display:flex; align-items:center; gap:24px; margin-top:40px; }
+  .faq-cta-icon { width:52px; height:52px; background:#F97316; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .faq-cta div h3 { font-size:16px; font-weight:800; color:#0D1F5C; margin:0 0 6px; }
+  .faq-cta div p  { font-size:13.5px; color:#6B7280; margin:0 0 14px; }
+  .faq-cta div a  { display:inline-block; background:#F97316; color:#fff; font-weight:700; font-size:13.5px; padding:10px 22px; border-radius:8px; text-decoration:none; }
+
+  @media(max-width:600px){ .faq-hero{padding:36px 20px;} .faq-cta{flex-direction:column;text-align:center;} }
+</style>
+
+<div class="faq-wrap">
+
+  <div class="faq-hero">
+    <div class="faq-hero-label">Questions fréquentes</div>
+    <h1>Tout ce que vous devez savoir</h1>
+    <p>Trouvez rapidement les réponses à vos questions sur HooYia Market.</p>
+    <div class="faq-search">
+      <input type="text" id="faq-search-input" placeholder="Rechercher une question…" oninput="filterFaq(this.value)" />
+      <button onclick="filterFaq(document.getElementById('faq-search-input').value)">Chercher</button>
+    </div>
+  </div>
+
+  {# Filtres #}
+  <div class="faq-filters">
+    <button class="faq-filter active" onclick="filterCat('all',this)">Tout</button>
+    <button class="faq-filter" onclick="filterCat('commandes',this)">Commandes</button>
+    <button class="faq-filter" onclick="filterCat('paiement',this)">Paiement</button>
+    <button class="faq-filter" onclick="filterCat('livraison',this)">Livraison</button>
+    <button class="faq-filter" onclick="filterCat('retours',this)">Retours</button>
+    <button class="faq-filter" onclick="filterCat('compte',this)">Compte</button>
+    <button class="faq-filter" onclick="filterCat('vendeurs',this)">Vendeurs</button>
+  </div>
+
+  <div id="faq-no-results">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Aucun résultat pour votre recherche.
+  </div>
+
+  {# ── COMMANDES ── #}
+  <div class="faq-group" id="group-commandes" data-cat="commandes">
+    <div class="faq-group-title" id="commandes">📦 Commandes</div>
+
+    <div class="faq-item" data-cat="commandes">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment passer une commande sur HooYia Market ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Parcourez le catalogue, ajoutez les produits au panier, renseignez votre adresse de livraison, puis confirmez et choisissez votre mode de paiement. Vous recevrez une confirmation par email ou notification.</div>
+    </div>
+
+    <div class="faq-item" data-cat="commandes">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment suivre l'état de ma commande ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Connectez-vous et allez dans <strong>Mon compte → Mes commandes</strong>. Vous verrez le statut en temps réel : En attente → Confirmée → En préparation → Expédiée → Livrée. Des notifications vous sont envoyées à chaque étape.</div>
+    </div>
+
+    <div class="faq-item" data-cat="commandes">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Puis-je annuler une commande ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">L'annulation est possible tant que la commande est au statut <strong>En attente</strong>. Une fois confirmée ou en préparation, contactez notre <a href="{% url 'products:assistance' %}">service client</a> dans les plus brefs délais.</div>
+    </div>
+
+    <div class="faq-item" data-cat="commandes">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Puis-je modifier ma commande après validation ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Il n'est pas possible de modifier une commande confirmée. Vous devez l'annuler (si encore possible) et en passer une nouvelle, ou contacter notre équipe via le <a href="{% url 'products:contact' %}">formulaire de contact</a>.</div>
+    </div>
+  </div>
+
+  {# ── PAIEMENT ── #}
+  <div class="faq-group" id="group-paiement" data-cat="paiement">
+    <div class="faq-group-title" id="paiement">💳 Paiement</div>
+
+    <div class="faq-item" data-cat="paiement">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Quels modes de paiement sont acceptés ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Nous acceptons : <strong>paiement à la livraison</strong> (espèces), <strong>Orange Money</strong> et <strong>MTN Mobile Money</strong> (bientôt disponibles). Aucune carte bancaire pour l'instant.</div>
+    </div>
+
+    <div class="faq-item" data-cat="paiement">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Le paiement en ligne est-il sécurisé ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Oui. Toutes les communications sont chiffrées via HTTPS. HooYia Market ne stocke aucune donnée bancaire sur ses serveurs. Les paiements mobiles sont traités directement par Orange et MTN.</div>
+    </div>
+
+    <div class="faq-item" data-cat="paiement">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Puis-je obtenir une facture ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Un récapitulatif de commande est disponible dans votre espace client. Pour une facture officielle, contactez-nous à <a href="mailto:facturation@hooyia.com">facturation@hooyia.com</a>.</div>
+    </div>
+  </div>
+
+  {# ── LIVRAISON ── #}
+  <div class="faq-group" id="group-livraison" data-cat="livraison">
+    <div class="faq-group-title" id="livraison">🚚 Livraison</div>
+
+    <div class="faq-item" data-cat="livraison">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Dans quelles villes livrez-vous ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Nous livrons actuellement à <strong>Douala</strong>, <strong>Yaoundé</strong> et <strong>Bafoussam</strong>. D'autres villes seront ajoutées prochainement. Pour toute autre localisation, <a href="{% url 'products:contact' %}">contactez-nous</a>.</div>
+    </div>
+
+    <div class="faq-item" data-cat="livraison">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Quels sont les délais de livraison ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a"><strong>Douala :</strong> 24–48h · <strong>Yaoundé :</strong> 48–72h · <strong>Bafoussam :</strong> 72–96h. Ces délais s'entendent en jours ouvrés à partir de la confirmation de commande.</div>
+    </div>
+
+    <div class="faq-item" data-cat="livraison">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Quels sont les frais de livraison ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Les frais de livraison sont calculés selon la zone et le poids du colis. Ils sont affichés clairement avant la validation de votre commande. La livraison gratuite est disponible au-delà d'un certain montant d'achat.</div>
+    </div>
+  </div>
+
+  {# ── RETOURS ── #}
+  <div class="faq-group" id="group-retours" data-cat="retours">
+    <div class="faq-group-title" id="retours">🔄 Retours & Remboursements</div>
+
+    <div class="faq-item" data-cat="retours">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Puis-je retourner un produit ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Oui, dans un délai de <strong>48h après la livraison</strong> pour tout produit défectueux ou non conforme à la description. Le produit doit être dans son emballage d'origine.</div>
+    </div>
+
+    <div class="faq-item" data-cat="retours">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment initier un retour ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Contactez notre équipe via la messagerie intégrée ou à <a href="mailto:support@hooyia.com">support@hooyia.com</a> en indiquant votre numéro de commande et la raison du retour. Nous vous guiderons dans la procédure.</div>
+    </div>
+
+    <div class="faq-item" data-cat="retours">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Dans quel délai suis-je remboursé ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Une fois le retour validé par notre équipe, le remboursement est effectué sous <strong>5 à 7 jours ouvrés</strong> via le même moyen de paiement utilisé lors de la commande.</div>
+    </div>
+  </div>
+
+  {# ── COMPTE ── #}
+  <div class="faq-group" id="group-compte" data-cat="compte">
+    <div class="faq-group-title" id="compte">👤 Compte utilisateur</div>
+
+    <div class="faq-item" data-cat="compte">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment créer un compte ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Cliquez sur <strong>"S'inscrire"</strong> en haut à droite, renseignez votre email, un nom d'utilisateur et un mot de passe. Un email de confirmation vous sera envoyé.</div>
+    </div>
+
+    <div class="faq-item" data-cat="compte">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">J'ai oublié mon mot de passe, que faire ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Sur la page de connexion, cliquez sur <strong>"Mot de passe oublié"</strong>. Entrez votre email et vous recevrez un lien de réinitialisation valable 24h.</div>
+    </div>
+
+    <div class="faq-item" data-cat="compte">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment supprimer mon compte ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Rendez-vous dans <strong>Mon compte → Paramètres</strong> puis cliquez sur "Supprimer mon compte". Vos données seront supprimées sous 30 jours conformément à notre <a href="{% url 'products:politique' %}">Politique de confidentialité</a>.</div>
+    </div>
+  </div>
+
+  {# ── VENDEURS ── #}
+  <div class="faq-group" id="group-vendeurs" data-cat="vendeurs">
+    <div class="faq-group-title" id="vendeurs">🏪 Vendeurs</div>
+
+    <div class="faq-item" data-cat="vendeurs">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Comment devenir vendeur sur HooYia Market ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Créez un compte, puis contactez notre équipe à <a href="mailto:vendeurs@hooyia.com">vendeurs@hooyia.com</a> pour demander l'activation du statut vendeur. Nous vous accompagnons dans la configuration de votre boutique.</div>
+    </div>
+
+    <div class="faq-item" data-cat="vendeurs">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Quels types de produits puis-je vendre ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">HooYia Market est spécialisé en électronique et informatique : smartphones, PC, accessoires, périphériques, TV, appareils connectés. Les produits contrefaits ou dangereux sont strictement interdits.</div>
+    </div>
+
+    <div class="faq-item" data-cat="vendeurs">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Quelles sont les commissions de HooYia Market ?</span>
+        <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="faq-a">Les conditions tarifaires sont communiquées lors de l'activation du compte vendeur. Pour en savoir plus, <a href="{% url 'products:contact' %}">contactez-nous</a>.</div>
+    </div>
+  </div>
+
+  {# CTA #}
+  <div class="faq-cta">
+    <div class="faq-cta-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </div>
+    <div>
+      <h3>Vous n'avez pas trouvé votre réponse ?</h3>
+      <p>Notre équipe support est disponible pour vous aider.</p>
+      <a href="{% url 'products:contact' %}">Nous contacter</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleFaq(el) {
+    var item = el.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+
+  function filterFaq(q) {
+    q = (q || '').toLowerCase().trim();
+    var items = document.querySelectorAll('.faq-item');
+    var groups = document.querySelectorAll('.faq-group');
+    var found = 0;
+    items.forEach(function(item) {
+      var text = item.textContent.toLowerCase();
+      var match = !q || text.includes(q);
+      item.classList.toggle('hidden', !match);
+      if (match) found++;
+    });
+    groups.forEach(function(g) {
+      var visible = g.querySelectorAll('.faq-item:not(.hidden)').length > 0;
+      g.style.display = visible ? '' : 'none';
+    });
+    document.getElementById('faq-no-results').style.display = found === 0 ? 'block' : 'none';
+  }
+
+  function filterCat(cat, btn) {
+    document.querySelectorAll('.faq-filter').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.faq-group').forEach(function(g){
+      g.style.display = (cat === 'all' || g.dataset.cat === cat) ? '' : 'none';
+    });
+    document.getElementById('faq-search-input').value = '';
+    document.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('hidden'); });
+    document.getElementById('faq-no-results').style.display = 'none';
+  }
+
+  // Lire le paramètre ?q= dans l'URL
+  var urlQ = new URLSearchParams(window.location.search).get('q');
+  if (urlQ) {
+    document.getElementById('faq-search-input').value = urlQ;
+    filterFaq(urlQ);
+  }
+</script>
+{% endblock %}

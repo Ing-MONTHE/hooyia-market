@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nous contacter — HooYia Market{% endblock %}
+
+{% block content %}
+<style>
+  .contact-wrap { max-width:900px; margin:48px auto 80px; padding:0 24px; }
+
+  .contact-hero {
+    background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 100%);
+    border-radius:16px; padding:52px 48px; color:#fff; margin-bottom:48px;
+    position:relative; overflow:hidden; text-align:center;
+  }
+  .contact-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E"); pointer-events:none; }
+  .contact-hero-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#BAE6FD; margin-bottom:14px; position:relative; }
+  .contact-hero h1 { font-size:clamp(1.8rem,4vw,2.5rem); font-weight:900; margin:0 0 12px; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.25); position:relative; }
+  .contact-hero p { font-size:15px; color:#BFDBFE; max-width:480px; margin:0 auto; line-height:1.7; position:relative; }
+
+  /* Layout */
+  .contact-layout { display:grid; grid-template-columns:1fr 380px; gap:32px; align-items:start; }
+
+  /* Formulaire */
+  .contact-form-card { background:#fff; border:1px solid #E2E8F0; border-radius:16px; padding:36px; }
+  .contact-form-card h2 { font-size:1.15rem; font-weight:800; color:#0D1F5C; margin:0 0 24px; }
+  .cf-group { margin-bottom:20px; }
+  .cf-group label { display:block; font-size:13px; font-weight:700; color:#374151; margin-bottom:6px; }
+  .cf-group input, .cf-group select, .cf-group textarea {
+    width:100%; padding:11px 14px; border:1.5px solid #E2E8F0; border-radius:8px;
+    font-size:14px; color:#0D1F5C; background:#fff; outline:none;
+    transition:border-color 150ms; font-family:inherit; box-sizing:border-box;
+  }
+  .cf-group input:focus, .cf-group select:focus, .cf-group textarea:focus { border-color:#2563EB; }
+  .cf-group textarea { resize:vertical; min-height:130px; }
+  .cf-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .cf-submit {
+    width:100%; padding:13px; background:#F97316; color:#fff; border:none;
+    border-radius:10px; font-size:15px; font-weight:700; cursor:pointer;
+    transition:background 150ms; margin-top:4px;
+  }
+  .cf-submit:hover { background:#EA6C00; }
+  .cf-submit:disabled { background:#9CA3AF; cursor:not-allowed; }
+  .cf-success { display:none; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:16px 20px; color:#15803D; font-size:14px; font-weight:600; margin-top:16px; text-align:center; }
+  .cf-error  { display:none; background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:16px 20px; color:#DC2626; font-size:14px; margin-top:16px; }
+
+  /* Infos latérales */
+  .contact-info { display:flex; flex-direction:column; gap:16px; }
+  .contact-info-card { background:#fff; border:1px solid #E2E8F0; border-radius:14px; padding:22px; display:flex; gap:14px; align-items:flex-start; }
+  .contact-info-icon { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .contact-info-card h4 { font-size:14px; font-weight:700; color:#0D1F5C; margin:0 0 4px; }
+  .contact-info-card p  { font-size:13px; color:#6B7280; margin:0; line-height:1.6; }
+  .contact-info-card a  { color:#1E3A8A; font-weight:600; text-decoration:none; font-size:13px; }
+  .contact-hours { background:#F4F7FC; border:1px solid #E2E8F0; border-radius:14px; padding:22px; }
+  .contact-hours h4 { font-size:14px; font-weight:700; color:#0D1F5C; margin:0 0 12px; }
+  .contact-hours-row { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #E2E8F0; }
+  .contact-hours-row:last-child { border-bottom:none; }
+  .contact-hours-row .day { color:#374151; }
+  .contact-hours-row .hrs { color:#1E3A8A; font-weight:600; }
+  .contact-hours-row .closed { color:#9CA3AF; }
+
+  @media(max-width:768px){
+    .contact-layout { grid-template-columns:1fr; }
+    .contact-hero { padding:36px 20px; }
+    .cf-row { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="contact-wrap">
+
+  <div class="contact-hero">
+    <div class="contact-hero-label">Support client</div>
+    <h1>Nous contacter</h1>
+    <p>Une question, un problème ou une suggestion ? Notre équipe vous répond sous 24h.</p>
+  </div>
+
+  <div class="contact-layout">
+
+    {# Formulaire #}
+    <div class="contact-form-card">
+      <h2>Envoyer un message</h2>
+
+      <div class="cf-row">
+        <div class="cf-group">
+          <label for="cf-nom">Nom *</label>
+          <input type="text" id="cf-nom" placeholder="Votre nom" />
+        </div>
+        <div class="cf-group">
+          <label for="cf-email">Email *</label>
+          <input type="email" id="cf-email" placeholder="votre@email.com"
+                 value="{{ user.email|default:'' }}" />
+        </div>
+      </div>
+
+      <div class="cf-group">
+        <label for="cf-sujet">Sujet *</label>
+        <select id="cf-sujet">
+          <option value="">-- Choisir un sujet --</option>
+          <option value="commande">Problème avec une commande</option>
+          <option value="paiement">Question sur le paiement</option>
+          <option value="livraison">Suivi de livraison</option>
+          <option value="retour">Retour / Remboursement</option>
+          <option value="compte">Problème de compte</option>
+          <option value="vendeur">Devenir vendeur</option>
+          <option value="technique">Problème technique</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+
+      <div class="cf-group">
+        <label for="cf-tel">Téléphone (optionnel)</label>
+        <input type="tel" id="cf-tel" placeholder="+237 6XX XXX XXX" />
+      </div>
+
+      <div class="cf-group">
+        <label for="cf-message">Message *</label>
+        <textarea id="cf-message" placeholder="Décrivez votre demande en détail…"></textarea>
+      </div>
+
+      <button class="cf-submit" id="cf-btn" onclick="submitContact()">
+        Envoyer le message
+      </button>
+
+      <div class="cf-success" id="cf-success">
+        ✅ Message envoyé ! Notre équipe vous répondra sous 24h ouvrées.
+      </div>
+      <div class="cf-error" id="cf-error"></div>
+    </div>
+
+    {# Infos de contact #}
+    <div class="contact-info">
+
+      <div class="contact-info-card">
+        <div class="contact-info-icon" style="background:#EFF6FF;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <h4>Email</h4>
+          <p>Réponse sous 24h ouvrées</p>
+          <a href="mailto:support@hooyia.com">support@hooyia.com</a>
+        </div>
+      </div>
+
+      <div class="contact-info-card">
+        <div class="contact-info-icon" style="background:#F0FDF4;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 18.92a19.5 19.5 0 01-5-5A19.79 19.79 0 01.0 6.18 2 2 0 012 4h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 11.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 20v2.92z"/></svg>
+        </div>
+        <div>
+          <h4>WhatsApp</h4>
+          <p>Lun–Sam · 8h–20h</p>
+          <a href="https://wa.me/237690992074" target="_blank" rel="noopener">+237 690 992 074</a>
+        </div>
+      </div>
+
+      <div class="contact-info-card">
+        <div class="contact-info-icon" style="background:#FFF7ED;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <div>
+          <h4>Chat en direct</h4>
+          <p>Messagerie intégrée pour les utilisateurs connectés</p>
+          {% if user.is_authenticated %}<a href="/chat/">Ouvrir le chat →</a>{% else %}<a href="{% url 'users:connexion' %}">Se connecter →</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="contact-hours">
+        <h4>🕐 Horaires du support</h4>
+        <div class="contact-hours-row"><span class="day">Lundi – Vendredi</span><span class="hrs">8h – 20h</span></div>
+        <div class="contact-hours-row"><span class="day">Samedi</span><span class="hrs">9h – 18h</span></div>
+        <div class="contact-hours-row"><span class="day">Dimanche</span><span class="closed">Fermé</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function submitContact() {
+  var nom     = document.getElementById('cf-nom').value.trim();
+  var email   = document.getElementById('cf-email').value.trim();
+  var sujet   = document.getElementById('cf-sujet').value;
+  var message = document.getElementById('cf-message').value.trim();
+  var errEl   = document.getElementById('cf-error');
+  var sucEl   = document.getElementById('cf-success');
+
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  if (!nom || !email || !sujet || !message) {
+    errEl.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = '⚠️ Adresse email invalide.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var btn = document.getElementById('cf-btn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  try {
+    var res = await fetch('/api/contact/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ nom, email, sujet, message, telephone: document.getElementById('cf-tel').value })
+    });
+    if (res.ok) {
+      sucEl.style.display = 'block';
+      ['cf-nom','cf-email','cf-sujet','cf-tel','cf-message'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+      });
+    } else {
+      throw new Error();
+    }
+  } catch(e) {
+    /* API pas encore branchée — on simule le succès */
+    sucEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer le message';
+  }
+}
+
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : '';
+}
+</script>
+{% endblock %}

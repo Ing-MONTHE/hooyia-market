@@ -216,9 +216,9 @@
       {% comment %} MENTION LÉGALE {% endcomment %}
       <p style="text-align:center;font-size:.75rem;color:var(--text-muted);margin-top:1.5rem;font-family:'Poppins',sans-serif;line-height:1.6;">
         En continuant, vous acceptez nos
-        <a href="#" style="color:var(--brand-500);text-decoration:none;">conditions d'utilisation</a>
+        <a href="{% url 'products:conditions' %}" style="color:var(--brand-500);text-decoration:none;">conditions d'utilisation</a>
         et notre
-        <a href="#" style="color:var(--brand-500);text-decoration:none;">politique de confidentialité</a>.
+        <a href="{% url 'products:politique' %}" style="color:var(--brand-500);text-decoration:none;">politique de confidentialité</a>.
       </p>
 
     </div>

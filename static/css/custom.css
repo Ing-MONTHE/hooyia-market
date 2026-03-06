@@ -571,3 +571,138 @@ label {
 .bg-surface   { background: var(--surface); } /* Fond carte/blanc */
 .rounded-card { border-radius: 0.75rem; }     /* Radius cohérent avec .card */
 .shadow-card  { box-shadow: var(--shadow-sm); } /* Ombre légère */
+
+/* ═══════════════════════════════════════════════════════════════
+   16. DARK MODE
+   Variables remplacées via html.dark — scope global
+═══════════════════════════════════════════════════════════════ */
+html.dark {
+  --bg:             #0F1117;
+  --surface:        #1A1D27;
+  --surface-2:      #22263A;
+  --surface-3:      #2A2F45;
+  --border:         #2E3350;
+  --border-2:       #3A4060;
+  --text-primary:   #E8ECF4;
+  --text-secondary: #9BA8C0;
+  --text-muted:     #5E6A88;
+  --shadow-sm:      0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:      0 4px 16px rgba(0,0,0,.5);
+  color-scheme: dark;
+}
+
+/* Navbar dark */
+html.dark .navbar,
+html.dark .nav-menu { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .nav-link { color: var(--text-secondary) !important; }
+html.dark .nav-link:hover, html.dark .nav-link.active { color: var(--text-primary) !important; }
+html.dark .nav-icon-btn { color: var(--text-secondary) !important; }
+html.dark .nav-icon-btn:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+html.dark .nav-search-input { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+html.dark .nav-dropdown { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .nav-dropdown a { color: var(--text-secondary) !important; }
+html.dark .nav-dropdown a:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+
+/* Cards, inputs, boutons */
+html.dark .card,
+html.dark .pcard { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark input, html.dark textarea, html.dark select {
+  background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-primary) !important;
+}
+html.dark .footer { background: #080A10 !important; }
+
+/* Dashboard dark */
+html.dark .da-sidebar { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-topbar  { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-card    { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-topbar-btn { color: var(--text-secondary) !important; }
+html.dark .da-topbar-btn:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+html.dark .sb-item    { color: var(--text-secondary) !important; }
+html.dark .sb-item:hover, html.dark .sb-item.active { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+html.dark table       { color: var(--text-primary) !important; }
+html.dark th          { background: var(--surface-2) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
+html.dark td          { border-color: var(--border) !important; }
+html.dark tr:hover td { background: var(--surface-2) !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Site public (home, produits, détail, pages légales)
+   Couvre tous les fonds hardcodés #fff/#ffffff dans les templates
+════════════════════════════════════════════════════════════════ */
+
+/* Fond global body + main */
+html.dark body  { background: var(--bg) !important; color: var(--text-primary) !important; }
+html.dark main  { background: var(--bg) !important; }
+
+/* Sections et conteneurs avec fond blanc hardcodé */
+html.dark section,
+html.dark [style*="background:#ffffff"],
+html.dark [style*="background: #ffffff"],
+html.dark [style*="background:#fff"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background:white"],
+html.dark [style*="background: white"] { background: var(--bg) !important; }
+
+/* Fonds légèrement gris (#F4F7FC) */
+html.dark [style*="background:#F4F7FC"],
+html.dark [style*="background: #F4F7FC"],
+html.dark [style*="background:#f4f7fc"] { background: var(--surface) !important; }
+
+/* Textes sombres hardcodés */
+html.dark [style*="color:#0D1F5C"],
+html.dark [style*="color:#1E3A8A"],
+html.dark [style*="color:#0F1923"] { color: var(--text-primary) !important; }
+html.dark [style*="color:#4A5568"] { color: var(--text-secondary) !important; }
+html.dark [style*="color:#6B7280"],
+html.dark [style*="color:#8898AA"] { color: var(--text-muted) !important; }
+
+/* Bordures hardcodées */
+html.dark [style*="border:1px solid #E2E8F0"],
+html.dark [style*="border: 1px solid #E2E8F0"],
+html.dark [style*="border-color:#E2E8F0"] { border-color: var(--border) !important; }
+
+/* Cards produits et génériques */
+html.dark .card,
+html.dark .pcard,
+html.dark .product-card { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .product-card-name { color: var(--text-primary) !important; }
+html.dark .product-card-price { color: var(--text-primary) !important; }
+
+/* Section titles */
+html.dark .section-title { color: var(--text-primary) !important; }
+html.dark .section-title span { color: var(--accent) !important; }
+
+/* Hero & bannières */
+html.dark .hero,
+html.dark [class*="hero"] { background: var(--surface) !important; }
+
+/* Filtres & inputs sur pages liste/détail */
+html.dark input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html.dark textarea,
+html.dark select {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Icônes valeurs (value-icon) */
+html.dark .value-icon,
+html.dark [style*="background:#fff7ed"],
+html.dark [style*="background:#fff1f2"],
+html.dark [style*="background:#f0fdf4"],
+html.dark [style*="background:#EFF6FF"],
+html.dark [style*="background:#FFF7ED"] { background: var(--surface-2) !important; }
+
+/* Dropdown profil navbar */
+html.dark .nav-profile-dropdown,
+html.dark .nav-user-menu { background: var(--surface) !important; border-color: var(--border) !important; }
+
+/* Reviews section */
+html.dark .reviews-home-section { background: var(--bg) !important; }
+
+/* Footer link colors */
+html.dark .footer-link { color: var(--text-secondary) !important; }
+html.dark .footer-link:hover { color: var(--text-primary) !important; }
+
+/* Logo navbar — bords arrondis */
+.nav-logo img,
+.navbar-logo img { border-radius: 10px; }

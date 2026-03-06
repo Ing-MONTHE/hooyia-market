@@ -93,6 +93,34 @@ class ProduitFilter(django_filters.FilterSet):
             return queryset.filter(stock__gt=0)
         return queryset
 
+    # Filtre stock faible (stock > 0 et stock <= stock_minimum)
+    # ?stock_faible=true
+    stock_faible = django_filters.BooleanFilter(
+        method='filter_stock_faible',
+        label="Stock faible"
+    )
+
+    # Filtre stock OK (stock > stock_minimum)
+    # ?stock_ok=true
+    stock_ok = django_filters.BooleanFilter(
+        method='filter_stock_ok',
+        label="Stock OK"
+    )
+
+    def filter_stock_faible(self, queryset, name, value):
+        """Produits avec stock faible : stock > 0 et stock <= stock_minimum"""
+        if value:
+            from django.db.models import F
+            return queryset.filter(stock__gt=0, stock__lte=F('stock_minimum'))
+        return queryset
+
+    def filter_stock_ok(self, queryset, name, value):
+        """Produits avec stock suffisant : stock > stock_minimum"""
+        if value:
+            from django.db.models import F
+            return queryset.filter(stock__gt=F('stock_minimum'))
+        return queryset
+
     class Meta:
         model  = Produit
         fields = [
