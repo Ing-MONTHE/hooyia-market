@@ -1,344 +1,893 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if produit %}Modifier — {% endif %}Ajouter un produit — HooYia Market{% endblock %}
+{% comment %}
+════════════════════════════════════════════════════════════════
+   HooYia Market — products/ajouter_produit.html
+   ────────────────────────────────────────────────────────────
+   DESCRIPTION :
+     Formulaire d'ajout et d'édition d'un produit.
+     Ce template est utilisé pour deux actions :
+       · Créer un nouveau produit     (produit = None)
+       · Modifier un produit existant (produit = instance Produit)
 
-{% block extra_head %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --navy:     #0D1F5C;
-  --blue:     #1E3A8A;
-  --orange:   #F97316;
-  --orange-d: #ea6000;
-  --green:    #10b981;
-  --red:      #ef4444;
-  --bg:       #f0f3fa;
-  --border:   #e2e8f8;
-  --shadow:   0 1px 6px rgba(13,31,92,.08);
-  --shadow-md:0 4px 20px rgba(13,31,92,.12);
-}
-*, *::before, *::after { box-sizing: border-box; }
-body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
-.page-root { display: flex; min-height: calc(100vh - 64px); }
-.sidebar { width: 230px; flex-shrink: 0; background: linear-gradient(180deg, #0a1840 0%, #0D1F5C 100%); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid rgba(255,255,255,.06); }
-.sb-head { padding: 22px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
-.sb-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: var(--orange); }
-.sb-sub  { font-size: 10.5px; color: rgba(255,255,255,.3); margin-top: 2px; }
-.sb-lbl  { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.22); padding: 14px 18px 4px; }
-.sb-item { display: flex; align-items: center; gap: 9px; padding: 9px 18px; font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,.5); text-decoration: none; border-left: 3px solid transparent; transition: all .12s; }
-.sb-item:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.05); border-left-color: rgba(255,255,255,.15); }
-.sb-item.active { color: white; background: rgba(249,115,22,.15); border-left-color: var(--orange); font-weight: 600; }
-.sb-bottom { margin-top: auto; padding: 16px 18px; border-top: 1px solid rgba(255,255,255,.07); }
-.sb-version { font-size: 10px; color: rgba(255,255,255,.2); }
-.main-content { flex: 1; padding: 32px 40px; max-width: 860px; }
-.page-back { font-size: 11.5px; color: rgba(13,31,92,.4); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 8px; transition: color .12s; }
-.page-back:hover { color: var(--orange); }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
-.page-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--navy); letter-spacing: -.4px; }
-.page-subtitle { font-size: 13px; color: rgba(13,31,92,.45); margin-top: 3px; }
-.card { background: white; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 18px; transition: box-shadow .2s; }
-.card:hover { box-shadow: var(--shadow-md); }
-.card-head { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-.card-head-icon { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, var(--orange), var(--orange-d)); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(249,115,22,.25); }
-.card-head-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--navy); }
-.card-head-sub { font-size: 11.5px; color: rgba(13,31,92,.4); }
-.card-body { padding: 22px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.field-group { margin-bottom: 16px; }
-.field-group:last-child { margin-bottom: 0; }
-.field-label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .8px; }
-.field-label span { font-weight: 400; color: rgba(13,31,92,.35); text-transform: none; letter-spacing: 0; margin-left: 4px; font-size: 11px; }
-.field-input { width: 100%; padding: 10px 13px; border-radius: 9px; border: 1.5px solid var(--border); font-size: 13.5px; color: #111; font-family: 'DM Sans', sans-serif; background: #fafbff; transition: border .15s, box-shadow .15s; }
-.field-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,58,138,.1); background: white; }
-.field-input:hover:not(:focus) { border-color: #c4cee8; }
-.field-textarea { resize: vertical; min-height: 95px; line-height: 1.5; }
-.field-select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230D1F5C' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 38px; }
-.field-error { font-size: 11.5px; color: var(--red); margin-top: 5px; }
-.field-hint { font-size: 11.5px; color: rgba(13,31,92,.4); margin-top: 4px; }
-.input-wrap { position: relative; }
-.input-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: rgba(13,31,92,.35); font-weight: 700; pointer-events: none; background: var(--border); padding: 2px 7px; border-radius: 4px; }
-.remise-badge { display: inline-block; background: #d1fae5; color: #065f46; font-size: 12px; font-weight: 600; padding: 3px 12px; border-radius: 20px; margin-top: 6px; }
-.toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 9px; background: #fafbff; border: 1.5px solid var(--border); }
-.toggle { position: relative; display: inline-block; width: 46px; height: 25px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; inset: 0; border-radius: 25px; background: #d1d5e8; cursor: pointer; transition: .2s; }
-.toggle-slider:before { content: ''; position: absolute; width: 19px; height: 19px; border-radius: 50%; background: white; left: 3px; top: 3px; transition: .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
-.toggle input:checked + .toggle-slider { background: var(--green); }
-.toggle input:checked + .toggle-slider:before { transform: translateX(21px); }
-.toggle-info { flex: 1; }
-.toggle-title { font-size: 13px; font-weight: 600; color: var(--navy); }
-.toggle-desc { font-size: 11.5px; color: rgba(13,31,92,.4); margin-top: 1px; }
-.btn-primary { padding: 11px 24px; border-radius: 9px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: linear-gradient(135deg, var(--orange), var(--orange-d)); color: white; box-shadow: 0 2px 10px rgba(249,115,22,.3); transition: all .15s; display: inline-flex; align-items: center; gap: 7px; }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(249,115,22,.4); }
-.btn-secondary { padding: 11px 20px; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: white; color: var(--navy); border: 1.5px solid var(--border); transition: all .15s; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
-.btn-secondary:hover { border-color: var(--blue); background: #f4f6fd; }
-.btn-danger { padding: 11px 20px; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: #fff5f5; color: var(--red); border: 1.5px solid #fecaca; transition: all .15s; display: inline-flex; align-items: center; gap: 7px; }
-.btn-danger:hover { background: #fee2e2; border-color: var(--red); }
-.btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.flash { padding: 12px 18px; border-radius: 9px; font-size: 13px; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 9px; animation: slideIn .2s ease; }
-.flash-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-.flash-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-.drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all .2s; background: #fafbff; }
-.drop-zone:hover, .drop-zone.drag-over { border-color: var(--blue); background: #f0f4ff; }
-.img-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; }
-.img-thumb { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--border); box-shadow: var(--shadow); }
-.img-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.badge-principal { position: absolute; top: 5px; left: 5px; background: var(--blue); color: white; font-size: 8.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
-.btn-del-img { position: absolute; top: 5px; right: 5px; background: rgba(239,68,68,.92); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; cursor: pointer; opacity: 0; transition: opacity .15s; display: flex; align-items: center; justify-content: center; }
-.img-thumb:hover .btn-del-img { opacity: 1; }
-.section-label { font-size: 10.5px; font-weight: 700; color: rgba(13,31,92,.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-.action-bar { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); margin-bottom: 40px; position: sticky; bottom: 20px; z-index: 10; }
-.action-bar-right { display: flex; gap: 10px; }
-.cat-shortcut { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--orange); text-decoration: none; font-weight: 600; margin-top: 6px; transition: opacity .12s; }
-.cat-shortcut:hover { opacity: .75; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(2px); }
-.modal-overlay.hidden { display: none; }
-.modal-box { background: white; border-radius: 16px; padding: 30px; max-width: 420px; width: 100%; box-shadow: 0 24px 72px rgba(0,0,0,.25); animation: modalIn .2s ease; }
-@keyframes modalIn { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: none; } }
-.modal-icon { font-size: 36px; margin-bottom: 12px; }
-.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-.modal-body { font-size: 13px; color: #64748b; margin-bottom: 22px; line-height: 1.6; }
-@media (max-width: 900px) { .sidebar { display: none; } .main-content { padding: 20px 16px; max-width: 100%; } .grid-2 { grid-template-columns: 1fr; } .img-grid { grid-template-columns: repeat(3, 1fr); } .action-bar { flex-direction: column; gap: 12px; } }
-</style>
-{% endblock %}
+   CONTEXTE DJANGO :
+     {{ produit }}    — Instance Produit ou None (mode ajout)
+     {{ form }}       — ProduitForm avec champs validés + erreurs
+     {{ categories }} — QuerySet Categorie (racines + sous_categories)
+
+   DESIGN SYSTEM (tokens de custom.css) :
+     Poppins          → police unique (titres + corps)
+     --brand-600      → #0D1F5C  (titres, labels)
+     --brand-500      → #1E3A8A  (liens actifs, focus)
+     Accent CTA       → #F97316  (1 seul bouton primary par page)
+     --bg             → #F4F7FC  (fond global)
+     --surface        → #FFFFFF  (cartes)
+     --border         → #E2E8F0  (bordures)
+     --text-muted     → #8898AA  (aide, compteurs, dates)
+
+   ICÔNES : Lucide Icons — SVG inline, stroke="currentColor"
+     width="18" height="18" stroke-width="1.75" sauf exceptions.
+     Utilisées : FileText, DollarSign, Image, ChevronLeft,
+     Eye, Trash2, Save, Send, CheckCircle, AlertTriangle,
+     Plus, Tag, Package, Star, BarChart2, X, UploadCloud,
+     Info, XCircle.
+
+   STRUCTURE VISUELLE :
+     ┌────────────────────────────────────────────────────┐
+     │  En-tête : lien retour + titre + (btn Voir)        │
+     ├──────────────────────────┬─────────────────────────┤
+     │  Formulaire principal    │  Panneau latéral        │
+     │  ├─ Infos de base        │  ├─ Statut de vente     │
+     │  ├─ Prix & Stock         │  ├─ Options (vedette)   │
+     │  └─ Images               │  ├─ Infos (édition)     │
+     │                          │  └─ Danger zone (édit.) │
+     └────────────────────────────────────────────────────┘
+     └─── Barre d'actions sticky (bas de page) ───────────┘
+
+   JS ({% block extra_scripts %}) :
+     · previewImages(files)    — Prévisualisation avant upload
+     · handleDrop(e)           — Glisser-déposer images
+     · calcRemise()            — % remise prix/promo en temps réel
+     · updateCounter()         — Compteur chars description courte
+     · updateStock()           — Indicateur coloré niveau stock
+     · supprimerImage(id, btn) — DELETE API + animation retrait DOM
+════════════════════════════════════════════════════════════════
+{% endcomment %}
+
+{% block title %}{% if produit %}Modifier — {{ produit.nom }}{% else %}Ajouter un produit{% endif %} — HooYia Market{% endblock %}
 
 {% block content %}
-<div class="page-root">
 
-  <aside class="sidebar">
-    <div class="sb-head">
-      <div class="sb-logo">⚙ Admin</div>
-      <div class="sb-sub">HooYia Market</div>
+{% comment %} ── CSS LOCAL ──
+   Préfixe .ap- (ajouter-produit) pour éviter toute collision
+   avec les classes globales de custom.css ou Tailwind. {% endcomment %}
+<style>
+
+/* ── Grille principale : formulaire 2/3 + panneau latéral 1/3 ── */
+.ap-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.375rem;
+  align-items: start;
+}
+
+/* ── Cartes de section ── */
+.ap-card {
+  background: #fff;
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(13,31,92,.06);
+  margin-bottom: 1.25rem;
+  transition: box-shadow .2s;
+}
+.ap-card:hover { box-shadow: 0 4px 16px rgba(13,31,92,.09); }
+
+/* ── En-tête de carte : icône + titre + sous-titre ── */
+.ap-card-head {
+  display: flex;
+  align-items: center;
+  gap: .875rem;
+  padding: 1rem 1.375rem;
+  border-bottom: 1px solid var(--border, #E2E8F0);
+}
+
+/* Icône orange (sections principales) */
+.ap-card-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #F97316, #ea6000);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(249,115,22,.25);
+}
+/* Variante bleue (sections secondaires) */
+.ap-card-icon.blue {
+  background: linear-gradient(135deg, #1E3A8A, #0D1F5C);
+  box-shadow: 0 2px 8px rgba(13,31,92,.2);
+}
+
+.ap-card-title   { font-size: .9375rem; font-weight: 700; color: #0D1F5C; margin: 0; }
+.ap-card-subtitle { font-size: .8rem; color: #8898AA; margin: .15rem 0 0 0; }
+.ap-card-body { padding: 1.375rem; }
+
+/* ── Champs de formulaire ── */
+.ap-field { margin-bottom: 1.125rem; }
+.ap-field:last-child { margin-bottom: 0; }
+
+.ap-label {
+  display: block;
+  font-size: .75rem; font-weight: 700;
+  color: #0D1F5C;
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: .4rem;
+}
+.ap-label-opt {
+  font-weight: 400; font-size: .75rem; color: #8898AA;
+  text-transform: none; letter-spacing: 0; margin-left: .25rem;
+}
+
+.ap-input {
+  width: 100%; padding: .625rem .875rem;
+  border-radius: 9px;
+  border: 1.5px solid var(--border, #E2E8F0);
+  font-size: .9375rem; font-family: 'Poppins', sans-serif;
+  color: #0F1923; background: #fafbff;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.ap-input:hover:not(:focus) { border-color: #c4cee8; }
+.ap-input:focus {
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30,58,138,.1);
+  background: #fff;
+}
+.ap-input::placeholder { color: #c0c9d8; }
+textarea.ap-input { resize: vertical; min-height: 95px; line-height: 1.6; }
+
+/* Select avec chevron inline */
+select.ap-input {
+  appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230D1F5C' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+  padding-right: 38px;
+}
+
+/* Input avec suffixe FCFA */
+.ap-input-wrap { position: relative; }
+.ap-input-suffix {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  font-size: .75rem; font-weight: 700; color: #8898AA;
+  background: var(--border, #E2E8F0); padding: 2px 7px; border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Messages d'erreur champ */
+.ap-error {
+  display: flex; align-items: center; gap: .375rem;
+  font-size: .8rem; color: #ef4444; margin-top: .375rem;
+}
+/* Aide sous champ */
+.ap-hint { font-size: .8rem; color: #8898AA; margin-top: .35rem; }
+
+/* Grille 2 colonnes (Prix & Stock) */
+.ap-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* Badge remise calculée dynamiquement */
+.ap-remise-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: #ecfdf5; color: #065f46;
+  font-size: .8125rem; font-weight: 700;
+  padding: .25rem .75rem; border-radius: 999px;
+  margin-top: .5rem; border: 1px solid #6ee7b7;
+}
+
+/* ── Toggle switch ── */
+.ap-toggle-row {
+  display: flex; align-items: center; gap: .875rem;
+  padding: .875rem 1rem; border-radius: 10px;
+  background: #fafbff; border: 1.5px solid var(--border, #E2E8F0);
+}
+.ap-toggle { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+.ap-toggle input { opacity: 0; width: 0; height: 0; }
+.ap-toggle-track {
+  position: absolute; inset: 0; border-radius: 26px;
+  background: #d1d5e8; cursor: pointer; transition: background .2s;
+}
+.ap-toggle-track::before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; left: 3px; top: 3px;
+  transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.ap-toggle input:checked + .ap-toggle-track { background: #10b981; }
+.ap-toggle input:checked + .ap-toggle-track::before { transform: translateX(20px); }
+
+/* ── Zone de dépôt images ── */
+.ap-dropzone {
+  border: 2px dashed var(--border, #E2E8F0);
+  border-radius: 12px; padding: 2rem 1.25rem;
+  text-align: center; cursor: pointer;
+  background: #fafbff; transition: border-color .2s, background .2s;
+}
+.ap-dropzone:hover, .ap-dropzone.drag-over {
+  border-color: #1E3A8A; background: #eff4ff;
+}
+
+/* Grille miniatures images */
+.ap-img-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: .625rem; margin-top: 1rem;
+}
+.ap-img-thumb {
+  position: relative; border-radius: 9px; overflow: hidden;
+  aspect-ratio: 1; background: var(--border);
+  box-shadow: 0 1px 4px rgba(13,31,92,.08);
+}
+.ap-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ap-img-badge {
+  position: absolute; top: 5px; left: 5px;
+  background: #1E3A8A; color: #fff;
+  font-size: .625rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 4px; letter-spacing: .03em;
+}
+.ap-img-del {
+  position: absolute; top: 5px; right: 5px;
+  background: rgba(239,68,68,.92); color: #fff;
+  border: none; border-radius: 50%;
+  width: 22px; height: 22px;
+  cursor: pointer; opacity: 0; transition: opacity .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.ap-img-thumb:hover .ap-img-del { opacity: 1; }
+
+/* ── Panneau latéral ── */
+.ap-side-card {
+  background: #fff; border: 1px solid var(--border, #E2E8F0);
+  border-radius: 14px; box-shadow: 0 1px 4px rgba(13,31,92,.06);
+  margin-bottom: 1.25rem; overflow: hidden;
+}
+.ap-side-head {
+  padding: .875rem 1.125rem; border-bottom: 1px solid var(--border);
+  font-size: .875rem; font-weight: 700; color: #0D1F5C;
+  display: flex; align-items: center; gap: .5rem;
+}
+.ap-side-body { padding: 1.125rem; }
+
+/* ── Barre d'actions sticky ── */
+.ap-action-bar {
+  position: sticky; bottom: 1.25rem; z-index: 20;
+  background: #fff; border: 1px solid var(--border, #E2E8F0);
+  border-radius: 14px; padding: .875rem 1.375rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; box-shadow: 0 8px 32px rgba(13,31,92,.13);
+  margin-top: .5rem;
+}
+.ap-action-right { display: flex; align-items: center; gap: .625rem; }
+
+/* ── Flash messages ── */
+.ap-flash {
+  display: flex; align-items: center; gap: .625rem;
+  padding: .875rem 1.125rem; border-radius: 10px;
+  font-size: .875rem; font-weight: 500; margin-bottom: 1.25rem;
+  animation: ap-fade .2s ease both;
+}
+.ap-flash-success { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+.ap-flash-error   { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+@keyframes ap-fade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive mobile ── */
+@media (max-width: 860px) {
+  .ap-layout        { grid-template-columns: 1fr; }
+  .ap-grid-2        { grid-template-columns: 1fr; }
+  .ap-img-grid      { grid-template-columns: repeat(3, 1fr); }
+  .ap-action-bar    { flex-direction: column; gap: .75rem; }
+  .ap-action-right  { width: 100%; justify-content: flex-end; }
+}
+</style>
+
+
+<div style="max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem;">
+
+  {% comment %} ══════════════════════════════════════════════════
+     EN-TÊTE DE PAGE
+     ── Lien retour vers la liste des produits
+     ── Titre dynamique (Nouveau produit / Modifier «…»)
+     ── Bouton "Voir sur le site" visible en mode édition
+  ══════════════════════════════════════════════════ {% endcomment %}
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;
+              flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;">
+    <div>
+
+      {% comment %} Lien retour — ChevronLeft {% endcomment %}
+      <a href="{% url 'products:vendeur_produits' %}"
+         style="display:inline-flex;align-items:center;gap:.375rem;font-size:.8125rem;
+                color:#8898AA;text-decoration:none;margin-bottom:.5rem;transition:color .15s;"
+         onmouseover="this.style.color='#F97316'"
+         onmouseout="this.style.color='#8898AA'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour aux produits
+      </a>
+
+      <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;
+                 color:#0D1F5C;margin:0 0 .25rem 0;letter-spacing:-.02em;">
+        {% if produit %}Modifier «&nbsp;{{ produit.nom }}&nbsp;»{% else %}Nouveau produit{% endif %}
+      </h1>
+      <p style="font-size:.875rem;color:#8898AA;margin:0;">
+        {% if produit %}Mettez à jour les informations de ce produit{% else %}Remplissez les champs pour publier un produit{% endif %}
+      </p>
     </div>
-    <div class="sb-lbl">Navigation</div>
-    <a href="{% url 'products:admin_dashboard' %}" class="sb-item">📊 Dashboard</a>
-    <div class="sb-lbl">Catalogue</div>
-    <a href="{% url 'products:gestion_categories' %}" class="sb-item">🗂 Catégories</a>
-    <a href="{% url 'products:liste' %}" class="sb-item">📦 Produits</a>
-    <a href="{% url 'products:ajouter' %}" class="sb-item active">➕ {% if produit %}Modifier{% else %}Ajouter produit{% endif %}</a>
-    <div class="sb-lbl">Site</div>
-    <a href="{% url 'products:accueil' %}" class="sb-item">🏠 Voir le site</a>
-    <div class="sb-bottom"><div class="sb-version">HooYia Market v1.0</div></div>
-  </aside>
 
-  <div class="main-content">
-    <a href="{% url 'products:admin_dashboard' %}" class="page-back">← Retour au Dashboard</a>
-    <div class="page-header">
+    {% comment %} Bouton Voir sur le site — Eye — mode édition uniquement {% endcomment %}
+    {% if produit %}
+    <a href="{% url 'products:detail' produit.slug %}" target="_blank"
+       class="btn btn-secondary"
+       style="display:inline-flex;align-items:center;gap:.5rem;flex-shrink:0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Voir sur le site
+    </a>
+    {% endif %}
+  </div>
+
+
+  {% comment %} ══ MESSAGES FLASH (succès / erreur) ══ {% endcomment %}
+  {% for message in messages %}
+  <div class="ap-flash {% if message.tags == 'success' %}ap-flash-success{% else %}ap-flash-error{% endif %}">
+    {% if message.tags == 'success' %}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    {% else %}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    {% endif %}
+    {{ message }}
+  </div>
+  {% endfor %}
+
+
+  <form method="POST" enctype="multipart/form-data" id="product-form">
+    {% csrf_token %}
+
+    <div class="ap-layout">
+
+      {% comment %} ════════════════════════════════════════════
+         COLONNE GAUCHE — Formulaire principal
+      ════════════════════════════════════════════ {% endcomment %}
       <div>
-        <div class="page-title">{% if produit %}✏️ Modifier «&nbsp;{{ produit.nom }}&nbsp;»{% else %}➕ Nouveau produit{% endif %}</div>
-        <div class="page-subtitle">{% if produit %}Mettez à jour les informations de ce produit{% else %}Remplissez les informations pour publier un nouveau produit{% endif %}</div>
-      </div>
-      {% if produit %}
-      <a href="{% url 'products:detail' produit.slug %}" target="_blank" class="btn-secondary" style="flex-shrink:0;">👁 Voir</a>
-      {% endif %}
-    </div>
 
-    {% for message in messages %}
-    <div class="flash {% if message.tags == 'success' %}flash-success{% else %}flash-error{% endif %}">
-      {% if message.tags == 'success' %}✓{% else %}✕{% endif %} {{ message }}
-    </div>
-    {% endfor %}
-
-    <form method="POST" enctype="multipart/form-data" id="product-form">
-      {% csrf_token %}
-
-      <!-- 1. Informations de base -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-head-icon">📝</div>
-          <div>
-            <div class="card-head-title">Informations de base</div>
-            <div class="card-head-sub">Nom, description et catégorie du produit</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="field-group">
-            <label class="field-label" for="id_nom">Nom du produit <span>(obligatoire)</span></label>
-            <input type="text" name="nom" id="id_nom" value="{{ form.nom.value|default:'' }}" placeholder="Ex: Samsung Galaxy S24 Ultra 256Go" class="field-input" required autocomplete="off" />
-            {% if form.nom.errors %}<p class="field-error">⚠ {{ form.nom.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="id_description_courte">Description courte <span>(max 500 caractères)</span></label>
-            <input type="text" name="description_courte" id="id_description_courte" value="{{ form.description_courte.value|default:'' }}" placeholder="Résumé accrocheur affiché en liste produits…" maxlength="500" class="field-input" />
-            <div class="field-hint" id="desc-courte-counter" style="text-align:right;"></div>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="id_description">Description complète <span>(obligatoire)</span></label>
-            <textarea name="description" id="id_description" rows="5" placeholder="Description détaillée : caractéristiques, contenu de la boîte, garantie…" class="field-input field-textarea" required>{{ form.description.value|default:'' }}</textarea>
-            {% if form.description.errors %}<p class="field-error">⚠ {{ form.description.errors.0 }}</p>{% endif %}
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="id_categorie">Catégorie <span>(obligatoire)</span></label>
-            <select name="categorie" id="id_categorie" class="field-input field-select" required>
-              <option value="">— Choisir une catégorie —</option>
-              {% for cat in categories %}
-              <option value="{{ cat.id }}" {% if form.categorie.value == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.nom }}</option>
-              {% for sous in cat.sous_categories.all %}
-              <option value="{{ sous.id }}" {% if form.categorie.value == sous.id|stringformat:"s" %}selected{% endif %}>  ↳ {{ sous.nom }}</option>
-              {% endfor %}
-              {% endfor %}
-            </select>
-            {% if form.categorie.errors %}<p class="field-error">⚠ {{ form.categorie.errors.0 }}</p>{% endif %}
-            <a href="{% url 'products:gestion_categories' %}" target="_blank" class="cat-shortcut">+ Créer une catégorie →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- 2. Prix & Stock -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-head-icon">💰</div>
-          <div>
-            <div class="card-head-title">Prix &amp; Stock</div>
-            <div class="card-head-sub">Tarification et gestion des quantités</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="grid-2">
-            <div class="field-group">
-              <label class="field-label" for="id_prix">Prix <span>(obligatoire)</span></label>
-              <div class="input-wrap">
-                <input type="number" name="prix" id="id_prix" value="{{ form.prix.value|default:'' }}" placeholder="150000" min="0" step="500" class="field-input" style="padding-right:62px;" required />
-                <span class="input-suffix">FCFA</span>
-              </div>
-              {% if form.prix.errors %}<p class="field-error">⚠ {{ form.prix.errors.0 }}</p>{% endif %}
+        {% comment %} ── CARTE 1 : Informations de base ──
+           Nom, description courte (max 500 chars), description
+           longue et catégorie hiérarchique.
+           Ces champs alimentent le SEO et les cartes produit. {% endcomment %}
+        <div class="ap-card">
+          <div class="ap-card-head">
+            <div class="ap-card-icon">
+              {% comment %} Lucide — FileText {% endcomment %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
             </div>
-            <div class="field-group">
-              <label class="field-label" for="id_prix_promo">Prix promo <span>(optionnel)</span></label>
-              <div class="input-wrap">
-                <input type="number" name="prix_promo" id="id_prix_promo" value="{{ form.prix_promo.value|default:'' }}" placeholder="120000" min="0" step="500" class="field-input" style="padding-right:62px;" />
-                <span class="input-suffix">FCFA</span>
-              </div>
-              <div id="remise-preview" style="display:none;" class="remise-badge"></div>
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="id_stock">Stock <span>(obligatoire)</span></label>
-              <input type="number" name="stock" id="id_stock" value="{{ form.stock.value|default:0 }}" min="0" class="field-input" required />
-              {% if form.stock.errors %}<p class="field-error">⚠ {{ form.stock.errors.0 }}</p>{% endif %}
-              <div class="field-hint" id="stock-indicator"></div>
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="id_stock_minimum">Seuil d'alerte <span>(défaut : 5)</span></label>
-              <input type="number" name="stock_minimum" id="id_stock_minimum" value="{{ form.stock_minimum.value|default:5 }}" min="0" class="field-input" />
-              <div class="field-hint">Alerte si stock ≤ cette valeur</div>
+            <div>
+              <p class="ap-card-title">Informations de base</p>
+              <p class="ap-card-subtitle">Nom, description et catégorie du produit</p>
             </div>
           </div>
-        </div>
-      </div>
+          <div class="ap-card-body">
 
-      <!-- 3. Statut & Options -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-head-icon">⚙️</div>
-          <div>
-            <div class="card-head-title">Statut &amp; Options</div>
-            <div class="card-head-sub">Visibilité et mise en avant du produit</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="grid-2">
-            <div class="field-group">
-              <label class="field-label" for="id_statut">Statut de vente</label>
-              <select name="statut" id="id_statut" class="field-input field-select">
-                <option value="actif"   {% if form.statut.value == 'actif'   or not form.statut.value %}selected{% endif %}>✅ Actif — visible et en vente</option>
-                <option value="inactif" {% if form.statut.value == 'inactif' %}selected{% endif %}>🔒 Inactif — masqué</option>
-                <option value="epuise"  {% if form.statut.value == 'epuise'  %}selected{% endif %}>❌ Épuisé</option>
-                <option value="archive" {% if form.statut.value == 'archive' %}selected{% endif %}>📦 Archivé</option>
+            <div class="ap-field">
+              <label class="ap-label" for="id_nom">Nom du produit</label>
+              <input type="text" name="nom" id="id_nom"
+                     value="{{ form.nom.value|default:'' }}"
+                     placeholder="Ex: Samsung Galaxy S24 Ultra 256Go — Titane Gris"
+                     class="ap-input" required autocomplete="off" />
+              {% if form.nom.errors %}
+              <p class="ap-error">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ form.nom.errors.0 }}
+              </p>
+              {% endif %}
+            </div>
+
+            {% comment %} Description courte : compteur live géré par updateCounter() {% endcomment %}
+            <div class="ap-field">
+              <label class="ap-label" for="id_description_courte">
+                Description courte
+                <span class="ap-label-opt">(max 500 caractères)</span>
+              </label>
+              <input type="text" name="description_courte" id="id_description_courte"
+                     value="{{ form.description_courte.value|default:'' }}"
+                     placeholder="Résumé affiché dans les cartes produit du catalogue…"
+                     maxlength="500" class="ap-input" />
+              <div class="ap-hint" id="desc-courte-counter" style="text-align:right;">0/500</div>
+            </div>
+
+            <div class="ap-field">
+              <label class="ap-label" for="id_description">Description complète</label>
+              <textarea name="description" id="id_description" rows="5"
+                        placeholder="Description détaillée : caractéristiques, contenu, garantie…"
+                        class="ap-input" required>{{ form.description.value|default:'' }}</textarea>
+              {% if form.description.errors %}
+              <p class="ap-error">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ form.description.errors.0 }}
+              </p>
+              {% endif %}
+            </div>
+
+            {% comment %} Select catégorie : racines + sous-catégories indentées {% endcomment %}
+            <div class="ap-field">
+              <label class="ap-label" for="id_categorie">Catégorie</label>
+              <select name="categorie" id="id_categorie" class="ap-input" required>
+                <option value="">— Sélectionner une catégorie —</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if form.categorie.value == cat.id|stringformat:"s" %}selected{% endif %}>
+                  {{ cat.nom }}
+                </option>
+                {% for sous in cat.sous_categories.all %}
+                <option value="{{ sous.id }}" {% if form.categorie.value == sous.id|stringformat:"s" %}selected{% endif %}>
+                  &nbsp;&nbsp;↳ {{ sous.nom }}
+                </option>
+                {% endfor %}
+                {% endfor %}
               </select>
+              {% if form.categorie.errors %}
+              <p class="ap-error">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {{ form.categorie.errors.0 }}
+              </p>
+              {% endif %}
+              {% comment %} Raccourci vers la gestion catégories (nouvel onglet) — Plus {% endcomment %}
+              <a href="{% url 'products:gestion_categories' %}" target="_blank"
+                 style="display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;
+                        color:#F97316;font-weight:600;text-decoration:none;margin-top:.5rem;
+                        transition:opacity .15s;"
+                 onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Créer une nouvelle catégorie →
+              </a>
             </div>
-            <div class="field-group">
-              <label class="field-label">Mise en avant</label>
-              <div class="toggle-row">
-                <label class="toggle">
-                  <input type="checkbox" name="en_vedette" id="id_en_vedette" {% if form.en_vedette.value %}checked{% endif %}>
-                  <span class="toggle-slider"></span>
+
+          </div>
+        </div>
+
+
+        {% comment %} ── CARTE 2 : Prix & Stock ──
+           Prix normal + prix promo avec badge remise automatique,
+           quantité en stock et seuil d'alerte Celery. {% endcomment %}
+        <div class="ap-card">
+          <div class="ap-card-head">
+            <div class="ap-card-icon">
+              {% comment %} Lucide — DollarSign {% endcomment %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <div>
+              <p class="ap-card-title">Prix &amp; Stock</p>
+              <p class="ap-card-subtitle">Tarification et gestion des quantités disponibles</p>
+            </div>
+          </div>
+          <div class="ap-card-body">
+            <div class="ap-grid-2">
+
+              <div class="ap-field">
+                <label class="ap-label" for="id_prix">Prix</label>
+                <div class="ap-input-wrap">
+                  <input type="number" name="prix" id="id_prix"
+                         value="{{ form.prix.value|default:'' }}"
+                         placeholder="150 000" min="0" step="500"
+                         class="ap-input" style="padding-right:62px;" required />
+                  <span class="ap-input-suffix">FCFA</span>
+                </div>
+                {% if form.prix.errors %}<p class="ap-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ form.prix.errors.0 }}</p>{% endif %}
+              </div>
+
+              {% comment %} Prix promo — badge remise calculé par calcRemise() {% endcomment %}
+              <div class="ap-field">
+                <label class="ap-label" for="id_prix_promo">
+                  Prix promo <span class="ap-label-opt">(optionnel)</span>
                 </label>
-                <div class="toggle-info">
-                  <div class="toggle-title">Produit en vedette ⭐</div>
-                  <div class="toggle-desc">Affiché sur la page d'accueil</div>
+                <div class="ap-input-wrap">
+                  <input type="number" name="prix_promo" id="id_prix_promo"
+                         value="{{ form.prix_promo.value|default:'' }}"
+                         placeholder="120 000" min="0" step="500"
+                         class="ap-input" style="padding-right:62px;" />
+                  <span class="ap-input-suffix">FCFA</span>
+                </div>
+                <div id="remise-preview" class="ap-remise-badge" style="display:none;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span id="remise-txt"></span>
                 </div>
               </div>
+
+              {% comment %} Stock — indicateur coloré updateStock() {% endcomment %}
+              <div class="ap-field">
+                <label class="ap-label" for="id_stock">Stock</label>
+                <input type="number" name="stock" id="id_stock"
+                       value="{{ form.stock.value|default:0 }}"
+                       min="0" class="ap-input" required />
+                {% if form.stock.errors %}<p class="ap-error"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>{{ form.stock.errors.0 }}</p>{% endif %}
+                <div class="ap-hint" id="stock-indicator"></div>
+              </div>
+
+              <div class="ap-field">
+                <label class="ap-label" for="id_stock_minimum">
+                  Seuil d'alerte <span class="ap-label-opt">(défaut : 5)</span>
+                </label>
+                <input type="number" name="stock_minimum" id="id_stock_minimum"
+                       value="{{ form.stock_minimum.value|default:5 }}"
+                       min="0" class="ap-input" />
+                <p class="ap-hint">Notification envoyée si stock ≤ ce seuil</p>
+              </div>
+
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 4. Images -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-head-icon">🖼️</div>
-          <div>
-            <div class="card-head-title">Images du produit</div>
-            <div class="card-head-sub">Glissez vos images ou cliquez pour parcourir</div>
-          </div>
-        </div>
-        <div class="card-body">
-          {% if produit and produit.images.all %}
-          <div class="section-label">Images actuelles</div>
-          <div class="img-grid" style="margin-bottom:20px;">
-            {% for img in produit.images.all %}
-            <div class="img-thumb">
-              <img src="{{ img.image.url }}" alt="" loading="lazy" />
-              {% if img.est_principale %}<span class="badge-principal">Principal</span>{% endif %}
-              <button type="button" class="btn-del-img" onclick="supprimerImage({{ img.id }}, this)" title="Supprimer">✕</button>
+
+        {% comment %} ── CARTE 3 : Images ──
+           Zone de dépôt principale (clic + drag-and-drop).
+           En mode édition : images existantes affichées avec
+           bouton de suppression individuelle via API DELETE. {% endcomment %}
+        <div class="ap-card">
+          <div class="ap-card-head">
+            <div class="ap-card-icon blue">
+              {% comment %} Lucide — Image {% endcomment %}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
             </div>
-            {% endfor %}
+            <div>
+              <p class="ap-card-title">Images du produit</p>
+              <p class="ap-card-subtitle">La 1ʳᵉ image uploadée sera l'image principale</p>
+            </div>
           </div>
-          <div class="section-label">Ajouter de nouvelles images</div>
-          {% endif %}
-          <div class="drop-zone" id="drop-zone"
-            onclick="document.getElementById('id_images').click()"
-            ondragover="event.preventDefault(); this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event)">
-            <div style="font-size:36px;margin-bottom:10px;">📷</div>
-            <div style="font-size:13px;color:rgba(13,31,92,.55);font-weight:500;"><strong style="color:var(--orange);">Cliquez</strong> ou glissez vos images ici</div>
-            <div style="font-size:11.5px;color:rgba(13,31,92,.3);margin-top:4px;">JPG, PNG, WebP — Max 5 Mo/image — 1ère image = principale</div>
-          </div>
-          <input type="file" name="images" id="id_images" multiple accept="image/*" onchange="previewImages(this.files)" style="display:none;" />
-          <div id="preview-grid" class="img-grid"></div>
-        </div>
-      </div>
+          <div class="ap-card-body">
 
-      <!-- Action Bar -->
-      <div class="action-bar">
-        <div>
+            {% comment %} Images existantes — mode édition uniquement {% endcomment %}
+            {% if produit and produit.images.all %}
+            <p style="font-size:.75rem;font-weight:700;color:#8898AA;text-transform:uppercase;
+                      letter-spacing:.06em;margin-bottom:.625rem;">Images actuelles</p>
+            <div class="ap-img-grid" style="margin-bottom:1.25rem;">
+              {% for img in produit.images.all %}
+              <div class="ap-img-thumb">
+                <img src="{{ img.image.url }}" alt="{{ produit.nom }}" loading="lazy" />
+                {% if img.est_principale %}<span class="ap-img-badge">Principal</span>{% endif %}
+                <button type="button" class="ap-img-del"
+                        onclick="supprimerImage({{ img.id }}, this)" title="Supprimer">
+                  {% comment %} Lucide — X {% endcomment %}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+            <p style="font-size:.75rem;font-weight:700;color:#8898AA;text-transform:uppercase;
+                      letter-spacing:.06em;margin-bottom:.625rem;">Ajouter de nouvelles images</p>
+            {% endif %}
+
+            {% comment %} Zone de dépôt — UploadCloud {% endcomment %}
+            <div class="ap-dropzone" id="drop-zone"
+                 onclick="document.getElementById('id_images').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="handleDrop(event)">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+                   stroke="#C8D3E0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                   style="margin:0 auto .875rem auto;display:block;">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+              <p style="font-size:.9375rem;color:#4A5568;margin:0 0 .25rem 0;">
+                <strong style="color:#F97316;">Cliquez</strong> ou glissez vos images ici
+              </p>
+              <p style="font-size:.8rem;color:#8898AA;margin:0;">JPG, PNG, WebP — Max 5 Mo/image</p>
+            </div>
+
+            <input type="file" name="images" id="id_images" multiple accept="image/*"
+                   onchange="previewImages(this.files)" style="display:none;" />
+
+            {% comment %} Grille preview remplie dynamiquement par previewImages() {% endcomment %}
+            <div id="preview-grid" class="ap-img-grid"></div>
+
+          </div>
+        </div>
+
+      </div>
+      {% comment %} ── FIN colonne gauche ── {% endcomment %}
+
+
+      {% comment %} ════════════════════════════════════════════
+         COLONNE DROITE — Panneau latéral
+         Statut, options et informations du produit
+      ════════════════════════════════════════════ {% endcomment %}
+      <div>
+
+        {% comment %} ── Panneau Statut de vente ──
+           Contrôle la visibilité du produit sur le catalogue. {% endcomment %}
+        <div class="ap-side-card">
+          <div class="ap-side-head">
+            {% comment %} Lucide — BarChart2 {% endcomment %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            Statut de vente
+          </div>
+          <div class="ap-side-body">
+            <div class="ap-field" style="margin-bottom:0;">
+              <label class="ap-label" for="id_statut">Statut</label>
+              <select name="statut" id="id_statut" class="ap-input">
+                <option value="actif"   {% if form.statut.value == 'actif'   or not form.statut.value %}selected{% endif %}>Actif — visible et en vente</option>
+                <option value="inactif" {% if form.statut.value == 'inactif' %}selected{% endif %}>Inactif — masqué du catalogue</option>
+                <option value="epuise"  {% if form.statut.value == 'epuise'  %}selected{% endif %}>Épuisé — affiché sans achat</option>
+                <option value="archive" {% if form.statut.value == 'archive' %}selected{% endif %}>Archivé — retiré définitivement</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+        {% comment %} ── Panneau Options ──
+           Toggle "en vedette" → produit affiché sur la page d'accueil. {% endcomment %}
+        <div class="ap-side-card">
+          <div class="ap-side-head">
+            {% comment %} Lucide — Star {% endcomment %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F97316"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Options
+          </div>
+          <div class="ap-side-body">
+            <div class="ap-toggle-row">
+              <label class="ap-toggle">
+                <input type="checkbox" name="en_vedette" id="id_en_vedette"
+                       {% if form.en_vedette.value %}checked{% endif %}>
+                <span class="ap-toggle-track"></span>
+              </label>
+              <div>
+                <div style="font-size:.875rem;font-weight:600;color:#0D1F5C;">Produit en vedette</div>
+                <div style="font-size:.8rem;color:#8898AA;margin-top:.1rem;">Affiché sur la page d'accueil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        {% comment %} ── Panneau Informations — mode édition uniquement ──
+           Date de création, slug URL, note moyenne, nb d'avis. {% endcomment %}
+        {% if produit %}
+        <div class="ap-side-card">
+          <div class="ap-side-head">
+            {% comment %} Lucide — Package {% endcomment %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            Informations
+          </div>
+          <div class="ap-side-body" style="font-size:.8125rem;">
+            {% comment %} Ligne : libellé gris + valeur bold {% endcomment %}
+            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:#8898AA;">Créé le</span>
+              <strong>{{ produit.date_creation|date:"d/m/Y" }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:#8898AA;">Slug</span>
+              <code style="font-size:.75rem;background:#f0f3fa;padding:1px 6px;border-radius:4px;color:#0D1F5C;">{{ produit.slug }}</code>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:#8898AA;">Note moyenne</span>
+              <strong>{{ produit.note_moyenne|default:"—" }} / 5</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.5rem 0;">
+              <span style="color:#8898AA;">Avis clients</span>
+              <strong>{{ produit.nombre_avis }} avis</strong>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+
+        {% comment %} ── Panneau Danger zone — mode édition uniquement ──
+           Bouton suppression irréversible qui ouvre la modale #modal-del. {% endcomment %}
+        {% if produit %}
+        <div class="ap-side-card" style="border-color:#fecaca;">
+          <div class="ap-side-head" style="background:#fef2f2;color:#991b1b;">
+            {% comment %} Lucide — Trash2 {% endcomment %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Zone de danger
+          </div>
+          <div class="ap-side-body">
+            <p style="font-size:.8rem;color:#64748b;margin:0 0 .875rem 0;line-height:1.5;">
+              Suppression définitive du produit et de toutes ses images.
+            </p>
+            <button type="button"
+                    onclick="document.getElementById('modal-del').style.display='flex'"
+                    style="width:100%;padding:.625rem;border-radius:9px;
+                           border:1.5px solid #fecaca;background:#fff5f5;color:#ef4444;
+                           font-family:'Poppins',sans-serif;font-size:.875rem;font-weight:600;
+                           cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;
+                           transition:all .15s;"
+                    onmouseover="this.style.background='#fee2e2';this.style.borderColor='#ef4444'"
+                    onmouseout="this.style.background='#fff5f5';this.style.borderColor='#fecaca'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              Supprimer ce produit
+            </button>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+      {% comment %} ── FIN colonne droite ── {% endcomment %}
+
+    </div>
+    {% comment %} ── FIN .ap-layout ── {% endcomment %}
+
+
+    {% comment %} ── BARRE D'ACTIONS STICKY ──
+       Reste visible pendant le scroll (position: sticky, bottom: 1.25rem).
+       3 boutons : Annuler | Brouillon (sauvegarde sans publier) | Publier (CTA orange).
+       Le bouton Publier utilise name="action" value="publish" pour la vue Django. {% endcomment %}
+    <div class="ap-action-bar">
+      <p style="font-size:.8rem;color:#8898AA;margin:0;">
+        {% if produit %}Modifications non sauvegardées{% else %}Formulaire en cours{% endif %}
+      </p>
+      <div class="ap-action-right">
+
+        {% comment %} Annuler — X {% endcomment %}
+        <a href="{% url 'products:vendeur_produits' %}" class="btn btn-secondary"
+           style="display:inline-flex;align-items:center;gap:.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Annuler
+        </a>
+
+        {% comment %} Brouillon — Save {% endcomment %}
+        <button type="submit" name="action" value="draft" class="btn btn-secondary"
+                style="display:inline-flex;align-items:center;gap:.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Brouillon
+        </button>
+
+        {% comment %} Publier / Enregistrer — CTA orange unique de la page {% endcomment %}
+        <button type="submit" name="action" value="publish" class="btn btn-primary"
+                style="display:inline-flex;align-items:center;gap:.4rem;">
           {% if produit %}
-          <button type="button" class="btn-danger" onclick="document.getElementById('modal-del').classList.remove('hidden')">🗑 Supprimer le produit</button>
+            {% comment %} Mode édition : CheckCircle {% endcomment %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Enregistrer les modifications
+          {% else %}
+            {% comment %} Mode ajout : Send (simulant Rocket) {% endcomment %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Publier le produit
           {% endif %}
-        </div>
-        <div class="action-bar-right">
-          <a href="{% url 'products:admin_dashboard' %}" class="btn-secondary">Annuler</a>
-          <button type="submit" name="action" value="draft" class="btn-secondary">💾 Brouillon</button>
-          <button type="submit" name="action" value="publish" class="btn-primary">{% if produit %}✓ Enregistrer{% else %}🚀 Publier le produit{% endif %}</button>
-        </div>
+        </button>
+
       </div>
-    </form>
-  </div>
+    </div>
+
+  </form>
 </div>
 
+
+{% comment %} ── MODALE SUPPRESSION ──
+   Masquée par défaut (display:none).
+   Ouverte via onclick sur le bouton Danger zone.
+   Clic sur le fond overlay = fermeture. {% endcomment %}
 {% if produit %}
-<div id="modal-del" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div class="modal-icon">⚠️</div>
-    <div class="modal-title">Supprimer ce produit ?</div>
-    <p class="modal-body">Action <strong>irréversible</strong>. Le produit «&nbsp;{{ produit.nom }}&nbsp;» sera définitivement supprimé ainsi que toutes ses images.</p>
-    <div class="btn-row" style="justify-content:flex-end;">
-      <button onclick="document.getElementById('modal-del').classList.add('hidden')" class="btn-secondary">Annuler</button>
-      <form method="POST" action="{% url 'products:supprimer' produit.id %}">
-        {% csrf_token %}
-        <button type="submit" style="padding:11px 20px;border-radius:9px;border:none;cursor:pointer;background:var(--red);color:white;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;display:inline-flex;align-items:center;gap:7px;">🗑 Confirmer</button>
-      </form>
+<div id="modal-del"
+     style="display:none;position:fixed;inset:0;z-index:300;
+            background:rgba(0,0,0,.55);align-items:center;justify-content:center;
+            padding:1.25rem;backdrop-filter:blur(2px);"
+     onclick="if(event.target===this)this.style.display='none'">
+
+  <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;
+              box-shadow:0 24px 72px rgba(0,0,0,.25);overflow:hidden;">
+
+    {% comment %} En-tête rouge de la modale — AlertTriangle {% endcomment %}
+    <div style="background:#fef2f2;padding:1.25rem 1.5rem;
+                display:flex;align-items:center;gap:.875rem;">
+      <div style="width:42px;height:42px;border-radius:10px;background:#fee2e2;
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;color:#991b1b;margin:0;">Supprimer ce produit ?</h3>
+        <p style="font-size:.8rem;color:#b91c1c;margin:.15rem 0 0 0;">Action irréversible</p>
+      </div>
     </div>
+
+    <div style="padding:1.25rem 1.5rem;">
+      <p style="font-size:.875rem;color:#64748b;margin:0 0 1.375rem 0;line-height:1.6;">
+        Le produit <strong style="color:#0F1923;">«&nbsp;{{ produit.nom }}&nbsp;»</strong>
+        sera définitivement supprimé avec toutes ses images et données associées.
+      </p>
+      <div style="display:flex;gap:.625rem;justify-content:flex-end;">
+        <button onclick="document.getElementById('modal-del').style.display='none'"
+                style="padding:.625rem 1.25rem;border-radius:9px;
+                       border:1.5px solid var(--border);background:#fff;
+                       color:#4A5568;font-family:'Poppins',sans-serif;
+                       font-size:.875rem;font-weight:600;cursor:pointer;">
+          Annuler
+        </button>
+        <form method="POST" action="{% url 'products:supprimer' produit.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit"
+                  style="padding:.625rem 1.25rem;border-radius:9px;border:none;
+                         background:#ef4444;color:#fff;font-family:'Poppins',sans-serif;
+                         font-size:.875rem;font-weight:600;cursor:pointer;
+                         display:inline-flex;align-items:center;gap:.4rem;">
+            {% comment %} Lucide — Trash2 {% endcomment %}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Confirmer la suppression
+          </button>
+        </form>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endif %}
+
 {% endblock %}
+
 
 {% block extra_scripts %}
 <script>
+/*
+ * ════════════════════════════════════════════════════════════════
+ * JavaScript — ajouter_produit.html
+ * ────────────────────────────────────────────────────────────────
+ * 1. previewImages(files)    — Prévisualisation locale avant upload
+ * 2. handleDrop(e)           — Transfert fichiers drag-and-drop
+ * 3. calcRemise()            — Badge % remise en temps réel
+ * 4. updateCounter()         — Compteur chars description courte
+ * 5. updateStock()           — Indicateur coloré niveau stock
+ * 6. supprimerImage(id, btn) — DELETE /api/produits/images/:id/
+ * ════════════════════════════════════════════════════════════════
+ */
+
+/* ── 1. Prévisualisation images sélectionnées ──
+   FileReader lit les fichiers locaux et injecte les miniatures
+   dans #preview-grid. La 1ère image reçoit le badge "Principal". */
 function previewImages(files) {
   const grid = document.getElementById('preview-grid');
   grid.innerHTML = '';
@@ -346,13 +895,18 @@ function previewImages(files) {
     const reader = new FileReader();
     reader.onload = e => {
       const div = document.createElement('div');
-      div.className = 'img-thumb';
-      div.innerHTML = '<img src="' + e.target.result + '" />' + (i === 0 ? '<span class="badge-principal">Principal</span>' : '');
+      div.className = 'ap-img-thumb';
+      div.innerHTML = '<img src="' + e.target.result + '" alt="Aperçu" />'
+        + (i === 0 ? '<span class="ap-img-badge">Principal</span>' : '');
       grid.appendChild(div);
     };
     reader.readAsDataURL(file);
   });
 }
+
+/* ── 2. Glisser-déposer ──
+   Transfère les fichiers de l'événement drop dans l'input file
+   puis déclenche la prévisualisation. */
 function handleDrop(e) {
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
@@ -362,80 +916,91 @@ function handleDrop(e) {
   input.files = dt.files;
   previewImages(e.dataTransfer.files);
 }
+
+/* ── 3. Calcul remise en % ──
+   Compare prix normal et prix promo.
+   Affiche le badge vert uniquement si promo < prix. */
 function calcRemise() {
   const prix  = parseFloat(document.getElementById('id_prix').value);
   const promo = parseFloat(document.getElementById('id_prix_promo').value);
   const badge = document.getElementById('remise-preview');
+  const txt   = document.getElementById('remise-txt');
   if (prix && promo && promo < prix) {
-    badge.textContent = '− ' + Math.round(((prix - promo) / prix) * 100) + '% de remise';
-    badge.style.display = 'inline-block';
-  } else { badge.style.display = 'none'; }
+    txt.textContent = '−' + Math.round(((prix - promo) / prix) * 100) + '% de remise';
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
 }
 document.getElementById('id_prix_promo').addEventListener('input', calcRemise);
 document.getElementById('id_prix').addEventListener('input', calcRemise);
+calcRemise(); /* Init au chargement (mode édition avec valeurs existantes) */
 
-const descCourte = document.getElementById('id_description_courte');
-const counter    = document.getElementById('desc-courte-counter');
+/* ── 4. Compteur description courte ──
+   Met à jour le compteur X/500.
+   Passe en orange à partir de 450 pour alerter. */
+const descInput = document.getElementById('id_description_courte');
+const counter   = document.getElementById('desc-courte-counter');
 function updateCounter() {
-  const len = descCourte.value.length;
+  const len = descInput.value.length;
   counter.textContent = len + '/500';
-  counter.style.color = len > 450 ? 'var(--orange)' : 'rgba(13,31,92,.3)';
+  counter.style.color      = len > 450 ? '#F97316' : '#8898AA';
+  counter.style.fontWeight = len > 450 ? '600' : '400';
 }
-descCourte.addEventListener('input', updateCounter);
+descInput.addEventListener('input', updateCounter);
 updateCounter();
 
+/* ── 5. Indicateur niveau stock ──
+   3 états visuels :
+     · Rouge  (stock = 0)          → Rupture
+     · Orange (0 < stock ≤ seuil)  → Stock bas
+     · Vert   (stock > seuil)      → Stock OK */
 const stockInput = document.getElementById('id_stock');
 const stockMin   = document.getElementById('id_stock_minimum');
 const stockInd   = document.getElementById('stock-indicator');
 function updateStock() {
   const s = parseInt(stockInput.value) || 0;
   const m = parseInt(stockMin.value) || 5;
-  if (s === 0) stockInd.innerHTML = '<span style="color:var(--red);font-weight:600;">⚠ Rupture de stock</span>';
-  else if (s <= m) stockInd.innerHTML = '<span style="color:var(--orange);font-weight:600;">⚠ Stock bas (seuil : ' + m + ')</span>';
-  else stockInd.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Stock OK</span>';
+  const ico = (d) => '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+  if (s === 0) {
+    stockInd.innerHTML = '<span style="color:#ef4444;font-weight:600;display:inline-flex;align-items:center;gap:.3rem;">'
+      + ico('<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>')
+      + 'Rupture de stock</span>';
+  } else if (s <= m) {
+    stockInd.innerHTML = '<span style="color:#F97316;font-weight:600;display:inline-flex;align-items:center;gap:.3rem;">'
+      + ico('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>')
+      + 'Stock bas (seuil : ' + m + ')</span>';
+  } else {
+    stockInd.innerHTML = '<span style="color:#10b981;font-weight:600;display:inline-flex;align-items:center;gap:.3rem;">'
+      + ico('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>')
+      + 'Stock OK</span>';
+  }
 }
 stockInput.addEventListener('input', updateStock);
 stockMin.addEventListener('input', updateStock);
 updateStock();
 
-function getCsrf() { return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''; }
-
+/* ── 6. Suppression image existante ──
+   Appelle DELETE /api/produits/images/<id>/ avec le token CSRF.
+   Anime la disparition de la miniature avant de la retirer du DOM. */
+function getCsrf() {
+  return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+}
 async function supprimerImage(imageId, btn) {
-  const confirmed = await showConfirm('Supprimer cette image ?', "L'image sera définitivement supprimée du produit.");
-  if (!confirmed) return;
+  if (!confirm('Supprimer cette image définitivement ?')) return;
   try {
     const resp = await fetch('/api/produits/images/' + imageId + '/', {
       method: 'DELETE',
       headers: { 'X-CSRFToken': getCsrf() }
     });
     if (resp.ok || resp.status === 204) {
-      const thumb = btn.closest('.img-thumb');
-      thumb.style.transition = 'all .2s';
+      const thumb = btn.closest('.ap-img-thumb');
+      thumb.style.transition = 'all .2s ease';
       thumb.style.opacity = '0';
       thumb.style.transform = 'scale(.8)';
-      setTimeout(() => thumb.remove(), 200);
+      setTimeout(() => thumb.remove(), 220);
     }
-  } catch(e) { console.error(e); }
-}
-
-function showConfirm(title, body) {
-  return new Promise(resolve => {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px);';
-    overlay.innerHTML = '<div style="background:white;border-radius:16px;max-width:400px;width:100%;box-shadow:0 24px 72px rgba(0,0,0,.25);overflow:hidden;">'
-      + '<div style="background:#fff5f5;padding:20px 24px;display:flex;align-items:center;gap:12px;">'
-      + '<div style="width:40px;height:40px;border-radius:10px;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:18px;">🗑</div>'
-      + '<div style="font-size:15px;font-weight:700;color:#991b1b;">' + title + '</div></div>'
-      + '<div style="padding:16px 24px 20px;font-size:13px;color:#64748b;">' + body + '</div>'
-      + '<div style="padding:0 24px 20px;display:flex;gap:8px;justify-content:flex-end;">'
-      + '<button id="_no_btn" style="padding:9px 18px;border-radius:8px;border:1.5px solid #e2e8f8;background:white;font-weight:600;font-size:12px;cursor:pointer;color:#64748b;font-family:DM Sans,sans-serif;">Annuler</button>'
-      + '<button id="_yes_btn" style="padding:9px 18px;border-radius:8px;border:none;background:#ef4444;color:white;font-weight:600;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;">🗑 Supprimer</button>'
-      + '</div></div>';
-    document.body.appendChild(overlay);
-    overlay.querySelector('#_yes_btn').onclick = () => { document.body.removeChild(overlay); resolve(true); };
-    overlay.querySelector('#_no_btn').onclick  = () => { document.body.removeChild(overlay); resolve(false); };
-    overlay.onclick = e => { if (e.target === overlay) { document.body.removeChild(overlay); resolve(false); } };
-  });
+  } catch(e) { console.error('Erreur suppression image :', e); }
 }
 </script>
 {% endblock %}

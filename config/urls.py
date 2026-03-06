@@ -6,11 +6,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from apps.products.api_views import CategorieViewSet
+from apps.products.api_views import CategorieViewSet, StatsOverviewView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('__debug__/', include('debug_toolbar.urls')),
 
     # ── Pages HTML ──────────────────────────────────────────
     path('',          include('apps.products.urls')),
@@ -32,7 +31,7 @@ urlpatterns = [
     path('api/chat/',          include('apps.chat.api_urls')),
 
     # ── Stats Dashboard ──────────────────────────────────────
-    path('api/stats/overview/', __import__('apps.products.api_views', fromlist=['StatsOverviewView']).StatsOverviewView.as_view(), name='stats-overview'),
+    path('api/stats/overview/', StatsOverviewView.as_view(), name='stats-overview'),
 ]
 
 if settings.DEBUG:

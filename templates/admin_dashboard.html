@@ -2066,57 +2066,44 @@ html, body {
 </div>
 
 <div class="da-card" id="sec-produits-card" style="display:none;">
-  <div class="da-card-head">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <h3>Tous les produits</h3>
-      {# Compteur total #}
-      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
-                   background:var(--surface-2);border:1px solid var(--border);
-                   padding:2px 9px;border-radius:99px;" id="prod-count"></span>
+
+  {# ── Barre recherche + filtres ── #}
+  <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="position:relative;width:340px;flex-shrink:0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="#8898AA" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="prod-search"
+             placeholder="Rechercher un produit…"
+             oninput="debounce(()=>loadProduits(1),350)()"
+             style="width:100%;padding:8px 14px 8px 36px;border-radius:var(--r-sm);
+                    border:1.5px solid #C8D3E0;font-size:13px;
+                    font-family:var(--font-body);color:var(--text);
+                    background:#fff;outline:none;transition:border-color 150ms;"
+             onfocus="this.style.borderColor='var(--brand-main)'"
+             onblur="this.style.borderColor='#C8D3E0'" />
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      {# Champ de recherche rapide #}
-      <div style="position:relative;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="var(--text-muted)" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round"
-             style="position:absolute;left:10px;top:50%;transform:translateY(-50%);">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" id="prod-search"
-               placeholder="Rechercher…"
-               oninput="debounce(()=>loadProduits(1),350)()"
-               style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
-                      border:1.5px solid var(--border);font-size:12.5px;
-                      font-family:var(--font-body);color:var(--text);
-                      width:180px;outline:none;
-                      transition:border-color 150ms;" />
-      </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="font-size:11.5px;font-weight:700;color:var(--text-2);
+                   background:var(--brand-light);border:1.5px solid #B8CDFA;
+                   padding:3px 12px;border-radius:99px;" id="prod-count"></span>
       {# Toggle vue tableau / cartes #}
-      <div style="display:flex;gap:3px;">
+      <div style="display:flex;gap:6px;">
         <button id="vt-prod-table" class="vt-btn active" onclick="setProduitsView('table')" title="Tableau">
-          {# Icône Lucide : List #}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <line x1="8" y1="6"  x2="21" y2="6"/>
-            <line x1="8" y1="12" x2="21" y2="12"/>
-            <line x1="8" y1="18" x2="21" y2="18"/>
-            <line x1="3" y1="6"  x2="3.01" y2="6"/>
-            <line x1="3" y1="12" x2="3.01" y2="12"/>
-            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6"  x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6"  x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
           </svg>
         </button>
         <button id="vt-prod-card" class="vt-btn" onclick="setProduitsView('card')" title="Cartes">
-          {# Icône Lucide : Grid #}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
           </svg>
         </button>
       </div>
@@ -2188,284 +2175,214 @@ html, body {
 </div>
 
 {# Flash message formulaire produit #}
-<div id="ap-flash" style="display:none;margin-bottom:16px;padding:14px 18px;
+<div id="ap-flash" style="display:none;margin-bottom:14px;padding:12px 16px;
      border-radius:var(--r-md);font-size:13px;font-weight:600;
      font-family:var(--font-body);align-items:center;gap:10px;"></div>
 
-{# Formulaire produit (visible quand section active) #}
+{# Formulaire produit — grille 2 colonnes compacte #}
 <div id="ap-form-wrapper" style="display:none;">
   <form id="ap-form" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="hidden" id="ap-produit-id" name="_produit_id" value="" />
 
-    {# ── Bloc : Informations de base ── #}
-    <div class="da-card" style="margin-bottom:16px;">
-      <div class="da-card-head">
-        <h3>
-          {# Icône Lucide : FileText #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="var(--brand-main)" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:-2px;margin-right:6px;">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-          Informations de base
-        </h3>
-      </div>
-      <div style="padding:20px;">
-        <div class="da-field">
-          <label class="da-label">Nom du produit <span style="color:var(--accent);font-size:10px;">*</span></label>
-          <input type="text" name="nom" id="ap-nom"
-                 placeholder="Ex: Samsung Galaxy S24 Ultra 256Go"
-                 class="da-input" required />
-        </div>
-        <div class="da-field">
-          <label class="da-label">Description courte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(max 500 car.)</span></label>
-          <input type="text" name="description_courte" id="ap-desc-courte"
-                 placeholder="Résumé affiché dans la liste produits"
-                 maxlength="500" class="da-input" />
-        </div>
-        <div class="da-field">
-          <label class="da-label">Description complète <span style="color:var(--accent);font-size:10px;">*</span></label>
-          <textarea name="description" id="ap-desc" rows="5"
-                    placeholder="Description détaillée : caractéristiques, contenu de la boîte, garantie…"
-                    class="da-input" style="resize:vertical;min-height:90px;" required></textarea>
-        </div>
-        <div class="da-field" style="margin-bottom:0;">
-          <label class="da-label">Catégorie <span style="color:var(--accent);font-size:10px;">*</span></label>
-          <select name="categorie" id="ap-categorie" class="da-input" required>
-            <option value="">— Choisir une catégorie —</option>
-            {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.nom }}</option>
-            {% for sous in cat.sous_categories.all %}
-            <option value="{{ sous.id }}">　↳ {{ sous.nom }}</option>
-            {% endfor %}
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    </div>
+    {# Grille : formulaire principal (gauche) + panneau latéral (droite) #}
+    <div style="display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:start;">
 
-    {# ── Bloc : Prix & Stock ── #}
-    <div class="da-card" style="margin-bottom:16px;">
-      <div class="da-card-head">
-        <h3>
-          {# Icône Lucide : DollarSign #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="var(--green)" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:-2px;margin-right:6px;">
-            <line x1="12" y1="1" x2="12" y2="23"/>
-            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-          </svg>
-          Prix &amp; Stock
-        </h3>
-      </div>
-      <div style="padding:20px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="da-field">
-            <label class="da-label">Prix (FCFA) <span style="color:var(--accent);font-size:10px;">*</span></label>
-            <div style="position:relative;">
-              <input type="number" name="prix" id="ap-prix"
-                     placeholder="150 000" min="0" step="500"
-                     class="da-input" style="padding-right:56px;" required />
-              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                           font-size:10.5px;color:var(--text-muted);font-weight:600;
-                           pointer-events:none;">FCFA</span>
+      {# ════ Colonne gauche ════ #}
+      <div>
+
+        {# ── Bloc Informations de base — Lucide FileText #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Informations de base
+            </h3>
+          </div>
+          <div style="padding:16px;">
+            <div class="da-field">
+              <label class="da-label">Nom du produit <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <input type="text" name="nom" id="ap-nom" placeholder="Ex: Samsung Galaxy S24 Ultra 256Go" class="da-input" required />
+            </div>
+            <div class="da-field">
+              <label class="da-label">Description courte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(max 500 car.)</span></label>
+              <input type="text" name="description_courte" id="ap-desc-courte" placeholder="Résumé affiché dans la liste produits" maxlength="500" class="da-input" />
+            </div>
+            <div class="da-field">
+              <label class="da-label">Description complète <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <textarea name="description" id="ap-desc" rows="4" placeholder="Caractéristiques, contenu, garantie…" class="da-input" style="resize:vertical;min-height:80px;" required></textarea>
+            </div>
+            <div class="da-field" style="margin-bottom:0;">
+              <label class="da-label">Catégorie <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <select name="categorie" id="ap-categorie" class="da-input" required>
+                <option value="">— Choisir une catégorie —</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.nom }}</option>
+                {% for sous in cat.sous_categories.all %}
+                <option value="{{ sous.id }}">　↳ {{ sous.nom }}</option>
+                {% endfor %}
+                {% endfor %}
+              </select>
+              {# Raccourci — ouvre la modale d'ajout catégorie #}
+              <button type="button" onclick="openModalCat()"
+                      style="display:inline-flex;align-items:center;gap:5px;
+                             margin-top:8px;font-size:12px;font-weight:600;
+                             color:var(--accent);background:var(--accent-light);
+                             border:1.5px solid rgba(249,115,22,.25);
+                             border-radius:var(--r-sm);padding:5px 12px;
+                             cursor:pointer;transition:all 150ms;font-family:var(--font-body);"
+                      onmouseover="this.style.background='#ffe8d4';this.style.borderColor='var(--accent)'"
+                      onmouseout="this.style.background='var(--accent-light)';this.style.borderColor='rgba(249,115,22,.25)'">
+                {# Lucide — Plus #}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Ajouter une catégorie
+              </button>
             </div>
           </div>
-          <div class="da-field">
-            <label class="da-label">Prix promo <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
-            <div style="position:relative;">
-              <input type="number" name="prix_promo" id="ap-prix-promo"
-                     placeholder="120 000" min="0" step="500"
-                     class="da-input" style="padding-right:56px;" />
-              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                           font-size:10.5px;color:var(--text-muted);font-weight:600;
-                           pointer-events:none;">FCFA</span>
+        </div>
+
+        {# ── Bloc Prix & Stock — Lucide DollarSign #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              Prix &amp; Stock
+            </h3>
+          </div>
+          <div style="padding:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="da-field">
+                <label class="da-label">Prix (FCFA) <span style="color:var(--accent);font-size:9px;">*</span></label>
+                <div style="position:relative;">
+                  <input type="number" name="prix" id="ap-prix" placeholder="150 000" min="0" step="500" class="da-input" style="padding-right:52px;" required />
+                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);font-weight:700;pointer-events:none;">FCFA</span>
+                </div>
+              </div>
+              <div class="da-field">
+                <label class="da-label">Prix promo <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
+                <div style="position:relative;">
+                  <input type="number" name="prix_promo" id="ap-prix-promo" placeholder="120 000" min="0" step="500" class="da-input" style="padding-right:52px;" />
+                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);font-weight:700;pointer-events:none;">FCFA</span>
+                </div>
+                <div id="ap-remise" style="display:none;margin-top:5px;background:var(--green-light);color:#065F46;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;"></div>
+              </div>
+              <div class="da-field" style="margin-bottom:0;">
+                <label class="da-label">Stock initial <span style="color:var(--accent);font-size:9px;">*</span></label>
+                <input type="number" name="stock" id="ap-stock" value="0" min="0" class="da-input" required />
+              </div>
+              <div class="da-field" style="margin-bottom:0;">
+                <label class="da-label">Seuil d'alerte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(défaut : 5)</span></label>
+                <input type="number" name="stock_minimum" id="ap-stock-min" value="5" min="0" class="da-input" />
+              </div>
             </div>
-            {# Badge remise calculé dynamiquement #}
-            <div id="ap-remise" style="display:none;margin-top:6px;
-                 background:var(--green-light);color:#065F46;font-size:11.5px;
-                 font-weight:700;padding:3px 10px;border-radius:99px;
-                 display:inline-block;"></div>
-          </div>
-          <div class="da-field">
-            <label class="da-label">Stock initial <span style="color:var(--accent);font-size:10px;">*</span></label>
-            <input type="number" name="stock" id="ap-stock"
-                   value="0" min="0" class="da-input" required />
-          </div>
-          <div class="da-field">
-            <label class="da-label">Seuil d'alerte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(défaut : 5)</span></label>
-            <input type="number" name="stock_minimum" id="ap-stock-min"
-                   value="5" min="0" class="da-input" />
-            <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">
-              Alerte si stock ≤ cette valeur
-            </p>
           </div>
         </div>
-      </div>
-    </div>
 
-    {# ── Bloc : Statut & Options ── #}
-    <div class="da-card" style="margin-bottom:16px;">
-      <div class="da-card-head">
-        <h3>
-          {# Icône Lucide : Settings #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="var(--text-2)" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:-2px;margin-right:6px;">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
-          </svg>
-          Statut &amp; Options
-        </h3>
+        {# ── Bloc Images — Lucide Image + UploadCloud #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Images du produit
+            </h3>
+          </div>
+          <div style="padding:16px;">
+            <div id="ap-drop-zone"
+                 style="border:2px dashed var(--border);border-radius:var(--r-md);
+                        padding:24px;text-align:center;cursor:pointer;
+                        background:var(--surface-2);transition:border-color 150ms,background 150ms;"
+                 onclick="document.getElementById('ap-images').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--brand-main)';this.style.background='var(--brand-light)';"
+                 ondragleave="this.style.borderColor='';this.style.background='var(--surface-2)';"
+                 ondrop="apHandleDrop(event)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 8px;display:block;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+              <p style="font-size:12.5px;color:var(--text-2);margin:0 0 3px 0;"><strong style="color:var(--accent);">Cliquez</strong> ou glissez vos images</p>
+              <p style="font-size:11px;color:var(--text-muted);margin:0;">JPG, PNG, WebP — Max 5 Mo — 1ère = principale</p>
+            </div>
+            <input type="file" name="images" id="ap-images" multiple accept="image/*" onchange="apPreviewImages(this.files)" style="display:none;" />
+            <div id="ap-preview-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;"></div>
+          </div>
+        </div>
+
       </div>
-      <div style="padding:20px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-          <div class="da-field" style="margin-bottom:0;">
-            <label class="da-label">Statut de vente</label>
+      {# ════ FIN colonne gauche ════ #}
+
+      {# ════ Colonne droite — panneau latéral ════ #}
+      <div>
+
+        {# Panneau Statut — Lucide BarChart2 #}
+        <div class="da-card" style="margin-bottom:12px;overflow:hidden;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Statut de vente
+          </div>
+          <div style="padding:12px 14px;">
             <select name="statut" id="ap-statut" class="da-input">
-              <option value="actif">Actif — visible et en vente</option>
-              <option value="inactif">Inactif — masqué du catalogue</option>
+              <option value="actif">Actif — en vente</option>
+              <option value="inactif">Inactif — masqué</option>
               <option value="epuise">Épuisé</option>
               <option value="archive">Archivé</option>
             </select>
           </div>
-          <div style="display:flex;align-items:center;gap:12px;padding-top:24px;">
-            {# Toggle "En vedette" — CSS pur #}
-            <label style="position:relative;display:inline-block;width:42px;height:23px;flex-shrink:0;">
-              <input type="checkbox" name="en_vedette" id="ap-vedette"
-                     style="opacity:0;width:0;height:0;">
-              <span style="position:absolute;cursor:pointer;inset:0;
-                           background:#CBD5E0;border-radius:23px;
-                           transition:background 200ms;">
-                <span style="position:absolute;width:17px;height:17px;
-                             left:3px;top:3px;background:white;border-radius:50%;
-                             transition:transform 200ms;
-                             box-shadow:0 1px 3px rgba(0,0,0,.15);"
-                      id="ap-vedette-knob"></span>
-              </span>
-            </label>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text);">Produit en vedette</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">Affiché sur la page d'accueil</div>
+        </div>
+
+        {# Panneau Options — Lucide Star (en vedette) #}
+        <div class="da-card" style="margin-bottom:12px;overflow:hidden;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Options
+          </div>
+          <div style="padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;">
+                <input type="checkbox" name="en_vedette" id="ap-vedette" style="opacity:0;width:0;height:0;">
+                <span style="position:absolute;cursor:pointer;inset:0;background:#CBD5E0;border-radius:22px;transition:background 200ms;">
+                  <span style="position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:transform 200ms;box-shadow:0 1px 3px rgba(0,0,0,.15);" id="ap-vedette-knob"></span>
+                </span>
+              </label>
+              <div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--text);">En vedette</div>
+                <div style="font-size:11px;color:var(--text-muted);">Affiché en page d'accueil</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    {# ── Bloc : Images ── #}
-    <div class="da-card" style="margin-bottom:16px;">
-      <div class="da-card-head">
-        <h3>
-          {# Icône Lucide : Image #}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="var(--brand-main)" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:-2px;margin-right:6px;">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          Images du produit
-        </h3>
-      </div>
-      <div style="padding:20px;">
-        {# Zone drag & drop #}
-        <div id="ap-drop-zone"
-             style="border:2px dashed var(--border);border-radius:var(--r-md);
-                    padding:32px;text-align:center;cursor:pointer;
-                    background:var(--surface-2);transition:border-color 150ms,background 150ms;"
-             onclick="document.getElementById('ap-images').click()"
-             ondragover="event.preventDefault();this.style.borderColor='var(--brand-main)';this.style.background='var(--brand-light)';"
-             ondragleave="this.style.borderColor='';this.style.background='var(--surface-2)';"
-             ondrop="apHandleDrop(event)">
-          {# Icône Lucide : UploadCloud (grande) #}
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-               stroke="var(--border-2)" stroke-width="1.5"
-               stroke-linecap="round" stroke-linejoin="round"
-               style="margin:0 auto 10px;display:block;">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
-          </svg>
-          <p style="font-size:13px;color:var(--text-2);margin-bottom:4px;">
-            <strong style="color:var(--accent);">Cliquez</strong> ou glissez vos images ici
-          </p>
-          <p style="font-size:11.5px;color:var(--text-muted);">
-            JPG, PNG, WebP — Max 5 Mo par image — 1ère image = principale
-          </p>
+        {# Panneau Actions — boutons du formulaire #}
+        <div class="da-card" style="overflow:hidden;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            Actions
+          </div>
+          <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+            {# Publier — CTA orange unique #}
+            <button type="submit" name="action" value="publish" id="ap-btn-pub" class="btn btn-primary" style="width:100%;justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Publier le produit
+            </button>
+            {# Brouillon #}
+            <button type="submit" name="action" value="draft" id="ap-btn-draft" class="btn btn-secondary" style="width:100%;justify-content:center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Brouillon
+            </button>
+            {# Annuler #}
+            <button type="button" class="btn btn-secondary" onclick="navTo('produits')" style="width:100%;justify-content:center;">
+              Annuler
+            </button>
+            {# Supprimer — mode édition uniquement #}
+            <button type="button" id="ap-btn-del" class="btn btn-danger" style="display:none;width:100%;justify-content:center;" onclick="supprimerProduit()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              Supprimer le produit
+            </button>
+          </div>
         </div>
-        <input type="file" name="images" id="ap-images"
-               multiple accept="image/*"
-               onchange="apPreviewImages(this.files)"
-               style="display:none;" />
-        {# Grille de prévisualisation des images sélectionnées #}
-        <div id="ap-preview-grid"
-             style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;">
-        </div>
-      </div>
-    </div>
 
-    {# ── Bloc : Actions du formulaire ── #}
-    <div class="da-card" style="margin-bottom:28px;">
-      <div style="padding:14px 20px;display:flex;justify-content:space-between;
-                  align-items:center;flex-wrap:wrap;gap:10px;">
-        <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-secondary" onclick="navTo('produits')">
-            Annuler
-          </button>
-          {# Bouton Supprimer — visible uniquement en mode édition #}
-          <button type="button" id="ap-btn-del"
-                  class="btn btn-danger" style="display:none;"
-                  onclick="supprimerProduit()">
-            {# Icône Lucide : Trash2 #}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-              <path d="M10 11v6"/><path d="M14 11v6"/>
-              <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-            </svg>
-            Supprimer
-          </button>
-        </div>
-        <div style="display:flex;gap:10px;">
-          {# Sauvegarder en brouillon #}
-          <button type="submit" name="action" value="draft"
-                  id="ap-btn-draft" class="btn btn-secondary">
-            {# Icône Lucide : Save #}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Brouillon
-          </button>
-          {# Publier — CTA principal orange #}
-          <button type="submit" name="action" value="publish"
-                  id="ap-btn-pub" class="btn btn-primary">
-            {# Icône Lucide : Send #}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-            Publier le produit
-          </button>
-        </div>
       </div>
+      {# ════ FIN colonne droite ════ #}
+
     </div>
   </form>
 </div>{# fin #ap-form-wrapper #}
@@ -3154,6 +3071,105 @@ html, body {
   </div>{# fin .da-body #}
 
 </div>{# fin .da-layout #}
+
+{% comment %} ── MODALE AJOUT RAPIDE DE CATÉGORIE ──
+   Déclenchée par le bouton "Ajouter une catégorie" dans le formulaire produit.
+   Réutilise l'API /api/categories/ pour créer via fetch.
+   Après succès : rafraîchit le select #ap-categorie et sélectionne la nouvelle option. {% endcomment %}
+<div id="modal-cat-quick"
+     style="display:none;position:fixed;inset:0;z-index:400;
+            background:rgba(0,0,0,.5);align-items:center;justify-content:center;
+            padding:1rem;backdrop-filter:blur(2px);"
+     onclick="if(event.target===this)closeModalCat()">
+
+  <div style="background:var(--surface);border-radius:var(--r-lg);
+              width:100%;max-width:460px;box-shadow:var(--sh-lg);
+              animation:modal-cat-in .2s ease both;overflow:hidden;">
+
+    {# En-tête modale #}
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);
+                display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:30px;height:30px;border-radius:var(--r-sm);
+                    background:linear-gradient(135deg,var(--brand-main),var(--brand-deep));
+                    display:flex;align-items:center;justify-content:center;">
+          {# Lucide — Tag #}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">Nouvelle catégorie</span>
+      </div>
+      <button onclick="closeModalCat()"
+              style="width:28px;height:28px;border:none;background:var(--surface-2);
+                     border-radius:var(--r-sm);cursor:pointer;color:var(--text-muted);
+                     display:flex;align-items:center;justify-content:center;
+                     transition:background .15s;"
+              onmouseover="this.style.background='var(--border)'"
+              onmouseout="this.style.background='var(--surface-2)'">
+        {# Lucide — X #}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Corps de la modale #}
+    <div style="padding:16px 18px;">
+
+      {# Flash interne de la modale #}
+      <div id="modal-cat-flash" style="display:none;margin-bottom:12px;padding:10px 14px;
+           border-radius:var(--r-sm);font-size:12.5px;font-weight:600;
+           font-family:var(--font-body);align-items:center;gap:8px;"></div>
+
+      <div class="da-field">
+        <label class="da-label">Nom <span style="color:var(--accent);font-size:9px;">*</span></label>
+        <input type="text" id="mcat-nom" placeholder="Ex: Smartphones, PC Portables…"
+               class="da-input" required />
+      </div>
+
+      <div class="da-field">
+        <label class="da-label">Description <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
+        <textarea id="mcat-desc" rows="2" placeholder="Description courte…"
+                  class="da-input" style="resize:none;min-height:58px;"></textarea>
+      </div>
+
+      <div class="da-field" style="margin-bottom:0;">
+        <label class="da-label">Catégorie parente <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(vide = racine)</span></label>
+        <select id="mcat-parent" class="da-input">
+          <option value="">— Aucun parent —</option>
+        </select>
+      </div>
+
+    </div>
+
+    {# Pied de modale #}
+    <div style="padding:12px 18px;border-top:1px solid var(--border);
+                display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+      <button type="button" onclick="closeModalCat()" class="btn btn-secondary">Annuler</button>
+      <button type="button" onclick="submitModalCat()" id="mcat-btn-submit" class="btn btn-primary">
+        {# Lucide — Check #}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Créer la catégorie
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes modal-cat-in {
+  from { opacity:0; transform:scale(.96) translateY(8px); }
+  to   { opacity:1; transform:none; }
+}
+</style>
+
 {% endblock %}
 
 
@@ -3566,6 +3582,11 @@ html, body {
 
     } catch(e) {
       console.warn('loadOverview error:', e);
+      // Afficher un état d'erreur sur les KPIs si l'API ne répond pas
+      ['kpi-produits','kpi-commandes','kpi-users','kpi-avis'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('loading'); el.textContent = '—'; }
+      });
     }
   };
 
@@ -4908,7 +4929,7 @@ html, body {
   ══════════════════════════════════════════════════════════════ */
   window.loadPaniers = async function() {
     try {
-      var data  = await API.get('/api/paniers/');
+      var data  = await API.get('/api/panier/admin/');
       var items = data.results || data;
       var tbody = document.getElementById('tbl-paniers');
       if (!tbody) return;
@@ -4919,13 +4940,13 @@ html, body {
       }
 
       tbody.innerHTML = items.map(function(p) {
-        var total = (p.items || []).reduce(function(s, i) { return s + (i.sous_total || 0); }, 0);
+        var n = p.nb_articles || 0;
         return '<tr>'
-          + '<td style="font-weight:600;color:var(--text);">' + escHtml(p.utilisateur_nom || '—') + '</td>'
+          + '<td style="font-weight:600;color:var(--text);">' + escHtml(p.utilisateur || '—') + '</td>'
           + '<td class="hide-mobile" style="font-size:12.5px;color:var(--text-muted);">' + escHtml(p.utilisateur_email || '—') + '</td>'
-          + '<td style="font-weight:600;">' + ((p.items || []).length) + ' article' + ((p.items || []).length > 1 ? 's' : '') + '</td>'
-          + '<td style="font-weight:700;color:var(--brand-main);">' + fmtPrice(total) + '</td>'
-          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(p.date_modification || p.date_creation) + '</td>'
+          + '<td style="font-weight:600;">' + n + ' article' + (n > 1 ? 's' : '') + '</td>'
+          + '<td style="font-weight:700;color:var(--brand-main);">' + fmtPrice(p.montant_total) + '</td>'
+          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(p.date_modification) + '</td>'
           + '</tr>';
       }).join('');
     } catch(e) {
@@ -5054,6 +5075,91 @@ html, body {
   };
 
 })(); // fin IIFE Section C
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   MODALE AJOUT RAPIDE DE CATÉGORIE
+   ────────────────────────────────────────────────────────
+   openModalCat()      — Ouvre la modale + charge les parents
+   closeModalCat()     — Ferme + reset les champs
+   submitModalCat()    — POST /api/categories/ + màj du select produit
+   ════════════════════════════════════════════════════════ */
+
+/* Ouvre la modale et charge la liste des catégories parentes */
+window.openModalCat = async function() {
+  document.getElementById('modal-cat-quick').style.display = 'flex';
+  document.getElementById('mcat-nom').focus();
+  document.getElementById('modal-cat-flash').style.display = 'none';
+
+  /* Charger les catégories disponibles comme parents */
+  try {
+    var data = await API.get('/api/categories/');
+    var cats = data.results || data;
+    var sel = document.getElementById('mcat-parent');
+    sel.innerHTML = '<option value="">— Aucun parent —</option>';
+    cats.forEach(function(c) {
+      sel.innerHTML += '<option value="' + c.id + '">' + c.nom + '</option>';
+    });
+  } catch(e) { /* silencieux si API non dispo */ }
+};
+
+/* Ferme la modale et réinitialise les champs */
+window.closeModalCat = function() {
+  document.getElementById('modal-cat-quick').style.display = 'none';
+  document.getElementById('mcat-nom').value = '';
+  document.getElementById('mcat-desc').value = '';
+  document.getElementById('mcat-parent').value = '';
+  document.getElementById('modal-cat-flash').style.display = 'none';
+};
+
+/* Soumet le formulaire, crée la catégorie et met à jour le select produit */
+window.submitModalCat = async function() {
+  var nom = document.getElementById('mcat-nom').value.trim();
+  if (!nom) {
+    var fl = document.getElementById('modal-cat-flash');
+    fl.style.display = 'flex';
+    fl.style.background = 'var(--red-light)';
+    fl.style.color = '#991b1b';
+    fl.style.border = '1px solid #fca5a5';
+    fl.textContent = 'Le nom de la catégorie est obligatoire.';
+    return;
+  }
+
+  var btn = document.getElementById('mcat-btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Création…';
+
+  var payload = { nom: nom };
+  var desc    = document.getElementById('mcat-desc').value.trim();
+  var parent  = document.getElementById('mcat-parent').value;
+  if (desc)   payload.description = desc;
+  if (parent) payload.parent_id   = parseInt(parent);
+
+  try {
+    var resp = await API.post('/api/categories/', payload);
+
+    /* Succès — injecter la nouvelle option dans le select produit */
+    var sel = document.getElementById('ap-categorie');
+    var opt = document.createElement('option');
+    opt.value = resp.id;
+    opt.textContent = resp.nom;
+    opt.selected = true;
+    sel.appendChild(opt);
+
+    closeModalCat();
+  } catch(e) {
+    var fl = document.getElementById('modal-cat-flash');
+    fl.style.display = 'flex';
+    fl.style.background = 'var(--red-light)';
+    fl.style.color = '#991b1b';
+    fl.style.border = '1px solid #fca5a5';
+    fl.textContent = 'Erreur lors de la création. Vérifiez les données.';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Créer la catégorie';
+  }
+};
 </script>
 
 {% endblock %}

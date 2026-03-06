@@ -71,7 +71,11 @@ const API = (() => {
   async function request(method, url, body = null, options = {}) {
     const makeHeaders = (token) => {
       const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      // N'envoyer le header Authorization que si un token valide existe.
+      // Sans cela, "Bearer null" invalide l'authentification par session Django.
+      if (token && token !== 'null' && token !== 'undefined') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       if (method !== 'GET') headers['X-CSRFToken'] = getCsrfToken();
       return headers;
     };

@@ -317,6 +317,15 @@ class StatsOverviewView(APIView):
     permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
+        import traceback, logging
+        logger = logging.getLogger(__name__)
+        try:
+            return self._get_data(request)
+        except Exception as e:
+            logger.error("StatsOverviewView 500: %s\n%s", e, traceback.format_exc())
+            return Response({'error': str(e), 'detail': traceback.format_exc()}, status=500)
+
+    def _get_data(self, request):
         from apps.orders.models import Commande
         from apps.users.models import CustomUser
         from apps.reviews.models import Avis
@@ -331,12 +340,18 @@ class StatsOverviewView(APIView):
         produits_total   = Produit.objects.count()
         commandes_total  = Commande.objects.count()
         utilisateurs     = CustomUser.objects.filter(is_active=True).count()
-        nouveaux_users   = CustomUser.objects.filter(date_joined__gte=debut_mois).count()
+        nouveaux_users   = CustomUser.objects.filter(date_inscription__gte=debut_mois).count()
         avis_total       = Avis.objects.count()
 
         # ── Alertes ──
         commandes_attente = Commande.objects.filter(statut=Commande.EN_ATTENTE).count()
-        avis_en_attente   = Avis.objects.filter(is_validated=False).count()
+        try:
+            avis_en_attente = Avis.objects.filter(is_validated=False).count()
+        except Exception:
+            try:
+                avis_en_attente = Avis.objects.filter(is_valide=False).count()
+            except Exception:
+                avis_en_attente = 0
 
         # ── Stocks ──
         stock_faible = Produit.objects.filter(
@@ -344,13 +359,17 @@ class StatsOverviewView(APIView):
         ).count()
         stock_epuise = Produit.objects.filter(stock=0).count()
 
-        # ── Commandes récentes (5) ──
+        # ── Commandes récentes (5) — champ FK = 'client' ──
         commandes_recentes = []
-        for c in Commande.objects.select_related('utilisateur').order_by('-date_creation')[:5]:
+        for c in Commande.objects.select_related('client').order_by('-date_creation')[:5]:
+            try:
+                client_nom = (c.client.get_full_name() or c.client.username) if c.client else '—'
+            except Exception:
+                client_nom = '—'
             commandes_recentes.append({
                 'id':              c.id,
-                'reference_courte': str(c.id).zfill(6),
-                'client_nom':      c.utilisateur.get_full_name() or c.utilisateur.username if c.utilisateur else '—',
+                'reference_courte': str(c.reference)[:8].upper() if c.reference else str(c.id).zfill(6),
+                'client_nom':      client_nom,
                 'montant_total':   str(c.montant_total),
                 'date_creation':   c.date_creation.isoformat(),
                 'statut':          c.statut,
@@ -364,17 +383,20 @@ class StatsOverviewView(APIView):
                 'nom':           p.nom,
                 'stock':         p.stock,
                 'stock_minimum': p.stock_minimum,
-                'stock_max':     p.stock_minimum * 3 or 15,
+                'stock_max':     (p.stock_minimum * 3) or 15,
             })
 
-        # ── Activité récente depuis AuditLog (6) ──
+        # ── Activité récente (AuditLog — champ date, pas date_action) ──
         activite_recente = []
-        for log in AuditLog.objects.select_related('utilisateur').order_by('-date')[:6]:
-            activite_recente.append({
-                'description': f"{log.action} — {log.url}",
-                'date':        log.date.isoformat(),
-                'type':        'systeme',
-            })
+        try:
+            for log in AuditLog.objects.select_related('utilisateur').order_by('-date')[:6]:
+                activite_recente.append({
+                    'description': f"{log.action} — {log.url}",
+                    'date':        log.date.isoformat(),
+                    'type':        'systeme',
+                })
+        except Exception:
+            pass
 
         # ── Vue système ──
         try:
@@ -389,22 +411,25 @@ class StatsOverviewView(APIView):
         except Exception:
             notifications_total = 0
 
-        paniers_actifs = Panier.objects.filter(items__isnull=False).distinct().count()
+        try:
+            paniers_actifs = Panier.objects.filter(items__isnull=False).distinct().count()
+        except Exception:
+            paniers_actifs = 0
 
         return Response({
             # KPIs
-            'produits_actifs':   produits_actifs,
-            'produits_total':    produits_total,
-            'commandes_total':   commandes_total,
-            'utilisateurs':      utilisateurs,
-            'nouveaux_users':    nouveaux_users,
-            'avis_total':        avis_total,
+            'produits_actifs':    produits_actifs,
+            'produits_total':     produits_total,
+            'commandes_total':    commandes_total,
+            'utilisateurs':       utilisateurs,
+            'nouveaux_users':     nouveaux_users,
+            'avis_total':         avis_total,
             # Alertes
-            'commandes_attente': commandes_attente,
-            'avis_en_attente':   avis_en_attente,
+            'commandes_attente':  commandes_attente,
+            'avis_en_attente':    avis_en_attente,
             # Stocks
-            'stock_faible':      stock_faible,
-            'stock_epuise':      stock_epuise,
+            'stock_faible':       stock_faible,
+            'stock_epuise':       stock_epuise,
             # Listes
             'commandes_recentes': commandes_recentes,
             'stocks_faibles':     stocks_faibles,
