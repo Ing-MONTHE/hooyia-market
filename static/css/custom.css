@@ -671,9 +671,14 @@ html.dark .product-card-price { color: var(--text-primary) !important; }
 html.dark .section-title { color: var(--text-primary) !important; }
 html.dark .section-title span { color: var(--accent) !important; }
 
-/* Hero & bannières */
-html.dark .hero,
-html.dark [class*="hero"] { background: var(--surface) !important; }
+/* Hero & bannières — on n'écrase PAS hero-banner-inner (a son propre gradient) */
+html.dark .hero { background: var(--surface) !important; }
+html.dark .hero-banner { background: var(--bg) !important; }
+/* hero-banner-inner garde son gradient bleu — on corrige juste l'image de fond */
+html.dark .hero-banner-bg {
+  opacity: 0.25 !important;
+  mix-blend-mode: normal !important;
+}
 
 /* Filtres & inputs sur pages liste/détail */
 html.dark input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
@@ -699,9 +704,99 @@ html.dark .nav-user-menu { background: var(--surface) !important; border-color: 
 /* Reviews section */
 html.dark .reviews-home-section { background: var(--bg) !important; }
 
+html.dark .section-vedette  { background: var(--surface) !important; }
+html.dark .section-arrivages { background: var(--bg) !important; }
+html.dark .section-valeurs  { background: var(--surface) !important; }
+
 /* Footer link colors */
 html.dark .footer-link { color: var(--text-secondary) !important; }
 html.dark .footer-link:hover { color: var(--text-primary) !important; }
+
+/* ── Produits en vedette / nouveaux arrivages ── */
+html.dark .pcard-sm {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+html.dark .pcard-sm:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
+}
+html.dark .pcard-img-wrap,
+html.dark .pcard-img-placeholder {
+  background: var(--surface-2) !important;
+}
+html.dark .pcard-cat { color: var(--text-muted) !important; }
+html.dark .pcard-name { color: var(--text-primary) !important; }
+html.dark .pcard-footer {
+  border-top-color: var(--border) !important;
+}
+html.dark .pcard-price { color: var(--text-primary) !important; }
+html.dark .pcard-price-old { color: var(--text-muted) !important; }
+html.dark .pcard-cart-btn {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .pcard-cart-btn:hover {
+  background: #F97316 !important;
+  color: #ffffff !important;
+}
+
+/* ── Titres de section ── */
+html.dark .section-heading h2 { color: var(--text-primary) !important; }
+html.dark .section-sub { color: var(--text-secondary) !important; }
+
+/* ── Boutons nav carousel ── */
+html.dark .vedette-nav-btn {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .vedette-nav-btn:hover {
+  background: #1E3A8A !important;
+  color: #ffffff !important;
+}
+html.dark .vedette-nav-btn.btn-next-primary {
+  background: #1E3A8A !important;
+  color: #ffffff !important;
+}
+
+/* ── Value cards (Ce qui nous distingue) ── */
+html.dark .value-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .value-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+}
+html.dark .value-card h3 { color: var(--text-primary) !important; }
+html.dark .value-card p  { color: var(--text-secondary) !important; }
+
+/* ── Reviews cards ── */
+html.dark .rhc {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .rhc:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+}
+html.dark .rhc-text   { color: var(--text-secondary) !important; }
+html.dark .rhc-author { color: var(--text-primary) !important; }
+html.dark .rhc-role   { color: var(--text-muted) !important; }
+html.dark .rhc-quote  { color: var(--surface-3) !important; }
+
+/* Skeletons en dark */
+html.dark .rhc-sk {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .rhc-sk-line {
+  background: linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 50%,var(--surface-2) 75%) !important;
+  background-size: 400% 100% !important;
+}
+
+/* ── Couleurs icônes valeur en dark ── */
+html.dark [style*="background:#ecfdf5"],
+html.dark [style*="background:#ede9fe"],
+html.dark [style*="background:#eff4ff"] { background: var(--surface-2) !important; }
 
 /* Logo navbar — bords arrondis */
 .nav-logo img,

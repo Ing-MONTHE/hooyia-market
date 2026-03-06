@@ -25,6 +25,7 @@
   .hero-banner {
     padding: 2.5rem 1.5rem 0 1.5rem;
     background: #F4F7FC;
+    transition: background 200ms;
   }
   .hero-banner-inner {
     max-width: 1200px;
@@ -445,7 +446,7 @@
   @media (min-width: 1024px) { .pcard-sm { flex: 0 0 220px; min-width: 220px; } }
 </style>
 
-<section style="padding:2rem 0 4rem 0;background:#F4F7FC;">
+<section class="section-vedette" style="padding:2rem 0 4rem 0;background:#F4F7FC;">
   <div class="container">
 
     {% comment %} En-tête + boutons nav {% endcomment %}
@@ -576,7 +577,7 @@
    Fond blanc pour alterner avec le fond gris de la section précédente.
 ════════════════════════════════════════════════════ {% endcomment %}
 {% if nouveaux_arrivages %}
-<section style="padding:4rem 0;background:#ffffff;">
+<section class="section-arrivages" style="padding:4rem 0;background:#ffffff;">
   <div class="container">
 
     {% comment %} En-tête + boutons nav {% endcomment %}
@@ -710,7 +711,7 @@
    4 cartes valeur, messages attractifs et honnêtes.
    Fond gris clair (#F4F7FC) pour alterner avec le blanc.
 ════════════════════════════════════════════════════ {% endcomment %}
-<section style="padding:4rem 0;background:#F4F7FC;">
+<section class="section-valeurs" style="padding:4rem 0;background:#F4F7FC;">
   <div class="container">
 
     <p class="section-eyebrow">L’expérience HooYia</p>
