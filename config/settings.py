@@ -227,6 +227,13 @@ AUTHENTIFICATION_BACKENDS = [
 # En local, on autorise toutes les origines (uniquement en développement)
 CORS_ALLOW_ALL_ORIGINS = True
 
+# CSRF — Domaines de confiance (nécessaire sur Render / HTTPS)
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='https://hooyia-market-wpsp.onrender.com',
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
+
 
 # ═══════════════════════════════════════════════
 # EMAILS — Console en local (affiche dans le terminal)

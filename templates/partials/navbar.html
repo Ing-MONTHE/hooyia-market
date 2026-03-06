@@ -666,7 +666,7 @@
         {% comment %} ── Panier ──
            Visible pour tous (connecté ou non).
            Caché pour les admins/vendeurs qui ne font pas d'achats. {% endcomment %}
-        {% if not user.is_staff %}
+        {% if not user.is_staff and not user.is_vendeur %}
         <a href="{% url 'cart:panier' %}"
            class="nav-icon-btn nav-cart-btn"
            aria-label="Panier ({{ cart_count }} article{% if cart_count != 1 %}s{% endif %})">
@@ -974,7 +974,7 @@
       </svg>
       Mon profil
     </a>
-    {% if not user.is_staff %}
+    {% if not user.is_staff and not user.is_vendeur %}
     <a href="{% url 'orders:historique' %}" class="mobile-link">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

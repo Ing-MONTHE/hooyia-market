@@ -195,6 +195,7 @@ def liste_produits(request):
         'search'          : search,
         'ordering'        : ordering,
         'est_admin': u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
+        'est_vendeur': u.is_authenticated and getattr(u, 'is_vendeur', False),
     }
     return render(request, 'products/list.html', context)
 

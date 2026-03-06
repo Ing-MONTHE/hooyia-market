@@ -588,6 +588,7 @@ html.dark {
   --text-muted:     #5E6A88;
   --shadow-sm:      0 1px 3px rgba(0,0,0,.4);
   --shadow-md:      0 4px 16px rgba(0,0,0,.5);
+  --shadow-lg:      0 8px 32px rgba(0,0,0,.55);
   color-scheme: dark;
 }
 

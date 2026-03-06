@@ -116,16 +116,66 @@ window.toast = function(message, type = 'info', duration = 4000) {
     info:    '#1E3A8A',
   };
 
-  // ── Création de l'élément toast ──
-  const toastEl = document.createElement('div');
+  // ── Détection dark mode ──
+  const isDark = document.documentElement.classList.contains('dark');
+  const colors = isDark ? {
+    bg:        '#1A1D27',
+    border:    '#2E3350',
+    text:      '#E8ECF4',
+    close:     '#5E6A88',
+    closeHover:'#E8ECF4',
+    shadow:    '0 8px 32px rgba(0,0,0,0.5)',
+    iconInfo:  '#93B4FF',
+  } : {
+    bg:        '#ffffff',
+    border:    '#E2E8F0',
+    text:      '#0F1923',
+    close:     '#8898AA',
+    closeHover:'#0F1923',
+    shadow:    '0 8px 32px rgba(13,31,92,0.13)',
+    iconInfo:  '#1E3A8A',
+  };
 
-  // Styles inline pour garantir le rendu indépendamment de Tailwind
+  // Icône info adapte sa couleur au dark mode
+  const icons = {
+    success: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#10b981" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>`,
+
+    error:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#ef4444" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>`,
+
+    warning: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="#f59e0b" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>`,
+
+    info:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="${colors.iconInfo}" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>`,
+  };
+
+  // ── Création de l'élément toast avec couleurs dynamiques ──
+  const toastEl = document.createElement('div');
   toastEl.style.cssText = `
-    background: #ffffff;
-    border: 1px solid #E2E8F0;
+    background: ${colors.bg};
+    border: 1px solid ${colors.border};
     border-left: 3px solid ${borderColors[type] || borderColors.info};
     border-radius: 0.75rem;
-    box-shadow: 0 8px 32px rgba(13,31,92,0.13);
+    box-shadow: ${colors.shadow};
     padding: 0.875rem 1rem;
     display: flex;
     align-items: flex-start;
@@ -142,7 +192,7 @@ window.toast = function(message, type = 'info', duration = 4000) {
     </span>
     <p style="font-size:0.8125rem;
               font-weight:500;
-              color:#0F1923;
+              color:${colors.text};
               flex:1;
               line-height:1.5;
               font-family:'Poppins',sans-serif;
@@ -155,13 +205,13 @@ window.toast = function(message, type = 'info', duration = 4000) {
              background:none;
              border:none;
              cursor:pointer;
-             color:#8898AA;
+             color:${colors.close};
              padding:2px;
              transition:color 150ms;
              line-height:1;
              border-radius:4px;"
-      onmouseover="this.style.color='#0F1923'"
-      onmouseout="this.style.color='#8898AA'"
+      onmouseover="this.style.color='${colors.closeHover}'"
+      onmouseout="this.style.color='${colors.close}'"
       aria-label="Fermer">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.5"
