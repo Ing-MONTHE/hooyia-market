@@ -30,6 +30,9 @@ urlpatterns = [
     path('api/avis-app/',      include('apps.reviews.api_urls_app')),
     path('api/notifications/', include('apps.notifications.api_urls')),
     path('api/chat/',          include('apps.chat.api_urls')),
+
+    # ── Stats Dashboard ──────────────────────────────────────
+    path('api/stats/overview/', __import__('apps.products.api_views', fromlist=['StatsOverviewView']).StatsOverviewView.as_view(), name='stats-overview'),
 ]
 
 if settings.DEBUG:

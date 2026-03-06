@@ -4,6 +4,7 @@ Retournent du JSON consommé par JavaScript.
 """
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.core.cache import cache
 from django.db import transaction
@@ -20,6 +21,25 @@ from .serializers import (
 )
 from .filters import ProduitFilter
 from apps.users.permissions import EstVendeur, EstAdminOuLectureSeule
+
+
+
+# ═══════════════════════════════════════════════════════════════
+# PAGINATION — Inclut page_size dans la réponse pour le JS
+# ═══════════════════════════════════════════════════════════════
+class AdminPagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count':     self.page.paginator.count,
+            'next':      self.get_next_link(),
+            'previous':  self.get_previous_link(),
+            'page_size': self.page_size,
+            'results':   data,
+        })
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -54,6 +74,7 @@ class CategorieViewSet(viewsets.ReadOnlyModelViewSet):
 # ═══════════════════════════════════════════════════════════════
 
 class ProduitViewSet(viewsets.ModelViewSet):
+    pagination_class = AdminPagination
     """
     API complète pour les produits.
 
@@ -277,4 +298,119 @@ class ProduitViewSet(viewsets.ModelViewSet):
             'message'    : 'Stock mis à jour.',
             'stock_avant': stock_avant,
             'stock_apres': stock_apres
+        })
+
+# ═══════════════════════════════════════════════════════════════
+# VUE — Stats Overview Dashboard Admin
+# GET /api/stats/overview/
+# ═══════════════════════════════════════════════════════════════
+from rest_framework.views import APIView
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum, Count, F, Q
+
+class StatsOverviewView(APIView):
+    """
+    Agrégat de statistiques pour le tableau de bord admin.
+    Retourne KPIs, commandes récentes, alertes stock, activité.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        from apps.orders.models import Commande
+        from apps.users.models import CustomUser
+        from apps.reviews.models import Avis
+        from apps.cart.models import Panier
+        from apps.audit.models import AuditLog
+
+        maintenant = timezone.now()
+        debut_mois = maintenant.replace(day=1, hour=0, minute=0, second=0)
+
+        # ── KPIs principaux ──
+        produits_actifs  = Produit.objects.filter(statut=Produit.Statut.ACTIF).count()
+        produits_total   = Produit.objects.count()
+        commandes_total  = Commande.objects.count()
+        utilisateurs     = CustomUser.objects.filter(is_active=True).count()
+        nouveaux_users   = CustomUser.objects.filter(date_joined__gte=debut_mois).count()
+        avis_total       = Avis.objects.count()
+
+        # ── Alertes ──
+        commandes_attente = Commande.objects.filter(statut=Commande.EN_ATTENTE).count()
+        avis_en_attente   = Avis.objects.filter(is_validated=False).count()
+
+        # ── Stocks ──
+        stock_faible = Produit.objects.filter(
+            stock__gt=0, stock__lte=F('stock_minimum')
+        ).count()
+        stock_epuise = Produit.objects.filter(stock=0).count()
+
+        # ── Commandes récentes (5) ──
+        commandes_recentes = []
+        for c in Commande.objects.select_related('utilisateur').order_by('-date_creation')[:5]:
+            commandes_recentes.append({
+                'id':              c.id,
+                'reference_courte': str(c.id).zfill(6),
+                'client_nom':      c.utilisateur.get_full_name() or c.utilisateur.username if c.utilisateur else '—',
+                'montant_total':   str(c.montant_total),
+                'date_creation':   c.date_creation.isoformat(),
+                'statut':          c.statut,
+            })
+
+        # ── Stocks faibles (6) ──
+        stocks_faibles = []
+        for p in Produit.objects.filter(stock__lte=F('stock_minimum')).order_by('stock')[:6]:
+            stocks_faibles.append({
+                'id':            p.id,
+                'nom':           p.nom,
+                'stock':         p.stock,
+                'stock_minimum': p.stock_minimum,
+                'stock_max':     p.stock_minimum * 3 or 15,
+            })
+
+        # ── Activité récente depuis AuditLog (6) ──
+        activite_recente = []
+        for log in AuditLog.objects.select_related('utilisateur').order_by('-date')[:6]:
+            activite_recente.append({
+                'description': f"{log.action} — {log.url}",
+                'date':        log.date.isoformat(),
+                'type':        'systeme',
+            })
+
+        # ── Vue système ──
+        try:
+            from apps.chat.models import Conversation
+            conversations = Conversation.objects.count()
+        except Exception:
+            conversations = 0
+
+        try:
+            from apps.notifications.models import Notification
+            notifications_total = Notification.objects.count()
+        except Exception:
+            notifications_total = 0
+
+        paniers_actifs = Panier.objects.filter(items__isnull=False).distinct().count()
+
+        return Response({
+            # KPIs
+            'produits_actifs':   produits_actifs,
+            'produits_total':    produits_total,
+            'commandes_total':   commandes_total,
+            'utilisateurs':      utilisateurs,
+            'nouveaux_users':    nouveaux_users,
+            'avis_total':        avis_total,
+            # Alertes
+            'commandes_attente': commandes_attente,
+            'avis_en_attente':   avis_en_attente,
+            # Stocks
+            'stock_faible':      stock_faible,
+            'stock_epuise':      stock_epuise,
+            # Listes
+            'commandes_recentes': commandes_recentes,
+            'stocks_faibles':     stocks_faibles,
+            'activite_recente':   activite_recente,
+            # Système
+            'conversations':       conversations,
+            'notifications_total': notifications_total,
+            'paniers_actifs':      paniers_actifs,
         })
