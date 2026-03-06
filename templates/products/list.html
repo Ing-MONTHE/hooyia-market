@@ -630,11 +630,69 @@
   .pcard-price { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 700; color: #0D1F5C; line-height: 1; }
   .pcard-price-old { font-size: 0.75rem; color: #8898AA; text-decoration: line-through; font-weight: 400; font-family: 'Poppins', sans-serif; }
   .pcard-cart-btn {
-    width: 30px; height: 30px; border-radius: 0.5rem; background: #eff4ff; border: none;
-    display: flex; align-items: center; justify-content: center; color: #1E3A8A;
+    width: 30px; height: 30px; border-radius: 0.5rem; background: #F97316; border: none;
+    display: flex; align-items: center; justify-content: center; color: #ffffff;
     cursor: pointer; transition: background 150ms, color 150ms; flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(249,115,22,0.35);
   }
-  .pcard-cart-btn:hover { background: #F97316; color: #ffffff; }
+  .pcard-cart-btn:hover { background: #ea6000; color: #ffffff; }
+
+  /* ── Dark mode catalogue ── */
+  html.dark .pcard { background: #1A1D27; border-color: #2E3350; }
+  html.dark .pcard:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+  html.dark .pcard-img-wrap,
+  html.dark .pcard-img-placeholder { background: #22263A; color: #3A4060; }
+  html.dark .pcard-cat  { color: #5E6A88; }
+  html.dark .pcard-name { color: #E8ECF4; }
+  html.dark .pcard-footer { border-top-color: #2E3350; }
+  html.dark .pcard-price { color: #E8ECF4; }
+  html.dark .pcard-price-old { color: #5E6A88; }
+  html.dark .pcard-cart-btn { background: #F97316; color: #fff; box-shadow: 0 2px 6px rgba(249,115,22,0.3); }
+  html.dark .pcard-cart-btn:hover { background: #ea6000; }
+  html.dark .header-search-wrap { background: #22263A; border-color: #2E3350; }
+  html.dark .header-search-wrap:focus-within { background: #2A2F45; border-color: #1E3A8A; }
+  html.dark .header-search-input { color: #E8ECF4; }
+  html.dark .header-search-input::placeholder { color: #5E6A88; }
+  html.dark .header-search-wrap > svg { color: #5E6A88; }
+  html.dark .header-tab-secondary { color: #93B4FF; border-color: #2E4A8A; background: transparent; }
+  html.dark .header-tab-secondary:hover { background: #22263A; }
+  html.dark .catalogue-sort label { color: #9BA8C0; }
+  html.dark .catalogue-sort select { background: #22263A; border-color: #2E3350; color: #E8ECF4; }
+  html.dark .filter-sidebar { background: #1A1D27; border-color: #2E3350; }
+  html.dark .filter-sidebar-header { border-color: #2E3350; }
+  html.dark .filter-sidebar-title { color: #E8ECF4; }
+  html.dark .filter-section { border-color: #2E3350; }
+  html.dark .filter-section-header { background: #22263A; }
+  html.dark .filter-section-header:hover { background: #2A2F45; }
+  html.dark .filter-section-label { color: #E8ECF4; }
+  html.dark .filter-section-icon { background: #2A2F45; color: #9BA8C0; }
+  html.dark .filter-section-chevron { color: #5E6A88; }
+  html.dark .cat-item { color: #9BA8C0; }
+  html.dark .cat-item:hover { background: #22263A; color: #E8ECF4; }
+  html.dark .cat-item.active { background: #22263A; color: #93B4FF; }
+  html.dark .cat-checkbox { background: #22263A; border-color: #2E3350; }
+  html.dark .cat-item.active .cat-checkbox { background: #1E3A8A; border-color: #1E3A8A; }
+  html.dark .cat-sub-group { border-color: #2E3350; }
+  html.dark .cat-divider { background: #2E3350; }
+  html.dark .cat-item-row:hover { background: #22263A; }
+  html.dark .cat-item-row.active { background: #22263A; }
+  html.dark .cat-item-link { color: #9BA8C0; }
+  html.dark .cat-item-link.active { color: #93B4FF; }
+  html.dark .cat-collapse-btn { color: #5E6A88; }
+  html.dark .cat-collapse-btn:hover { color: #93B4FF; background: #22263A; }
+  html.dark .filter-promo-label { color: #9BA8C0; }
+  html.dark .filter-reset { color: #5E6A88; border-color: #2E3350; }
+  html.dark .filter-reset:hover { color: #93B4FF; border-color: #2E4A8A; }
+  html.dark .filter-burger-btn { border-color: #2E3350; color: #9BA8C0; }
+  html.dark .products-count { color: #5E6A88; }
+  html.dark .empty-state { background: #1A1D27; border-color: #2E3350; }
+  html.dark .empty-state h3 { color: #E8ECF4; }
+  html.dark .empty-state p  { color: #5E6A88; }
+  html.dark .page-btn { background: #1A1D27; border-color: #2E3350; color: #9BA8C0; }
+  html.dark .page-btn:hover { border-color: #1E3A8A; color: #93B4FF; }
+  html.dark .page-btn.active { background: #1E3A8A; border-color: #1E3A8A; color: #fff; }
+  html.dark .btn-filter-mobile { color: #93B4FF; border-color: #2E4A8A; }
+  html.dark .catalogue-wrap { background: #0F1117; }
 
   /* EMPTY STATE */
   .empty-state {

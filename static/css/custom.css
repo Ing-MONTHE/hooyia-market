@@ -591,17 +591,30 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Navbar dark */
-html.dark .navbar,
-html.dark .nav-menu { background: var(--surface) !important; border-color: var(--border) !important; }
-html.dark .nav-link { color: var(--text-secondary) !important; }
-html.dark .nav-link:hover, html.dark .nav-link.active { color: var(--text-primary) !important; }
-html.dark .nav-icon-btn { color: var(--text-secondary) !important; }
-html.dark .nav-icon-btn:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
-html.dark .nav-search-input { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
-html.dark .nav-dropdown { background: var(--surface) !important; border-color: var(--border) !important; }
-html.dark .nav-dropdown a { color: var(--text-secondary) !important; }
-html.dark .nav-dropdown a:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+/* Navbar dark — les variables CSS dans navbar.html gèrent l'essentiel.
+   On surcharge ici uniquement les styles inline restants dans le HTML. */
+
+/* En-tête dropdown profil : nom + email + séparateur */
+html.dark .nav-dropdown-menu [style*="border-bottom:1px solid #E2E8F0"],
+html.dark .nav-dropdown-menu [style*="border-top:1px solid #E2E8F0"],
+html.dark #notif-dropdown [style*="border-bottom:1px solid #E2E8F0"],
+html.dark #notif-dropdown [style*="border-top:1px solid #E2E8F0"] {
+  border-color: #2E3350 !important;
+}
+html.dark .nav-dropdown-menu [style*="color:#0F1923"] { color: #E8ECF4 !important; }
+html.dark .nav-dropdown-menu [style*="color:#8898AA"] { color: #5E6A88 !important; }
+html.dark .nav-dropdown-menu [style*="color:#1E3A8A"] { color: #93B4FF !important; }
+/* Dropdown notifications */
+html.dark #notif-dropdown { background: #1A1D27 !important; border-color: #2E3350 !important; }
+html.dark #notif-dropdown [style*="color:#0D1F5C"] { color: #E8ECF4 !important; }
+html.dark #notif-dropdown [style*="background:#F4F7FC"],
+html.dark #notif-dropdown [style*="border-top:1px solid #E2E8F0"] { background: #22263A !important; }
+html.dark #notif-dropdown a[style*="background:#f8f9ff"] { background: #22263A !important; border-left-color: #F97316 !important; }
+/* Lien "Voir toutes les notifications" */
+html.dark #notif-dropdown [style*="color:#1E3A8A"] { color: #93B4FF !important; }
+/* dropdown langue */
+html.dark .nav-dropdown-menu [style*="color:#0F1923;"] { color: #E8ECF4 !important; }
+html.dark .nav-dropdown-menu [style*="color:#8898AA;"] { color: #5E6A88 !important; }
 
 /* Cards, inputs, boutons */
 html.dark .card,
@@ -697,16 +710,12 @@ html.dark [style*="background:#f0fdf4"],
 html.dark [style*="background:#EFF6FF"],
 html.dark [style*="background:#FFF7ED"] { background: var(--surface-2) !important; }
 
-/* Dropdown profil navbar */
-html.dark .nav-profile-dropdown,
-html.dark .nav-user-menu { background: var(--surface) !important; border-color: var(--border) !important; }
-
 /* Reviews section */
 html.dark .reviews-home-section { background: var(--bg) !important; }
 
-html.dark .section-vedette  { background: var(--surface) !important; }
+html.dark .section-vedette  { background: var(--bg) !important; }
 html.dark .section-arrivages { background: var(--bg) !important; }
-html.dark .section-valeurs  { background: var(--surface) !important; }
+html.dark .section-valeurs  { background: var(--bg) !important; }
 
 /* Footer link colors */
 html.dark .footer-link { color: var(--text-secondary) !important; }
@@ -733,11 +742,12 @@ html.dark .pcard-footer {
 html.dark .pcard-price { color: var(--text-primary) !important; }
 html.dark .pcard-price-old { color: var(--text-muted) !important; }
 html.dark .pcard-cart-btn {
-  background: var(--surface-2) !important;
-  color: var(--text-secondary) !important;
+  background: #F97316 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(249,115,22,0.3) !important;
 }
 html.dark .pcard-cart-btn:hover {
-  background: #F97316 !important;
+  background: #ea6000 !important;
   color: #ffffff !important;
 }
 
@@ -798,6 +808,334 @@ html.dark [style*="background:#ecfdf5"],
 html.dark [style*="background:#ede9fe"],
 html.dark [style*="background:#eff4ff"] { background: var(--surface-2) !important; }
 
-/* Logo navbar — bords arrondis */
+/* ── Logo navbar — bords arrondis */
 .nav-logo img,
 .navbar-logo img { border-radius: 10px; }
+
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Page catalogue produits (list.html)
+════════════════════════════════════════════════════════════════ */
+
+/* Barre de recherche catalogue */
+html.dark .header-search-wrap {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+}
+html.dark .header-search-wrap:focus-within {
+  background: var(--surface-3) !important;
+  border-color: #1E3A8A !important;
+}
+html.dark .header-search-input {
+  color: var(--text-primary) !important;
+}
+html.dark .header-search-input::placeholder { color: var(--text-muted) !important; }
+
+/* Bouton Catégories (tab secondaire) */
+html.dark .header-tab-secondary {
+  color: #93B4FF !important;
+  border-color: #2E4A8A !important;
+}
+html.dark .header-tab-secondary:hover { background: var(--surface-2) !important; }
+
+/* Dropdown catégories header */
+html.dark .header-cat-dropdown {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+}
+html.dark .hcat-link { color: var(--text-secondary) !important; }
+html.dark .hcat-link:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+html.dark .hcat-link.active { background: var(--surface-2) !important; color: #93B4FF !important; }
+html.dark .hcat-link.sub { color: var(--text-muted) !important; }
+html.dark .hcat-divider { background: var(--border) !important; }
+
+/* Sous-barre tri */
+html.dark .catalogue-sort label { color: var(--text-secondary) !important; }
+html.dark .catalogue-sort select {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+html.dark .btn-filter-mobile {
+  color: #93B4FF !important;
+  border-color: #2E4A8A !important;
+}
+html.dark .btn-filter-mobile:hover { background: var(--surface-2) !important; }
+
+/* Sidebar filtres */
+html.dark .filter-sidebar {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+}
+html.dark .filter-sidebar::-webkit-scrollbar-thumb { background: var(--border) !important; }
+html.dark .filter-sidebar-header {
+  border-color: var(--border) !important;
+}
+html.dark .filter-sidebar-title { color: var(--text-primary) !important; }
+html.dark .filter-burger-btn {
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .filter-burger-btn:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+
+/* Sections accordéon sidebar */
+html.dark .filter-section { border-color: var(--border) !important; }
+html.dark .filter-section-header {
+  background: var(--surface-2) !important;
+}
+html.dark .filter-section-header:hover { background: var(--surface-3) !important; }
+html.dark .filter-section-label { color: var(--text-primary) !important; }
+html.dark .filter-section-icon {
+  background: var(--surface-3) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .filter-section-chevron { color: var(--text-muted) !important; }
+
+/* Recherche dans sidebar */
+html.dark .filter-search-wrap input {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+html.dark .filter-search-wrap input:focus { background: var(--surface-3) !important; border-color: #1E3A8A !important; }
+html.dark .filter-search-wrap svg { color: var(--text-muted) !important; }
+
+/* Items catégories sidebar */
+html.dark .cat-item { color: var(--text-secondary) !important; }
+html.dark .cat-item:hover { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+html.dark .cat-item.active { background: var(--surface-2) !important; color: #93B4FF !important; }
+html.dark .cat-checkbox { background: var(--surface-2) !important; border-color: var(--border) !important; }
+html.dark .cat-item.active .cat-checkbox { background: #1E3A8A !important; border-color: #1E3A8A !important; }
+html.dark .cat-item-arrow { color: var(--text-muted) !important; }
+html.dark .cat-sub-group { border-color: var(--border) !important; }
+html.dark .cat-divider { background: var(--border) !important; }
+html.dark .cat-item-row:hover { background: var(--surface-2) !important; }
+html.dark .cat-item-row.active { background: var(--surface-2) !important; }
+html.dark .cat-item-link { color: var(--text-secondary) !important; }
+html.dark .cat-item-link.active { color: #93B4FF !important; }
+html.dark .cat-collapse-btn { color: var(--text-muted) !important; }
+html.dark .cat-collapse-btn:hover { color: #93B4FF !important; background: var(--surface-2) !important; }
+
+/* Checkbox promos */
+html.dark .filter-promo-label { color: var(--text-secondary) !important; }
+
+/* Bouton reset */
+html.dark .filter-reset {
+  color: var(--text-muted) !important;
+  border-color: var(--border) !important;
+}
+html.dark .filter-reset:hover { color: #93B4FF !important; border-color: #2E4A8A !important; }
+
+/* Compte produits */
+html.dark .products-count { color: var(--text-muted) !important; }
+
+/* Cartes produit (pcard sur page liste) */
+html.dark .pcard {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .pcard:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.3) !important; }
+html.dark .pcard-img-wrap,
+html.dark .pcard-img-placeholder { background: var(--surface-2) !important; }
+html.dark .pcard-footer { border-top-color: var(--border) !important; }
+html.dark .pcard-cart-btn { background: #F97316 !important; color: #fff !important; box-shadow: 0 2px 6px rgba(249,115,22,0.3) !important; }
+html.dark .pcard-cart-btn:hover { background: #ea6000 !important; }
+
+/* Empty state */
+html.dark .empty-state {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .empty-state h3 { color: var(--text-primary) !important; }
+html.dark .empty-state p  { color: var(--text-muted) !important; }
+
+/* Pagination */
+html.dark .page-btn {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .page-btn:hover { border-color: #1E3A8A !important; color: #93B4FF !important; }
+html.dark .page-btn.active { background: #1E3A8A !important; border-color: #1E3A8A !important; color: #fff !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   DARK MODE — Pages légales & institutionnelles
+   (apropos, faq, assistance, contact, conditions, mentions, politique)
+════════════════════════════════════════════════════════════════ */
+
+/* Fond global de la page */
+html.dark .about-wrap,
+html.dark .faq-wrap,
+html.dark .help-wrap,
+html.dark .contact-wrap,
+html.dark .legal-wrap,
+html.dark .legal-content { background: var(--bg) !important; color: var(--text-primary) !important; }
+
+/* ── Stats (À propos) ── */
+html.dark .about-stat {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .about-stat .val { color: var(--text-primary) !important; }
+html.dark .about-stat .lbl { color: var(--text-secondary) !important; }
+
+/* ── Sections de contenu ── */
+html.dark .about-section h2,
+html.dark .help-section h2,
+html.dark .legal-section h2,
+html.dark .faq-group-title { color: var(--text-primary) !important; }
+
+html.dark .about-section p,
+html.dark .help-section p,
+html.dark .legal-section p,
+html.dark .legal-section ul,
+html.dark .legal-section li,
+html.dark .legal-table td { color: var(--text-secondary) !important; }
+
+/* ── Cartes MVV (Mission / Vision / Valeurs) ── */
+html.dark .about-mvv-card.mission { background: #1F1408 !important; border-color: #7C3A0A !important; }
+html.dark .about-mvv-card.vision  { background: #0D1829 !important; border-color: #1E3A6A !important; }
+html.dark .about-mvv-card.valeurs { background: #0B1F10 !important; border-color: #166534 !important; }
+html.dark .about-mvv-card p { color: var(--text-secondary) !important; }
+
+/* ── Cartes équipe ── */
+html.dark .about-team-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .about-team-card h4 { color: var(--text-primary) !important; }
+html.dark .about-team-card p  { color: var(--text-secondary) !important; }
+
+/* ── FAQ ── */
+html.dark .faq-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .faq-q:hover { background: var(--surface-2) !important; }
+html.dark .faq-q-text { color: var(--text-primary) !important; }
+html.dark .faq-a {
+  color: var(--text-secondary) !important;
+  border-top-color: var(--border) !important;
+  background: var(--surface) !important;
+}
+html.dark .faq-a a { color: #93B4FF !important; }
+html.dark .faq-search input {
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+html.dark .faq-filter {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .faq-filter.active { background: #1E3A8A !important; border-color: #1E3A8A !important; color: #fff !important; }
+html.dark .faq-cta {
+  background: #1A1008 !important;
+  border-color: #7C3A0A !important;
+}
+html.dark .faq-cta div h3 { color: var(--text-primary) !important; }
+html.dark .faq-cta div p  { color: var(--text-secondary) !important; }
+html.dark #faq-no-results { color: var(--text-muted) !important; }
+
+/* ── Assistance ── */
+html.dark .help-channel {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .help-channel h3 { color: var(--text-primary) !important; }
+html.dark .help-channel p  { color: var(--text-secondary) !important; }
+html.dark .help-channel a  { background: var(--surface-2) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
+html.dark .help-channel a:hover { background: var(--surface-3) !important; color: var(--text-primary) !important; }
+html.dark .help-topic {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .help-topic h4 { color: var(--text-primary) !important; }
+html.dark .help-topic p  { color: var(--text-secondary) !important; }
+html.dark .help-step-body h4 { color: var(--text-primary) !important; }
+html.dark .help-step-body p  { color: var(--text-secondary) !important; }
+html.dark .help-step-line { background: var(--border) !important; }
+html.dark .help-cta {
+  background: #1A1008 !important;
+  border-color: #7C3A0A !important;
+}
+html.dark .help-search-bar input { background: var(--surface-2) !important; color: var(--text-primary) !important; }
+
+/* ── Contact ── */
+html.dark .contact-form-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .contact-form-card h2 { color: var(--text-primary) !important; }
+html.dark .cf-group label { color: var(--text-secondary) !important; }
+html.dark .cf-group input,
+html.dark .cf-group select,
+html.dark .cf-group textarea {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+html.dark .contact-info-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .contact-info-card h4 { color: var(--text-primary) !important; }
+html.dark .contact-info-card p  { color: var(--text-secondary) !important; }
+html.dark .contact-info-card a  { color: #93B4FF !important; }
+
+/* ── Légal commun (conditions, mentions, politique) ── */
+html.dark .legal-toc {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .legal-toc h2 { color: var(--text-primary) !important; }
+html.dark .legal-toc a  { color: #93B4FF !important; }
+html.dark .legal-section { border-color: var(--border) !important; }
+html.dark .legal-section h2 .num {
+  background: var(--surface-2) !important;
+  color: #93B4FF !important;
+}
+html.dark .legal-info-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .legal-info-card .label { color: var(--text-muted) !important; }
+html.dark .legal-info-card .value { color: var(--text-primary) !important; }
+html.dark .legal-contact-box {
+  background: #0D1829 !important;
+  border-color: #1E3A6A !important;
+}
+html.dark .legal-contact-box h3 { color: var(--text-primary) !important; }
+html.dark .legal-contact-box p  { color: var(--text-secondary) !important; }
+html.dark .legal-contact-box a  { color: #F97316 !important; }
+html.dark .legal-highlight {
+  background: #1A1008 !important;
+  border-left-color: #F97316 !important;
+  color: #FDBA74 !important;
+}
+html.dark .legal-badge {
+  background: #0B1F10 !important;
+  color: #4ADE80 !important;
+}
+html.dark .legal-table th {
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+html.dark .legal-table td { border-color: var(--border) !important; }
+html.dark .legal-table tr:nth-child(even) td { background: var(--surface) !important; }
+
+/* Inline styles hardcodés dans les templates légaux */
+html.dark [style*="color:#374151"],
+html.dark [style*="color: #374151"] { color: var(--text-secondary) !important; }
+html.dark [style*="color:#0D1F5C"],
+html.dark [style*="color:#1E3A8A"] { color: var(--text-primary) !important; }
+html.dark [style*="background:#F8FAFC"],
+html.dark [style*="background: #F8FAFC"],
+html.dark [style*="background:#EFF6FF"] {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark [style*="background:#FFF7ED"] { background: #1A1008 !important; }

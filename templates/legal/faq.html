@@ -55,6 +55,25 @@
   .faq-cta div a  { display:inline-block; background:#F97316; color:#fff; font-weight:700; font-size:13.5px; padding:10px 22px; border-radius:8px; text-decoration:none; }
 
   @media(max-width:600px){ .faq-hero{padding:36px 20px;} .faq-cta{flex-direction:column;text-align:center;} }
+
+  /* ── Dark mode ── */
+  html.dark .faq-wrap { background:#0F1117; }
+  html.dark .faq-filter { background:#1A1D27; border-color:#2E3350; color:#9BA8C0; }
+  html.dark .faq-filter.active { background:#1E3A8A; border-color:#1E3A8A; color:#fff; }
+  html.dark .faq-group-title { color:#E8ECF4; }
+  html.dark .faq-item { background:#1A1D27; border-color:#2E3350; }
+  html.dark .faq-q:hover { background:#22263A; }
+  html.dark .faq-q-text { color:#E8ECF4; }
+  html.dark .faq-q-icon { background:#22263A; }
+  html.dark .faq-item.open .faq-q-icon { background:#1E3A8A; }
+  html.dark .faq-a { display:none; color:#9BA8C0; border-top-color:#2E3350; background:#1A1D27; }
+  html.dark .faq-item.open .faq-a { display:block; }
+  html.dark .faq-a a { color:#93B4FF; }
+  html.dark .faq-search input { background:#22263A; border-color:#2E3350; color:#E8ECF4; }
+  html.dark #faq-no-results { color:#5E6A88; }
+  html.dark .faq-cta { background:#1A1008; border-color:#7C3A0A; }
+  html.dark .faq-cta div h3 { color:#E8ECF4; }
+  html.dark .faq-cta div p  { color:#9BA8C0; }
 </style>
 
 <div class="faq-wrap">
