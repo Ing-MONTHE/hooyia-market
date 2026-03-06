@@ -114,7 +114,8 @@ def accueil(request):
         'produits_vedette':  produits_vedette,
         'nouveaux_arrivages': nouveaux_arrivages,
         'titre':             'HooYia Market — Électronique & Informatique',
-        'est_admin': u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
+        'est_admin':   u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
+        'est_vendeur': u.is_authenticated and getattr(u, 'is_vendeur', False),
     }
     return render(request, 'home.html', context)
 

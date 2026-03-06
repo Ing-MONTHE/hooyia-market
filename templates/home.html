@@ -520,7 +520,7 @@
                 <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
                 {% endif %}
               </div>
-              {% if not est_admin %}
+              {% if not est_admin and not est_vendeur %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"
@@ -656,7 +656,7 @@
                 <div class="pcard-price-old">{{ produit.prix|floatformat:0 }} FCFA</div>
                 {% endif %}
               </div>
-              {% if not est_admin %}
+              {% if not est_admin and not est_vendeur %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
                       title="Ajouter au panier"

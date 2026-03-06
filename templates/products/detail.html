@@ -410,6 +410,84 @@
   .dp-not-found { text-align: center; padding: 5rem 1rem; }
   .dp-not-found p { font-family: 'Poppins', sans-serif; font-size: 1.125rem; color: #8898AA; margin: 0 0 1.5rem; }
 
+  /* ── Dark mode ── */
+  html.dark .dp-root { background: #0F1117; }
+  html.dark .dp-breadcrumb a { color: #5E6A88; }
+  html.dark .dp-breadcrumb a:hover { color: #93B4FF; }
+  html.dark .dp-breadcrumb-sep { color: #2E3350; }
+  html.dark .dp-breadcrumb-current { color: #9BA8C0; }
+
+  /* Skeleton */
+  html.dark .skel-box { background: #22263A; }
+
+  /* Galerie */
+  html.dark .gallery-main-wrap { background: #1A1D27 !important; border-color: #2E3350 !important; }
+  html.dark .gallery-thumb-btn { border-color: #2E3350 !important; background: #1A1D27 !important; }
+  html.dark .gallery-thumb-btn:hover { border-color: #1E3A8A; }
+
+  /* Infos produit */
+  html.dark .info-cat { color: #5E6A88; }
+  html.dark .info-title { color: #E8ECF4; }
+  html.dark .info-price-current { color: #E8ECF4; }
+  html.dark .info-price-old { color: #3A4060; }
+  html.dark .info-short-desc { color: #9BA8C0; }
+  html.dark .info-stock.in-stock  { background: #0B1F10; border-color: #166534; color: #4ADE80; }
+  html.dark .info-stock.out-of-stock { background: #1F0808; border-color: #7F1D1D; color: #F87171; }
+  html.dark .info-divider { background: #2E3350; }
+
+  /* Qty picker */
+  html.dark .qty-picker { border-color: #2E3350 !important; background: #1A1D27 !important; }
+  html.dark .qty-btn { background: #22263A !important; color: #93B4FF !important; }
+  html.dark .qty-btn:hover { background: #2A2F45 !important; color: #E8ECF4 !important; }
+  html.dark .qty-input { color: #E8ECF4 !important; }
+
+  /* Bouton contact vendeur */
+  html.dark .btn-contact-seller { color: #93B4FF; border-color: #2E4A8A; }
+  html.dark .btn-contact-seller:hover { background: #0D1829; border-color: #1E3A8A; }
+
+  /* Description */
+  html.dark .info-desc-long { border-top-color: #2E3350; }
+  html.dark .info-desc-label { color: #5E6A88; }
+  html.dark .info-desc-label, html.dark [class*="desc-label"], html.dark .info-desc-long .info-desc-label { color: #93B4FF !important; }
+  html.dark .info-desc-long h3 { color: #93B4FF !important; }
+  html.dark .info-desc-long p  { color: #9BA8C0 !important; }
+  html.dark .info-desc-text { color: #9BA8C0; }
+
+  /* Section avis */
+  html.dark .reviews-section { background: #1A1D27 !important; border-color: #2E3350 !important; box-shadow: 0 2px 12px rgba(0,0,0,.3) !important; }
+  html.dark .reviews-card { background: #1A1D27; border-color: #2E3350; }
+  html.dark .reviews-title { color: #E8ECF4; }
+  html.dark .btn-leave-review { color: #93B4FF; border-color: #2E4A8A; }
+  html.dark .btn-leave-review:hover { background: #0D1829; }
+  html.dark .reviews-form { background: #0D1829; border-color: #1E3A6A; }
+  html.dark .reviews-form-title { color: #E8ECF4; }
+  html.dark .review-card { border-bottom-color: #2E3350; }
+  html.dark .review-avatar { border-color: #2E3350; }
+  html.dark .review-author { color: #E8ECF4; }
+  html.dark .review-date   { color: #5E6A88; }
+  html.dark .review-text   { color: #9BA8C0; }
+  html.dark .reviews-empty { color: #5E6A88; }
+  html.dark .star-note-text { color: #9BA8C0; }
+
+  /* Section similaires */
+  html.dark .similar-section { background: #0F1117; }
+  html.dark .similar-title { color: #E8ECF4; }
+  html.dark .sim-card { background: #1A1D27 !important; border-color: #2E3350 !important; }
+  html.dark .sim-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.4); }
+  html.dark .sim-card-img-wrap { background: #22263A; }
+  html.dark .sim-card-cat  { color: #5E6A88; }
+  html.dark .sim-card-name { color: #E8ECF4; }
+  html.dark .sim-card-footer { border-top-color: #2E3350; }
+  html.dark .sim-card-price { color: #E8ECF4; }
+  html.dark .sim-card-price-old { color: #3A4060; }
+  html.dark .sim-card-cart-btn { background: #F97316; border-color: #F97316; color: #fff; }
+
+  /* Not found */
+  html.dark .dp-not-found p { color: #5E6A88; }
+
+  /* Textarea avis inline */
+  html.dark textarea { background: #22263A !important; border-color: #2E3350 !important; color: #E8ECF4 !important; }
+
 </style>
 
 
@@ -648,8 +726,10 @@
 {% block extra_scripts %}
 <script src="{% static 'js/products.js' %}"></script>
 <script>
-const SLUG     = '{{ produit.slug }}';
-const ADMIN_ID = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
+const SLUG      = '{{ produit.slug }}';
+const ADMIN_ID  = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
+const EST_VENDEUR = {% if user.is_vendeur %}true{% else %}false{% endif %};
+const EST_ADMIN   = {% if user.is_staff or user.is_admin %}true{% else %}false{% endif %};
 
 let produitData      = null;
 let noteSelectionnee = 0;
@@ -1015,7 +1095,7 @@ function renderSimilaires(produits, catId) {
             <div class="sim-card-price">${formatPrix(prix)} F CFA</div>
             ${promo ? `<div class="sim-card-price-old">${formatPrix(p.prix)} F CFA</div>` : ''}
           </div>
-          <button class="sim-cart-btn" type="button"
+          ${(!EST_VENDEUR && !EST_ADMIN) ? `<button class="sim-cart-btn" type="button"
                   onclick="event.preventDefault();event.stopPropagation();addToCartQuick(${p.id})"
                   aria-label="Ajouter au panier">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1023,7 +1103,7 @@ function renderSimilaires(produits, catId) {
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
               <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
             </svg>
-          </button>
+          </button>` : ''}
         </div>
       </div>
     </a>`;

@@ -113,10 +113,12 @@ class ProduitViewSet(viewsets.ModelViewSet):
             ).prefetch_related('images', 'mouvements_stock')
 
         if user.is_authenticated and getattr(user, 'is_vendeur', False):
-            # Vendeur voit ses propres produits
+            # Vendeur voit tous les produits actifs (pour consulter le catalogue)
+            # + ses propres produits (tous statuts, pour gérer son stock)
+            from django.db.models import Q
             return Produit.objects.filter(
-                vendeur=user
-            ).select_related('categorie').prefetch_related('images', 'mouvements_stock')
+                Q(statut='actif') | Q(vendeur=user)
+            ).distinct().select_related('categorie', 'vendeur').prefetch_related('images', 'mouvements_stock')
 
         # Public → produits actifs uniquement
         return Produit.actifs.all()
