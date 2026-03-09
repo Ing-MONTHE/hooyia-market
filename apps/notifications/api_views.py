@@ -13,6 +13,7 @@ Un utilisateur ne voit que SES notifications.
 from rest_framework import generics, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -67,13 +68,13 @@ class MarquerLuAPIView(APIView):
             notif = Notification.objects.get(pk=pk, utilisateur=request.user)
         except Notification.DoesNotExist:
             return Response(
-                {'detail': 'Notification introuvable.'},
+                {'detail': _('Notification introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         if notif.is_read:
             return Response(
-                {'detail': 'Notification déjà lue.'},
+                {'detail': _('Notification déjà lue.')},
                 status=status.HTTP_200_OK
             )
 
@@ -87,7 +88,7 @@ class MarquerLuAPIView(APIView):
 
         return Response(
             {
-                'detail'      : 'Notification marquée comme lue.',
+                'detail'      : _('Notification marquée comme lue.'),
                 'unread_count': unread_count,
             },
             status=status.HTTP_200_OK
@@ -116,7 +117,7 @@ class ToutLireAPIView(APIView):
 
         return Response(
             {
-                'detail'      : f'{updated} notification(s) marquée(s) comme lue(s).',
+                'detail'      : _("%(n)s notification(s) marquée(s) comme lue(s).") % {'n': updated},
                 'unread_count': 0,
             },
             status=status.HTTP_200_OK

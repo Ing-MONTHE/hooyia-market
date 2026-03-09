@@ -8,6 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.core.cache import cache
 from django.db import transaction
+from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
@@ -223,7 +224,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         # Vérifie que c'est le propriétaire ou un admin
         if produit.vendeur != request.user and not (request.user.is_admin or request.user.is_staff):
             return Response(
-                {'erreur': 'Permission refusée.'},
+                {'erreur': _('Permission refusée.')},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -250,7 +251,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         # Vérifie les permissions
         if not (request.user.is_admin or request.user.is_staff or produit.vendeur == request.user):
             return Response(
-                {'erreur': 'Permission refusée.'},
+                {'erreur': _('Permission refusée.')},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -260,7 +261,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
 
         if quantite <= 0:
             return Response(
-                {'erreur': 'La quantité doit être supérieure à 0.'},
+                {'erreur': _('La quantité doit être supérieure à 0.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -271,7 +272,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
         elif type_mouvement == 'sortie':
             if quantite > stock_avant:
                 return Response(
-                    {'erreur': 'Stock insuffisant.'},
+                    {'erreur': _('Stock insuffisant.')},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             stock_apres = stock_avant - quantite
@@ -279,7 +280,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
             stock_apres = quantite  # Ajustement direct
         else:
             return Response(
-                {'erreur': 'Type de mouvement invalide.'},
+                {'erreur': _('Type de mouvement invalide.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -297,7 +298,7 @@ class ProduitViewSet(viewsets.ModelViewSet):
             # Le signal mettre_a_jour_stock_produit met à jour le produit
 
         return Response({
-            'message'    : 'Stock mis à jour.',
+            'message'    : _('Stock mis à jour.'),
             'stock_avant': stock_avant,
             'stock_apres': stock_apres
         })

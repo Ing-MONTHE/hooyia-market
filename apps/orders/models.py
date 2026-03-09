@@ -46,6 +46,7 @@ Notion clé — Prix snapshot :
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from decimal import Decimal
 import uuid
@@ -74,12 +75,12 @@ class Commande(models.Model):
     ANNULEE         = 'annulee'
 
     STATUT_CHOICES = [
-        (EN_ATTENTE,     'En attente'),
-        (CONFIRMEE,      'Confirmée'),
-        (EN_PREPARATION, 'En préparation'),
-        (EXPEDIEE,       'Expédiée'),
-        (LIVREE,         'Livrée'),
-        (ANNULEE,        'Annulée'),
+        (EN_ATTENTE,     _('En attente')),
+        (CONFIRMEE,      _('Confirmée')),
+        (EN_PREPARATION, _('En préparation')),
+        (EXPEDIEE,       _('Expédiée')),
+        (LIVREE,         _('Livrée')),
+        (ANNULEE,        _('Annulée')),
     ]
 
     # ── Référence unique de la commande ───────────────────────
@@ -89,63 +90,50 @@ class Commande(models.Model):
         default=uuid.uuid4,
         unique=True,
         editable=False,
-        verbose_name="Référence commande"
+        verbose_name=_("Référence commande")
     )
 
-    # ── Relations ─────────────────────────────────────────────
-    # Le client qui a passé la commande
-    # SET_NULL : si le compte est supprimé, on garde l'historique des commandes
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='commandes',
-        verbose_name="Client"
+        verbose_name=_("Client")
     )
 
-    # ── Adresse de livraison (snapshot) ───────────────────────
-    # On copie les champs de l'adresse plutôt que de faire une FK
-    # Si le client modifie son adresse plus tard, la commande garde l'adresse d'origine
-    adresse_livraison_nom      = models.CharField(max_length=150, verbose_name="Nom destinataire")
-    adresse_livraison_telephone = models.CharField(max_length=20,  verbose_name="Téléphone livraison")
-    adresse_livraison_adresse  = models.CharField(max_length=255, verbose_name="Adresse")
-    adresse_livraison_ville    = models.CharField(max_length=100, verbose_name="Ville")
-    adresse_livraison_region   = models.CharField(max_length=100, verbose_name="Région")
-    adresse_livraison_pays     = models.CharField(max_length=100, default="Cameroun", verbose_name="Pays")
+    adresse_livraison_nom      = models.CharField(max_length=150, verbose_name=_("Nom destinataire"))
+    adresse_livraison_telephone = models.CharField(max_length=20,  verbose_name=_("Téléphone livraison"))
+    adresse_livraison_adresse  = models.CharField(max_length=255, verbose_name=_("Adresse"))
+    adresse_livraison_ville    = models.CharField(max_length=100, verbose_name=_("Ville"))
+    adresse_livraison_region   = models.CharField(max_length=100, verbose_name=_("Région"))
+    adresse_livraison_pays     = models.CharField(max_length=100, default="Cameroun", verbose_name=_("Pays"))
 
-    # ── Montants ──────────────────────────────────────────────
-    # Montant total calculé lors de la création (somme des lignes)
     montant_total = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
-        verbose_name="Montant total (FCFA)"
+        verbose_name=_("Montant total (FCFA)")
     )
 
-    # ── Statut FSM ────────────────────────────────────────────
-    # FSMField = champ spécial django-fsm qui contrôle les transitions
-    # protected=True → impossible de modifier le statut autrement que via les transitions
     statut = FSMField(
         default=EN_ATTENTE,
         choices=STATUT_CHOICES,
-        protected=True,           # Bloque les modifications directes en DB
-        verbose_name="Statut"
+        protected=True,
+        verbose_name=_("Statut")
     )
 
-    # ── Note du client ────────────────────────────────────────
     note_client = models.TextField(
         blank=True,
-        verbose_name="Note / Instructions de livraison"
+        verbose_name=_("Note / Instructions de livraison")
     )
 
-    # ── Dates ─────────────────────────────────────────────────
-    date_creation    = models.DateTimeField(auto_now_add=True, verbose_name="Date de commande")
-    date_modification = models.DateTimeField(auto_now=True,    verbose_name="Dernière mise à jour")
-    date_livraison   = models.DateTimeField(null=True, blank=True, verbose_name="Date de livraison")
+    date_creation    = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de commande"))
+    date_modification = models.DateTimeField(auto_now=True,    verbose_name=_("Dernière mise à jour"))
+    date_livraison   = models.DateTimeField(null=True, blank=True, verbose_name=_("Date de livraison"))
 
     class Meta:
-        verbose_name = "Commande"
-        verbose_name_plural = "Commandes"
+        verbose_name = _("Commande")
+        verbose_name_plural = _("Commandes")
         ordering = ['-date_creation']
 
     def __str__(self):
@@ -238,48 +226,41 @@ class LigneCommande(models.Model):
     C'est la preuve historique de ce qui a été commandé et à quel prix.
     """
 
-    # Lien vers la commande parente
     commande = models.ForeignKey(
         Commande,
         on_delete=models.CASCADE,
-        related_name='lignes',     # commande.lignes.all() → toutes les lignes
-        verbose_name="Commande"
+        related_name='lignes',
+        verbose_name=_("Commande")
     )
 
-    # Le produit commandé
-    # SET_NULL : si le produit est supprimé, la ligne historique est conservée
     produit = models.ForeignKey(
         'products.Produit',
         on_delete=models.SET_NULL,
         null=True,
         related_name='lignes_commande',
-        verbose_name="Produit"
+        verbose_name=_("Produit")
     )
 
-    # Nom capturé au moment de la commande
-    # Si le produit est renommé/supprimé plus tard, on garde le nom d'origine
     produit_nom = models.CharField(
         max_length=255,
-        verbose_name="Nom du produit (au moment de la commande)"
+        verbose_name=_("Nom du produit (au moment de la commande)")
     )
 
-    # Quantité commandée
     quantite = models.PositiveIntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name="Quantité"
+        verbose_name=_("Quantité")
     )
 
-    # Prix unitaire capturé au moment de la commande
     prix_unitaire = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))],
-        verbose_name="Prix unitaire (FCFA)"
+        verbose_name=_("Prix unitaire (FCFA)")
     )
 
     class Meta:
-        verbose_name = "Ligne de commande"
-        verbose_name_plural = "Lignes de commande"
+        verbose_name = _("Ligne de commande")
+        verbose_name_plural = _("Lignes de commande")
 
     def __str__(self):
         return f"{self.quantite}x {self.produit_nom} — Commande #{self.commande.reference_courte}"
@@ -304,65 +285,60 @@ class Paiement(models.Model):
     Prévu pour intégration Mobile Money (Orange Money, MTN MoMo) en Phase 6.
     """
 
-    # ── Mode de paiement ──────────────────────────────────────
     class ModePaiement(models.TextChoices):
-        LIVRAISON    = 'livraison',    'Paiement à la livraison'
-        ORANGE_MONEY = 'orange_money', 'Orange Money'
-        MTN_MOMO     = 'mtn_momo',    'MTN Mobile Money'
-        CARTE        = 'carte',        'Carte bancaire'
+        LIVRAISON    = 'livraison',    _('Paiement à la livraison')
+        ORANGE_MONEY = 'orange_money', _('Orange Money')
+        MTN_MOMO     = 'mtn_momo',    _('MTN Mobile Money')
+        CARTE        = 'carte',        _('Carte bancaire')
 
-    # ── Statut du paiement ────────────────────────────────────
     class StatutPaiement(models.TextChoices):
-        EN_ATTENTE = 'en_attente', 'En attente'
-        REUSSI     = 'reussi',     'Réussi'
-        ECHOUE     = 'echoue',     'Échoué'
-        REMBOURSE  = 'rembourse',  'Remboursé'
+        EN_ATTENTE = 'en_attente', _('En attente')
+        REUSSI     = 'reussi',     _('Réussi')
+        ECHOUE     = 'echoue',     _('Échoué')
+        REMBOURSE  = 'rembourse',  _('Remboursé')
 
-    # Une commande n'a qu'un seul paiement (OneToOne)
     commande = models.OneToOneField(
         Commande,
         on_delete=models.CASCADE,
         related_name='paiement',
-        verbose_name="Commande"
+        verbose_name=_("Commande")
     )
 
     mode = models.CharField(
         max_length=20,
         choices=ModePaiement.choices,
         default=ModePaiement.LIVRAISON,
-        verbose_name="Mode de paiement"
+        verbose_name=_("Mode de paiement")
     )
 
     statut = models.CharField(
         max_length=15,
         choices=StatutPaiement.choices,
         default=StatutPaiement.EN_ATTENTE,
-        verbose_name="Statut du paiement"
+        verbose_name=_("Statut du paiement")
     )
 
-    # Montant payé (peut différer du montant_total si remise appliquée)
     montant = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
-        verbose_name="Montant (FCFA)"
+        verbose_name=_("Montant (FCFA)")
     )
 
-    # Référence externe (numéro de transaction Mobile Money, etc.)
     reference_externe = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name="Référence externe (transaction)"
+        verbose_name=_("Référence externe (transaction)")
     )
 
     date_paiement = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Date du paiement"
+        verbose_name=_("Date du paiement")
     )
 
     class Meta:
-        verbose_name = "Paiement"
-        verbose_name_plural = "Paiements"
+        verbose_name = _("Paiement")
+        verbose_name_plural = _("Paiements")
 
     def __str__(self):
         return f"Paiement {self.mode} — Commande #{self.commande.reference_courte} — {self.statut}"

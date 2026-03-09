@@ -14,6 +14,7 @@ Endpoints exposés (préfixe défini dans config/urls.py : api/avis/) :
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Avis
@@ -122,7 +123,7 @@ class AvisViewSet(viewsets.ModelViewSet):
         # Seul le propriétaire ou un admin peut supprimer l'avis
         if not user.is_staff and instance.utilisateur != user:
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Vous ne pouvez supprimer que votre propre avis.")
+            raise PermissionDenied(_("Vous ne pouvez supprimer que votre propre avis."))
 
         instance.delete()
 
@@ -138,16 +139,15 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         if avis.is_validated:
             return Response(
-                {'detail': 'Cet avis est déjà validé.'},
+                {'detail': _('Cet avis est déjà validé.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         avis.is_validated = True
         avis.save(update_fields=['is_validated'])
-        # Le signal post_save (reviews/signals.py) recalcule automatiquement note_moyenne
 
         return Response(
-            {'detail': f'Avis #{avis.id} validé. Note moyenne du produit mise à jour.'},
+            {'detail': _('Avis #%(id)s validé. Note moyenne du produit mise à jour.') % {'id': avis.id}},
             status=status.HTTP_200_OK
         )
 
@@ -163,16 +163,15 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         if not avis.is_validated:
             return Response(
-                {'detail': 'Cet avis est déjà invalide.'},
+                {'detail': _('Cet avis est déjà invalide.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         avis.is_validated = False
         avis.save(update_fields=['is_validated'])
-        # Le signal post_save (reviews/signals.py) recalcule automatiquement note_moyenne
 
         return Response(
-            {'detail': f'Avis #{avis.id} invalidé. Note moyenne du produit recalculée.'},
+            {'detail': _('Avis #%(id)s invalidé. Note moyenne du produit recalculée.') % {'id': avis.id}},
             status=status.HTTP_200_OK
         )
 
@@ -205,7 +204,7 @@ class AvisAppCreerView(APIView):
         serializer = AvisAppCreerSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'Avis soumis, en attente de validation.'}, status=status.HTTP_201_CREATED)
+            return Response({'message': _('Avis soumis, en attente de validation.')}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):

@@ -13,6 +13,7 @@ Tâches planifiées (à appeler via un management command ou un cron Render) :
 import logging
 from django.utils import timezone
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -116,14 +117,18 @@ def send_order_confirmation_email(commande_id):
         commande = Commande.objects.select_related('client').get(pk=commande_id)
         client   = commande.client
 
-        sujet = f"[HooYia Market] Commande #{commande.reference_courte} confirmée ✓"
+        sujet = _("[HooYia Market] Commande #%(ref)s confirmée ✓") % {'ref': commande.reference_courte}
         corps = (
-            f"Bonjour {client.username},\n\n"
-            f"Votre commande #{commande.reference_courte} a bien été confirmée.\n"
-            f"Montant total : {commande.montant_total} FCFA\n\n"
-            f"Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n\n"
-            f"Merci pour votre confiance !\n"
-            f"L'équipe HooYia Market"
+            _("Bonjour %(username)s,\n\n"
+              "Votre commande #%(ref)s a bien été confirmée.\n"
+              "Montant total : %(montant)s FCFA\n\n"
+              "Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n\n"
+              "Merci pour votre confiance !\n"
+              "L'équipe HooYia Market") % {
+                'username': client.username,
+                'ref': commande.reference_courte,
+                'montant': commande.montant_total,
+            }
         )
 
         _envoyer_email(
@@ -145,8 +150,8 @@ def send_order_confirmation_email(commande_id):
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
-            titre="Commande confirmée !",
-            message=f"Votre commande #{commande.reference_courte} est confirmée.",
+            titre=_("Commande confirmée !"),
+            message=_("Votre commande #%(ref)s est confirmée.") % {'ref': commande.reference_courte},
             type_notif='commande',
             lien=f"/commandes/{commande.id}/",
         )
@@ -165,10 +170,10 @@ def send_status_update_email(commande_id):
     from apps.orders.models import Commande
 
     MESSAGES_STATUT = {
-        Commande.EN_PREPARATION : ("En préparation 📦", "Votre commande est en cours de préparation."),
-        Commande.EXPEDIEE       : ("Commande expédiée 🚚", "Votre commande est en route !"),
-        Commande.LIVREE         : ("Commande livrée ✓", "Votre commande a bien été livrée."),
-        Commande.ANNULEE        : ("Commande annulée", "Votre commande a été annulée."),
+        Commande.EN_PREPARATION : (_("En préparation 📦"), _("Votre commande est en cours de préparation.")),
+        Commande.EXPEDIEE       : (_("Commande expédiée 🚚"), _("Votre commande est en route !")),
+        Commande.LIVREE         : (_("Commande livrée ✓"), _("Votre commande a bien été livrée.")),
+        Commande.ANNULEE        : (_("Commande annulée"), _("Votre commande a été annulée.")),
     }
 
     try:
@@ -177,18 +182,26 @@ def send_status_update_email(commande_id):
 
         titre_statut, msg_statut = MESSAGES_STATUT.get(
             commande.statut,
-            ("Mise à jour commande", f"Statut : {commande.statut}")
+            (_("Mise à jour commande"), _("Statut : %(statut)s") % {'statut': commande.statut})
         )
 
-        sujet = f"[HooYia Market] Commande #{commande.reference_courte} — {titre_statut}"
+        sujet = _("[HooYia Market] Commande #%(ref)s — %(titre)s") % {
+            'ref': commande.reference_courte, 'titre': titre_statut
+        }
         corps = (
-            f"Bonjour {client.username},\n\n"
-            f"{msg_statut}\n"
-            f"Référence : #{commande.reference_courte}\n\n"
-            f"L'équipe HooYia Market"
+            _("Bonjour %(username)s,\n\n%(msg)s\nRéférence : #%(ref)s\n\nL'équipe HooYia Market") % {
+                'username': client.username,
+                'msg': msg_statut,
+                'ref': commande.reference_courte,
+            }
         )
 
-        LABELS_STATUT = {Commande.EN_PREPARATION: "En préparation 📦", Commande.EXPEDIEE: "Expédiée 🚚", Commande.LIVREE: "Livrée ✅", Commande.ANNULEE: "Annulée ❌"}
+        LABELS_STATUT = {
+            Commande.EN_PREPARATION: _("En préparation 📦"),
+            Commande.EXPEDIEE: _("Expédiée 🚚"),
+            Commande.LIVREE: _("Livrée ✅"),
+            Commande.ANNULEE: _("Annulée ❌"),
+        }
         ICONES_STATUT = {Commande.EN_PREPARATION: "📦", Commande.EXPEDIEE: "🚚", Commande.LIVREE: "✅", Commande.ANNULEE: "❌"}
         _envoyer_email(client, sujet, corps, html_template="notifications/emails/status_update.html", html_context={"client_username": client.username, "reference": commande.reference_courte, "date": commande.date_creation.strftime("%d/%m/%Y"), "montant_total": commande.montant_total, "statut": commande.statut, "titre_statut": titre_statut, "label_statut": LABELS_STATUT.get(commande.statut, commande.statut), "icone": ICONES_STATUT.get(commande.statut, "📋"), "message_intro": msg_statut, "lien_commande": f"/commandes/{commande.id}/", "lien_chat": "/chat/"})
 
@@ -222,22 +235,26 @@ def send_review_reminder(commande_id):
         noms_produits = [l.produit_nom for l in commande.lignes.all()]
         liste_produits = "\n".join(f"  - {nom}" for nom in noms_produits[:5])
 
-        sujet = "[HooYia Market] Votre avis nous intéresse !"
+        sujet = _("[HooYia Market] Votre avis nous intéresse !")
         corps = (
-            f"Bonjour {client.username},\n\n"
-            f"Votre commande #{commande.reference_courte} a été livrée.\n"
-            f"Nous espérons que vous êtes satisfait(e) de vos achats :\n\n"
-            f"{liste_produits}\n\n"
-            f"Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n\n"
-            f"L'équipe HooYia Market"
+            _("Bonjour %(username)s,\n\n"
+              "Votre commande #%(ref)s a été livrée.\n"
+              "Nous espérons que vous êtes satisfait(e) de vos achats :\n\n"
+              "%(produits)s\n\n"
+              "Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n\n"
+              "L'équipe HooYia Market") % {
+                'username': client.username,
+                'ref': commande.reference_courte,
+                'produits': liste_produits,
+            }
         )
 
         _envoyer_email(client, sujet, corps)
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
-            titre="Partagez votre avis !",
-            message=f"Donnez votre avis sur votre commande #{commande.reference_courte}.",
+            titre=_("Partagez votre avis !"),
+            message=_("Donnez votre avis sur votre commande #%(ref)s.") % {'ref': commande.reference_courte},
             type_notif='avis',
             lien=f"/commandes/{commande.id}/",
         )
@@ -269,13 +286,12 @@ def alert_low_stock():
     )
     nb = produits_faibles.count()
 
-    sujet = f"[HooYia Market] ⚠️ Alerte stock faible — {nb} produit(s)"
+    sujet = _("[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)") % {'nb': nb}
     corps = (
-        f"Bonjour,\n\n"
-        f"{nb} produit(s) sont en stock faible :\n\n"
-        f"{liste}\n\n"
-        f"Pensez à réapprovisionner ces articles.\n\n"
-        f"HooYia Market — Système automatique"
+        _("Bonjour,\n\n%(nb)s produit(s) sont en stock faible :\n\n%(liste)s\n\n"
+          "Pensez à réapprovisionner ces articles.\n\nHooYia Market — Système automatique") % {
+            'nb': nb, 'liste': liste,
+        }
     )
 
     admins = CustomUser.objects.filter(is_staff=True, is_active=True)
@@ -283,8 +299,8 @@ def alert_low_stock():
         _envoyer_email(admin, sujet, corps)
         _diffuser_notification_ws(
             utilisateur_id=admin.id,
-            titre=f"⚠️ Stock faible : {nb} produit(s)",
-            message=f"{nb} produit(s) nécessitent un réapprovisionnement.",
+            titre=_("⚠️ Stock faible : %(nb)s produit(s)") % {'nb': nb},
+            message=_("%(nb)s produit(s) nécessitent un réapprovisionnement.") % {'nb': nb},
             type_notif='stock',
             lien="/admin/products/produit/?statut=stock_faible",
         )

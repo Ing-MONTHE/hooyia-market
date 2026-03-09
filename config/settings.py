@@ -79,6 +79,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Servir les fichiers statiques en prod
     'corsheaders.middleware.CorsMiddleware',           # CORS pour les appels JS
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',       # i18n : détecte la langue de l'utilisateur
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -292,11 +293,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # ═══════════════════════════════════════════════
 # INTERNATIONALISATION
 # ═══════════════════════════════════════════════
+from django.utils.translation import gettext_lazy as _
 
-LANGUAGE_CODE = 'fr-fr'
+LANGUAGE_CODE = 'fr'
 TIME_ZONE = 'Africa/Douala'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+
+# Langues disponibles sur le site
+LANGUAGES = [
+    ('fr', _('Français')),
+    ('en', _('English')),
+]
+
+# Dossier des fichiers de traduction (.po / .mo)
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 
 # ═══════════════════════════════════════════════

@@ -17,6 +17,7 @@ from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 
 from .models import Panier
 from .serializers import (
@@ -98,7 +99,7 @@ class AjouterItemAPIView(APIView):
 
         # Retourne la ligne créée/mise à jour et le résumé du panier
         return Response({
-            'message'        : 'Article ajouté au panier.',
+            'message'        : _('Article ajouté au panier.'),
             'item'           : PanierItemSerializer(item, context={'request': request}).data,
             'nombre_articles': panier.nombre_articles,
             'total'          : str(panier.total),
@@ -133,7 +134,7 @@ class PanierItemAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': 'Panier introuvable.'},
+                {'erreur': _('Panier introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -149,13 +150,13 @@ class PanierItemAPIView(APIView):
         # Si quantite = 0, CartService retourne None (ligne supprimée)
         if item is None:
             return Response({
-                'message'        : 'Article supprimé du panier.',
+                'message'        : _('Article supprimé du panier.'),
                 'nombre_articles': panier.nombre_articles,
                 'total'          : str(panier.total),
             })
 
         return Response({
-            'message'        : 'Quantité mise à jour.',
+            'message'        : _('Quantité mise à jour.'),
             'item'           : PanierItemSerializer(item, context={'request': request}).data,
             'nombre_articles': panier.nombre_articles,
             'total'          : str(panier.total),
@@ -170,7 +171,7 @@ class PanierItemAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': 'Panier introuvable.'},
+                {'erreur': _('Panier introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -180,7 +181,7 @@ class PanierItemAPIView(APIView):
             return Response({'erreur': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
-            'message'        : 'Article supprimé du panier.',
+            'message'        : _('Article supprimé du panier.'),
             'nombre_articles': panier.nombre_articles,
             'total'          : str(panier.total),
         }, status=status.HTTP_200_OK)
@@ -207,14 +208,14 @@ class ViderPanierAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': 'Panier introuvable.'},
+                {'erreur': _('Panier introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         panier.vider()  # Supprime tous les PanierItem (méthode du modèle)
 
         return Response(
-            {'message': 'Panier vidé avec succès.'},
+            {'message': _('Panier vidé avec succès.')},
             status=status.HTTP_200_OK
         )
 

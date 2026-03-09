@@ -15,6 +15,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils.translation import gettext as _
 
 from .models import AdresseLivraison
 from .serializers import (
@@ -46,7 +47,7 @@ class InscriptionAPIView(generics.CreateAPIView):
         user = serializer.save()
 
         return Response({
-            'message': f"Compte créé ! Vérifiez votre email {user.email} pour activer votre compte.",
+            'message': _("Compte créé ! Vérifiez votre email %(email)s pour activer votre compte.") % {'email': user.email},
             'email'  : user.email
         }, status=status.HTTP_201_CREATED)
 
@@ -74,12 +75,12 @@ class DeconnexionAPIView(APIView):
             token.blacklist()
 
             return Response(
-                {'message': 'Déconnexion réussie.'},
+                {'message': _('Déconnexion réussie.')},
                 status=status.HTTP_200_OK
             )
         except Exception:
             return Response(
-                {'erreur': 'Token invalide.'},
+                {'erreur': _('Token invalide.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -123,7 +124,7 @@ class ChangerMotDePasseAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {'message': 'Mot de passe changé avec succès.'},
+                {'message': _('Mot de passe changé avec succès.')},
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

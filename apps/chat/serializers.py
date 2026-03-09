@@ -8,6 +8,7 @@ Serializers pour le chat.
 """
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 from .models import Conversation, MessageChat
 
@@ -164,15 +165,14 @@ class CreerConversationSerializer(serializers.Serializer):
         try:
             destinataire = User.objects.get(id=value, is_active=True)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Utilisateur introuvable ou inactif.")
+            raise serializers.ValidationError(_("Utilisateur introuvable ou inactif."))
         return value
 
     def validate(self, data):
-        """Vérifie que l'utilisateur ne parle pas à lui-même."""
         user = self.context['request'].user
         if data['utilisateur_id'] == user.id:
             raise serializers.ValidationError(
-                "Vous ne pouvez pas démarrer une conversation avec vous-même."
+                _("Vous ne pouvez pas démarrer une conversation avec vous-même.")
             )
         return data
 

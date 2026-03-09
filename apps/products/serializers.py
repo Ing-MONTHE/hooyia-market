@@ -8,6 +8,7 @@ Serializers pour les produits :
 - MouvementStockSerializer   → historique stock
 """
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 from .models import Produit, Categorie, ImageProduit, MouvementStock
 
 
@@ -194,29 +195,26 @@ class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_prix(self, value):
-        """Le prix doit être positif"""
         if value <= 0:
             raise serializers.ValidationError(
-                "Le prix doit être supérieur à 0."
+                _("Le prix doit être supérieur à 0.")
             )
         return value
 
     def validate_prix_promo(self, value):
-        """Le prix promo doit être inférieur au prix normal"""
         if value is not None and value <= 0:
             raise serializers.ValidationError(
-                "Le prix promotionnel doit être supérieur à 0."
+                _("Le prix promotionnel doit être supérieur à 0.")
             )
         return value
 
     def validate(self, attrs):
-        """Vérifie que le prix promo est inférieur au prix normal"""
         prix       = attrs.get('prix')
         prix_promo = attrs.get('prix_promo')
 
         if prix and prix_promo and prix_promo >= prix:
             raise serializers.ValidationError({
-                'prix_promo': "Le prix promotionnel doit être inférieur au prix normal."
+                'prix_promo': _("Le prix promotionnel doit être inférieur au prix normal.")
             })
         return attrs
 

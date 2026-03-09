@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% comment %} ===============================================================
    HooYia Market — products/detail.html
 
@@ -496,10 +496,10 @@
 <div class="dp-container">
 
   {% comment %} -- 1. BREADCRUMB -- {% endcomment %}
-  <nav class="dp-breadcrumb" aria-label="Fil d'Ariane">
-    <a href="{% url 'products:accueil' %}">Accueil</a>
+  <nav class="dp-breadcrumb" aria-label="{% trans 'Fil d'Ariane' %}">
+    <a href="{% url 'products:accueil' %}">{% trans "Accueil" %}</a>
     <span class="dp-breadcrumb-sep">></span>
-    <a href="{% url 'products:liste' %}">Catalogue</a>
+    <a href="{% url 'products:liste' %}">{% trans "Catalogue" %}</a>
     <span class="dp-breadcrumb-sep">></span>
     {% comment %} Rendu Django (SEO) + mis à jour en JS {% endcomment %}
     <span class="dp-breadcrumb-current" id="bc-nom">{{ produit.nom }}</span>
@@ -538,11 +538,11 @@
                onerror="this.src='{% static 'img/logo.svg' %}'" />
           <span id="gallery-promo-badge" class="gallery-badge-promo" style="display:none;"></span>
           {% if user.is_staff %}
-          <a id="gallery-edit-btn" href="#" class="gallery-edit-btn">Modifier</a>
+          <a id="gallery-edit-btn" href="#" class="gallery-edit-btn">{% trans "Modifier" %}</a>
           {% endif %}
         </div>
         <div id="gallery-thumbs" class="gallery-thumbs"
-             role="list" aria-label="Images du produit"></div>
+             role="list" aria-label="{% trans 'Images du produit' %}"></div>
       </div>
 
       {% comment %} -- 4. INFOS -- {% endcomment %}
@@ -564,10 +564,10 @@
         {% comment %} Quantité + CTA — masqués pour admins/vendeurs {% endcomment %}
         {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
         <div class="info-action-row">
-          <div class="qty-picker" role="group" aria-label="Quantité">
-            <button class="qty-btn" type="button" onclick="changeQty(-1)" aria-label="Diminuer">-</button>
+          <div class="qty-picker" role="group" aria-label="{% trans 'Quantité' %}">
+            <button class="qty-btn" type="button" onclick="changeQty(-1)" aria-label="{% trans 'Diminuer' %}">-</button>
             <input  type="number" id="qty-input" class="qty-input" value="1" min="1" />
-            <button class="qty-btn" type="button" onclick="changeQty(1)"  aria-label="Augmenter">+</button>
+            <button class="qty-btn" type="button" onclick="changeQty(1)"  aria-label="{% trans 'Augmenter' %}">+</button>
           </div>
           {% comment %} * BOUTON ORANGE UNIQUE * {% endcomment %}
           <button id="btn-add-cart" class="btn-add-cart" type="button" onclick="ajouterAuPanier()">
@@ -576,7 +576,7 @@
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
               <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
             </svg>
-            Ajouter au panier
+            {% trans "Ajouter au panier" %}
           </button>
         </div>
         {% endif %}
@@ -589,13 +589,13 @@
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
           </svg>
-          Contacter le vendeur
+          {% trans "Contacter le vendeur" %}
         </button>
         {% endif %}
         {% endif %}
 
         <div class="info-desc-long">
-          <h3>Description</h3>
+          <h3>{% trans "Description" %}</h3>
           <p id="info-desc-long"></p>
         </div>
       </div>
@@ -605,14 +605,14 @@
     {% comment %} == 5. AVIS CLIENTS == {% endcomment %}
     <div class="reviews-section">
       <div class="reviews-header">
-        <h2 class="reviews-title">Avis clients</h2>
+        <h2 class="reviews-title">{% trans "Avis clients" %}</h2>
         {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
         <button id="btn-leave-review" class="btn-leave-review" type="button" onclick="toggleAvisForm()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Laisser un avis
+          {% trans "Laisser un avis" %}
         </button>
         {% endif %}
       </div>
@@ -620,10 +620,10 @@
       {% comment %} Formulaire collapsible (masqué par défaut) {% endcomment %}
       {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
       <div id="reviews-form-wrap" class="reviews-form-wrap" style="display:none;">
-        <p class="reviews-form-title">Votre avis</p>
+        <p class="reviews-form-title">{% trans "Votre avis" %}</p>
 
         {% comment %} Sélecteur étoiles SVG Lucide — demi-étoiles supportées (0.5 à 5) {% endcomment %}
-        <div class="star-picker" id="star-picker" role="group" aria-label="Note de 0.5 à 5">
+        <div class="star-picker" id="star-picker" role="group" aria-label="{% trans 'Note de 0.5 à 5' %}">
           {% for i in "12345" %}
           <div class="star-item" id="star-{{ forloop.counter }}" data-index="{{ forloop.counter }}">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -645,7 +645,7 @@
 
         {% comment %} Textarea large pour l'avis {% endcomment %}
         <textarea id="avis-commentaire" rows="5"
-                  placeholder="Partagez votre expérience avec ce produit…"
+                  placeholder="{% trans 'Partagez votre expérience avec ce produit…' %}"
                   style="width:100%; border:1.5px solid #E2E8F0; border-radius:.625rem;
                          padding:.875rem 1rem; font-family:'Poppins',sans-serif;
                          font-size:.875rem; color:#0F1923; background:#fff; resize:vertical;
@@ -663,13 +663,13 @@
             <line x1="22" y1="2" x2="11" y2="13"/>
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
-          Publier l'avis
+          {% trans "Publier l'avis" %}
         </button>
       </div>
       {% endif %}
 
       <div id="reviews-list">
-        <p style="color:#8898AA;font-family:'Poppins',sans-serif;font-size:.875rem;padding:1rem 0;">Chargement des avis…</p>
+        <p style="color:#8898AA;font-family:'Poppins',sans-serif;font-size:.875rem;padding:1rem 0;">{% trans "Chargement des avis…" %}</p>
       </div>
     </div>
 
@@ -678,14 +678,14 @@
        Masqué par défaut — affiché par renderSimilaires() si résultats.
        GET /api/produits/?categorie_id=X&statut=actif — filtré JS, max 4. {% endcomment %}
     <div class="similar-section" id="similar-section" style="display:none;">
-      <p class="similar-eyebrow">Recommandations</p>
-      <h2 class="similar-title">Vous pourriez <span>aimer</span></h2>
+      <p class="similar-eyebrow">{% trans "Recommandations" %}</p>
+      <h2 class="similar-title">{% trans "Vous pourriez" %} <span>{% trans "aimer" %}</span></h2>
       <div id="similar-grid" class="similar-grid"></div>
       <div style="text-align:center;margin-top:2rem;">
         <a id="similar-see-more" href="{% url 'products:liste' %}"
            class="btn btn-secondary btn-lg"
            style="display:inline-flex;align-items:center;gap:.375rem;">
-          Voir plus dans cette catégorie
+          {% trans "Voir plus dans cette catégorie" %}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5"
                stroke-linecap="round" stroke-linejoin="round">
@@ -706,8 +706,8 @@
       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
       <line x1="11" y1="8" x2="11" y2="12"/><line x1="11" y1="16" x2="11.01" y2="16"/>
     </svg>
-    <p>Produit introuvable.</p>
-    <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg"><- Retour au catalogue</a>
+    <p>{% trans "Produit introuvable." %}</p>
+    <a href="{% url 'products:liste' %}" class="btn btn-primary btn-lg">{% trans "← Retour au catalogue" %}</a>
   </div>
 
 </div>{% comment %} fin .dp-container {% endcomment %}
@@ -725,6 +725,31 @@
 ============================================================== {% endcomment %}
 {% block extra_scripts %}
 <script src="{% static 'js/products.js' %}"></script>
+{# Chaînes traduites pour le JS page détail produit #}
+<script>
+var DETAIL_I18N = {
+  enStock:            '{% trans "En stock" %}',
+  disponible:         '{% trans "disponible" %}',
+  disponibles:        '{% trans "disponibles" %}',
+  epuise:             '{% trans "Épuisé" %}',
+  ajoutEnCours:       '{% trans "Ajout en cours…" %}',
+  ajouterAuPanier:    '{% trans "Ajouter au panier" %}',
+  produitAjoute:      '{% trans "Produit ajouté au panier !" %}',
+  connexion:          '{% trans "Connexion…" %}',
+  contacterVendeur:   '{% trans "Contacter le vendeur" %}',
+  erreurConversation: '{% trans "Impossible d'ouvrir la conversation." %}',
+  produitsEpuise:     '{% trans "Produit épuisé" %}',
+  chargementAvis:     '{% trans "Impossible de charger les avis." %}',
+  aucunAvis:          '{% trans "Aucun avis pour l'instant. Soyez le premier !" %}',
+  anonyme:            '{% trans "Anonyme" %}',
+  annuler:            '{% trans "× Annuler" %}',
+  laisserAvis:        '{% trans "+ Laisser un avis" %}',
+  selectionnerNote:   '{% trans "Sélectionnez une note." %}',
+  avisSubmis:         '{% trans "Avis soumis ! Merci." %}',
+  erreur:             '{% trans "Erreur." %}',
+  avis:               '{% trans "avis" %}',
+};
+</script>
 <script>
 const SLUG      = '{{ produit.slug }}';
 const ADMIN_ID  = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
@@ -842,7 +867,7 @@ function afficherProduit(p) {
   }
 
   document.getElementById('info-stars').innerHTML         = buildStarsSVG(parseFloat(p.note_moyenne) || 0);
-  document.getElementById('info-reviews-count').textContent = `(${p.nombre_avis} avis)`;
+  document.getElementById('info-reviews-count').textContent = `(${p.nombre_avis} ${DETAIL_I18N.avis})`;
 
   // Prix
   const pEl    = document.getElementById('info-price-current');
@@ -862,16 +887,16 @@ function afficherProduit(p) {
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
-      En stock <span style="opacity:.65;font-size:.75rem;">(${p.stock} disponible${p.stock > 1 ? 's' : ''})</span>`;
+      ${DETAIL_I18N.enStock} <span style="opacity:.65;font-size:.75rem;">(${p.stock} ${p.stock > 1 ? DETAIL_I18N.disponibles : DETAIL_I18N.disponible})</span>`;
   } else {
     sEl.className = 'info-stock out-of-stock';
     sEl.innerHTML = `
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
-      Épuisé`;
+      ${DETAIL_I18N.epuise}`;
     const btn = document.getElementById('btn-add-cart');
-    if (btn) { btn.disabled = true; btn.textContent = 'Produit épuisé'; }
+    if (btn) { btn.disabled = true; btn.textContent = DETAIL_I18N.produitsEpuise; }
   }
 }
 
@@ -899,10 +924,10 @@ async function ajouterAuPanier() {
   const btn = document.getElementById('btn-add-cart');
   const qty = parseInt(document.getElementById('qty-input').value) || 1;
   btn.disabled    = true;
-  btn.textContent = 'Ajout en cours…';
+  btn.textContent = DETAIL_I18N.ajoutEnCours;
   try {
     await API.post('/api/panier/ajouter/', { produit_id: produitData.id, quantite: qty });
-    window.toast && window.toast('Produit ajouté au panier !', 'success');
+    window.toast && window.toast(DETAIL_I18N.produitAjoute, 'success');
     const badge = document.getElementById('cart-badge');
     if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent) || 0) + qty; }
   } catch {}
@@ -912,7 +937,7 @@ async function ajouterAuPanier() {
       <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
       <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
     </svg>
-    Ajouter au panier`;
+    ${DETAIL_I18N.ajouterAuPanier}`;
 }
 
 
@@ -920,13 +945,13 @@ async function ajouterAuPanier() {
 async function contacterVendeur() {
   if (!ADMIN_ID) return;
   const btn = document.getElementById('btn-contact-seller');
-  if (btn) { btn.disabled = true; btn.textContent = 'Connexion…'; }
+  if (btn) { btn.disabled = true; btn.textContent = DETAIL_I18N.connexion; }
   try {
     const conv = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID }, { silentError: true });
     window.location.href = `/chat/${conv.id}/`;
   } catch (err) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Contacter le vendeur'; }
-    window.toast && window.toast(err?.message || 'Impossible d\'ouvrir la conversation.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = DETAIL_I18N.contacterVendeur; }
+    window.toast && window.toast(err?.message || DETAIL_I18N.erreurConversation, 'error');
   }
 }
 
@@ -938,7 +963,7 @@ async function loadAvis(produitId) {
     renderAvis(data.results || data);
   } catch {
     document.getElementById('reviews-list').innerHTML =
-      '<p style="color:#8898AA;font-family:Poppins,sans-serif;font-size:.875rem;">Impossible de charger les avis.</p>';
+`<p style="color:#8898AA;font-family:Poppins,sans-serif;font-size:.875rem;">${DETAIL_I18N.chargementAvis}</p>`;
   }
 }
 
@@ -950,17 +975,17 @@ function renderAvis(avis) {
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
         </svg>
-        Aucun avis pour l'instant. Soyez le premier !
+        ${DETAIL_I18N.aucunAvis}
       </div>`;
     return;
   }
   cont.innerHTML = avis.map(a => {
-    const nom    = a.auteur_nom || a.nom_utilisateur || 'Anonyme';
+    const nom    = a.auteur_nom || a.nom_utilisateur || DETAIL_I18N.anonyme;
     const avatar = a.auteur_photo
       ? `<img src="${a.auteur_photo}" class="review-avatar" alt="${nom}" />`
       : `<div class="review-avatar-initials">${nom[0].toUpperCase()}</div>`;
     const date = a.date_creation
-      ? new Date(a.date_creation).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })
+      ? new Date(a.date_creation).toLocaleDateString(document.documentElement.lang||'fr', { day:'numeric', month:'long', year:'numeric' })
       : '';
     return `
     <div class="review-card">
@@ -981,7 +1006,7 @@ function toggleAvisForm() {
   const open = wrap.style.display === 'none';
   wrap.style.display = open ? 'block' : 'none';
   const btn = document.getElementById('btn-leave-review');
-  if (btn) btn.textContent = open ? 'x Annuler' : '+ Laisser un avis';
+  if (btn) btn.textContent = open ? DETAIL_I18N.annuler : DETAIL_I18N.laisserAvis;
 }
 
 /* -- SÉLECTEUR ÉTOILES : demi-étoiles + toggle --
@@ -1026,7 +1051,7 @@ function renderStars(note) {
 function setNote(n) { pickStar(n, 'full'); }
 
 async function soumettreAvis() {
-  if (!noteSelectionnee) { window.toast && window.toast('Sélectionnez une note.', 'error'); return; }
+  if (!noteSelectionnee) { window.toast && window.toast(DETAIL_I18N.selectionnerNote, 'error'); return; }
   if (!produitData) return;
   try {
     await API.post('/api/avis/', {
@@ -1034,10 +1059,10 @@ async function soumettreAvis() {
       note:        noteSelectionnee,
       commentaire: document.getElementById('avis-commentaire').value
     }, { silentError: true });
-    window.toast && window.toast('Avis soumis ! Merci.', 'success');
+    window.toast && window.toast(DETAIL_I18N.avisSubmis, 'success');
     toggleAvisForm();
     loadAvis(produitData.id);
-  } catch (err) { window.toast && window.toast(err?.message || 'Erreur.', 'error'); }
+  } catch (err) { window.toast && window.toast(err?.message || DETAIL_I18N.erreur, 'error'); }
 }
 
 
@@ -1097,7 +1122,7 @@ function renderSimilaires(produits, catId) {
           </div>
           ${(!EST_VENDEUR && !EST_ADMIN) ? `<button class="sim-cart-btn" type="button"
                   onclick="event.preventDefault();event.stopPropagation();addToCartQuick(${p.id})"
-                  aria-label="Ajouter au panier">
+                  aria-label="${DETAIL_I18N.ajouterAuPanier}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
@@ -1116,7 +1141,7 @@ function renderSimilaires(produits, catId) {
 async function addToCartQuick(id) {
   try {
     await API.post('/api/panier/ajouter/', { produit_id: id, quantite: 1 });
-    window.toast && window.toast('Produit ajouté au panier !', 'success');
+    window.toast && window.toast(DETAIL_I18N.produitAjoute, 'success');
     const badge = document.getElementById('cart-badge');
     if (badge) { badge.classList.remove('hidden'); badge.textContent = (parseInt(badge.textContent)||0)+1; }
   } catch {}
@@ -1124,7 +1149,7 @@ async function addToCartQuick(id) {
 
 
 /* -- HELPER ------------------------------------------------ */
-function formatPrix(val) { return parseInt(val).toLocaleString('fr-FR'); }
+function formatPrix(val) { return parseInt(val).toLocaleString(document.documentElement.lang||'fr'); }
 
 
 loadProduit();

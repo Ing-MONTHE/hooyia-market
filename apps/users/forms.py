@@ -5,6 +5,7 @@ et la génération des champs HTML.
 """
 from django import forms
 from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 from .models import CustomUser, AdresseLivraison
 
 
@@ -21,17 +22,17 @@ class InscriptionForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class'      : 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Mot de passe'
+            'placeholder': _('Mot de passe')
         }),
         validators=[validate_password],
-        label="Mot de passe"
+        label=_("Mot de passe")
     )
     password2 = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class'      : 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Confirmer le mot de passe'
+            'placeholder': _('Confirmer le mot de passe')
         }),
-        label="Confirmer le mot de passe"
+        label=_("Confirmer le mot de passe")
     )
 
     class Meta:
@@ -40,23 +41,23 @@ class InscriptionForm(forms.ModelForm):
         widgets = {
             'username' : forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': "Nom d'utilisateur"
+                'placeholder': _("Nom d'utilisateur")
             }),
             'email'    : forms.EmailInput(attrs={
                 'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'Adresse email'
+                'placeholder': _('Adresse email')
             }),
             'nom'      : forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'Nom'
+                'placeholder': _('Nom')
             }),
             'prenom'   : forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'Prénom'
+                'placeholder': _('Prénom')
             }),
             'telephone': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'Téléphone (ex: +237 6XX XXX XXX)'
+                'placeholder': _('Téléphone (ex: +237 6XX XXX XXX)')
             }),
         }
 
@@ -64,16 +65,15 @@ class InscriptionForm(forms.ModelForm):
         """Vérifie l'unicité de l'email"""
         email = self.cleaned_data.get('email')
         if CustomUser.objects.filter(email=email).exists():
-            raise forms.ValidationError("Un compte existe déjà avec cet email.")
+            raise forms.ValidationError(_("Un compte existe déjà avec cet email."))
         return email.lower()
 
     def clean(self):
-        """Vérifie que les deux mots de passe correspondent"""
         cleaned_data = super().clean()
         p1 = cleaned_data.get('password')
         p2 = cleaned_data.get('password2')
         if p1 and p2 and p1 != p2:
-            raise forms.ValidationError("Les mots de passe ne correspondent pas.")
+            raise forms.ValidationError(_("Les mots de passe ne correspondent pas."))
         return cleaned_data
 
     def save(self, commit=True):
@@ -100,17 +100,17 @@ class ConnexionForm(forms.Form):
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class'      : 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Adresse email',
+            'placeholder': _('Adresse email'),
             'autofocus'  : True
         }),
-        label="Email"
+        label=_("Email")
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class'      : 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Mot de passe'
+            'placeholder': _('Mot de passe')
         }),
-        label="Mot de passe"
+        label=_("Mot de passe")
     )
 
 

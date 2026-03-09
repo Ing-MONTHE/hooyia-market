@@ -47,10 +47,10 @@
      renderCartPage(data)   → bascule entre les 3 états HTML
      renderCartItem(item)   → génère le HTML d'une ligne article
 {% endcomment %}
-{% load static %}
+{% load static i18n %}
 
 
-{% block title %}Mon Panier — HooYia Market{% endblock %}
+{% block title %}{% trans 'Mon Panier' %} — HooYia Market{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -418,12 +418,12 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
 
   {% comment %} ── Breadcrumb — Fil d'Ariane ── {% endcomment %}
-  <nav class="cart-breadcrumb" aria-label="Fil d'Ariane">
-    <a href="{% url 'products:accueil' %}">Accueil</a>
+  <nav class="cart-breadcrumb" aria-label="{% trans 'Fil d\'Ariane' %}">
+    <a href="{% url 'products:accueil' %}">{% trans "Accueil" %}</a>
     <span class="sep">›</span>
-    <a href="{% url 'products:liste' %}">Catalogue</a>
+    <a href="{% url 'products:liste' %}">{% trans "Catalogue" %}</a>
     <span class="sep">›</span>
-    <span class="current">Mon Panier</span>
+    <span class="current">{% trans "Mon Panier" %}</span>
   </nav>
 
   {% comment %} ════════════════════════════════════════════════════
@@ -487,10 +487,10 @@
         </svg>
       </div>
 
-      <h2 class="empty-title">Votre panier est vide</h2>
+      <h2 class="empty-title">{% trans "Votre panier est vide" %}</h2>
       <p class="empty-subtitle">
-        Vous n'avez encore rien ajouté à votre panier.<br>
-        Découvrez notre catalogue et faites-vous plaisir !
+        {% trans "Vous n'avez encore rien ajouté à votre panier." %}<br>
+        {% trans "Découvrez notre catalogue et faites-vous plaisir !" %}
       </p>
 
       {% comment %} CTA unique — règle d'or : 1 seul btn orange par vue
@@ -502,7 +502,7 @@
           <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
         </svg>
-        Voir le catalogue
+        {% trans "Voir le catalogue" %}
       </a>
 
     </div>
@@ -523,14 +523,14 @@
 
         <div class="cart-header">
           <div class="cart-header-left">
-            <h1 class="cart-title">Mon Panier</h1>
+            <h1 class="cart-title">{% trans "Mon Panier" %}</h1>
             {% comment %} Injecté par renderCartPage() : "3 articles" {% endcomment %}
             <span id="cart-count" class="cart-count-label"></span>
           </div>
 
           {% comment %} Vider tout — confirm() dans Cart.vider()
              Icône Lucide : Trash2 {% endcomment %}
-          <button onclick="Cart.vider()" class="btn-vider" aria-label="Vider tout le panier">
+          <button onclick="Cart.vider()" class="btn-vider" aria-label="{% trans 'Vider tout le panier' %}">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round">
@@ -539,50 +539,50 @@
               <path d="M10 11v6M14 11v6"/>
               <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
             </svg>
-            Vider
+            {% trans "Vider" %}
           </button>
         </div>
 
         {% comment %} Liste des articles — injectée par renderCartItem() en bas de page {% endcomment %}
-        <div id="items-list" class="space-y-3" role="list" aria-label="Articles dans votre panier"></div>
+        <div id="items-list" class="space-y-3" role="list" aria-label="{% trans 'Articles dans votre panier' %}"></div>
 
       </div>
 
       {% comment %} ── Colonne droite : récapitulatif sticky ── {% endcomment %}
       <div class="lg:col-span-1 recap-sidebar">
-        <div class="recap-card" role="complementary" aria-label="Récapitulatif de commande">
+        <div class="recap-card" role="complementary" aria-label="{% trans 'Récapitulatif de commande' %}">
 
           {% comment %} Header bleu marine {% endcomment %}
           <div class="recap-header">
-            <p class="recap-header-title">Récapitulatif</p>
+            <p class="recap-header-title">{% trans "Récapitulatif" %}</p>
           </div>
 
           <div class="recap-body">
 
             {% comment %} Sous-total — injecté par renderCartPage() {% endcomment %}
             <div class="recap-line">
-              <span class="recap-line-label">Sous-total</span>
+              <span class="recap-line-label">{% trans "Sous-total" %}</span>
               <span class="recap-line-value" id="subtotal">—</span>
             </div>
 
             {% comment %} Livraison gratuite {% endcomment %}
             <div class="recap-line">
-              <span class="recap-line-label">Livraison</span>
-              <span class="badge-free">Gratuite</span>
+              <span class="recap-line-label">{% trans "Livraison" %}</span>
+              <span class="badge-free">{% trans "Gratuite" %}</span>
             </div>
 
             <div class="recap-divider"></div>
 
             {% comment %} Total final — injecté par renderCartPage() {% endcomment %}
             <div class="recap-total-line">
-              <span class="recap-total-label">Total</span>
+              <span class="recap-total-label">{% trans "Total" %}</span>
               <span class="recap-total-value" id="total-price">—</span>
             </div>
 
             {% comment %} CTA unique — règle d'or : 1 seul btn orange par vue
                Icône Lucide : ArrowRight {% endcomment %}
             <a href="{% url 'orders:passer_commande' %}" id="btn-commander" class="btn-commander">
-              Passer la commande
+              {% trans "Passer la commande" %}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2.5"
                    stroke-linecap="round" stroke-linejoin="round">
@@ -592,7 +592,7 @@
             </a>
 
             {% comment %} Retour catalogue — lien ghost {% endcomment %}
-            <a href="{% url 'products:liste' %}" class="btn-continue">← Continuer mes achats</a>
+            <a href="{% url 'products:liste' %}" class="btn-continue">← {% trans "Continuer mes achats" %}</a>
 
           </div>
 
@@ -603,7 +603,7 @@
                  stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span>Paiement 100% sécurisé</span>
+            <span>{% trans "Paiement 100% sécurisé" %}</span>
           </div>
 
         </div>
@@ -621,11 +621,11 @@
 <div id="mobile-recap-bar" class="mobile-recap-bar" aria-hidden="true">
   <div class="mobile-recap-inner">
     <div>
-      <p class="mobile-total-label">Total</p>
+      <p class="mobile-total-label">{% trans "Total" %}</p>
       <p class="mobile-total-value" id="mobile-total-price">—</p>
     </div>
     <a href="{% url 'orders:passer_commande' %}" class="btn-mobile-commander">
-      Commander
+      {% trans "Commander" %}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round">
@@ -638,6 +638,28 @@
 {% endblock %}
 
 {% block extra_scripts %}
+
+{# Chaînes traduites pour le JS du panier #}
+<script>
+var CART_I18N = {
+  articleSingulier:  '{% trans "article" %}',
+  articlePluriel:    '{% trans "articles" %}',
+  produitSupprime:   '{% trans "Produit supprimé" %}',
+  produitEpuise:     '{% trans "Produit épuisé" %}',
+  parUnite:          '{% trans "/ unité" %}',
+  articleSupprime:   '{% trans "Article supprimé." %}',
+  articleSupprimeMsg:'{% trans "Article supprimé du panier." %}',
+  panierVide:        '{% trans "Panier vidé." %}',
+  viderTitre:        '{% trans "Vider le panier ?" %}',
+  viderBody:         '{% trans "Tous les articles seront supprimés." %}',
+  viderConfirm:      '{% trans "🗑 Vider le panier" %}',
+  diminuerQty:       '{% trans "Diminuer la quantité" %}',
+  augmenterQty:      '{% trans "Augmenter la quantité" %}',
+  quantiteDe:        '{% trans "Quantité de" %}',
+  voirProduit:       '{% trans "Voir" %}',
+  supprimerDu:       '{% trans "Supprimer" %}',
+};
+</script>
 <script src="{% static 'js/cart.js' %}"></script>
 
 <script>
@@ -714,7 +736,7 @@ function renderCartPage(data) {
   const countEl = document.getElementById('cart-count');
   if (countEl) {
     const n = data.nombre_articles;
-    countEl.textContent = `${n} article${n > 1 ? 's' : ''}`;
+    countEl.textContent = `${n} ${n > 1 ? CART_I18N.articlePluriel : CART_I18N.articleSingulier}`;
   }
 
   /* Injecter la liste des articles */
@@ -777,7 +799,7 @@ function renderCartPage(data) {
  */
 function renderCartItem(item) {
   const img       = item.image_principale || '/static/img/logo.svg';
-  const nom       = item.produit_nom || 'Produit supprimé';
+  const nom       = item.produit_nom || CART_I18N.produitSupprime;
   const slug      = item.produit_slug || '#';
   const prixUnit  = parseFloat(item.prix_snapshot || 0);
   const sousTotal = parseFloat(item.sous_total || 0);
@@ -791,14 +813,14 @@ function renderCartItem(item) {
         <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
       </svg>
-      Produit épuisé
+      ${CART_I18N.produitEpuise}
     </span>` : '';
 
   return `
   <div class="cart-item" id="item-${item.id}" role="listitem">
 
     <!-- Vignette image — lien vers la fiche produit -->
-    <a href="/produits/${escapeHtml(slug)}/" class="item-img-wrap" aria-label="Voir ${escapeHtml(nom)}">
+    <a href="/produits/${escapeHtml(slug)}/" class="item-img-wrap" aria-label="${CART_I18N.voirProduit} ${escapeHtml(nom)}">
       <img src="${escapeHtml(img)}"
            alt="${escapeHtml(nom)}"
            loading="lazy"
@@ -808,16 +830,16 @@ function renderCartItem(item) {
     <!-- Informations produit -->
     <div class="item-info">
       <a href="/produits/${escapeHtml(slug)}/" class="item-name">${escapeHtml(nom)}</a>
-      <p class="item-prix-unit">${formatPrix(prixUnit)} / unité</p>
+      <p class="item-prix-unit">${formatPrix(prixUnit)} ${CART_I18N.parUnite}</p>
       ${badgeEpuise}
 
       <!-- Contrôleur quantité [−] [n] [+] + lien Supprimer
            Icônes : Lucide Minus / Plus -->
       <div class="qty-controls">
-        <div class="qty-stepper" role="group" aria-label="Quantité de ${escapeHtml(nom)}">
+        <div class="qty-stepper" role="group" aria-label="${CART_I18N.quantiteDe} ${escapeHtml(nom)}">
           <button class="qty-btn"
             onclick="Cart.updateQty(${item.id}, ${item.quantite - 1})"
-            aria-label="Diminuer la quantité">
+            aria-label="${CART_I18N.diminuerQty}">
             <!-- Lucide : Minus -->
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -826,7 +848,7 @@ function renderCartItem(item) {
           <span class="qty-value" aria-live="polite" aria-atomic="true">${item.quantite}</span>
           <button class="qty-btn"
             onclick="Cart.updateQty(${item.id}, ${Math.min(item.quantite + 1, stockMax)})"
-            aria-label="Augmenter la quantité"
+            aria-label="${CART_I18N.augmenterQty}"
             ${item.quantite >= stockMax ? 'disabled' : ''}>
             <!-- Lucide : Plus -->
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -836,8 +858,8 @@ function renderCartItem(item) {
         </div>
         <button class="btn-remove-item"
           onclick="Cart.removeItem(${item.id})"
-          aria-label="Supprimer ${escapeHtml(nom)} du panier">
-          Supprimer
+          aria-label="${CART_I18N.supprimerDu} ${escapeHtml(nom)}">
+          ${CART_I18N.supprimerDu}
         </button>
       </div>
     </div>
@@ -880,7 +902,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       await API.patch(`/api/panier/items/${itemId}/`, { quantite: nouvelleQty });
       await reloadPanier();
-      if (nouvelleQty === 0) window.toast && window.toast('Article supprimé.', 'success');
+      if (nouvelleQty === 0) window.toast && window.toast(CART_I18N.articleSupprime, 'success');
     } catch(e) {}
   };
 
@@ -889,13 +911,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       await API.delete(`/api/panier/items/${itemId}/`);
       await reloadPanier();
-      window.toast && window.toast('Article supprimé du panier.', 'success');
+      window.toast && window.toast(CART_I18N.articleSupprimeMsg, 'success');
     } catch(e) {}
   };
 
   // Surcharge vider
   Cart.vider = async function() {
-    const ok = await showConfirm({ title: 'Vider le panier ?', body: 'Tous les articles seront supprimés.', confirmText: '🗑 Vider le panier', type: 'warning' });
+    const ok = await showConfirm({ title: CART_I18N.viderTitre, body: CART_I18N.viderBody, confirmText: CART_I18N.viderConfirm, type: 'warning' });
     if (!ok) return;
     try {
       await API.delete('/api/panier/vider/');
@@ -903,7 +925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window._cartItemOrder = [];
       // Forcer l'état vide immédiatement sans attendre l'API
       renderCartPage({ est_vide: true, items: [], nombre_articles: 0, total: '0' });
-      window.toast && window.toast('Panier vidé.', 'success');
+      window.toast && window.toast(CART_I18N.panierVide, 'success');
     } catch(e) {}
   };
 

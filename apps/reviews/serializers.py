@@ -8,6 +8,7 @@ Serializers pour les avis clients.
 """
 from rest_framework import serializers
 from django.db import IntegrityError
+from django.utils.translation import gettext_lazy as _
 
 from .models import Avis
 from apps.orders.models import Commande
@@ -124,7 +125,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         # Un produit épuisé ou inactif ne devrait plus recevoir d'avis
         if produit.statut not in ['actif', 'stock_faible']:
             raise serializers.ValidationError(
-                "Ce produit n'accepte plus d'avis."
+                _("Ce produit n'accepte plus d'avis.")
             )
         return produit
 
@@ -144,8 +145,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         # appelée directement sans passer par la vue standard).
         if utilisateur.is_staff or utilisateur.is_admin or utilisateur.is_vendeur:
             raise serializers.ValidationError(
-                "Les administrateurs et vendeurs ne peuvent pas laisser d'avis. "
-                "Cette fonctionnalité est réservée aux clients."
+                _("Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette fonctionnalité est réservée aux clients.")
             )
 
         # ── Vérification : l'utilisateur a-t-il reçu ce produit ? ─────────────
@@ -162,7 +162,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
 
             if not a_commande:
                 raise serializers.ValidationError(
-                    "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+                    _("Vous ne pouvez laisser un avis que sur un produit que vous avez reçu.")
                 )
 
         # ── Vérification : l'utilisateur n'a-t-il pas déjà noté ce produit ? ──
@@ -175,7 +175,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
 
         if deja_note:
             raise serializers.ValidationError(
-                "Vous avez déjà laissé un avis sur ce produit."
+                _("Vous avez déjà laissé un avis sur ce produit.")
             )
 
         return data
@@ -196,7 +196,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         except IntegrityError:
             # Cas de concurrence rare : deux requêtes simultanées du même user
             raise serializers.ValidationError(
-                "Vous avez déjà laissé un avis sur ce produit."
+                _("Vous avez déjà laissé un avis sur ce produit.")
             )
 
 # ===============================================================
@@ -237,7 +237,7 @@ class AvisAppCreerSerializer(serializers.ModelSerializer):
     def validate(self, data):
         utilisateur = self.context['request'].user
         if AvisApp.objects.filter(utilisateur=utilisateur).exists():
-            raise serializers.ValidationError("Vous avez déjà laissé un avis sur la plateforme.")
+            raise serializers.ValidationError(_("Vous avez déjà laissé un avis sur la plateforme."))
         return data
 
     def create(self, validated_data):
@@ -247,4 +247,4 @@ class AvisAppCreerSerializer(serializers.ModelSerializer):
                 **validated_data
             )
         except IntegrityError:
-            raise serializers.ValidationError("Vous avez déjà laissé un avis sur la plateforme.")
+            raise serializers.ValidationError(_("Vous avez déjà laissé un avis sur la plateforme."))

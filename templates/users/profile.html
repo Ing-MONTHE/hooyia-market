@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -50,7 +50,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}Mon Profil — HooYia Market{% endblock %}
+{% block title %}{% trans 'Mon Profil' %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -86,7 +86,7 @@
         <span class="badge badge-brand" style="display:inline-flex;align-items:center;gap:.3rem;">
           {% comment %} Lucide — ShieldCheck {% endcomment %}
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          Administrateur
+          {% trans "Administrateur" %}
         </span>
       </div>
       <p style="font-size:.875rem;color:var(--text-muted);margin:.25rem 0 0 0;">{{ user.email }}</p>
@@ -102,27 +102,27 @@
       {% comment %} Infos personnelles admin {% endcomment %}
       <div class="card" style="padding:1.5rem;">
         <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0 0 1.25rem 0;">
-          Informations
+          {% trans "Informations" %}
         </h2>
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" name="action" value="update_profil" />
           <div style="display:flex;flex-direction:column;gap:.875rem;">
             <div>
-              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Prénom</label>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">{% trans "Prénom" %}</label>
               <input type="text" name="prenom" value="{{ user.prenom }}" class="input-field" style="font-size:.875rem;" />
             </div>
             <div>
-              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Nom</label>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">{% trans "Nom" %}</label>
               <input type="text" name="nom" value="{{ user.nom }}" class="input-field" style="font-size:.875rem;" />
             </div>
             <div>
-              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">Téléphone</label>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.375rem;">{% trans "Téléphone" %}</label>
               <input type="text" name="telephone" value="{{ user.telephone }}" class="input-field" style="font-size:.875rem;" />
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:1rem;justify-content:center;">
-            Mettre à jour
+            {% trans "Mettre à jour" %}
           </button>
         </form>
       </div>
@@ -130,7 +130,7 @@
       {% comment %} Accès rapides admin {% endcomment %}
       <div class="card" style="padding:1.5rem;">
         <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0 0 1rem 0;">
-          Accès rapides
+          {% trans "Accès rapides" %}
         </h2>
         <nav style="display:flex;flex-direction:column;gap:.25rem;">
 
@@ -139,7 +139,7 @@
              onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">
             {% comment %} Lucide — LayoutDashboard {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Dashboard admin
+            {% trans "Dashboard admin" %}
           </a>
 
           <a href="{% url 'orders:historique' %}"
@@ -147,7 +147,7 @@
              onmouseover="this.style.background='var(--surface-3)'" onmouseout="this.style.background='transparent'">
             {% comment %} Lucide — ClipboardList {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-            Voir les commandes
+            {% trans "Voir les commandes" %}
           </a>
 
           <a href="{% url 'users:deconnexion' %}"
@@ -155,7 +155,7 @@
              onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
             {% comment %} Lucide — LogOut {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Déconnexion
+            {% trans "Déconnexion" %}
           </a>
 
         </nav>
@@ -176,19 +176,19 @@
 
         <div class="card" style="padding:1.25rem;text-align:center;">
           <p id="nb-produits" style="font-size:1.75rem;font-weight:800;color:var(--brand-500);margin:0 0 .25rem 0;">—</p>
-          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Produits</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">{% trans "Produits" %}</p>
         </div>
         <div class="card" style="padding:1.25rem;text-align:center;">
           <p id="nb-commandes" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
-          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Commandes</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">{% trans "Commandes" %}</p>
         </div>
         <div class="card" style="padding:1.25rem;text-align:center;">
           <p id="nb-utilisateurs" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
-          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Utilisateurs</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">{% trans "Utilisateurs" %}</p>
         </div>
         <div class="card" style="padding:1.25rem;text-align:center;">
           <p id="nb-avis" style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin:0 0 .25rem 0;">—</p>
-          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">Avis</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0;">{% trans "Avis" %}</p>
         </div>
 
       </div>
@@ -196,14 +196,14 @@
       {% comment %} Dernières commandes (chargées via API) {% endcomment %}
       <div class="card" style="padding:1.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-          <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;">Dernières commandes</h2>
+          <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;">{% trans "Dernières commandes" %}</h2>
           <a href="{% url 'orders:historique' %}" style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
              onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-            Voir tout →
+            {% trans "Voir tout" %} →
           </a>
         </div>
         <div id="dernières-commandes">
-          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">{% trans "Chargement…" %}</p>
         </div>
       </div>
 
@@ -213,15 +213,15 @@
           <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;display:flex;align-items:center;gap:.5rem;">
             {% comment %} Lucide — AlertTriangle {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Stock faible
+            {% trans "Stock faible" %}
           </h2>
           <a href="{% url 'products:liste' %}" style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
              onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-            Catalogue →
+            {% trans "Catalogue" %} →
           </a>
         </div>
         <div id="stock-faible">
-          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">{% trans "Chargement…" %}</p>
         </div>
       </div>
 
@@ -267,7 +267,7 @@
 
           <div style="position:relative;display:inline-block;margin-bottom:1rem;">
             {% if user.photo_profil %}
-              <img src="{{ user.photo_profil.url }}" alt="Photo de profil"
+              <img src="{{ user.photo_profil.url }}" alt="{% trans 'Photo de profil' %}"
                    style="width:88px;height:88px;border-radius:18px;object-fit:cover;" />
             {% else %}
               {% comment %} Fallback initiales — fond brand-600 {% endcomment %}
@@ -280,7 +280,7 @@
 
             {% comment %} Bouton Camera — overlay bas-droit {% endcomment %}
             <button type="button" onclick="document.getElementById('photo-input').click()"
-              aria-label="Changer la photo de profil"
+              aria-label="{% trans 'Changer la photo de profil' %}"
               style="position:absolute;bottom:-6px;right:-6px;width:28px;height:28px;
                      border-radius:8px;background:var(--surface);border:1.5px solid var(--border);
                      display:flex;align-items:center;justify-content:center;
@@ -313,13 +313,13 @@
             <span class="badge badge-success" style="display:inline-flex;align-items:center;gap:.3rem;">
               {% comment %} Lucide — CheckCircle {% endcomment %}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Email vérifié
+              {% trans "Email vérifié" %}
             </span>
           {% else %}
             <span class="badge badge-error" style="display:inline-flex;align-items:center;gap:.3rem;">
               {% comment %} Lucide — XCircle {% endcomment %}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              Non vérifié
+              {% trans "Non vérifié" %}
             </span>
           {% endif %}
 
@@ -327,7 +327,7 @@
             <span class="badge badge-warning" style="display:inline-flex;align-items:center;gap:.3rem;">
               {% comment %} Lucide — Store {% endcomment %}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Vendeur
+              {% trans "Vendeur" %}
             </span>
           {% endif %}
 
@@ -335,7 +335,7 @@
 
         {% comment %} Date d'inscription {% endcomment %}
         <div style="padding-top:.875rem;border-top:1px solid var(--border);">
-          <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .2rem 0;">Membre depuis</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .2rem 0;">{% trans "Membre depuis" %}</p>
           <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0;">
             {{ user.date_inscription|date:"d F Y" }}
           </p>
@@ -359,7 +359,7 @@
              onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
             {% comment %} Lucide — ClipboardList {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-            Mes commandes
+            {% trans "Mes commandes" %}
           </a>
 
           <a href="{% url 'cart:panier' %}"
@@ -368,7 +368,7 @@
              onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
             {% comment %} Lucide — ShoppingCart {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-            Mon panier
+            {% trans "Mon panier" %}
           </a>
 
           <a href="/chat/"
@@ -377,7 +377,7 @@
              onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
             {% comment %} Lucide — MessageSquare {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-500);flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Mes messages
+            {% trans "Mes messages" %}
           </a>
 
           <div style="height:1px;background:var(--border);margin:.25rem 0;"></div>
@@ -387,7 +387,7 @@
              onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
             {% comment %} Lucide — LogOut {% endcomment %}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Déconnexion
+            {% trans "Déconnexion" %}
           </a>
 
         </nav>
@@ -418,7 +418,7 @@
 
         <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0 0 1.25rem 0;
                    padding-bottom:.875rem;border-bottom:1px solid var(--border);">
-          Informations personnelles
+          {% trans "Informations personnelles" %}
         </h2>
 
         {% comment %} Messages flash spécifiques au formulaire profil {% endcomment %}
@@ -439,11 +439,11 @@
           {% comment %} Grille 2 colonnes pour prénom/nom {% endcomment %}
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
             <div>
-              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">Prénom</label>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">{% trans "Prénom" %}</label>
               <input type="text" name="prenom" id="id_prenom" value="{{ user.prenom }}" class="input-field" />
             </div>
             <div>
-              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">Nom</label>
+              <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">{% trans "Nom" %}</label>
               <input type="text" name="nom" id="id_nom" value="{{ user.nom }}" class="input-field" />
             </div>
           </div>
@@ -452,7 +452,7 @@
 
             <div>
               <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-                Nom d'utilisateur
+                {% trans "Nom d'utilisateur" %}
               </label>
               <div style="position:relative;">
                 {% comment %} Lucide — User {% endcomment %}
@@ -466,7 +466,7 @@
 
             <div>
               <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-                Téléphone
+                {% trans "Téléphone" %}
               </label>
               <div style="position:relative;">
                 {% comment %} Lucide — Phone {% endcomment %}
@@ -482,7 +482,7 @@
             {% comment %} Email — readonly, non modifiable {% endcomment %}
             <div>
               <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-                Adresse email
+                {% trans "Adresse email" %}
               </label>
               <div style="position:relative;">
                 {% comment %} Lucide — Mail {% endcomment %}
@@ -494,7 +494,7 @@
                        disabled />
               </div>
               <p style="font-size:.75rem;color:var(--text-muted);margin:.375rem 0 0 0;">
-                L'adresse email ne peut pas être modifiée.
+                {% trans "L'adresse email ne peut pas être modifiée." %}
               </p>
             </div>
 
@@ -503,7 +503,7 @@
           {% comment %} CTA — RÈGLE D'OR : 1 seul .btn-primary sur cette section {% endcomment %}
           <button type="submit" class="btn btn-primary"
                   style="margin-top:1.5rem;padding:.625rem 1.5rem;">
-            Enregistrer les modifications
+            {% trans "Enregistrer les modifications" %}
           </button>
 
         </form>
@@ -523,13 +523,13 @@
         <div style="display:flex;align-items:center;justify-content:space-between;
                     margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
           <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0;">
-            Adresses de livraison
+            {% trans "Adresses de livraison" %}
           </h2>
           <a href="{% url 'users:ajouter_adresse' %}" class="btn btn-secondary btn-sm"
              style="display:inline-flex;align-items:center;gap:.375rem;">
             {% comment %} Lucide — Plus {% endcomment %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Ajouter
+            {% trans "Ajouter" %}
           </a>
         </div>
 
@@ -556,7 +556,7 @@
                 </svg>
                 <div>
                   {% if adr.is_default %}
-                    <span class="badge badge-brand" style="margin-bottom:.375rem;display:inline-block;">Par défaut</span>
+                    <span class="badge badge-brand" style="margin-bottom:.375rem;display:inline-block;">{% trans "Par défaut" %}</span>
                   {% endif %}
                   <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0 0 .2rem 0;">
                     {{ adr.nom_complet }}
@@ -589,7 +589,7 @@
                     <path d="M10 11v6"/><path d="M14 11v6"/>
                     <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                   </svg>
-                  Supprimer
+                  {% trans "Supprimer" %}
                 </button>
               </form>
 
@@ -608,10 +608,10 @@
               <circle cx="12" cy="10" r="3"/>
             </svg>
             <p style="font-size:.875rem;color:var(--text-muted);margin:0 0 .75rem 0;">
-              Aucune adresse enregistrée.
+              {% trans "Aucune adresse enregistrée." %}
             </p>
             <a href="{% url 'users:ajouter_adresse' %}" class="btn btn-secondary btn-sm">
-              Ajouter une adresse
+              {% trans "Ajouter une adresse" %}
             </a>
           </div>
         {% endif %}
@@ -629,16 +629,16 @@
         <div style="display:flex;align-items:center;justify-content:space-between;
                     margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
           <h2 style="font-size:1rem;font-weight:700;color:var(--brand-600);margin:0;">
-            Commandes récentes
+            {% trans "Commandes récentes" %}
           </h2>
           <a href="{% url 'orders:historique' %}"
              style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;"
              onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-            Voir tout →
+            {% trans "Voir tout" %} →
           </a>
         </div>
         <div id="commandes-recentes">
-          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">Chargement…</p>
+          <p style="font-size:.875rem;color:var(--text-muted);font-style:italic;">{% trans "Chargement…" %}</p>
         </div>
       </div>
       {% comment %} ── FIN section commandes ── {% endcomment %}
@@ -676,6 +676,22 @@
 {% endcomment %}
 {% block extra_scripts %}
 <script>
+  {# Chaînes traduites pour le JS #}
+  var PROFIL_I18N = {
+    enAttente:      '{% trans "En attente" %}',
+    confirmee:      '{% trans "Confirmée" %}',
+    enPreparation:  '{% trans "En préparation" %}',
+    expediee:       '{% trans "Expédiée" %}',
+    livree:         '{% trans "Livrée" %}',
+    annulee:        '{% trans "Annulée" %}',
+    aucuneCommande: '{% trans "Aucune commande." %}',
+    aucuneCommandeUser: '{% trans "Aucune commande pour le moment." %}',
+    erreurCommandes:'{% trans "Impossible de charger les commandes." %}',
+    aucunStockFaible: '{% trans "Aucun produit en stock faible. ✓" %}',
+    commande:       '{% trans "Commande" %}',
+    restant:        '{% trans "restant" %}',
+    restants:       '{% trans "restants" %}',
+  };
 {% if user.is_staff %}
 
 /**
@@ -711,9 +727,9 @@ async function loadAdminStats() {
         annulee:       'background:rgba(239,68,68,.1);color:#991b1b;',
       };
       const LABELS = {
-        en_attente:'En attente', confirmee:'Confirmée',
-        en_preparation:'En préparation', expediee:'Expédiée',
-        livree:'Livrée', annulee:'Annulée'
+        en_attente: PROFIL_I18N.enAttente, confirmee: PROFIL_I18N.confirmee,
+        en_preparation: PROFIL_I18N.enPreparation, expediee: PROFIL_I18N.expediee,
+        livree: PROFIL_I18N.livree, annulee: PROFIL_I18N.annulee
       };
 
       document.getElementById('dernières-commandes').innerHTML = cmds.length
@@ -728,7 +744,7 @@ async function loadAdminStats() {
                 #${c.reference_courte || c.id}
               </a>
               <p style="font-size:.75rem;color:var(--text-muted);margin:.1rem 0 0 0;">
-                ${new Date(c.date_creation).toLocaleDateString('fr-FR')}
+                ${new Date(c.date_creation).toLocaleDateString(document.documentElement.lang||'fr')}
               </p>
             </div>
             <div style="display:flex;align-items:center;gap:.75rem;">
@@ -770,7 +786,7 @@ async function loadStockFaible() {
              onmouseout="this.style.color='var(--text-primary)'">${p.nom}</a>
           <span style="font-size:.8125rem;font-weight:700;
                        color:${p.stock <= 2 ? '#ef4444' : '#f59e0b'};">
-            ${p.stock} restant${p.stock > 1 ? 's' : ''}
+            ${p.stock} ${p.stock > 1 ? PROFIL_I18N.restants : PROFIL_I18N.restant}
           </span>
         </div>`).join('')
       : '<p style="font-size:.875rem;color:var(--text-muted);">Aucun produit en stock faible. ✓</p>';
@@ -813,10 +829,10 @@ async function loadCommandesRecentes() {
                color:var(--text-primary);text-decoration:none;"
                onmouseover="this.style.color='var(--brand-500)'"
                onmouseout="this.style.color='var(--text-primary)'">
-              Commande #${c.reference_courte || c.id}
+              ${PROFIL_I18N.commande} #${c.reference_courte || c.id}
             </a>
             <p style="font-size:.75rem;color:var(--text-muted);margin:.1rem 0 0 0;">
-              ${new Date(c.date_creation).toLocaleDateString('fr-FR')}
+              ${new Date(c.date_creation).toLocaleDateString(document.documentElement.lang||'fr')}
             </p>
           </div>
           <div style="display:flex;align-items:center;gap:.75rem;">
@@ -831,7 +847,7 @@ async function loadCommandesRecentes() {
 
   } catch(e) {
     document.getElementById('commandes-recentes').innerHTML =
-      '<p style="font-size:.875rem;color:var(--text-muted);">Impossible de charger les commandes.</p>';
+      '<p style="font-size:.875rem;color:var(--text-muted);">'+PROFIL_I18N.erreurCommandes+'</p>';
   }
 }
 

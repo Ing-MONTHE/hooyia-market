@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — partials/footer.html
 
@@ -165,7 +165,7 @@
                   transition:opacity 150ms;"
            onmouseover="this.style.opacity='.85'"
            onmouseout="this.style.opacity='1'"
-           aria-label="HooYia Market — Accueil">
+           aria-label="{% trans 'HooYia Market — Accueil' %}">
           <img src="{% static 'img/logo.svg' %}"
                alt="HooYia Market"
                style="height:32px;width:auto;border-radius:8px;" />
@@ -173,7 +173,7 @@
 
         {# Description #}
         <p class="footer-desc" style="max-width:230px;">
-          Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs camerounais à ceux qui veulent le meilleur — sans compromis.
+          {% trans "Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs camerounais à ceux qui veulent le meilleur — sans compromis." %}
         </p>
 
         {# Badge localisation #}
@@ -184,7 +184,7 @@
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
               <circle cx="12" cy="10" r="3"/>
             </svg>
-            Bafoussam, Cameroun
+            {% trans "Bafoussam, Cameroun" %}
           </span>
         </div>
 
@@ -227,7 +227,7 @@
 
       {# ── COLONNE 2 : Catalogue ── #}
       <div>
-        <h4 class="footer-title">Catalogue</h4>
+        <h4 class="footer-title">{% trans "Catalogue" %}</h4>
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
 
           <li>
@@ -238,7 +238,7 @@
                 <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
                 <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
               </svg>
-              Tous les produits
+              {% trans "Tous les produits" %}
             </a>
           </li>
 
@@ -249,7 +249,7 @@
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
-              Nouveautés
+              {% trans "Nouveautés" %}
             </a>
           </li>
 
@@ -262,7 +262,7 @@
                 <circle cx="6.5" cy="6.5" r="2.5"/>
                 <circle cx="17.5" cy="17.5" r="2.5"/>
               </svg>
-              Promotions
+              {% trans "Promotions" %}
             </a>
           </li>
 
@@ -272,7 +272,7 @@
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
               </svg>
-              En vedette
+              {% trans "En vedette" %}
             </a>
           </li>
 
@@ -283,7 +283,7 @@
 
       {# ── COLONNE 3 : Liens utiles ── #}
       <div>
-        <h4 class="footer-title">Liens utiles</h4>
+        <h4 class="footer-title">{% trans "Liens utiles" %}</h4>
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
 
           <li>
@@ -292,7 +292,7 @@
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
-              Accueil
+              {% trans "Accueil" %}
             </a>
           </li>
 
@@ -303,7 +303,7 @@
                 <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
                 <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
               </svg>
-              Tous les produits
+              {% trans "Tous les produits" %}
             </a>
           </li>
 
@@ -313,7 +313,7 @@
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
               </svg>
-              Mon panier
+              {% trans "Mon panier" %}
             </a>
           </li>
 
@@ -324,7 +324,7 @@
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <path d="M16 10a4 4 0 01-8 0"/>
               </svg>
-              Mes commandes
+              {% trans "Mes commandes" %}
             </a>
           </li>
 
@@ -333,7 +333,7 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               </svg>
-              Messages
+              {% trans "Messages" %}
             </a>
           </li>
 
@@ -343,7 +343,7 @@
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              Mon profil
+              {% trans "Mon profil" %}
             </a>
           </li>
 
@@ -352,7 +352,7 @@
 
       {# ── COLONNE 4 : Aide & Informations ── #}
       <div>
-        <h4 class="footer-title">Aide & Informations</h4>
+        <h4 class="footer-title">{% trans "Aide & Informations" %}</h4>
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
 
           <li>
@@ -363,7 +363,7 @@
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
-              À propos
+              {% trans "À propos" %}
             </a>
           </li>
 
@@ -375,7 +375,7 @@
                 <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/>
                 <path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
               </svg>
-              Assistance
+              {% trans "Assistance" %}
             </a>
           </li>
 
@@ -387,7 +387,7 @@
                 <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              FAQ
+              {% trans "FAQ" %}
             </a>
           </li>
 
@@ -398,7 +398,7 @@
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
-              Nous contacter
+              {% trans "Nous contacter" %}
             </a>
           </li>
 
@@ -421,14 +421,14 @@
 
       {# Copyright — couleur #7a94b8 (ratio 4.6:1 sur #060e30 ✓) #}
       <p class="footer-copyright">
-        &copy; {% now "Y" %} HooYia Market. Tous droits réservés.
+        &copy; {% now "Y" %} HooYia Market. {% trans "Tous droits réservés." %}
       </p>
 
       {# Liens légaux #}
       <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-        <a href="{% url 'products:conditions' %}" class="footer-legal-link">Conditions d'utilisation</a>
-        <a href="{% url 'products:politique' %}" class="footer-legal-link">Politique de confidentialité</a>
-        {% if user.is_admin or user.is_staff or user.is_superuser or user.is_vendeur %}<a href="{% url 'products:mentions' %}" class="footer-legal-link">Mentions légales</a>{% endif %}
+        <a href="{% url 'products:conditions' %}" class="footer-legal-link">{% trans "Conditions d'utilisation" %}</a>
+        <a href="{% url 'products:politique' %}" class="footer-legal-link">{% trans "Politique de confidentialité" %}</a>
+        {% if user.is_admin or user.is_staff or user.is_superuser or user.is_vendeur %}<a href="{% url 'products:mentions' %}" class="footer-legal-link">{% trans "Mentions légales" %}</a>{% endif %}
       </div>
 
     </div>

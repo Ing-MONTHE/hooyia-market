@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — orders/confirm.html
@@ -47,8 +47,8 @@
      soumettreAvis()    — POST /api/avis/ avec validation étoiles
 {% endcomment %}
 
-{% block title %}Commande confirmée — HooYia Market{% endblock %}
-{% block meta_description %}Votre commande a bien été enregistrée sur HooYia Market.{% endblock %}
+{% block title %}{% trans 'Commande confirmée' %} — HooYia Market{% endblock %}
+{% block meta_description %}{% trans 'Votre commande a bien été enregistrée sur HooYia Market.' %}{% endblock %}
 
 {% block content %}
 
@@ -185,8 +185,8 @@
           <polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
       </div>
-      <h1 style="font-size:1.65rem; font-weight:800; margin-bottom:8px; color:#ffffff; text-shadow:0 2px 12px rgba(0,0,0,0.4); position:relative; z-index:1;">Commande enregistrée !</h1>
-      <p style="color:rgba(255,255,255,0.85); font-size:0.875rem; position:relative; z-index:1;">Merci pour votre achat. Confirmation email en cours.</p>
+      <h1 style="font-size:1.65rem; font-weight:800; margin-bottom:8px; color:#ffffff; text-shadow:0 2px 12px rgba(0,0,0,0.4); position:relative; z-index:1;">{% trans "Commande enregistrée !" %}</h1>
+      <p style="color:rgba(255,255,255,0.85); font-size:0.875rem; position:relative; z-index:1;">{% trans "Merci pour votre achat. Confirmation email en cours." %}</p>
       <div class="confirm-ref-pill" id="ref-commande">—</div>
       <div style="margin-top:10px;" id="statut-badge-wrap">
         <span id="statut-badge" class="statut-badge" style="background:rgba(255,255,255,0.18); color:white; border:1.5px solid rgba(255,255,255,0.35);">—</span>
@@ -205,7 +205,7 @@
           </svg>
         </div>
         <div>
-          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Livraison</p>
+          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">{% trans "Livraison" %}</p>
           <div id="adresse-livraison" class="text-sm text-ink space-y-0.5"></div>
         </div>
       </div>
@@ -219,7 +219,7 @@
           </svg>
         </div>
         <div>
-          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Paiement</p>
+          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">{% trans "Paiement" %}</p>
           <div id="paiement-info" class="text-sm text-ink space-y-0.5"></div>
         </div>
       </div>
@@ -234,12 +234,12 @@
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
           <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        <h3 class="font-semibold text-ink text-sm">Articles commandés</h3>
+        <h3 class="font-semibold text-ink text-sm">{% trans "Articles commandés" %}</h3>
       </div>
       <div id="lignes-commande"></div>
       <div class="h-px bg-cream-border my-3"></div>
       <div class="flex justify-between items-center">
-        <span class="font-bold text-ink">Total payé</span>
+        <span class="font-bold text-ink">{% trans "Total payé" %}</span>
         <span id="total-commande" class="font-bold text-accent text-xl">—</span>
       </div>
     </div>
@@ -251,9 +251,9 @@
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
-        <h3 class="font-semibold text-ink text-sm">Laisser un avis</h3>
+        <h3 class="font-semibold text-ink text-sm">{% trans "Laisser un avis" %}</h3>
       </div>
-      <p class="text-xs text-text-muted mb-3">Votre commande a été livrée. Partagez votre expérience !</p>
+      <p class="text-xs text-text-muted mb-3">{% trans "Votre commande a été livrée. Partagez votre expérience !" %}</p>
       <div id="avis-produits"></div>
     </div>
 
@@ -266,7 +266,7 @@
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
           <line x1="9" x2="15" y1="12" y2="12"/><line x1="9" x2="15" y1="16" y2="16"/>
         </svg>
-        Voir mes commandes
+        {% trans "Voir mes commandes" %}
       </a>
       <a href="{% url 'products:liste' %}" class="btn btn-primary flex-1 flex items-center justify-center gap-2 py-3">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -274,7 +274,7 @@
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
           <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        Continuer mes achats
+        {% trans "Continuer mes achats" %}
       </a>
     </div>
 
@@ -294,18 +294,39 @@
      renderAvis(lignes)   — construit la zone de notation étoiles par produit
      soumettreAvis(pid,n) — POST /api/avis/ avec note + commentaire
 {% endcomment %}
+{# Chaînes traduites pour le JS page confirmation #}
+<script>
+var CONFIRM_I18N = {
+  enAttente:          '{% trans "En attente" %}',
+  confirmee:          '{% trans "Confirmée" %}',
+  enPreparation:      '{% trans "En préparation" %}',
+  expediee:           '{% trans "Expédiée" %}',
+  livree:             '{% trans "Livrée" %}',
+  annulee:            '{% trans "Annulée" %}',
+  paiementLivraison:  '{% trans "Paiement à la livraison" %}',
+  enAttentePaiement:  '{% trans "En attente" %}',
+  aucunArticle:       '{% trans "Aucun article." %}',
+  commentairePlaceh:  '{% trans "Votre commentaire (optionnel)…" %}',
+  envoyerAvis:        '{% trans "Envoyer mon avis" %}',
+  selectionnerNote:   '{% trans "Veuillez sélectionner une note (étoiles)." %}',
+  envoiEnCours:       '{% trans "Envoi…" %}',
+  avisEnvoye:         '{% trans "Avis envoyé — Merci !" %}',
+  erreurEnvoi:        '{% trans "Erreur lors de l'envoi. Réessayez." %}',
+  erreurChargement:   '{% trans "Impossible de charger la commande." %}',
+};
+</script>
 <script>
 const COMMANDE_ID = {{ commande.id }};
 
 // ── Mapping statuts FSM ───────────────────────────────────────────────────────
 const STATUTS_ORDRE  = ['en_attente', 'confirmee', 'en_preparation', 'expediee', 'livree'];
 const STATUTS_LABELS = {
-  en_attente    : 'En attente',
-  confirmee     : 'Confirmée',
-  en_preparation: 'En préparation',
-  expediee      : 'Expédiée',
-  livree        : 'Livrée',
-  annulee       : 'Annulée',
+  en_attente    : CONFIRM_I18N.enAttente,
+  confirmee     : CONFIRM_I18N.confirmee,
+  en_preparation: CONFIRM_I18N.enPreparation,
+  expediee      : CONFIRM_I18N.expediee,
+  livree        : CONFIRM_I18N.livree,
+  annulee       : CONFIRM_I18N.annulee,
 };
 // Couleurs des badges statut (fond + texte)
 const STATUTS_BADGE = {
@@ -336,7 +357,7 @@ async function loadCommande() {
     }
   } catch(e) {
     document.getElementById('skeleton').innerHTML =
-      '<p class="text-sm text-center py-4" style="color:var(--error)">Impossible de charger la commande.</p>';
+      `<p class="text-sm text-center py-4" style="color:var(--error)">${CONFIRM_I18N.erreurChargement}</p>`;
   }
 }
 
@@ -366,7 +387,7 @@ function afficherCommande(c) {
   document.getElementById('paiement-info').innerHTML = p
     ? `<p class="font-semibold text-ink">${p.mode_affiche || p.mode}</p>
        <p class="${p.statut === 'reussi' ? 'text-green-600 font-medium' : ''}">${p.statut_affiche || p.statut}</p>`
-    : `<p class="font-semibold text-ink">Paiement à la livraison</p><p>En attente</p>`;
+    : `<p class="font-semibold text-ink">${CONFIRM_I18N.paiementLivraison}</p><p>${CONFIRM_I18N.enAttentePaiement}</p>`;
 
   // Lignes commande
   const lignes = c.lignes || [];
@@ -379,7 +400,7 @@ function afficherCommande(c) {
           </span>
           <span class="font-semibold text-ink flex-shrink-0">${formatFCFA(parseFloat(l.prix_unitaire) * l.quantite)}</span>
         </div>`).join('')
-    : '<p class="text-sm text-text-muted">Aucun article.</p>';
+    : `<p class="text-sm text-text-muted">${CONFIRM_I18N.aucunArticle}</p>`;
 
   // Total
   document.getElementById('total-commande').textContent = formatFCFA(c.montant_total);
@@ -401,7 +422,7 @@ function renderAvis(lignes) {
 
       <div class="star-rating mb-2" id="stars-${l.produit}">${renderEtoiles(l.produit)}</div>
 
-      <textarea id="comment-${l.produit}" rows="2" placeholder="Votre commentaire (optionnel)…"
+      <textarea id="comment-${l.produit}" rows="2" placeholder="${CONFIRM_I18N.commentairePlaceh}"
                 class="input-field text-sm resize-none mt-1"></textarea>
 
       <button onclick="soumettreAvis(${l.produit})"
@@ -465,14 +486,14 @@ function resetHoverEtoiles(produitId) {
 async function soumettreAvis(produitId) {
   const note = notesSelectionnees[produitId];
   if (!note) {
-    window.toast && window.toast('Veuillez sélectionner une note (étoiles).', 'error');
+    window.toast && window.toast(CONFIRM_I18N.selectionnerNote, 'error');
     return;
   }
 
   const commentaire = document.getElementById(`comment-${produitId}`)?.value.trim() || '';
   const btn = document.getElementById(`btn-avis-${produitId}`);
   btn.disabled = true;
-  btn.textContent = 'Envoi…';
+  btn.textContent = CONFIRM_I18N.envoiEnCours;
 
   try {
     await API.post('/api/avis/', {
@@ -493,8 +514,8 @@ async function soumettreAvis(produitId) {
       </div>`;
   } catch(e) {
     btn.disabled = false;
-    btn.textContent = 'Envoyer mon avis';
-    const msg = (e && e.message) ? e.message : 'Erreur lors de l\'envoi. Réessayez.';
+    btn.textContent = CONFIRM_I18N.envoyerAvis;
+    const msg = (e && e.message) ? e.message : CONFIRM_I18N.erreurEnvoi;
     window.toast && window.toast(msg, 'error');
   }
 }

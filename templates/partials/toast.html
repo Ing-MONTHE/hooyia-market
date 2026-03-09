@@ -1,3 +1,4 @@
+{% load i18n %}
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — partials/toast.html
 
@@ -70,6 +71,8 @@
  *   toast('Stock limité.', 'warning')
  *   toast('Nouveauté disponible.', 'info')
  */
+  {# Chaîne traduite pour le JS #}
+  var TOAST_I18N = { fermer: '{% trans "Fermer" %}' };
 window.toast = function(message, type = 'info', duration = 4000) {
 
   const container = document.getElementById('toast-container');
@@ -212,7 +215,7 @@ window.toast = function(message, type = 'info', duration = 4000) {
              border-radius:4px;"
       onmouseover="this.style.color='${colors.closeHover}'"
       onmouseout="this.style.color='${colors.close}'"
-      aria-label="Fermer">
+      aria-label="${TOAST_I18N.fermer}">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round">

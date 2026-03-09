@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — orders/history.html
@@ -37,8 +37,8 @@
      annulerCommande(id)  — POST /api/commandes/<id>/annuler/ avec confirmation
 {% endcomment %}
 
-{% block title %}Mes commandes — HooYia Market{% endblock %}
-{% block meta_description %}Historique de vos commandes sur HooYia Market{% endblock %}
+{% block title %}{% trans 'Mes commandes' %} — HooYia Market{% endblock %}
+{% block meta_description %}{% trans 'Historique de vos commandes sur HooYia Market' %}{% endblock %}
 
 {% block content %}
 
@@ -91,7 +91,7 @@
   {# En-tête #}
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-brand-600">Mes commandes</h1>
+      <h1 class="text-2xl font-bold text-brand-600">{% trans "Mes commandes" %}</h1>
       <p class="text-sm text-text-muted mt-0.5" id="commandes-count"></p>
     </div>
     <a href="{% url 'products:liste' %}" class="btn btn-secondary flex items-center gap-2 text-sm">
@@ -100,7 +100,7 @@
         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
         <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
       </svg>
-      Catalogue
+      {% trans "Catalogue" %}
     </a>
   </div>
 
@@ -136,11 +136,11 @@
         <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
       </svg>
     </div>
-    <h2 class="text-xl font-bold text-ink mb-2">Aucune commande</h2>
+    <h2 class="text-xl font-bold text-ink mb-2">{% trans "Aucune commande" %}</h2>
     <p class="text-sm text-text-muted mb-6 max-w-xs mx-auto">
-      Vous n'avez pas encore passé de commande. Découvrez notre catalogue !
+      {% trans "Vous n'avez pas encore passé de commande. Découvrez notre catalogue !" %}
     </p>
-    <a href="{% url 'products:liste' %}" class="btn btn-primary">Voir le catalogue</a>
+    <a href="{% url 'products:liste' %}" class="btn btn-primary">{% trans "Voir le catalogue" %}</a>
   </div>
 
   {# Liste commandes — peuplée par JS #}
@@ -155,12 +155,12 @@
 <script>
 // ── Mapping statuts ───────────────────────────────────────────────────────────
 const STATUTS_LABELS = {
-  en_attente    : 'En attente',
-  confirmee     : 'Confirmée',
-  en_preparation: 'En préparation',
-  expediee      : 'Expédiée',
-  livree        : 'Livrée',
-  annulee       : 'Annulée',
+  en_attente    : HISTORY_I18N.enAttente,
+  confirmee     : HISTORY_I18N.confirmee,
+  en_preparation: HISTORY_I18N.enPreparation,
+  expediee      : HISTORY_I18N.expediee,
+  livree        : HISTORY_I18N.livree,
+  annulee       : HISTORY_I18N.annulee,
 };
 // Couleurs inline des badges statut (plan de redesign)
 const STATUTS_STYLE = {
@@ -196,7 +196,7 @@ async function loadCommandes() {
 
     // Compteur dans l'en-tête
     document.getElementById('commandes-count').textContent =
-      `${commandes.length} commande${commandes.length > 1 ? 's' : ''}`;
+      `${commandes.length} ${commandes.length > 1 ? HISTORY_I18N.commandes : HISTORY_I18N.commande}`;
 
     const list = document.getElementById('commandes-list');
     list.classList.remove('hidden');
@@ -212,11 +212,11 @@ async function loadCommandes() {
 // ── Construction du HTML d'une carte commande ─────────────────────────────────
 function renderCommande(c) {
   const lignes         = c.lignes || [];
-  const premierProduit = lignes[0]?.produit_nom || 'Commande';
+  const premierProduit = lignes[0]?.produit_nom || HISTORY_I18N.commandeLabel;
   const autresProduits = lignes.length > 1
-    ? `<span style="color:var(--text-muted); font-size:0.75rem;"> +${lignes.length-1} autre${lignes.length>2?'s':''}</span>`
+    ? `<span style="color:var(--text-muted); font-size:0.75rem;"> +${lignes.length-1} ${lignes.length>2 ? HISTORY_I18N.autres : HISTORY_I18N.autre}</span>`
     : '';
-  const date      = new Date(c.date_creation).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+  const date      = new Date(c.date_creation).toLocaleDateString(document.documentElement.lang||'fr', { day:'numeric', month:'short', year:'numeric' });
   const montant   = parseInt(c.montant_total || 0).toLocaleString('fr-FR');
   const refCourte = c.reference_courte || (c.reference||'').slice(0,8).toUpperCase() || c.id;
   const statut    = c.statut || 'en_attente';
@@ -252,7 +252,7 @@ function renderCommande(c) {
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <div style="font-size:0.72rem; color:var(--text-muted); display:flex; flex-direction:column; gap:2px;">
           <span>${date}</span>
-          <span>${lignes.length} article${lignes.length>1?'s':''}</span>
+          <span>${lignes.length} ${lignes.length>1 ? HISTORY_I18N.articles : HISTORY_I18N.article}</span>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:800; font-size:1rem; color:var(--ink);">${montant}</div>
@@ -290,18 +290,18 @@ function renderCommande(c) {
 // ── Annulation d'une commande ─────────────────────────────────────────────────
 async function annulerCommande(commandeId, btn) {
   const ok = await (window.showConfirm
-    ? window.showConfirm('Annuler la commande', 'Cette action est irréversible. Confirmer ?', 'Oui, annuler')
-    : Promise.resolve(confirm('Confirmer l\'annulation ?')));
+    ? window.showConfirm(HISTORY_I18N.annulerTitre, HISTORY_I18N.annulerBody, HISTORY_I18N.annulerConfirm)
+    : Promise.resolve(confirm(HISTORY_I18N.annulerConfirmNatif)));
   if (!ok) return;
 
   btn.disabled = true;
   try {
     await API.post(`/api/commandes/${commandeId}/annuler/`, {});
-    window.toast && window.toast('Commande annulée avec succès.', 'success');
+    window.toast && window.toast(HISTORY_I18N.commandeAnnulee, 'success');
     loadCommandes(); // Recharger la liste
   } catch(e) {
     btn.disabled = false;
-    const msg = (e && e.message) ? e.message : 'Impossible d\'annuler.';
+    const msg = (e && e.message) ? e.message : HISTORY_I18N.erreurAnnulation;
     window.toast && window.toast(msg, 'error');
   }
 }

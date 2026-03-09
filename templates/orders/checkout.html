@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — orders/checkout.html
@@ -41,8 +41,8 @@
      formatFCFA()      — formatte un nombre en "X XXX FCFA"
 {% endcomment %}
 
-{% block title %}Finaliser ma commande — HooYia Market{% endblock %}
-{% block meta_description %}Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun{% endblock %}
+{% block title %}{% trans 'Finaliser ma commande' %} — HooYia Market{% endblock %}
+{% block meta_description %}{% trans 'Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun' %}{% endblock %}
 
 {% block content %}
 
@@ -134,8 +134,8 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
 
   <div class="mb-8 lg:mb-10">
-    <h1 class="text-2xl lg:text-3xl font-bold text-brand-600">Finaliser ma commande</h1>
-    <p class="text-sm text-text-secondary mt-1">Renseignez votre adresse de livraison et choisissez votre mode de paiement.</p>
+    <h1 class="text-2xl lg:text-3xl font-bold text-brand-600">{% trans "Finaliser ma commande" %}</h1>
+    <p class="text-sm text-text-secondary mt-1">{% trans "Renseignez votre adresse de livraison et choisissez votre mode de paiement." %}</p>
   </div>
 
   <div class="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
@@ -154,8 +154,8 @@
             </svg>
           </div>
           <div>
-            <h2 class="font-semibold text-ink text-base">Adresse de livraison</h2>
-            <p class="text-xs text-text-muted">Où devons-nous livrer votre commande ?</p>
+            <h2 class="font-semibold text-ink text-base">{% trans "Adresse de livraison" %}</h2>
+            <p class="text-xs text-text-muted">{% trans "Où devons-nous livrer votre commande ?" %}</p>
           </div>
         </div>
 
@@ -170,7 +170,7 @@
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
               </svg>
-              Mes adresses
+              {% trans "Mes adresses" %}
             </button>
             <button type="button" onclick="switchAddrTab('new')" id="tab-new"
                     style="flex:1; padding:10px 16px; font-size:0.875rem; font-weight:600; border:none; border-left:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; background:white; color:var(--text-secondary); border-radius:0;">
@@ -179,14 +179,14 @@
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
               </svg>
-              Nouvelle adresse
+              {% trans "Nouvelle adresse" %}
             </button>
           </div>
 
           
           <div id="panel-saved" class="p-4 bg-brand-50 rounded-xl border border-brand-200">
             <label class="block text-xs font-semibold text-brand-600 mb-2 uppercase tracking-wide">
-              Sélectionner une adresse
+              {% trans "Sélectionner une adresse" %}
             </label>
             <div class="space-y-2">
               {% for adr in adresses %}
@@ -206,7 +206,7 @@
                        class="mt-0.5 flex-shrink-0" style="accent-color: var(--brand-500);" />
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-semibold text-ink">
-                    {{ adr.adresse }}{% if adr.is_default %} <span class="badge badge-brand text-xs ml-1">Par défaut</span>{% endif %}
+                    {{ adr.adresse }}{% if adr.is_default %} <span class="badge badge-brand text-xs ml-1">{% trans "Par défaut" %}</span>{% endif %}
                   </p>
                   <p class="text-xs text-text-muted mt-0.5">{{ adr.ville }}, {{ adr.region }} — {{ adr.pays }}</p>
                   {% if adr.telephone %}<p class="text-xs text-text-muted">{{ adr.telephone }}</p>{% endif %}
@@ -218,7 +218,7 @@
 
           <div id="panel-new" class="hidden p-4 bg-surface-2 rounded-xl border border-border">
             <p class="text-xs text-text-muted font-medium">
-              Remplissez les champs ci-dessous pour une nouvelle adresse de livraison.
+              {% trans "Remplissez les champs ci-dessous pour une nouvelle adresse de livraison." %}
             </p>
           </div>
         </div>
@@ -228,7 +228,7 @@
           <div class="sm:col-span-2">
             {% comment %} Champ nom — pré-rempli depuis user.prenom + user.nom par loadRecap() {% endcomment %}
             <label for="nom" class="block text-sm font-medium text-ink mb-1.5">
-              Nom complet du destinataire <span class="text-accent">*</span>
+              {% trans "Nom complet du destinataire" %} <span class="text-accent">*</span>
             </label>
             <div class="relative">
               
@@ -239,7 +239,7 @@
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
-              <input type="text" id="nom" placeholder="Ex : Jean-Pierre Nkomo"
+              <input type="text" id="nom" placeholder="{% trans 'Ex : Jean-Pierre Nkomo' %}"
                      class="input-field pl-10" required autocomplete="name" />
             </div>
           </div>
@@ -248,7 +248,7 @@
           <div class="sm:col-span-2">
             {% comment %} Champ téléphone — pré-rempli depuis user.telephone {% endcomment %}
             <label for="telephone" class="block text-sm font-medium text-ink mb-1.5">
-              Numéro de téléphone <span class="text-accent">*</span>
+              {% trans "Numéro de téléphone" %} <span class="text-accent">*</span>
             </label>
             <div class="relative">
               
@@ -265,31 +265,31 @@
 
           <div class="sm:col-span-2">
             <label for="adresse" class="block text-sm font-medium text-ink mb-1.5">
-              Adresse précise <span class="text-accent">*</span>
+              {% trans "Adresse précise" %} <span class="text-accent">*</span>
             </label>
-            <input type="text" id="adresse" placeholder="Quartier, rue, numéro de porte…"
+            <input type="text" id="adresse" placeholder="{% trans 'Quartier, rue, numéro de porte…' %}"
                    class="input-field" required autocomplete="street-address" />
           </div>
 
           <div>
             <label for="ville" class="block text-sm font-medium text-ink mb-1.5">
-              Ville <span class="text-accent">*</span>
+              {% trans "Ville" %} <span class="text-accent">*</span>
             </label>
-            <input type="text" id="ville" placeholder="Ex : Yaoundé"
+            <input type="text" id="ville" placeholder="{% trans 'Ex : Yaoundé' %}"
                    class="input-field" required autocomplete="address-level2" />
           </div>
 
           
           <div>
             <label for="region" class="block text-sm font-medium text-ink mb-1.5">
-              Région <span class="text-accent">*</span>
+              {% trans "Région" %} <span class="text-accent">*</span>
             </label>
-            <input type="text" id="region" placeholder="Ex : Centre"
+            <input type="text" id="region" placeholder="{% trans 'Ex : Centre' %}"
                    class="input-field" required autocomplete="address-level1" />
           </div>
 
           <div class="sm:col-span-2">
-            <label for="pays" class="block text-sm font-medium text-ink mb-1.5">Pays</label>
+            <label for="pays" class="block text-sm font-medium text-ink mb-1.5">{% trans "Pays" %}</label>
             <input type="text" id="pays" value="Cameroun"
                    class="input-field bg-surface-2 text-text-secondary" autocomplete="country-name" />
           </div>
@@ -312,8 +312,8 @@
             </svg>
           </div>
           <div>
-            <h2 class="font-semibold text-ink text-base">Mode de paiement</h2>
-            <p class="text-xs text-text-muted">Choisissez comment vous souhaitez régler.</p>
+            <h2 class="font-semibold text-ink text-base">{% trans "Mode de paiement" %}</h2>
+            <p class="text-xs text-text-muted">{% trans "Choisissez comment vous souhaitez régler." %}</p>
           </div>
         </div>
 
@@ -330,10 +330,10 @@
               </svg>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-sm text-ink">Paiement à la livraison</p>
-              <p class="text-xs text-text-muted mt-0.5">Payez en cash à la réception de votre commande</p>
+              <p class="font-semibold text-sm text-ink">{% trans "Paiement à la livraison" %}</p>
+              <p class="text-xs text-text-muted mt-0.5">{% trans "Payez en cash à la réception de votre commande" %}</p>
             </div>
-            <span class="badge badge-success text-xs hidden sm:inline-flex">Disponible</span>
+            <span class="badge badge-success text-xs hidden sm:inline-flex">{% trans "Disponible" %}</span>
           </label>
 
           <label class="payment-option opacity-50 cursor-not-allowed" title="Bientôt disponible">
@@ -345,10 +345,10 @@
               </svg>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-sm text-ink">Orange Money</p>
-              <p class="text-xs text-text-muted mt-0.5">Paiement mobile — Cameroun</p>
+              <p class="font-semibold text-sm text-ink">{% trans "Orange Money" %}</p>
+              <p class="text-xs text-text-muted mt-0.5">{% trans "Paiement mobile — Cameroun" %}</p>
             </div>
-            <span class="badge badge-muted text-xs hidden sm:inline-flex">Bientôt</span>
+            <span class="badge badge-muted text-xs hidden sm:inline-flex">{% trans "Bientôt" %}</span>
           </label>
 
           
@@ -362,10 +362,10 @@
               </svg>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-sm text-ink">MTN Mobile Money</p>
-              <p class="text-xs text-text-muted mt-0.5">Paiement mobile — Cameroun</p>
+              <p class="font-semibold text-sm text-ink">{% trans "MTN Mobile Money" %}</p>
+              <p class="text-xs text-text-muted mt-0.5">{% trans "Paiement mobile — Cameroun" %}</p>
             </div>
-            <span class="badge badge-muted text-xs hidden sm:inline-flex">Bientôt</span>
+            <span class="badge badge-muted text-xs hidden sm:inline-flex">{% trans "Bientôt" %}</span>
           </label>
 
         </div>
@@ -392,7 +392,7 @@
             <polyline points="3.29 7 12 12 20.71 7"/>
             <line x1="12" x2="12" y1="22" y2="12"/>
           </svg>
-          <h2 class="font-semibold text-ink text-base">Votre commande</h2>
+          <h2 class="font-semibold text-ink text-base">{% trans "Votre commande" %}</h2>
         </div>
 
         
@@ -421,7 +421,7 @@
             <path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/>
             <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
           </svg>
-          Livraison <strong class="ml-1">gratuite</strong>
+          {% trans "Livraison" %} <strong class="ml-1">{% trans "gratuite" %}</strong>
         </div>
 
         <div class="h-px bg-cream-border mb-4"></div>
@@ -430,19 +430,19 @@
         <div class="space-y-2.5 text-sm">
 
           <div class="flex justify-between items-center text-text-secondary">
-            <span>Sous-total</span>
+            <span>{% trans "Sous-total" %}</span>
             <span id="recap-sous-total" class="font-medium text-ink">—</span>
           </div>
 
           <div class="flex justify-between items-center text-text-secondary">
-            <span>Livraison</span>
-            <span class="text-green-600 font-semibold">Gratuite</span>
+            <span>{% trans "Livraison" %}</span>
+            <span class="text-green-600 font-semibold">{% trans "Gratuite" %}</span>
           </div>
 
           <div class="h-px bg-cream-border"></div>
 
           <div class="flex justify-between items-center">
-            <span class="font-bold text-ink text-base">Total</span>
+            <span class="font-bold text-ink text-base">{% trans "Total" %}</span>
             <span id="recap-total" class="font-bold text-accent text-lg">—</span>
           </div>
 
@@ -457,7 +457,7 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             <polyline points="9 12 11 14 15 10"/>
           </svg>
-          <span id="btn-label">Confirmer la commande</span>
+          <span id="btn-label">{% trans "Confirmer la commande" %}</span>
         </button>
 
         
@@ -468,7 +468,7 @@
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
-          Commande sécurisée — <a href="#" class="underline text-brand-500 hover:text-brand-600 ml-1 font-semibold">Conditions de vente</a>
+          {% trans "Commande sécurisée" %} — <a href="#" class="underline text-brand-500 hover:text-brand-600 ml-1 font-semibold">{% trans "Conditions de vente" %}</a>
         </div>
 
         
@@ -479,7 +479,7 @@
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="m12 19-7-7 7-7"/><line x1="19" x2="5" y1="12" y2="12"/>
             </svg>
-            Modifier le panier
+            {% trans "Modifier le panier" %}
           </a>
         </div>
 
@@ -497,8 +497,17 @@
 
 {% block extra_scripts %}
 
-{#   loadRecap()       — charge le panier via API, peuple #recap-items          #}
-
+{# Chaînes traduites pour le JS checkout #}
+<script>
+var CHECKOUT_I18N = {
+  parUnite:            '{% trans "/ unité" %}',
+  champObligatoires:   '{% trans "Veuillez remplir tous les champs obligatoires (*)." %}',
+  traitementEnCours:   '{% trans "Traitement en cours…" %}',
+  confirmerCommande:   '{% trans "Confirmer la commande" %}',
+  erreurPanier:        '{% trans "Impossible de charger le panier. Actualisez la page." %}',
+  erreurGenerique:     '{% trans "Une erreur est survenue. Veuillez réessayer." %}',
+};
+</script>
 <script>
 // ════════════════════════════════════════════════════════════════════════════
 // JAVASCRIPT — orders/checkout.html
@@ -560,7 +569,7 @@ async function loadRecap() {
           ${imgHTML}
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-ink line-clamp-1">${item.produit_nom}</p>
-            <p class="text-xs text-text-muted mt-0.5">${formatFCFA(item.prix_snapshot)} / unité</p>
+            <p class="text-xs text-text-muted mt-0.5">${formatFCFA(item.prix_snapshot)} ${CHECKOUT_I18N.parUnite}</p>
           </div>
           <div class="flex flex-col items-end gap-1 flex-shrink-0">
             <span class="qty-badge">×${item.quantite}</span>
@@ -582,7 +591,7 @@ async function loadRecap() {
       window.location.href = '/compte/connexion/?next=/commandes/checkout/';
     } else {
       document.getElementById('recap-items').innerHTML =
-        '<p class="text-sm text-center py-4" style="color:var(--error)">Impossible de charger le panier. Actualisez la page.</p>';
+        `<p class="text-sm text-center py-4" style="color:var(--error)">${CHECKOUT_I18N.erreurPanier}</p>`;
     }
   }
 }
@@ -665,7 +674,7 @@ async function passerCommande() {
   const requis = { nom, telephone, adresse, ville, region };
   const manquants = Object.keys(requis).filter(k => !requis[k]);
   if (manquants.length) {
-    window.toast && window.toast('Veuillez remplir tous les champs obligatoires (*).', 'error');
+    window.toast && window.toast(CHECKOUT_I18N.champObligatoires, 'error');
     manquants.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -682,7 +691,7 @@ async function passerCommande() {
   const label = document.getElementById('btn-label');
   const icon  = document.getElementById('btn-icon');
   btn.disabled     = true;
-  label.textContent = 'Traitement en cours…';
+  label.textContent = CHECKOUT_I18N.traitementEnCours;
   icon.classList.add('spinner');
 
   try {
@@ -704,10 +713,10 @@ async function passerCommande() {
   } catch (e) {
     // Réactiver le bouton
     btn.disabled     = false;
-    label.textContent = 'Confirmer la commande';
+    label.textContent = CHECKOUT_I18N.confirmerCommande;
     icon.classList.remove('spinner');
 
-    const msg = (e && e.message) ? e.message : 'Une erreur est survenue. Veuillez réessayer.';
+    const msg = (e && e.message) ? e.message : CHECKOUT_I18N.erreurGenerique;
     window.toast && window.toast(msg, 'error');
   }
 }

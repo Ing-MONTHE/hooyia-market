@@ -18,6 +18,7 @@ Choix de conception :
 """
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -35,31 +36,27 @@ class Conversation(models.Model):
       toujours par ID (le plus petit ID en participant1) dans save().
     """
 
-    # ── Participants ───────────────────────────────────────────
-    # SET_NULL : si un compte est supprimé, la conversation est conservée
     participant1 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='conversations_participant1',
-        verbose_name="Participant 1"
+        verbose_name=_("Participant 1")
     )
     participant2 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='conversations_participant2',
-        verbose_name="Participant 2"
+        verbose_name=_("Participant 2")
     )
 
-    # ── Date de création ───────────────────────────────────────
-    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Créée le")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("Créée le"))
 
     class Meta:
-        verbose_name = "Conversation"
-        verbose_name_plural = "Conversations"
+        verbose_name = _("Conversation")
+        verbose_name_plural = _("Conversations")
         ordering = ['-date_creation']
-        # Une seule conversation entre deux utilisateurs
         unique_together = ('participant1', 'participant2')
 
     def save(self, *args, **kwargs):
@@ -119,34 +116,31 @@ class MessageChat(models.Model):
       4. Quand le destinataire ouvre la conversation, is_read passe à True
     """
 
-    # CASCADE : si la conversation est supprimée, ses messages le sont aussi
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
         related_name='messages',
-        verbose_name="Conversation"
+        verbose_name=_("Conversation")
     )
 
-    # SET_NULL : si le compte est supprimé, le message reste mais anonymisé
     expediteur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='messages_envoyes',
-        verbose_name="Expéditeur"
+        verbose_name=_("Expéditeur")
     )
 
-    contenu = models.TextField(verbose_name="Message")
+    contenu = models.TextField(verbose_name=_("Message"))
 
-    # False par défaut : non lu jusqu'à ce que le destinataire ouvre la conv
-    is_read = models.BooleanField(default=False, verbose_name="Lu")
+    is_read = models.BooleanField(default=False, verbose_name=_("Lu"))
 
-    date_envoi = models.DateTimeField(auto_now_add=True, verbose_name="Envoyé le")
+    date_envoi = models.DateTimeField(auto_now_add=True, verbose_name=_("Envoyé le"))
 
     class Meta:
-        verbose_name = "Message"
-        verbose_name_plural = "Messages"
-        ordering = ['date_envoi']   # Ordre chronologique (du plus ancien au plus récent)
+        verbose_name = _("Message")
+        verbose_name_plural = _("Messages")
+        ordering = ['date_envoi']
 
     def __str__(self):
         exp = self.expediteur.username if self.expediteur else "Anonyme"

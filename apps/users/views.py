@@ -15,6 +15,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .models import AdresseLivraison, TokenVerificationEmail
 from .forms import InscriptionForm, ConnexionForm
@@ -40,11 +41,11 @@ def inscription(request):
             user = form.save()
             messages.success(
                 request,
-                f"Compte créé ! Vérifiez votre email {user.email} pour activer votre compte."
+                _("Compte créé ! Vérifiez votre email %(email)s pour activer votre compte.") % {'email': user.email}
             )
             return redirect('users:connexion')
         else:
-            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
+            messages.error(request, _("Veuillez corriger les erreurs ci-dessous."))
     else:
         form = InscriptionForm()
 
@@ -77,25 +78,21 @@ def connexion(request):
                 if not user.is_active:
                     messages.warning(
                         request,
-                        "Votre compte n'est pas encore activé. "
-                        "Vérifiez votre email."
+                        _("Votre compte n'est pas encore activé. Vérifiez votre email.")
                     )
                     return redirect('users:connexion')
 
-                # Connecte l'utilisateur et met à jour la dernière connexion
                 login(request, user)
                 user.derniere_connexion = timezone.now()
                 user.save(update_fields=['derniere_connexion'])
 
-                messages.success(request, f"Bienvenue {user.get_short_name()} !")
+                messages.success(request, _("Bienvenue %(prenom)s !") % {'prenom': user.get_short_name()})
 
-                # Redirige vers la page demandée avant la connexion
-                # ou vers l'accueil par défaut
                 next_url = request.GET.get('next', '/')
                 return redirect(next_url)
 
             else:
-                messages.error(request, "Email ou mot de passe incorrect.")
+                messages.error(request, _("Email ou mot de passe incorrect."))
     else:
         form = ConnexionForm()
 
@@ -113,7 +110,7 @@ def deconnexion(request):
     On utilise POST pour la déconnexion (sécurité CSRF).
     """
     logout(request)
-    messages.info(request, "Vous êtes déconnecté.")
+    messages.info(request, _("Vous êtes déconnecté."))
     return redirect('products:accueil')
 
 
@@ -131,32 +128,22 @@ def verifier_email(request, token):
     try:
         token_obj = TokenVerificationEmail.objects.get(token=token)
     except TokenVerificationEmail.DoesNotExist:
-        messages.error(request, "Lien de vérification invalide.")
+        messages.error(request, _("Lien de vérification invalide."))
         return redirect('users:connexion')
 
-    # Vérifie que le token n'a pas expiré (24h)
     if token_obj.est_expire():
-        messages.error(
-            request,
-            "Ce lien a expiré. Inscrivez-vous à nouveau."
-        )
-        # Supprime le token et l'utilisateur non activé
+        messages.error(request, _("Ce lien a expiré. Inscrivez-vous à nouveau."))
         token_obj.utilisateur.delete()
         return redirect('users:inscription')
 
-    # Active le compte
     user = token_obj.utilisateur
     user.is_active      = True
     user.email_verifie  = True
     user.save(update_fields=['is_active', 'email_verifie'])
 
-    # Supprime le token (usage unique)
     token_obj.delete()
 
-    messages.success(
-        request,
-        "Votre compte est activé ! Vous pouvez vous connecter."
-    )
+    messages.success(request, _("Votre compte est activé ! Vous pouvez vous connecter."))
     return redirect('users:connexion')
 
 
@@ -186,7 +173,7 @@ def profil(request):
             if request.FILES.get('photo_profil'):
                 user.photo_profil = request.FILES['photo_profil']
             user.save()
-            messages.success(request, "Profil mis à jour avec succès.")
+            messages.success(request, _("Profil mis à jour avec succès."))
             return redirect('users:profil')
 
     adresses = request.user.adresses.all()
@@ -212,7 +199,7 @@ def ajouter_adresse(request):
             # Associe l'adresse à l'utilisateur connecté
             adresse.utilisateur = request.user
             adresse.save()
-            messages.success(request, "Adresse ajoutée avec succès.")
+            messages.success(request, _("Adresse ajoutée avec succès."))
             return redirect('users:profil')
     else:
         form = AdresseForm()
@@ -238,7 +225,7 @@ def supprimer_adresse(request, adresse_id):
 
     if request.method == 'POST':
         adresse.delete()
-        messages.success(request, "Adresse supprimée.")
+        messages.success(request, _("Adresse supprimée."))
 
     return redirect('users:profil')
 
@@ -282,12 +269,12 @@ def google_callback(request):
     # Vérification CSRF state
     state = request.GET.get('state', '')
     if state != request.session.get('google_oauth_state', ''):
-        messages.error(request, "Erreur de sécurité OAuth. Réessayez.")
+        messages.error(request, _("Erreur de sécurité OAuth. Réessayez."))
         return redirect('users:connexion')
 
     code = request.GET.get('code')
     if not code:
-        messages.error(request, "Connexion Google annulée ou refusée.")
+        messages.error(request, _("Connexion Google annulée ou refusée."))
         return redirect('users:connexion')
 
     # Échange du code contre un access_token
@@ -301,12 +288,12 @@ def google_callback(request):
         }, timeout=10)
         token_data = token_resp.json()
     except Exception:
-        messages.error(request, "Impossible de contacter Google. Réessayez.")
+        messages.error(request, _("Impossible de contacter Google. Réessayez."))
         return redirect('users:connexion')
 
     access_token = token_data.get('access_token')
     if not access_token:
-        messages.error(request, "Échec de l'authentification Google.")
+        messages.error(request, _("Échec de l'authentification Google."))
         return redirect('users:connexion')
 
     # Récupération du profil Google
@@ -318,7 +305,7 @@ def google_callback(request):
         )
         userinfo = userinfo_resp.json()
     except Exception:
-        messages.error(request, "Impossible de récupérer le profil Google.")
+        messages.error(request, _("Impossible de récupérer le profil Google."))
         return redirect('users:connexion')
 
     email      = userinfo.get('email', '').lower()
@@ -327,7 +314,7 @@ def google_callback(request):
     google_id  = userinfo.get('sub', '')
 
     if not email:
-        messages.error(request, "Impossible de récupérer votre email Google.")
+        messages.error(request, _("Impossible de récupérer votre email Google."))
         return redirect('users:connexion')
 
     # Connexion ou création du compte
@@ -360,5 +347,5 @@ def google_callback(request):
         user.save()
 
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-    messages.success(request, f"Bienvenue {user.prenom or user.username} ! 👋")
+    messages.success(request, _("Bienvenue %(prenom)s ! 👋") % {'prenom': user.prenom or user.username})
     return redirect(settings.LOGIN_REDIRECT_URL)

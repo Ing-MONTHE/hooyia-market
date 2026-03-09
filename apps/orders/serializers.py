@@ -8,6 +8,7 @@ Serializers pour les commandes.
 - CreerCommandeSerializer    → validation pour créer une commande
 """
 from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
 from .models import Commande, LigneCommande, Paiement
 
 
@@ -229,6 +230,6 @@ class CreerCommandeSerializer(serializers.Serializer):
             if not region:    manquants.append('adresse_livraison_region')
             if manquants:
                 raise serializers.ValidationError(
-                    f"Champs obligatoires manquants : {', '.join(manquants)}"
+                    _("Champs obligatoires manquants : %(champs)s") % {'champs': ', '.join(manquants)}
                 )
         return data

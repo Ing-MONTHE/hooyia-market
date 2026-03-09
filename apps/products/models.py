@@ -9,6 +9,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 from .managers import ProduitActifManager, ProduitEnVedetteManager, ProduitStockFaibleManager
 
@@ -29,10 +30,9 @@ class Categorie(MPTTModel):
     nom = models.CharField(
         max_length=100,
         unique=True,
-        verbose_name="Nom"
+        verbose_name=_("Nom")
     )
 
-    # Slug = version URL de nom (ex: "téléphones-samsung")
     slug = models.SlugField(
         max_length=120,
         unique=True,
@@ -41,36 +41,34 @@ class Categorie(MPTTModel):
 
     description = models.TextField(
         blank=True,
-        verbose_name="Description"
+        verbose_name=_("Description")
     )
 
     image = models.ImageField(
         upload_to='categories/',
         null=True,
         blank=True,
-        verbose_name="Image"
+        verbose_name=_("Image")
     )
 
-    # Catégorie parente (None = catégorie racine)
     parent = TreeForeignKey(
         'self',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='sous_categories',
-        verbose_name="Catégorie parente"
+        verbose_name=_("Catégorie parente")
     )
 
     est_active = models.BooleanField(default=True)
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class MPTTMeta:
-        # Tri alphabétique dans l'arbre
         order_insertion_by = ['nom']
 
     class Meta:
-        verbose_name = "Catégorie"
-        verbose_name_plural = "Catégories"
+        verbose_name = _("Catégorie")
+        verbose_name_plural = _("Catégories")
 
     def __str__(self):
         return self.nom
@@ -92,42 +90,39 @@ class Produit(models.Model):
     Contient toutes les informations d'un produit.
     """
 
-    # ── Statuts possibles d'un produit ───────────────────────
     class Statut(models.TextChoices):
-        ACTIF     = 'actif',     'Actif'
-        INACTIF   = 'inactif',   'Inactif'
-        EPUISE    = 'epuise',    'Épuisé'
-        ARCHIVE   = 'archive',   'Archivé'
+        ACTIF     = 'actif',     _('Actif')
+        INACTIF   = 'inactif',   _('Inactif')
+        EPUISE    = 'epuise',    _('Épuisé')
+        ARCHIVE   = 'archive',   _('Archivé')
 
-    # ── Informations de base ──────────────────────────────────
     nom = models.CharField(
         max_length=255,
-        verbose_name="Nom du produit"
+        verbose_name=_("Nom du produit")
     )
 
     slug = models.SlugField(
         max_length=280,
         unique=True,
         blank=True,
-        verbose_name="Slug URL"
+        verbose_name=_("Slug URL")
     )
 
     description = models.TextField(
-        verbose_name="Description"
+        verbose_name=_("Description")
     )
 
     description_courte = models.CharField(
         max_length=500,
         blank=True,
-        verbose_name="Description courte"
+        verbose_name=_("Description courte")
     )
 
-    # ── Prix ──────────────────────────────────────────────────
     prix = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="Prix (FCFA)"
+        verbose_name=_("Prix (FCFA)")
     )
 
     prix_promo = models.DecimalField(
@@ -136,61 +131,56 @@ class Produit(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        verbose_name="Prix promotionnel (FCFA)"
+        verbose_name=_("Prix promotionnel (FCFA)")
     )
 
-    # ── Stock ─────────────────────────────────────────────────
     stock = models.PositiveIntegerField(
         default=0,
-        verbose_name="Quantité en stock"
+        verbose_name=_("Quantité en stock")
     )
 
     stock_minimum = models.PositiveIntegerField(
         default=5,
-        verbose_name="Seuil d'alerte stock"
+        verbose_name=_("Seuil d'alerte stock")
     )
 
-    # ── Relations ─────────────────────────────────────────────
     categorie = models.ForeignKey(
         Categorie,
         on_delete=models.SET_NULL,
         null=True,
         related_name='produits',
-        verbose_name="Catégorie"
+        verbose_name=_("Catégorie")
     )
 
-    # Le vendeur qui a créé ce produit
     vendeur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='produits',
-        verbose_name="Vendeur"
+        verbose_name=_("Vendeur")
     )
 
-    # ── Statut & Mise en avant ────────────────────────────────
     statut = models.CharField(
         max_length=10,
         choices=Statut.choices,
         default=Statut.ACTIF,
-        verbose_name="Statut"
+        verbose_name=_("Statut")
     )
 
     en_vedette = models.BooleanField(
         default=False,
-        verbose_name="Produit en vedette"
+        verbose_name=_("Produit en vedette")
     )
 
-    # ── Note moyenne (calculée automatiquement par signal) ────
     note_moyenne = models.DecimalField(
         max_digits=3,
         decimal_places=2,
         default=0.00,
-        verbose_name="Note moyenne"
+        verbose_name=_("Note moyenne")
     )
 
     nombre_avis = models.PositiveIntegerField(
         default=0,
-        verbose_name="Nombre d'avis"
+        verbose_name=_("Nombre d'avis")
     )
 
     # ── Managers ──────────────────────────────────────────────
@@ -204,8 +194,8 @@ class Produit(models.Model):
     date_modification = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Produit"
-        verbose_name_plural = "Produits"
+        verbose_name = _("Produit")
+        verbose_name_plural = _("Produits")
         ordering = ['-date_creation']
 
     def __str__(self):
@@ -268,37 +258,35 @@ class ImageProduit(models.Model):
         Produit,
         on_delete=models.CASCADE,
         related_name='images',
-        verbose_name="Produit"
+        verbose_name=_("Produit")
     )
 
     image = models.ImageField(
         upload_to='products/',
-        verbose_name="Image"
+        verbose_name=_("Image")
     )
 
-    # Texte alternatif pour l'accessibilité
     alt_text = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name="Texte alternatif"
+        verbose_name=_("Texte alternatif")
     )
 
-    # Ordre d'affichage (0 = image principale)
     ordre = models.PositiveIntegerField(
         default=0,
-        verbose_name="Ordre d'affichage"
+        verbose_name=_("Ordre d'affichage")
     )
 
     est_principale = models.BooleanField(
         default=False,
-        verbose_name="Image principale"
+        verbose_name=_("Image principale")
     )
 
     date_ajout = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Image produit"
-        verbose_name_plural = "Images produit"
+        verbose_name = _("Image produit")
+        verbose_name_plural = _("Images produit")
         ordering = ['ordre']
 
     def __str__(self):
@@ -330,50 +318,48 @@ class MouvementStock(models.Model):
     """
 
     class TypeMouvement(models.TextChoices):
-        ENTREE     = 'entree',     'Entrée stock'
-        SORTIE     = 'sortie',     'Sortie stock'
-        AJUSTEMENT = 'ajustement', 'Ajustement'
-        RETOUR     = 'retour',     'Retour client'
+        ENTREE     = 'entree',     _('Entrée stock')
+        SORTIE     = 'sortie',     _('Sortie stock')
+        AJUSTEMENT = 'ajustement', _('Ajustement')
+        RETOUR     = 'retour',     _('Retour client')
 
     produit = models.ForeignKey(
         Produit,
         on_delete=models.CASCADE,
         related_name='mouvements_stock',
-        verbose_name="Produit"
+        verbose_name=_("Produit")
     )
 
     type_mouvement = models.CharField(
         max_length=15,
         choices=TypeMouvement.choices,
-        verbose_name="Type"
+        verbose_name=_("Type")
     )
 
     quantite = models.IntegerField(
-        verbose_name="Quantité"
+        verbose_name=_("Quantité")
     )
 
-    # Stock avant et après le mouvement (pour traçabilité)
-    stock_avant  = models.PositiveIntegerField(verbose_name="Stock avant")
-    stock_apres  = models.PositiveIntegerField(verbose_name="Stock après")
+    stock_avant  = models.PositiveIntegerField(verbose_name=_("Stock avant"))
+    stock_apres  = models.PositiveIntegerField(verbose_name=_("Stock après"))
 
     note = models.TextField(
         blank=True,
-        verbose_name="Note"
+        verbose_name=_("Note")
     )
 
-    # Qui a effectué ce mouvement
     effectue_par = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name="Effectué par"
+        verbose_name=_("Effectué par")
     )
 
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Mouvement de stock"
-        verbose_name_plural = "Mouvements de stock"
+        verbose_name = _("Mouvement de stock")
+        verbose_name_plural = _("Mouvements de stock")
         ordering = ['-date']
 
     def __str__(self):

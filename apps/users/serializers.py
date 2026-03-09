@@ -6,6 +6,7 @@ Ils font deux choses :
 """
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 from .models import CustomUser, AdresseLivraison
 
 
@@ -80,7 +81,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
         style={'input_type': 'password'},
-        label="Confirmer le mot de passe"
+        label=_("Confirmer le mot de passe")
     )
 
     class Meta:
@@ -99,7 +100,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
         """
         if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                "Un compte existe déjà avec cette adresse email."
+                _("Un compte existe déjà avec cette adresse email.")
             )
         return value.lower()  # Stocke toujours en minuscules
 
@@ -110,7 +111,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
         """
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({
-                'password': "Les deux mots de passe ne correspondent pas."
+                'password': _("Les deux mots de passe ne correspondent pas.")
             })
         return attrs
 
@@ -156,23 +157,21 @@ class ChangerMotDePasseSerializer(serializers.Serializer):
         write_only=True,
         required=True,
         style={'input_type': 'password'},
-        label="Confirmer le nouveau mot de passe"
+        label=_("Confirmer le nouveau mot de passe")
     )
 
     def validate_ancien_password(self, value):
-        """Vérifie que l'ancien mot de passe est correct"""
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError(
-                "L'ancien mot de passe est incorrect."
+                _("L'ancien mot de passe est incorrect.")
             )
         return value
 
     def validate(self, attrs):
-        """Vérifie que les deux nouveaux mots de passe correspondent"""
         if attrs['nouveau_password'] != attrs['nouveau_password2']:
             raise serializers.ValidationError({
-                'nouveau_password': "Les deux mots de passe ne correspondent pas."
+                'nouveau_password': _("Les deux mots de passe ne correspondent pas.")
             })
         return attrs
 

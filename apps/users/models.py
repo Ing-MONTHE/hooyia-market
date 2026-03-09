@@ -7,6 +7,7 @@ CustomUser pour avoir un contrôle total sur les champs et comportements.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -24,9 +25,9 @@ class CustomUserManager(BaseUserManager):
         Appelé lors de l'inscription classique.
         """
         if not email:
-            raise ValueError("L'adresse email est obligatoire")
+            raise ValueError(_("L'adresse email est obligatoire"))
         if not username:
-            raise ValueError("Le nom d'utilisateur est obligatoire")
+            raise ValueError(_("Le nom d'utilisateur est obligatoire"))
 
         # Normalise l'email (met le domaine en minuscules)
         email = self.normalize_email(email)
@@ -60,69 +61,66 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
 
-    # ── Informations de base ──────────────────────────────────
     username = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="Nom d'utilisateur"
+        verbose_name=_("Nom d'utilisateur")
     )
     email = models.EmailField(
         unique=True,
-        verbose_name="Adresse email"
+        verbose_name=_("Adresse email")
     )
     nom = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name="Nom"
+        verbose_name=_("Nom")
     )
     prenom = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name="Prénom"
+        verbose_name=_("Prénom")
     )
     telephone = models.CharField(
         max_length=20,
         blank=True,
-        verbose_name="Téléphone"
+        verbose_name=_("Téléphone")
     )
     photo_profil = models.ImageField(
         upload_to='profils/',
         null=True,
         blank=True,
-        verbose_name="Photo de profil"
+        verbose_name=_("Photo de profil")
     )
 
-    # ── Statuts du compte ─────────────────────────────────────
     is_active = models.BooleanField(
-        default=False,           # False = compte non activé par email
-        verbose_name="Compte actif"
+        default=False,
+        verbose_name=_("Compte actif")
     )
     is_staff = models.BooleanField(
-        default=False,           # Accès à l'admin Django
-        verbose_name="Staff"
+        default=False,
+        verbose_name=_("Staff")
     )
     is_admin = models.BooleanField(
-        default=False,           # Administrateur HooYia Market
-        verbose_name="Administrateur"
+        default=False,
+        verbose_name=_("Administrateur")
     )
     is_vendeur = models.BooleanField(
-        default=False,           # Peut créer et gérer des produits
-        verbose_name="Vendeur"
+        default=False,
+        verbose_name=_("Vendeur")
     )
     email_verifie = models.BooleanField(
-        default=False,           # True après clic sur le lien de vérification
-        verbose_name="Email vérifié"
+        default=False,
+        verbose_name=_("Email vérifié")
     )
 
-    # ── Dates ─────────────────────────────────────────────────
     date_inscription = models.DateTimeField(
         default=timezone.now,
-        verbose_name="Date d'inscription"
+        verbose_name=_("Date d'inscription")
     )
     derniere_connexion = models.DateTimeField(
         null=True,
         blank=True,
-        verbose_name="Dernière connexion"
+        verbose_name=_("Dernière connexion")
     )
 
     # ── Configuration du manager ──────────────────────────────
@@ -135,8 +133,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['username']
 
     class Meta:
-        verbose_name = "Utilisateur"
-        verbose_name_plural = "Utilisateurs"
+        verbose_name = _("Utilisateur")
+        verbose_name_plural = _("Utilisateurs")
         ordering = ['-date_inscription']
 
     def __str__(self):
@@ -159,31 +157,28 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class AdresseLivraison(models.Model):
 
-    # L'utilisateur propriétaire de cette adresse
     utilisateur = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='adresses',
-        verbose_name="Utilisateur"
+        verbose_name=_("Utilisateur")
     )
 
-    # ── Champs de l'adresse ───────────────────────────────────
-    nom_complet     = models.CharField(max_length=150, verbose_name="Nom complet")
-    telephone       = models.CharField(max_length=20,  verbose_name="Téléphone")
-    adresse         = models.CharField(max_length=255, verbose_name="Adresse")
-    ville           = models.CharField(max_length=100, verbose_name="Ville")
-    region          = models.CharField(max_length=100, verbose_name="Région")
-    pays            = models.CharField(max_length=100, default="Cameroun", verbose_name="Pays")
-    code_postal     = models.CharField(max_length=10,  blank=True, verbose_name="Code postal")
+    nom_complet = models.CharField(max_length=150, verbose_name=_("Nom complet"))
+    telephone   = models.CharField(max_length=20,  verbose_name=_("Téléphone"))
+    adresse     = models.CharField(max_length=255, verbose_name=_("Adresse"))
+    ville       = models.CharField(max_length=100, verbose_name=_("Ville"))
+    region      = models.CharField(max_length=100, verbose_name=_("Région"))
+    pays        = models.CharField(max_length=100, default="Cameroun", verbose_name=_("Pays"))
+    code_postal = models.CharField(max_length=10,  blank=True, verbose_name=_("Code postal"))
 
-    # Adresse utilisée par défaut lors du passage de commande
-    is_default = models.BooleanField(default=False, verbose_name="Adresse par défaut")
+    is_default = models.BooleanField(default=False, verbose_name=_("Adresse par défaut"))
 
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Adresse de livraison"
-        verbose_name_plural = "Adresses de livraison"
+        verbose_name = _("Adresse de livraison")
+        verbose_name_plural = _("Adresses de livraison")
         ordering = ['-is_default', '-date_creation']
 
     def __str__(self):

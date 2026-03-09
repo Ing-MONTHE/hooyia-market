@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 
 from .models import Conversation, MessageChat
 from .serializers import (
@@ -152,7 +153,7 @@ class EnvoyerMessageAPIView(APIView):
         contenu = request.data.get('message', '').strip()
         if not contenu:
             return Response(
-                {'detail': 'Le message ne peut pas être vide.'},
+                {'detail': _('Le message ne peut pas être vide.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -198,6 +199,6 @@ class MarquerLuAPIView(APIView):
         ).exclude(expediteur=user).update(is_read=True)
 
         return Response(
-            {'detail': f'{updated} message(s) marqué(s) comme lu(s).'},
+            {'detail': _('%(n)s message(s) marqué(s) comme lu(s).') % {'n': updated}},
             status=status.HTTP_200_OK
         )

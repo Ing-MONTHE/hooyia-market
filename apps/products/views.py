@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.cache import cache
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from .models import Produit, Categorie, ImageProduit
 
 def est_admin(user):
@@ -256,7 +257,7 @@ def ajouter_produit(request):
         en_vedette = 'en_vedette' in request.POST
 
         if not nom or not description or not prix:
-            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            messages.error(request, _("Veuillez remplir tous les champs obligatoires."))
         else:
             try:
                 produit = Produit.objects.create(
@@ -287,11 +288,11 @@ def ajouter_produit(request):
                 cache.delete('categories_api')
                 cache.delete('categories_racines')
 
-                messages.success(request, f"Produit « {produit.nom} » créé avec succès !")
+                messages.success(request, _("Produit « %(nom)s » créé avec succès !") % {'nom': produit.nom})
                 return redirect('products:detail', slug=produit.slug)
 
             except Exception as e:
-                messages.error(request, f"Erreur lors de la création : {str(e)}")
+                messages.error(request, _("Erreur lors de la création : %(err)s") % {'err': str(e)})
 
     context = {
         'categories': categories,
@@ -347,10 +348,10 @@ def modifier_produit(request, produit_id):
                 )
 
             cache.delete(f'produit_slug_{produit.slug}')
-            messages.success(request, "Produit modifié avec succès !")
+            messages.success(request, _("Produit modifié avec succès !"))
             return redirect('products:detail', slug=produit.slug)
         except Exception as e:
-            messages.error(request, f"Erreur : {str(e)}")
+            messages.error(request, _("Erreur : %(err)s") % {'err': str(e)})
 
     context = {
         'produit': produit,
@@ -382,7 +383,7 @@ def supprimer_produit(request, produit_id):
         nom = produit.nom
         cache.delete(f'produit_slug_{produit.slug}')
         produit.delete()
-        messages.success(request, f"Produit « {nom} » supprimé.")
+        messages.success(request, _("Produit « %(nom)s » supprimé.") % {'nom': nom})
         return redirect('products:liste')
     return redirect('products:detail', slug=produit.slug)
 
@@ -409,7 +410,7 @@ def gestion_categories(request):
         est_active = 'est_active' in request.POST
 
         if not nom:
-            messages.error(request, "Le nom est obligatoire.")
+            messages.error(request, _("Le nom est obligatoires."))
         else:
             try:
                 if action == 'modifier' and request.POST.get('categorie_id'):
@@ -423,7 +424,7 @@ def gestion_categories(request):
                     cat.save()
                     cache.delete('categories_api')
                     cache.delete('categories_racines')
-                    messages.success(request, f"Catégorie « {cat.nom} » modifiée avec succès !")
+                    messages.success(request, _("Catégorie « %(nom)s » modifiée avec succès !") % {'nom': cat.nom})
                 else:
                     cat = Categorie.objects.create(
                         nom=nom,
@@ -436,10 +437,10 @@ def gestion_categories(request):
                         cat.save()
                     cache.delete('categories_api')
                     cache.delete('categories_racines')
-                    messages.success(request, f"Catégorie « {cat.nom} » créée avec succès !")
+                    messages.success(request, _("Catégorie « %(nom)s » créée avec succès !") % {'nom': cat.nom})
                 return redirect('products:gestion_categories')
             except Exception as e:
-                messages.error(request, f"Erreur : {str(e)}")
+                messages.error(request, _("Erreur : %(err)s") % {'err': str(e)})
 
     return render(request, 'products/gestion_categories.html', {
         'categories_racines': categories_racines,
@@ -476,7 +477,7 @@ def api_categories_crud(request):
     elif request.method == 'POST':
         nom = request.POST.get('nom', '').strip()
         if not nom:
-            return JsonResponse({'error': 'Le nom est obligatoire.'}, status=400)
+            return JsonResponse({'error': _('Le nom est obligatoire.')}, status=400)
         description = request.POST.get('description', '').strip()
         parent_id = request.POST.get('parent_id') or None
         est_active = request.POST.get('est_active', 'true') == 'true'
@@ -530,7 +531,7 @@ def api_categories_crud(request):
         body = json.loads(request.body or '{}')
         cat_id = body.get('cat_id')
         if not cat_id:
-            return JsonResponse({'error': 'cat_id manquant'}, status=400)
+            return JsonResponse({'error': _('cat_id manquant')}, status=400)
         cat = get_object_or_404(Categorie, id=cat_id)
         nom = cat.nom
         cat.est_active = False
@@ -539,7 +540,7 @@ def api_categories_crud(request):
         cache.delete('categories_racines')
         return JsonResponse({'success': True, 'nom': nom})
 
-    return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+    return JsonResponse({'error': _('Méthode non autorisée')}, status=405)
 
 
 @user_passes_test(est_admin, login_url='/compte/connexion/')
@@ -551,7 +552,7 @@ def supprimer_categorie(request, cat_id):
     cat.save()
     cache.delete('categories_api')
     cache.delete('categories_racines')
-    messages.success(request, f"Catégorie « {nom} » supprimée.")
+    messages.success(request, _("Catégorie « %(nom)s » supprimée.") % {'nom': nom})
     return redirect('products:gestion_categories')
 
 

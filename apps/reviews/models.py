@@ -20,6 +20,7 @@ Lien avec products/Produit :
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.translation import gettext_lazy as _
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -43,63 +44,46 @@ class Avis(models.Model):
       4. Admin valide → is_validated=True → signal recalcule note_moyenne du produit
     """
 
-    # ── Relation utilisateur ───────────────────────────────────
-    # SET_NULL : si le compte est supprimé, on garde l'avis anonymisé
-    # (l'historique des notes reste utile pour le produit)
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='avis',        # user.avis.all() → tous ses avis
-        verbose_name="Auteur"
+        related_name='avis',
+        verbose_name=_("Auteur")
     )
 
-    # ── Relation produit ───────────────────────────────────────
-    # CASCADE : si le produit est supprimé, ses avis le sont aussi
     produit = models.ForeignKey(
         'products.Produit',
         on_delete=models.CASCADE,
-        related_name='avis',        # produit.avis.all() → tous les avis du produit
-        verbose_name="Produit"
+        related_name='avis',
+        verbose_name=_("Produit")
     )
 
-    # ── Note de 1 à 5 ─────────────────────────────────────────
-    # 1 = très mauvais, 5 = excellent
-    # PositiveSmallIntegerField : entier positif stocké sur 2 octets (suffisant pour 1-5)
     note = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1, message="La note minimale est 1 étoile."),
-            MaxValueValidator(5, message="La note maximale est 5 étoiles."),
+            MinValueValidator(1, message=_("La note minimale est 1 étoile.")),
+            MaxValueValidator(5, message=_("La note maximale est 5 étoiles.")),
         ],
-        verbose_name="Note (1 à 5)"
+        verbose_name=_("Note (1 à 5)")
     )
 
-    # ── Commentaire ────────────────────────────────────────────
-    # Facultatif : le client peut noter sans écrire de texte
     commentaire = models.TextField(
         blank=True,
-        verbose_name="Commentaire"
+        verbose_name=_("Commentaire")
     )
 
-    # ── Modération ─────────────────────────────────────────────
-    # is_validated=False par défaut → l'admin doit valider avant publication
-    # Seuls les avis validés (is_validated=True) sont pris en compte
-    # dans la note_moyenne du produit via le signal reviews/signals.py
     is_validated = models.BooleanField(
         default=False,
-        verbose_name="Validé par un admin"
+        verbose_name=_("Validé par un admin")
     )
 
-    # ── Dates ──────────────────────────────────────────────────
-    date_creation    = models.DateTimeField(auto_now_add=True, verbose_name="Date de l'avis")
-    date_modification = models.DateTimeField(auto_now=True,    verbose_name="Dernière modification")
+    date_creation     = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de l'avis"))
+    date_modification = models.DateTimeField(auto_now=True,     verbose_name=_("Dernière modification"))
 
     class Meta:
-        verbose_name = "Avis"
-        verbose_name_plural = "Avis"
-        ordering = ['-date_creation']   # Les plus récents en premier
-        # Un utilisateur ne peut laisser qu'UN seul avis par produit
-        # Django lève IntegrityError si on tente d'en créer un second
+        verbose_name = _("Avis")
+        verbose_name_plural = _("Avis")
+        ordering = ['-date_creation']
         unique_together = ('utilisateur', 'produit')
 
     def __str__(self):
@@ -128,31 +112,30 @@ class AvisApp(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='avis_app',
-        verbose_name="Auteur"
+        verbose_name=_("Auteur")
     )
 
     note = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1, message="Note minimale : 1."),
-            MaxValueValidator(5, message="Note maximale : 5."),
+            MinValueValidator(1, message=_("Note minimale : 1.")),
+            MaxValueValidator(5, message=_("Note maximale : 5.")),
         ],
-        verbose_name="Note (1 à 5)"
+        verbose_name=_("Note (1 à 5)")
     )
 
-    commentaire = models.TextField(verbose_name="Commentaire")
+    commentaire = models.TextField(verbose_name=_("Commentaire"))
 
     is_valide = models.BooleanField(
         default=False,
-        verbose_name="Validé (affiché sur la home)"
+        verbose_name=_("Validé (affiché sur la home)")
     )
 
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Avis sur l'application"
-        verbose_name_plural = "Avis sur l'application"
+        verbose_name = _("Avis sur l'application")
+        verbose_name_plural = _("Avis sur l'application")
         ordering = ['-date_creation']
-        # Un utilisateur = un seul avis sur l'app
         unique_together = ('utilisateur',)
 
     def __str__(self):

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Catalogue — HooYia Market{% endblock %}
+{% block title %}{% trans 'Catalogue' %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -760,10 +760,10 @@
       <input
         type="search"
         class="header-search-input"
-        placeholder="Rechercher un produit…"
+        placeholder="{% trans 'Rechercher un produit…' %}"
         value="{{ search }}"
         onkeydown="if(event.key==='Enter'){ const p=new URLSearchParams(window.location.search); p.delete('page'); p.delete('categorie'); if(this.value) p.set('search',this.value); else p.delete('search'); window.location.href='?'+p.toString(); }"
-        aria-label="Rechercher un produit"
+        aria-label="{% trans 'Rechercher un produit' %}"
       />
     </div>
 
@@ -774,14 +774,14 @@
       <!-- Tab "Tous les produits" — réinitialise search et catégorie, conserve uniquement le tri -->
       <a href="?ordering={{ ordering }}"
          class="header-tab header-tab-primary"
-         aria-label="Voir tous les produits">
+         aria-label="{% trans 'Voir tous les produits' %}">
         <!-- Lucide "sparkles" — étoile scintillante -->
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5"
              stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3l1.88 5.76a1 1 0 00.95.69H21l-5 3.63a1 1 0 00-.36 1.12L17.52 20 12 16.37 6.48 20l1.88-5.8a1 1 0 00-.36-1.12L3 9.45h6.17a1 1 0 00.95-.69z"/>
         </svg>
-        Tous les produits
+        {% trans "Tous les produits" %}
       </a>
 
       <!-- Tab 2 : "Catégories" — rouge, ouvre un dropdown de sélection rapide
@@ -794,7 +794,7 @@
           aria-haspopup="true"
           aria-expanded="false"
           id="cat-tab-btn"
-          aria-label="Filtrer par catégorie">
+          aria-label="{% trans 'Filtrer par catégorie' %}">
           <!-- Lucide "layout-grid" — grille de catégories -->
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2.5"
@@ -804,7 +804,7 @@
               <rect x="3" y="14" width="7" height="7" rx="1"/>
               <rect x="14" y="14" width="7" height="7" rx="1"/>
             </svg>
-          Catégories
+          {% trans "Catégories" %}
           <!-- Lucide "chevron-down" — tourne à l'ouverture -->
           <svg class="tab-chevron" id="cat-chevron"
                width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -831,7 +831,7 @@
               <polyline points="2 17 12 22 22 17"/>
               <polyline points="2 12 12 17 22 12"/>
             </svg>
-            Toutes les catégories
+            {% trans "Toutes les catégories" %}
           </a>
 
           <div class="hcat-divider"></div>
@@ -860,17 +860,17 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
       </svg>
-      Filtres
+      {% trans "Filtres" %}
     </button>
 
     <!-- Sélecteur de tri — déclenche un rechargement de page via applyFilter() -->
     <div class="catalogue-sort">
-      <label for="sort-select">Trier par</label>
+      <label for="sort-select">{% trans "Trier par" %}</label>
       <select id="sort-select" onchange="applyFilter('ordering', this.value)">
-        <option value="-date_creation" {% if ordering == '-date_creation' %}selected{% endif %}>Plus récents</option>
-        <option value="prix"           {% if ordering == 'prix' %}selected{% endif %}>Prix croissant</option>
-        <option value="-prix"          {% if ordering == '-prix' %}selected{% endif %}>Prix décroissant</option>
-        <option value="-note_moyenne"  {% if ordering == '-note_moyenne' %}selected{% endif %}>Mieux notés</option>
+        <option value="-date_creation" {% if ordering == '-date_creation' %}selected{% endif %}>{% trans "Plus récents" %}</option>
+        <option value="prix"           {% if ordering == 'prix' %}selected{% endif %}>{% trans "Prix croissant" %}</option>
+        <option value="-prix"          {% if ordering == '-prix' %}selected{% endif %}>{% trans "Prix décroissant" %}</option>
+        <option value="-note_moyenne"  {% if ordering == '-note_moyenne' %}selected{% endif %}>{% trans "Mieux notés" %}</option>
       </select>
     </div>
   </div>
@@ -900,13 +900,13 @@
             <line x1="8" y1="12" x2="16" y2="12"/>
             <line x1="11" y1="18" x2="13" y2="18"/>
           </svg>
-          Filtres
+          {% trans "Filtres" %}
         </div>
         <!-- Bouton ≡ — ferme la sidebar sur mobile (overlay) -->
         <button class="filter-burger-btn filter-sidebar-close"
                 onclick="closeFilters()"
                 style="display:none;"
-                aria-label="Fermer les filtres">
+                aria-label="{% trans 'Fermer les filtres' %}">
           <!-- Lucide "menu" — 3 traits horizontaux -->
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5"
@@ -937,7 +937,7 @@
                 <rect x="14" y="14" width="7" height="7" rx="1"/>
               </svg>
             </span>
-            Catégories
+            {% trans "Catégories" %}
           </span>
           <svg class="filter-section-chevron" width="14" height="14"
                viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -957,7 +957,7 @@
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </span>
-            <span class="cat-item-name">Toutes les catégories</span>
+            <span class="cat-item-name">{% trans "Toutes les catégories" %}</span>
           </a>
 
           <div class="cat-divider"></div>
@@ -991,7 +991,7 @@
               {% if cat.sous_categories.all %}
               <button class="cat-collapse-btn {% for sous in cat.sous_categories.all %}{% if categorie_active.slug == sous.slug %}open{% endif %}{% endfor %}"
                       onclick="toggleCatParent(this)"
-                      aria-label="Afficher les sous-catégories de {{ cat.nom }}">
+                      aria-label="{% blocktrans with nom=cat.nom %}Afficher les sous-catégories de {{ nom }}{% endblocktrans %}">
                 <!-- Lucide "chevron-down" — tourne à l'ouverture -->
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2.5"
@@ -1046,7 +1046,7 @@
                 <circle cx="17.5" cy="17.5" r="2.5"/>
               </svg>
             </span>
-            Promotions
+            {% trans "Promotions" %}
           </span>
           <svg class="filter-section-chevron" width="14" height="14"
                viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1059,7 +1059,7 @@
             <input type="checkbox"
                    {% if request.GET.promo %}checked{% endif %}
                    onchange="applyFilter('promo', this.checked ? '1' : '')" />
-            Promotions uniquement
+            {% trans "Promotions uniquement" %}
           </label>
         </div>
       </div>
@@ -1074,7 +1074,7 @@
             <polyline points="1 4 1 10 7 10"/>
             <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
           </svg>
-          Réinitialiser les filtres
+          {% trans "Réinitialiser les filtres" %}
         </a>
       </div>
 
@@ -1116,7 +1116,7 @@
               {% if not est_admin and not est_vendeur %}
               <button class="pcard-cart-btn"
                       onclick="event.preventDefault();event.stopPropagation();addToCart({{ produit.id }}, '{{ produit.nom|escapejs }}')"
-                      title="Ajouter au panier" aria-label="Ajouter {{ produit.nom }} au panier">
+                      title="{% trans 'Ajouter au panier' %}" aria-label="{% trans 'Ajouter' %} {{ produit.nom }} {% trans 'au panier' %}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                   <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
@@ -1150,9 +1150,9 @@
       {% else %}
       <div class="empty-state">
         <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <h3>Aucun produit trouvé</h3>
-        <p>Essayez d'autres filtres ou catégories.</p>
-        <a href="{% url 'products:liste' %}" class="btn btn-secondary btn-sm">Réinitialiser les filtres</a>
+        <h3>{% trans "Aucun produit trouvé" %}</h3>
+        <p>{% trans "Essayez d'autres filtres ou catégories." %}</p>
+        <a href="{% url 'products:liste' %}" class="btn btn-secondary btn-sm">{% trans "Réinitialiser les filtres" %}</a>
       </div>
       {% endif %}
     </div>
@@ -1163,6 +1163,13 @@
 
 {% block extra_scripts %}
 <script>
+{# Chaînes traduites pour le JS catalogue #}
+<script>
+var LIST_I18N = {
+  ceProduit:      '{% trans "ce produit" %}',
+  ajouteAuPanier: '{% trans "a été ajouté au panier" %}',
+};
+</script>
   /* ── toggleCatParent : ouvre/ferme les sous-catégories d'une mère ── */
   function toggleCatParent(btn) {
     const wrap     = btn.closest('.cat-parent-wrap');
@@ -1231,8 +1238,8 @@
     {% if user.is_authenticated %}
     try {
       await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
-      const nom = produitNom ? `"${produitNom}"` : 'ce produit';
-      toast(`Le produit ${nom} a été ajouté au panier`, 'success');
+      const nom = produitNom ? `"${produitNom}"` : LIST_I18N.ceProduit;
+      toast(`Le produit ${nom} ${LIST_I18N.ajouteAuPanier}`, 'success');
       const badge = document.getElementById('cart-badge');
       if (badge) {
         badge.textContent = (parseInt(badge.textContent) || 0) + 1;

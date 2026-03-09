@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -35,7 +35,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}Nouvelle adresse — HooYia Market{% endblock %}
+{% block title %}{% trans 'Nouvelle adresse' %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -56,7 +56,7 @@
       <line x1="19" y1="12" x2="5" y2="12"/>
       <polyline points="12 19 5 12 12 5"/>
     </svg>
-    Retour au profil
+    {% trans "Retour au profil" %}
   </a>
 
 
@@ -64,10 +64,10 @@
   <div style="margin-bottom:1.75rem;">
     <h1 style="font-family:'Poppins',sans-serif;font-size:1.625rem;font-weight:800;
                color:var(--brand-600);margin:0 0 .25rem 0;">
-      Nouvelle adresse
+      {% trans "Nouvelle adresse" %}
     </h1>
     <p style="font-size:.875rem;color:var(--text-muted);margin:0;font-family:'Poppins',sans-serif;">
-      Adresse de livraison pour vos commandes.
+      {% trans "Adresse de livraison pour vos commandes." %}
     </p>
   </div>
 
@@ -100,7 +100,7 @@
       {% endcomment %}
       <div>
         <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-          Nom complet du destinataire <span style="color:var(--accent);">*</span>
+          {% trans "Nom complet du destinataire" %} <span style="color:var(--accent);">*</span>
         </label>
         <div style="position:relative;">
           {% comment %} Lucide — User {% endcomment %}
@@ -129,7 +129,7 @@
       {% endcomment %}
       <div>
         <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-          Téléphone <span style="color:var(--accent);">*</span>
+          {% trans "Téléphone" %} <span style="color:var(--accent);">*</span>
         </label>
         <div style="position:relative;">
           {% comment %} Lucide — Phone {% endcomment %}
@@ -158,7 +158,7 @@
       {% endcomment %}
       <div>
         <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-          Adresse <span style="color:var(--accent);">*</span>
+          {% trans "Adresse" %} <span style="color:var(--accent);">*</span>
         </label>
         <div style="position:relative;">
           {% comment %} Lucide — MapPin {% endcomment %}
@@ -167,7 +167,7 @@
           </span>
           <input type="text" name="adresse" id="id_adresse"
             value="{{ form.adresse.value|default:'' }}"
-            placeholder="Quartier, rue, numéro…"
+            placeholder="{% trans 'Quartier, rue, numéro…' %}"
             autocomplete="street-address" required
             class="input-field"
             style="padding-left:2.625rem;{% if form.adresse.errors %}border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.1);{% endif %}" />
@@ -186,7 +186,7 @@
 
         <div>
           <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-            Ville <span style="color:var(--accent);">*</span>
+            {% trans "Ville" %} <span style="color:var(--accent);">*</span>
           </label>
           <input type="text" name="ville" id="id_ville"
             value="{{ form.ville.value|default:'' }}"
@@ -201,7 +201,7 @@
 
         <div>
           <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-            Région <span style="color:var(--accent);">*</span>
+            {% trans "Région" %} <span style="color:var(--accent);">*</span>
           </label>
           <input type="text" name="region" id="id_region"
             value="{{ form.region.value|default:'' }}"
@@ -221,8 +221,8 @@
 
         <div>
           <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-            Code postal
-            <span style="font-weight:400;color:var(--text-muted);">(optionnel)</span>
+            {% trans "Code postal" %}
+            <span style="font-weight:400;color:var(--text-muted);">{% trans "(optionnel)" %}</span>
           </label>
           <input type="text" name="code_postal" id="id_code_postal"
             value="{{ form.code_postal.value|default:'' }}"
@@ -233,7 +233,7 @@
 
         <div>
           <label style="display:block;font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;">
-            Pays
+            {% trans "Pays" %}
           </label>
           <input type="text" name="pays" id="id_pays"
             value="{{ form.pays.value|default:'Cameroun' }}"
@@ -258,10 +258,10 @@
                style="width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--brand-500);cursor:pointer;" />
         <div>
           <span style="font-size:.875rem;font-weight:600;color:var(--text-primary);display:block;margin-bottom:.2rem;">
-            Définir comme adresse par défaut
+            {% trans "Définir comme adresse par défaut" %}
           </span>
           <span style="font-size:.75rem;color:var(--text-muted);">
-            Pré-remplie automatiquement lors du checkout.
+            {% trans "Pré-remplie automatiquement lors du checkout." %}
           </span>
         </div>
       </label>
@@ -276,7 +276,7 @@
 
         <a href="{% url 'users:profil' %}" class="btn btn-secondary"
            style="flex:1;justify-content:center;">
-          Annuler
+          {% trans "Annuler" %}
         </a>
 
         <button type="submit" class="btn btn-primary"
@@ -288,7 +288,7 @@
             <polyline points="17 21 17 13 7 13 7 21"/>
             <polyline points="7 3 7 8 15 8"/>
           </svg>
-          Enregistrer l'adresse
+          {% trans "Enregistrer l'adresse" %}
         </button>
 
       </div>

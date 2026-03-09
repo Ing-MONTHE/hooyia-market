@@ -21,6 +21,8 @@ from rest_framework import generics, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _l
 from django_fsm import TransitionNotAllowed
 
 from .models import Commande
@@ -96,7 +98,7 @@ class CommandeCreerAPIView(APIView):
                 )
             except AdresseLivraison.DoesNotExist:
                 return Response(
-                    {'erreur': "Adresse de livraison introuvable."},
+                    {'erreur': _("Adresse de livraison introuvable.")},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         else:
@@ -179,7 +181,7 @@ class AnnulerCommandeAPIView(APIView):
                 commande = Commande.objects.get(pk=pk, client=request.user)
         except Commande.DoesNotExist:
             return Response(
-                {'erreur': 'Commande introuvable.'},
+                {'erreur': _('Commande introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -189,12 +191,12 @@ class AnnulerCommandeAPIView(APIView):
             return Response({'erreur': e.message}, status=status.HTTP_400_BAD_REQUEST)
         except TransitionNotAllowed:
             return Response(
-                {'erreur': 'Cette commande ne peut pas être annulée dans son état actuel.'},
+                {'erreur': _('Cette commande ne peut pas être annulée dans son état actuel.')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         return Response({
-            'message': 'Commande annulée avec succès.',
+            'message': _('Commande annulée avec succès.'),
             'commande': CommandeDetailSerializer(commande).data,
         })
 
@@ -217,25 +219,24 @@ class TransitionCommandeAPIView(APIView):
 
     # Défini dans chaque sous-classe : nom de la méthode FSM à appeler
     transition_method = None
-    message_succes    = 'Statut mis à jour.'
+    message_succes    = _l('Statut mis à jour.')
 
     def post(self, request, pk):
         try:
             commande = Commande.objects.get(pk=pk)
         except Commande.DoesNotExist:
             return Response(
-                {'erreur': 'Commande introuvable.'},
+                {'erreur': _('Commande introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         try:
-            # Appelle dynamiquement la méthode FSM (confirmer, expedier, etc.)
             methode = getattr(commande, self.transition_method)
             methode()
             commande.save()
         except TransitionNotAllowed:
             return Response(
-                {'erreur': f"Transition '{self.transition_method}' non autorisée depuis le statut actuel."},
+                {'erreur': _("Transition '%(t)s' non autorisée depuis le statut actuel.") % {'t': self.transition_method}},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -246,24 +247,20 @@ class TransitionCommandeAPIView(APIView):
 
 
 class ConfirmerCommandeAPIView(TransitionCommandeAPIView):
-    """POST /api/commandes/<id>/confirmer/"""
     transition_method = 'confirmer'
-    message_succes    = 'Commande confirmée.'
+    message_succes    = _l('Commande confirmée.')
 
 
 class MettreEnPreparationAPIView(TransitionCommandeAPIView):
-    """POST /api/commandes/<id>/mettre_en_preparation/"""
     transition_method = 'mettre_en_preparation'
-    message_succes    = 'Commande en cours de préparation.'
+    message_succes    = _l('Commande en cours de préparation.')
 
 
 class ExpedierCommandeAPIView(TransitionCommandeAPIView):
-    """POST /api/commandes/<id>/expedier/"""
     transition_method = 'expedier'
-    message_succes    = 'Commande expédiée.'
+    message_succes    = _l('Commande expédiée.')
 
 
 class LivrerCommandeAPIView(TransitionCommandeAPIView):
-    """POST /api/commandes/<id>/livrer/"""
     transition_method = 'livrer'
-    message_succes    = 'Commande livrée.'
+    message_succes    = _l('Commande livrée.')

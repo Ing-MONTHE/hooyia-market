@@ -15,6 +15,7 @@ qu'en cas d'erreur, aucun changement partiel n'est sauvegardé en base.
 """
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import PanierItem
 from apps.products.models import Produit
@@ -68,16 +69,16 @@ class CartService:
         try:
             produit = Produit.actifs.get(pk=produit_id)
         except Produit.DoesNotExist:
-            raise ValidationError("Ce produit n'est pas disponible.")
+            raise ValidationError(_("Ce produit n'est pas disponible."))
 
         # Vérifie que la quantité demandée est valide
         if quantite <= 0:
-            raise ValidationError("La quantité doit être supérieure à 0.")
+            raise ValidationError(_("La quantité doit être supérieure à 0."))
 
         # Vérifie le stock disponible
         if produit.stock < quantite:
             raise ValidationError(
-                f"Stock insuffisant. Il reste {produit.stock} unité(s) disponible(s)."
+                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).") % {'stock': produit.stock}
             )
 
         # Capture le prix actuel (promo si disponible, sinon prix normal)
@@ -102,9 +103,12 @@ class CartService:
             # Vérifie que la nouvelle quantité totale ne dépasse pas le stock
             if nouvelle_quantite > produit.stock:
                 raise ValidationError(
-                    f"Quantité maximale atteinte. "
-                    f"Vous avez déjà {item.quantite} unité(s) dans votre panier "
-                    f"et il reste {produit.stock} unité(s) en stock."
+                    _("Quantité maximale atteinte. "
+                      "Vous avez déjà %(dans_panier)s unité(s) dans votre panier "
+                      "et il reste %(en_stock)s unité(s) en stock.") % {
+                        'dans_panier': item.quantite,
+                        'en_stock': produit.stock,
+                    }
                 )
 
             item.quantite = nouvelle_quantite
@@ -138,7 +142,7 @@ class CartService:
             item.delete()
             return True
         except PanierItem.DoesNotExist:
-            raise ValidationError("Cet article n'existe pas dans votre panier.")
+            raise ValidationError(_("Cet article n'existe pas dans votre panier."))
 
     @staticmethod
     @transaction.atomic
@@ -161,7 +165,7 @@ class CartService:
         try:
             item = PanierItem.objects.get(pk=item_id, panier=panier)
         except PanierItem.DoesNotExist:
-            raise ValidationError("Cet article n'existe pas dans votre panier.")
+            raise ValidationError(_("Cet article n'existe pas dans votre panier."))
 
         # Quantité = 0 → supprime la ligne
         if nouvelle_quantite <= 0:
@@ -171,7 +175,7 @@ class CartService:
         # Vérifie le stock disponible avant la mise à jour
         if item.produit and nouvelle_quantite > item.produit.stock:
             raise ValidationError(
-                f"Stock insuffisant. Il reste {item.produit.stock} unité(s) disponible(s)."
+                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).") % {'stock': item.produit.stock}
             )
 
         item.quantite = nouvelle_quantite

@@ -21,6 +21,7 @@ Flux de création d'une commande :
 """
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import Commande, LigneCommande, Paiement
 from apps.cart.models import Panier
@@ -70,10 +71,10 @@ class OrderService:
         try:
             panier = utilisateur.panier
         except Panier.DoesNotExist:
-            raise ValidationError("Vous n'avez pas de panier.")
+            raise ValidationError(_("Vous n'avez pas de panier."))
 
         if panier.est_vide:
-            raise ValidationError("Votre panier est vide.")
+            raise ValidationError(_("Votre panier est vide."))
 
         # Charge tous les articles du panier avec leurs produits en une seule requête
         items = panier.items.select_related('produit').all()
@@ -83,13 +84,17 @@ class OrderService:
         for item in items:
             if not item.produit:
                 raise ValidationError(
-                    "Un produit de votre panier n'est plus disponible. "
-                    "Veuillez le retirer de votre panier."
+                    _("Un produit de votre panier n'est plus disponible. "
+                      "Veuillez le retirer de votre panier.")
                 )
             if item.produit.stock < item.quantite:
                 raise ValidationError(
-                    f"Stock insuffisant pour « {item.produit.nom} ». "
-                    f"Disponible : {item.produit.stock} — Demandé : {item.quantite}."
+                    _("Stock insuffisant pour « %(nom)s ». "
+                      "Disponible : %(stock)s — Demandé : %(quantite)s.") % {
+                        'nom': item.produit.nom,
+                        'stock': item.produit.stock,
+                        'quantite': item.quantite,
+                    }
                 )
 
         # ── Étape 3 : Crée la Commande ────────────────────────
@@ -168,12 +173,12 @@ class OrderService:
         """
         # Vérifie que l'utilisateur est propriétaire ou admin
         if commande.client != utilisateur and not utilisateur.is_admin:
-            raise ValidationError("Vous n'êtes pas autorisé à annuler cette commande.")
+            raise ValidationError(_("Vous n'êtes pas autorisé à annuler cette commande."))
 
         if not commande.peut_etre_annulee:
             raise ValidationError(
-                "Cette commande ne peut plus être annulée "
-                "(déjà livrée ou déjà annulée)."
+                _("Cette commande ne peut plus être annulée "
+                  "(déjà livrée ou déjà annulée).")
             )
 
         # La transition FSM annuler() gère la remise en stock automatiquement

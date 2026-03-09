@@ -18,6 +18,7 @@ Flux normal :
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 
 
@@ -35,31 +36,26 @@ class Panier(models.Model):
     Cela évite de recréer un panier à chaque nouvelle commande.
     """
 
-    # Un seul panier par utilisateur
-    # Si l'utilisateur est supprimé, son panier l'est aussi (CASCADE)
     utilisateur = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='panier',   # user.panier → accès direct au panier
-        verbose_name="Utilisateur"
+        related_name='panier',
+        verbose_name=_("Utilisateur")
     )
 
-    # Date de création du panier (à l'inscription)
     date_creation = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Date de création"
+        verbose_name=_("Date de création")
     )
 
-    # Date de dernière modification (mise à jour automatique à chaque changement)
-    # Utile pour la tâche Celery cleanup_old_carts (paniers inactifs > 30j)
     date_modification = models.DateTimeField(
         auto_now=True,
-        verbose_name="Dernière modification"
+        verbose_name=_("Dernière modification")
     )
 
     class Meta:
-        verbose_name = "Panier"
-        verbose_name_plural = "Paniers"
+        verbose_name = _("Panier")
+        verbose_name_plural = _("Paniers")
 
     def __str__(self):
         return f"Panier de {self.utilisateur.username}"
@@ -123,52 +119,42 @@ class PanierItem(models.Model):
       C'est CartService.add_item() qui gère cette logique.
     """
 
-    # Lien vers le panier parent
-    # Si le panier est supprimé, tous ses articles le sont aussi (CASCADE)
     panier = models.ForeignKey(
         Panier,
         on_delete=models.CASCADE,
-        related_name='items',    # panier.items.all() → toutes les lignes
-        verbose_name="Panier"
+        related_name='items',
+        verbose_name=_("Panier")
     )
 
-    # Le produit ajouté au panier
-    # SET_NULL : si le produit est supprimé par le vendeur, la ligne reste (produit=None)
-    # pour ne pas vider silencieusement le panier du client sans le prévenir
     produit = models.ForeignKey(
         'products.Produit',
         on_delete=models.SET_NULL,
         null=True,
         related_name='paniers_items',
-        verbose_name="Produit"
+        verbose_name=_("Produit")
     )
 
-    # Quantité souhaitée (minimum 1)
     quantite = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)],
-        verbose_name="Quantité"
+        verbose_name=_("Quantité")
     )
 
-    # Prix capturé au moment de l'ajout au panier
-    # DecimalField évite les erreurs d'arrondi sur les montants monétaires
     prix_snapshot = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))],
-        verbose_name="Prix au moment de l'ajout (FCFA)"
+        verbose_name=_("Prix au moment de l'ajout (FCFA)")
     )
 
-    # Date d'ajout de cette ligne
     date_ajout = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Date d'ajout"
+        verbose_name=_("Date d'ajout")
     )
 
     class Meta:
-        verbose_name = "Article du panier"
-        verbose_name_plural = "Articles du panier"
-        # Un produit ne peut apparaître qu'une seule fois par panier
+        verbose_name = _("Article du panier")
+        verbose_name_plural = _("Articles du panier")
         unique_together = ('panier', 'produit')
 
     def __str__(self):
