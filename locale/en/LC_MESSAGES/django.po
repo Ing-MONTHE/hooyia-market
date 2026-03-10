@@ -364,29 +364,6 @@ msgstr "Async emails"
 msgid "[HooYia Market] Commande #%(ref)s confirmée ✓"
 msgstr "[HooYia Market] Order #%(ref)s confirmed ✓"
 
-#: .\apps\notifications\tasks.py:122
-#, python-format
-msgid ""
-"Bonjour %(username)s,\n"
-"\n"
-"Votre commande #%(ref)s a bien été confirmée.\n"
-"Montant total : %(montant)s FCFA\n"
-"\n"
-"Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n"
-"\n"
-"Merci pour votre confiance !\n"
-"L'équipe HooYia Market"
-msgstr ""
-"Hello %(username)s,\n"
-"\n"
-"Your order #%(ref)s has been confirmed.\n"
-"Total amount: %(montant)s FCFA\n"
-"\n"
-"We are preparing your package. You will receive an email once shipped.\n"
-"\n"
-"Thank you for your trust!\n"
-"The HooYia Market Team"
-
 #: .\apps\notifications\tasks.py:153
 #: .\templates\notifications\emails\order_confirm.html:154
 msgid "Commande confirmée !"
@@ -443,23 +420,6 @@ msgstr "Status: %(statut)s"
 msgid "[HooYia Market] Commande #%(ref)s — %(titre)s"
 msgstr "[HooYia Market] Order #%(ref)s — %(titre)s"
 
-#: .\apps\notifications\tasks.py:192
-#, python-format
-msgid ""
-"Bonjour %(username)s,\n"
-"\n"
-"%(msg)s\n"
-"Référence : #%(ref)s\n"
-"\n"
-"L'équipe HooYia Market"
-msgstr ""
-"Hello %(username)s,\n"
-"\n"
-"%(msg)s\n"
-"Reference: #%(ref)s\n"
-"\n"
-"The HooYia Market Team"
-
 #: .\apps\notifications\tasks.py:201
 msgid "Expédiée 🚚"
 msgstr "Shipped 🚚"
@@ -476,31 +436,6 @@ msgstr "Cancelled ❌"
 msgid "[HooYia Market] Votre avis nous intéresse !"
 msgstr "[HooYia Market] We'd love your feedback!"
 
-#: .\apps\notifications\tasks.py:240
-#, python-format
-msgid ""
-"Bonjour %(username)s,\n"
-"\n"
-"Votre commande #%(ref)s a été livrée.\n"
-"Nous espérons que vous êtes satisfait(e) de vos achats :\n"
-"\n"
-"%(produits)s\n"
-"\n"
-"Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n"
-"\n"
-"L'équipe HooYia Market"
-msgstr ""
-"Hello %(username)s,\n"
-"\n"
-"Your order #%(ref)s has been delivered.\n"
-"We hope you are satisfied with your purchase:\n"
-"\n"
-"%(produits)s\n"
-"\n"
-"Take 2 minutes to leave a review and help other buyers!\n"
-"\n"
-"The HooYia Market Team"
-
 #: .\apps\notifications\tasks.py:256
 msgid "Partagez votre avis !"
 msgstr "Share your review!"
@@ -514,29 +449,6 @@ msgstr "Leave a review for your order #%(ref)s."
 #, python-format
 msgid "[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)"
 msgstr "[HooYia Market] ⚠️ Low stock alert — %(nb)s product(s)"
-
-#: .\apps\notifications\tasks.py:291
-#, python-format
-msgid ""
-"Bonjour,\n"
-"\n"
-"%(nb)s produit(s) sont en stock faible :\n"
-"\n"
-"%(liste)s\n"
-"\n"
-"Pensez à réapprovisionner ces articles.\n"
-"\n"
-"HooYia Market — Système automatique"
-msgstr ""
-"Hello,\n"
-"\n"
-"%(nb)s product(s) are low in stock:\n"
-"\n"
-"%(liste)s\n"
-"\n"
-"Please restock these items.\n"
-"\n"
-"HooYia Market — Automated System"
 
 #: .\apps\notifications\tasks.py:302
 #, python-format
@@ -751,23 +663,6 @@ msgstr "You have no cart."
 #: .\apps\orders\services.py:77
 msgid "Votre panier est vide."
 msgstr "Your cart is empty."
-
-#: .\apps\orders\services.py:87
-msgid ""
-"Un produit de votre panier n'est plus disponible. Veuillez le retirer de "
-"votre panier."
-msgstr ""
-"A product in your cart is no longer available. Please remove it from your "
-"cart."
-
-#: .\apps\orders\services.py:92
-#, python-format
-msgid ""
-"Stock insuffisant pour « %(nom)s ». Disponible : %(stock)s — Demandé : "
-"%(quantite)s."
-msgstr ""
-"Insufficient stock for \"%(nom)s\". Available: %(stock)s — Requested: "
-"%(quantite)s."
 
 #: .\apps\orders\services.py:176
 msgid "Vous n'êtes pas autorisé à annuler cette commande."
@@ -1128,14 +1023,6 @@ msgstr "App review"
 #: .\apps\reviews\serializers.py:128
 msgid "Ce produit n'accepte plus d'avis."
 msgstr "This product no longer accepts reviews."
-
-#: .\apps\reviews\serializers.py:148
-msgid ""
-"Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette "
-"fonctionnalité est réservée aux clients."
-msgstr ""
-"Administrators and sellers cannot leave reviews. This feature is reserved "
-"for customers."
 
 #: .\apps\reviews\serializers.py:165
 msgid "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
@@ -1685,12 +1572,6 @@ msgstr "Alert threshold"
 msgid "(défaut : 5)"
 msgstr "(default: 5)"
 
-#: .\templates\admin_dashboard.html:2572
-msgid ""
-"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez vos images"
-msgstr ""
-"<strong style=\"color:var(--accent);\">Click</strong> or drag your images"
-
 #: .\templates\admin_dashboard.html:2573
 msgid "JPG, PNG, WebP — Max 5 Mo — 1ère = principale"
 msgstr "JPG, PNG, WebP — Max 5 MB — 1st = main"
@@ -1757,10 +1638,6 @@ msgstr "All"
 #: .\templates\admin_dashboard.html:2692
 msgid "Confirmées"
 msgstr "Confirmed"
-
-#: .\templates\admin_dashboard.html:2693
-msgid "En préparation"
-msgstr "Being prepared"
 
 #: .\templates\admin_dashboard.html:2694
 msgid "Expédiées"
@@ -1955,13 +1832,6 @@ msgstr "(empty = root)"
 #: .\templates\admin_dashboard.html:3504
 msgid "— Aucun parent —"
 msgstr "— No parent —"
-
-#: .\templates\admin_dashboard.html:3181
-msgid ""
-"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez une image "
-"ici"
-msgstr ""
-"<strong style=\"color:var(--accent);\">Click</strong> or drag an image here"
 
 #: .\templates\admin_dashboard.html:3183
 #: .\templates\products\gestion_categories.html:268
@@ -2215,11 +2085,6 @@ msgstr "Edit"
 msgid "Modifier le produit"
 msgstr "Edit product"
 
-#: .\templates\base.html:42
-msgid ""
-"HooYia Market — Électronique & Informatique au meilleur prix au Cameroun"
-msgstr "HooYia Market — Electronics & IT at the best price in Cameroon"
-
 #: .\templates\base.html:145 .\templates\partials\toast.html:75
 msgid "Fermer"
 msgstr "Close"
@@ -2419,13 +2284,6 @@ msgstr "Performance"
 msgid "commence ici."
 msgstr "starts here."
 
-#: .\templates\home.html:353
-msgid ""
-"Découvrez les meilleurs équipements et accessoires informatiques pour "
-"booster votre productivité."
-msgstr ""
-"Discover the best tech equipment and accessories to boost your productivity."
-
 #: .\templates\home.html:356
 msgid "Découvrir nos produits"
 msgstr "Discover our products"
@@ -2500,12 +2358,6 @@ msgstr "What sets us"
 #: .\templates\home.html:727
 msgid "distingue"
 msgstr "apart"
-
-#: .\templates\home.html:729
-msgid ""
-"Nous privilégions la qualité, la transparence et un service réellement "
-"efficace."
-msgstr "We prioritize quality, transparency, and truly effective service."
 
 #: .\templates\home.html:742
 msgid "Commandez en moins d'une minute"
@@ -2994,14 +2846,6 @@ msgstr "Thank you for your trust, we are preparing your package."
 msgid "Bonjour <strong>%(nom)s</strong>,"
 msgstr "Hello <strong>%(nom)s</strong>,"
 
-#: .\templates\notifications\emails\order_confirm.html:162
-msgid ""
-"Votre commande a bien été reçue et confirmée. Voici le récapitulatif de "
-"votre achat."
-msgstr ""
-"Your order has been received and confirmed. Here is a summary of your "
-"purchase."
-
 #: .\templates\notifications\emails\order_confirm.html:163
 msgid "Vous recevrez un nouvel email dès l'expédition de votre colis."
 msgstr "You will receive a new email as soon as your package is shipped."
@@ -3038,34 +2882,9 @@ msgstr "Your package is arriving at the specified address."
 msgid "Suivre ma commande"
 msgstr "Track my order"
 
-#: .\templates\notifications\emails\order_confirm.html:224
-#: .\templates\notifications\emails\status_update.html:105
-#, python-format
-msgid ""
-"Des questions ? Contactez-nous via <a href=\"%(lien)s\">notre messagerie</a>."
-msgstr "Questions? Contact us via <a href=\"%(lien)s\">our messaging</a>."
-
-#: .\templates\notifications\emails\order_confirm.html:225
-#: .\templates\notifications\emails\status_update.html:106
-msgid ""
-"Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y "
-"répondre."
-msgstr ""
-"This email was sent automatically by HooYia Market. Please do not reply."
-
 #: .\templates\notifications\emails\status_update.html:7
 msgid "Mise à jour de commande"
 msgstr "Order update"
-
-#: .\templates\notifications\emails\status_update.html:73
-msgid ""
-"Votre commande a été annulée. Si vous aviez effectué un paiement, le "
-"remboursement sera traité sous 5 à 7 jours ouvrés. Pour toute question, "
-"contactez notre support."
-msgstr ""
-"Your order has been cancelled. If you made a payment, the refund will be "
-"processed within 5 to 7 business days. For any questions, contact our "
-"support."
 
 #: .\templates\notifications\emails\status_update.html:78
 msgid "Détails de la commande"
@@ -3087,16 +2906,6 @@ msgstr "View my order"
 msgid "Finaliser ma commande"
 msgstr "Complete my order"
 
-#: .\templates\orders\checkout.html:45
-msgid ""
-"Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun"
-msgstr "Complete your order on HooYia Market — Fast delivery in Cameroon"
-
-#: .\templates\orders\checkout.html:138
-msgid ""
-"Renseignez votre adresse de livraison et choisissez votre mode de paiement."
-msgstr "Enter your delivery address and choose your payment method."
-
 #: .\templates\orders\checkout.html:159
 msgid "Où devons-nous livrer votre commande ?"
 msgstr "Where should we deliver your order?"
@@ -3117,11 +2926,6 @@ msgstr "Select an address"
 #: .\templates\orders\checkout.html:210 .\templates\users\profile.html:615
 msgid "Par défaut"
 msgstr "Default"
-
-#: .\templates\orders\checkout.html:222
-msgid ""
-"Remplissez les champs ci-dessous pour une nouvelle adresse de livraison."
-msgstr "Fill in the fields below for a new delivery address."
 
 #: .\templates\orders\checkout.html:233 .\templates\users\adresse_form.html:110
 msgid "Nom complet du destinataire"
@@ -3290,14 +3094,6 @@ msgstr "You haven't placed any orders yet. Explore our catalogue!"
 msgid "HooYia Market — Accueil"
 msgstr "HooYia Market — Home"
 
-#: .\templates\partials\footer.html:179
-msgid ""
-"Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs "
-"camerounais à ceux qui veulent le meilleur — sans compromis."
-msgstr ""
-"Shop smart, receive fast. HooYia connects the best Cameroonian sellers "
-"with those who want the best — no compromises."
-
 #: .\templates\partials\footer.html:190
 msgid "Bafoussam, Cameroun"
 msgstr "Bafoussam, Cameroon"
@@ -3398,22 +3194,9 @@ msgstr "My account"
 msgid "Navigation"
 msgstr "Navigation"
 
-#: .\templates\partials\navbar.html:547 .\templates\partials\navbar.html:938
-#: .\templates\products\detail.html:504
-msgid "Accueil"
-msgstr "Home"
-
 #: .\templates\partials\navbar.html:1210
 msgid "Voir tous les résultats"
 msgstr "View all results"
-
-#: .\templates\partials\navbar.html:1211
-msgid "Aucune notification"
-msgstr "No notification"
-
-#: .\templates\products\list.html:1153
-msgid "Aucun produit trouvé"
-msgstr "No product found"
 
 #: .\templates\products\ajouter_produit.html:58
 #, python-format
@@ -3580,15 +3363,6 @@ msgstr "Delete this product?"
 msgid "Action irréversible"
 msgstr "Irreversible action"
 
-#: .\templates\products\ajouter_produit.html:878
-#, python-format
-msgid ""
-"Le produit <strong style=\"color:#0F1923;\">«&nbsp;%(nom)s&nbsp;»</strong> "
-"sera définitivement supprimé avec toutes ses images et données associées."
-msgstr ""
-"The product <strong style=\"color:#0F1923;\">«&nbsp;%(nom)s&nbsp;»</strong> "
-"will be permanently deleted with all its images and associated data."
-
 #: .\templates\products\ajouter_produit.html:896
 msgid "Confirmer la suppression"
 msgstr "Confirm deletion"
@@ -3596,11 +3370,6 @@ msgstr "Confirm deletion"
 #: .\templates\products\avis_plateforme.html:114
 msgid "Avis déjà soumis"
 msgstr "Review already submitted"
-
-#: .\templates\products\avis_plateforme.html:117
-msgid ""
-"Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !"
-msgstr "You have already left a review on the platform. Thank you for your feedback!"
 
 #: .\templates\products\avis_plateforme.html:125
 #: .\templates\products\avis_plateforme.html:180
@@ -4155,14 +3924,6 @@ msgstr "Create my account"
 #: .\templates\users\register.html:350
 msgid "S'inscrire avec Google"
 msgstr "Sign up with Google"
-
-#: .\templates\users\register.html:369
-msgid ""
-"Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les "
-"spams) pour activer votre compte."
-msgstr ""
-"An activation email will be sent to you. Check your inbox (and spam) to "
-"activate your account."
 
 #: .\templates\users\register.html:376
 msgid "En créant un compte, vous acceptez nos"

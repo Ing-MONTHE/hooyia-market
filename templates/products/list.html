@@ -1164,12 +1164,10 @@
 {% block extra_scripts %}
 <script>
 {# Chaînes traduites pour le JS catalogue #}
-<script>
 var LIST_I18N = {
   ceProduit:      '{% trans "ce produit" %}',
   ajouteAuPanier: '{% trans "a été ajouté au panier" %}',
 };
-</script>
   /* ── toggleCatParent : ouvre/ferme les sous-catégories d'une mère ── */
   function toggleCatParent(btn) {
     const wrap     = btn.closest('.cat-parent-wrap');
@@ -1251,4 +1249,4 @@ var LIST_I18N = {
     {% endif %}
   }
 </script>
-{% endblock %}x
+{% endblock %}
