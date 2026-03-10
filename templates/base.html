@@ -162,6 +162,7 @@
                     utilisées dans tous les templates pour les appels API REST
      notifications.js : polling des notifications non lues (badge navbar)
                         chargé uniquement si l'utilisateur est connecté {% endcomment %}
+  <script src="{% url 'javascript-catalog' %}"></script>
   <script src="{% static 'js/api.js' %}"></script>
   {% comment %} ══ BADGE PANIER TEMPS RÉEL ══
      Charge le nombre d'articles du panier via l'API au chargement

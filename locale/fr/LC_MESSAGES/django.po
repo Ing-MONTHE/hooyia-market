@@ -1,0 +1,5475 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-10 12:28+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\apps\audit\models.py:16 .\apps\cart\models.py:43
+#: .\apps\users\models.py:136 .\apps\users\models.py:164
+#: .\templates\admin_dashboard.html:2895 .\templates\admin_dashboard.html:3241
+#: .\templates\chat\chat_liste.html:52
+msgid "Utilisateur"
+msgstr ""
+
+#: .\apps\audit\models.py:19 .\templates\admin_dashboard.html:2901
+#: .\templates\admin_dashboard.html:3052
+msgid "Action"
+msgstr ""
+
+#: .\apps\audit\models.py:20
+msgid "URL"
+msgstr ""
+
+#: .\apps\audit\models.py:21
+msgid "Code HTTP"
+msgstr ""
+
+#: .\apps\audit\models.py:22 .\templates\admin_dashboard.html:2102
+#: .\templates\admin_dashboard.html:2733 .\templates\admin_dashboard.html:3276
+#: .\templates\admin_dashboard.html:3307
+#: .\templates\notifications\emails\order_confirm.html:173
+msgid "Date"
+msgstr ""
+
+#: .\apps\audit\models.py:23 .\apps\products\models.py:348
+#: .\templates\admin_dashboard.html:2781 .\templates\admin_dashboard.html:2948
+msgid "Note"
+msgstr ""
+
+#: .\apps\audit\models.py:27
+msgid "Log Audit"
+msgstr ""
+
+#: .\apps\audit\models.py:28
+msgid "Logs Audit"
+msgstr ""
+
+#: .\apps\cart\api_views.py:102
+msgid "Article ajouté au panier."
+msgstr ""
+
+#: .\apps\cart\api_views.py:137 .\apps\cart\api_views.py:174
+#: .\apps\cart\api_views.py:211
+msgid "Panier introuvable."
+msgstr ""
+
+#: .\apps\cart\api_views.py:153 .\apps\cart\api_views.py:184
+#: .\templates\cart\cart.html:672
+msgid "Article supprimé du panier."
+msgstr ""
+
+#: .\apps\cart\api_views.py:159
+msgid "Quantité mise à jour."
+msgstr ""
+
+#: .\apps\cart\api_views.py:218
+msgid "Panier vidé avec succès."
+msgstr ""
+
+#: .\apps\cart\models.py:48
+msgid "Date de création"
+msgstr ""
+
+#: .\apps\cart\models.py:53 .\apps\reviews\models.py:81
+msgid "Dernière modification"
+msgstr ""
+
+#: .\apps\cart\models.py:57 .\apps\cart\models.py:126
+#: .\templates\partials\navbar.html:1003
+msgid "Panier"
+msgstr ""
+
+#: .\apps\cart\models.py:58
+msgid "Paniers"
+msgstr ""
+
+#: .\apps\cart\models.py:134 .\apps\orders\models.py:241
+#: .\apps\products\models.py:197 .\apps\products\models.py:261
+#: .\apps\products\models.py:330 .\apps\reviews\models.py:59
+#: .\templates\admin_dashboard.html:2385 .\templates\admin_dashboard.html:2946
+#: .\templates\admin_dashboard.html:3047 .\templates\admin_dashboard.html:3511
+#: .\templates\vendeur\produits.html:74
+msgid "Produit"
+msgstr ""
+
+#: .\apps\cart\models.py:140 .\apps\orders\models.py:251
+#: .\apps\products\models.py:340 .\templates\admin_dashboard.html:2776
+#: .\templates\products\detail.html:578
+msgid "Quantité"
+msgstr ""
+
+#: .\apps\cart\models.py:147
+msgid "Prix au moment de l'ajout (FCFA)"
+msgstr ""
+
+#: .\apps\cart\models.py:152
+msgid "Date d'ajout"
+msgstr ""
+
+#: .\apps\cart\models.py:156
+msgid "Article du panier"
+msgstr ""
+
+#: .\apps\cart\models.py:157
+msgid "Articles du panier"
+msgstr ""
+
+#: .\apps\cart\services.py:72
+msgid "Ce produit n'est pas disponible."
+msgstr ""
+
+#: .\apps\cart\services.py:76 .\apps\products\api_views.py:264
+msgid "La quantité doit être supérieure à 0."
+msgstr ""
+
+#: .\apps\cart\services.py:81 .\apps\cart\services.py:178
+#, python-format
+msgid "Stock insuffisant. Il reste %(stock)s unité(s) disponible(s)."
+msgstr ""
+
+#: .\apps\cart\services.py:106
+#, python-format
+msgid ""
+"Quantité maximale atteinte. Vous avez déjà %(dans_panier)s unité(s) dans "
+"votre panier et il reste %(en_stock)s unité(s) en stock."
+msgstr ""
+
+#: .\apps\cart\services.py:145 .\apps\cart\services.py:168
+msgid "Cet article n'existe pas dans votre panier."
+msgstr ""
+
+#: .\apps\cart\views.py:26
+msgid "Les administrateurs n'ont pas accès au panier."
+msgstr ""
+
+#: .\apps\cart\views.py:30
+msgid "Mon Panier — HooYia Market"
+msgstr ""
+
+#: .\apps\chat\api_views.py:156
+msgid "Le message ne peut pas être vide."
+msgstr ""
+
+#: .\apps\chat\api_views.py:202
+#, python-format
+msgid "%(n)s message(s) marqué(s) comme lu(s)."
+msgstr ""
+
+#: .\apps\chat\models.py:44
+msgid "Participant 1"
+msgstr ""
+
+#: .\apps\chat\models.py:51
+msgid "Participant 2"
+msgstr ""
+
+#: .\apps\chat\models.py:54 .\apps\notifications\models.py:75
+msgid "Créée le"
+msgstr ""
+
+#: .\apps\chat\models.py:57 .\apps\chat\models.py:123
+msgid "Conversation"
+msgstr ""
+
+#: .\apps\chat\models.py:58 .\templates\admin_dashboard.html:1883
+#: .\templates\admin_dashboard.html:3263
+msgid "Conversations"
+msgstr ""
+
+#: .\apps\chat\models.py:131
+msgid "Expéditeur"
+msgstr ""
+
+#: .\apps\chat\models.py:134 .\apps\chat\models.py:141
+#: .\apps\notifications\models.py:62 .\templates\legal\contact.html:133
+msgid "Message"
+msgstr ""
+
+#: .\apps\chat\models.py:136 .\templates\admin_dashboard.html:3308
+msgid "Lu"
+msgstr ""
+
+#: .\apps\chat\models.py:138 .\apps\notifications\models.py:138
+msgid "Envoyé le"
+msgstr ""
+
+#: .\apps\chat\models.py:142 .\templates\chat\chat_liste.html:4
+#: .\templates\chat\chat_liste.html:12 .\templates\partials\footer.html:339
+msgid "Messages"
+msgstr ""
+
+#: .\apps\chat\serializers.py:168
+msgid "Utilisateur introuvable ou inactif."
+msgstr ""
+
+#: .\apps\chat\serializers.py:175
+msgid "Vous ne pouvez pas démarrer une conversation avec vous-même."
+msgstr ""
+
+#: .\apps\chat\views.py:40
+msgid "Vous n'êtes pas membre de cette conversation."
+msgstr ""
+
+#: .\apps\notifications\api_views.py:71
+msgid "Notification introuvable."
+msgstr ""
+
+#: .\apps\notifications\api_views.py:77
+msgid "Notification déjà lue."
+msgstr ""
+
+#: .\apps\notifications\api_views.py:91
+msgid "Notification marquée comme lue."
+msgstr ""
+
+#: .\apps\notifications\api_views.py:120
+#, python-format
+msgid "%(n)s notification(s) marquée(s) comme lue(s)."
+msgstr ""
+
+#: .\apps\notifications\models.py:48 .\apps\orders\models.py:135
+#: .\apps\orders\models.py:233 .\apps\orders\models.py:304
+#: .\templates\legal\politique.html:113
+#: .\templates\notifications\emails\status_update.html:59
+#: .\templates\users\profile.html:757
+msgid "Commande"
+msgstr ""
+
+#: .\apps\notifications\models.py:49 .\apps\reviews\models.py:84
+#: .\apps\reviews\models.py:85 .\templates\users\profile.html:207
+msgid "Avis"
+msgstr ""
+
+#: .\apps\notifications\models.py:50 .\templates\admin_dashboard.html:2388
+#: .\templates\admin_dashboard.html:3049
+#: .\templates\products\ajouter_produit.html:539
+#: .\templates\vendeur\produits.html:76
+msgid "Stock"
+msgstr ""
+
+#: .\apps\notifications\models.py:51 .\templates\admin_dashboard.html:1890
+msgid "Système"
+msgstr ""
+
+#: .\apps\notifications\models.py:58 .\apps\notifications\models.py:121
+#: .\templates\admin_dashboard.html:3305
+msgid "Destinataire"
+msgstr ""
+
+#: .\apps\notifications\models.py:61 .\templates\admin_dashboard.html:3306
+msgid "Titre"
+msgstr ""
+
+#: .\apps\notifications\models.py:68 .\apps\products\models.py:336
+#: .\templates\admin_dashboard.html:3304
+#: .\templates\products\gestion_categories.html:338
+msgid "Type"
+msgstr ""
+
+#: .\apps\notifications\models.py:71
+msgid "Lue"
+msgstr ""
+
+#: .\apps\notifications\models.py:73
+msgid "Lien (optionnel)"
+msgstr ""
+
+#: .\apps\notifications\models.py:78
+msgid "Notification"
+msgstr ""
+
+#: .\apps\notifications\models.py:79 .\templates\admin_dashboard.html:1587
+#: .\templates\admin_dashboard.html:1599 .\templates\admin_dashboard.html:1902
+#: .\templates\admin_dashboard.html:3294 .\templates\partials\navbar.html:646
+#: .\templates\partials\navbar.html:655
+msgid "Notifications"
+msgstr ""
+
+#: .\apps\notifications\models.py:111 .\apps\orders\models.py:78
+#: .\apps\orders\models.py:295 .\templates\admin_dashboard.html:2691
+#: .\templates\admin_dashboard.html:2928 .\templates\admin_dashboard.html:3491
+#: .\templates\legal\faq.html:132 .\templates\orders\confirm.html:300
+#: .\templates\orders\confirm.html:307 .\templates\users\profile.html:747
+#: .\templates\vendeur\commandes.html:115
+#: .\templates\vendeur\dashboard.html:240
+msgid "En attente"
+msgstr ""
+
+#: .\apps\notifications\models.py:112
+msgid "Envoyé"
+msgstr ""
+
+#: .\apps\notifications\models.py:113
+msgid "Échec"
+msgstr ""
+
+#: .\apps\notifications\models.py:124 .\templates\legal\contact.html:113
+msgid "Sujet"
+msgstr ""
+
+#: .\apps\notifications\models.py:125
+msgid "Corps de l'email"
+msgstr ""
+
+#: .\apps\notifications\models.py:126
+msgid "Email destinataire"
+msgstr ""
+
+#: .\apps\notifications\models.py:132 .\apps\orders\models.py:122
+#: .\apps\products\models.py:166 .\templates\admin_dashboard.html:2103
+#: .\templates\admin_dashboard.html:2389 .\templates\admin_dashboard.html:2734
+#: .\templates\admin_dashboard.html:2900 .\templates\admin_dashboard.html:2950
+#: .\templates\products\ajouter_produit.html:668
+#: .\templates\products\gestion_categories.html:276
+#: .\templates\products\gestion_categories.html:339
+#: .\templates\vendeur\produits.html:77
+msgid "Statut"
+msgstr ""
+
+#: .\apps\notifications\models.py:135
+msgid "Détail erreur"
+msgstr ""
+
+#: .\apps\notifications\models.py:137
+#: .\templates\products\ajouter_produit.html:730
+#: .\templates\vendeur\produits.html:78
+msgid "Créé le"
+msgstr ""
+
+#: .\apps\notifications\models.py:141
+msgid "Email asynchrone"
+msgstr ""
+
+#: .\apps\notifications\models.py:142
+msgid "Emails asynchrones"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:120
+#, python-format
+msgid "[HooYia Market] Commande #%(ref)s confirmée ✓"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:122
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"Votre commande #%(ref)s a bien été confirmée.\n"
+"Montant total : %(montant)s FCFA\n"
+"\n"
+"Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n"
+"\n"
+"Merci pour votre confiance !\n"
+"L'équipe HooYia Market"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:153
+#: .\templates\notifications\emails\order_confirm.html:154
+msgid "Commande confirmée !"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:154
+#, python-format
+msgid "Votre commande #%(ref)s est confirmée."
+msgstr ""
+
+#: .\apps\notifications\tasks.py:173 .\apps\notifications\tasks.py:200
+msgid "En préparation 📦"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:173
+msgid "Votre commande est en cours de préparation."
+msgstr ""
+
+#: .\apps\notifications\tasks.py:174
+msgid "Commande expédiée 🚚"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:174
+msgid "Votre commande est en route !"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:175
+msgid "Commande livrée ✓"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:175
+msgid "Votre commande a bien été livrée."
+msgstr ""
+
+#: .\apps\notifications\tasks.py:176
+msgid "Commande annulée"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:176
+msgid "Votre commande a été annulée."
+msgstr ""
+
+#: .\apps\notifications\tasks.py:185
+msgid "Mise à jour commande"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:185
+#, python-format
+msgid "Statut : %(statut)s"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:188
+#, python-format
+msgid "[HooYia Market] Commande #%(ref)s — %(titre)s"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:192
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"%(msg)s\n"
+"Référence : #%(ref)s\n"
+"\n"
+"L'équipe HooYia Market"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:201
+msgid "Expédiée 🚚"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:202
+msgid "Livrée ✅"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:203
+msgid "Annulée ❌"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:238
+msgid "[HooYia Market] Votre avis nous intéresse !"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:240
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"Votre commande #%(ref)s a été livrée.\n"
+"Nous espérons que vous êtes satisfait(e) de vos achats :\n"
+"\n"
+"%(produits)s\n"
+"\n"
+"Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n"
+"\n"
+"L'équipe HooYia Market"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:256
+msgid "Partagez votre avis !"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:257
+#, python-format
+msgid "Donnez votre avis sur votre commande #%(ref)s."
+msgstr ""
+
+#: .\apps\notifications\tasks.py:289
+#, python-format
+msgid "[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:291
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"%(nb)s produit(s) sont en stock faible :\n"
+"\n"
+"%(liste)s\n"
+"\n"
+"Pensez à réapprovisionner ces articles.\n"
+"\n"
+"HooYia Market — Système automatique"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:302
+#, python-format
+msgid "⚠️ Stock faible : %(nb)s produit(s)"
+msgstr ""
+
+#: .\apps\notifications\tasks.py:303
+#, python-format
+msgid "%(nb)s produit(s) nécessitent un réapprovisionnement."
+msgstr ""
+
+#: .\apps\orders\api_views.py:101
+msgid "Adresse de livraison introuvable."
+msgstr ""
+
+#: .\apps\orders\api_views.py:184 .\apps\orders\api_views.py:229
+msgid "Commande introuvable."
+msgstr ""
+
+#: .\apps\orders\api_views.py:194
+msgid "Cette commande ne peut pas être annulée dans son état actuel."
+msgstr ""
+
+#: .\apps\orders\api_views.py:199
+msgid "Commande annulée avec succès."
+msgstr ""
+
+#: .\apps\orders\api_views.py:239
+#, python-format
+msgid "Transition '%(t)s' non autorisée depuis le statut actuel."
+msgstr ""
+
+#: .\apps\orders\models.py:79 .\templates\orders\confirm.html:301
+#: .\templates\users\profile.html:748 .\templates\vendeur\commandes.html:117
+msgid "Confirmée"
+msgstr ""
+
+#: .\apps\orders\models.py:80 .\templates\admin_dashboard.html:2693
+#: .\templates\orders\confirm.html:302 .\templates\users\profile.html:749
+#: .\templates\vendeur\commandes.html:119
+msgid "En préparation"
+msgstr ""
+
+#: .\apps\orders\models.py:81 .\templates\orders\confirm.html:303
+#: .\templates\users\profile.html:750 .\templates\vendeur\commandes.html:121
+#: .\templates\vendeur\dashboard.html:242
+msgid "Expédiée"
+msgstr ""
+
+#: .\apps\orders\models.py:82 .\templates\orders\confirm.html:304
+#: .\templates\users\profile.html:751 .\templates\vendeur\commandes.html:111
+#: .\templates\vendeur\dashboard.html:236
+msgid "Livrée"
+msgstr ""
+
+#: .\apps\orders\models.py:83 .\templates\orders\confirm.html:305
+#: .\templates\users\profile.html:752 .\templates\vendeur\commandes.html:113
+#: .\templates\vendeur\dashboard.html:238
+msgid "Annulée"
+msgstr ""
+
+#: .\apps\orders\models.py:93
+msgid "Référence commande"
+msgstr ""
+
+#: .\apps\orders\models.py:101 .\templates\admin_dashboard.html:2100
+#: .\templates\admin_dashboard.html:2730 .\templates\admin_dashboard.html:2947
+#: .\templates\admin_dashboard.html:3494 .\templates\vendeur\commandes.html:78
+msgid "Client"
+msgstr ""
+
+#: .\apps\orders\models.py:104
+msgid "Nom destinataire"
+msgstr ""
+
+#: .\apps\orders\models.py:105
+msgid "Téléphone livraison"
+msgstr ""
+
+#: .\apps\orders\models.py:106 .\apps\users\models.py:169
+#: .\templates\admin_dashboard.html:2731
+#: .\templates\users\adresse_form.html:172
+msgid "Adresse"
+msgstr ""
+
+#: .\apps\orders\models.py:107 .\apps\users\models.py:170
+#: .\templates\orders\checkout.html:279 .\templates\users\adresse_form.html:202
+msgid "Ville"
+msgstr ""
+
+#: .\apps\orders\models.py:108 .\apps\users\models.py:171
+#: .\templates\orders\checkout.html:288 .\templates\users\adresse_form.html:217
+msgid "Région"
+msgstr ""
+
+#: .\apps\orders\models.py:109 .\apps\users\models.py:172
+#: .\templates\orders\checkout.html:295 .\templates\users\adresse_form.html:250
+msgid "Pays"
+msgstr ""
+
+#: .\apps\orders\models.py:115
+msgid "Montant total (FCFA)"
+msgstr ""
+
+#: .\apps\orders\models.py:127
+msgid "Note / Instructions de livraison"
+msgstr ""
+
+#: .\apps\orders\models.py:130
+#: .\templates\notifications\emails\status_update.html:84
+msgid "Date de commande"
+msgstr ""
+
+#: .\apps\orders\models.py:131
+msgid "Dernière mise à jour"
+msgstr ""
+
+#: .\apps\orders\models.py:132
+msgid "Date de livraison"
+msgstr ""
+
+#: .\apps\orders\models.py:136 .\templates\admin_dashboard.html:1821
+#: .\templates\admin_dashboard.html:2680 .\templates\admin_dashboard.html:3471
+#: .\templates\legal\faq.html:94 .\templates\legal\faq.html:109
+#: .\templates\users\profile.html:199
+msgid "Commandes"
+msgstr ""
+
+#: .\apps\orders\models.py:246
+msgid "Nom du produit (au moment de la commande)"
+msgstr ""
+
+#: .\apps\orders\models.py:258
+msgid "Prix unitaire (FCFA)"
+msgstr ""
+
+#: .\apps\orders\models.py:262
+msgid "Ligne de commande"
+msgstr ""
+
+#: .\apps\orders\models.py:263
+msgid "Lignes de commande"
+msgstr ""
+
+#: .\apps\orders\models.py:289 .\templates\legal\conditions.html:262
+#: .\templates\orders\checkout.html:337 .\templates\orders\confirm.html:306
+msgid "Paiement à la livraison"
+msgstr ""
+
+#: .\apps\orders\models.py:290 .\templates\orders\checkout.html:352
+msgid "Orange Money"
+msgstr ""
+
+#: .\apps\orders\models.py:291 .\templates\orders\checkout.html:369
+msgid "MTN Mobile Money"
+msgstr ""
+
+#: .\apps\orders\models.py:292
+msgid "Carte bancaire"
+msgstr ""
+
+#: .\apps\orders\models.py:296
+msgid "Réussi"
+msgstr ""
+
+#: .\apps\orders\models.py:297
+msgid "Échoué"
+msgstr ""
+
+#: .\apps\orders\models.py:298
+msgid "Remboursé"
+msgstr ""
+
+#: .\apps\orders\models.py:311 .\templates\orders\checkout.html:319
+msgid "Mode de paiement"
+msgstr ""
+
+#: .\apps\orders\models.py:318
+msgid "Statut du paiement"
+msgstr ""
+
+#: .\apps\orders\models.py:325
+msgid "Montant (FCFA)"
+msgstr ""
+
+#: .\apps\orders\models.py:331
+msgid "Référence externe (transaction)"
+msgstr ""
+
+#: .\apps\orders\models.py:336
+msgid "Date du paiement"
+msgstr ""
+
+#: .\apps\orders\models.py:340 .\templates\legal\faq.html:95
+#: .\templates\legal\faq.html:146 .\templates\orders\confirm.html:222
+msgid "Paiement"
+msgstr ""
+
+#: .\apps\orders\models.py:341
+msgid "Paiements"
+msgstr ""
+
+#: .\apps\orders\serializers.py:233
+#, python-format
+msgid "Champs obligatoires manquants : %(champs)s"
+msgstr ""
+
+#: .\apps\orders\services.py:74
+msgid "Vous n'avez pas de panier."
+msgstr ""
+
+#: .\apps\orders\services.py:77
+msgid "Votre panier est vide."
+msgstr ""
+
+#: .\apps\orders\services.py:87
+msgid ""
+"Un produit de votre panier n'est plus disponible. Veuillez le retirer de "
+"votre panier."
+msgstr ""
+
+#: .\apps\orders\services.py:92
+#, python-format
+msgid ""
+"Stock insuffisant pour « %(nom)s ». Disponible : %(stock)s — Demandé : "
+"%(quantite)s."
+msgstr ""
+
+#: .\apps\orders\services.py:176
+msgid "Vous n'êtes pas autorisé à annuler cette commande."
+msgstr ""
+
+#: .\apps\orders\services.py:180
+msgid "Cette commande ne peut plus être annulée (déjà livrée ou déjà annulée)."
+msgstr ""
+
+#: .\apps\orders\views.py:20
+msgid "Cette fonctionnalité est réservée aux clients."
+msgstr ""
+
+#: .\apps\orders\views.py:41
+msgid "Finaliser ma commande — HooYia Market"
+msgstr ""
+
+#: .\apps\orders\views.py:63
+#, python-format
+msgid "Commande #%(ref)s — HooYia Market"
+msgstr ""
+
+#: .\apps\orders\views.py:79
+msgid "Mes commandes — HooYia Market"
+msgstr ""
+
+#: .\apps\products\api_views.py:227 .\apps\products\api_views.py:254
+msgid "Permission refusée."
+msgstr ""
+
+#: .\apps\products\api_views.py:275
+msgid "Stock insuffisant."
+msgstr ""
+
+#: .\apps\products\api_views.py:283
+msgid "Type de mouvement invalide."
+msgstr ""
+
+#: .\apps\products\api_views.py:301
+msgid "Stock mis à jour."
+msgstr ""
+
+#: .\apps\products\models.py:33 .\apps\users\forms.py:52
+#: .\apps\users\models.py:76 .\templates\admin_dashboard.html:3129
+#: .\templates\admin_dashboard.html:3413 .\templates\legal\contact.html:102
+#: .\templates\products\gestion_categories.html:223
+#: .\templates\users\profile.html:125 .\templates\users\profile.html:492
+msgid "Nom"
+msgstr ""
+
+#: .\apps\products\models.py:44 .\apps\products\models.py:112
+#: .\templates\admin_dashboard.html:3135 .\templates\admin_dashboard.html:3419
+#: .\templates\products\detail.html:611
+#: .\templates\products\gestion_categories.html:231
+msgid "Description"
+msgstr ""
+
+#: .\apps\products\models.py:51 .\apps\products\models.py:266
+#: .\templates\admin_dashboard.html:3161
+#: .\templates\products\gestion_categories.html:253
+#: .\templates\products\gestion_categories.html:336
+msgid "Image"
+msgstr ""
+
+#: .\apps\products\models.py:60 .\templates\admin_dashboard.html:3141
+#: .\templates\admin_dashboard.html:3425
+#: .\templates\products\gestion_categories.html:238
+msgid "Catégorie parente"
+msgstr ""
+
+#: .\apps\products\models.py:70 .\apps\products\models.py:152
+#: .\templates\admin_dashboard.html:2386 .\templates\admin_dashboard.html:2486
+#: .\templates\admin_dashboard.html:3048 .\templates\legal\politique.html:108
+#: .\templates\products\ajouter_produit.html:443
+msgid "Catégorie"
+msgstr ""
+
+#: .\apps\products\models.py:71 .\templates\admin_dashboard.html:1787
+#: .\templates\admin_dashboard.html:3071 .\templates\partials\navbar.html:556
+#: .\templates\partials\navbar.html:961
+#: .\templates\products\gestion_categories.html:158
+#: .\templates\products\list.html:807 .\templates\products\list.html:940
+msgid "Catégories"
+msgstr ""
+
+#: .\apps\products\models.py:94 .\templates\admin_dashboard.html:3495
+#: .\templates\vendeur\dashboard.html:175 .\templates\vendeur\produits.html:132
+msgid "Actif"
+msgstr ""
+
+#: .\apps\products\models.py:95 .\templates\admin_dashboard.html:3496
+#: .\templates\vendeur\produits.html:136
+msgid "Inactif"
+msgstr ""
+
+#: .\apps\products\models.py:96 .\templates\admin_dashboard.html:2596
+#: .\templates\products\detail.html:762 .\templates\vendeur\dashboard.html:177
+#: .\templates\vendeur\produits.html:134
+msgid "Épuisé"
+msgstr ""
+
+#: .\apps\products\models.py:97 .\templates\admin_dashboard.html:2597
+msgid "Archivé"
+msgstr ""
+
+#: .\apps\products\models.py:101 .\templates\admin_dashboard.html:2474
+#: .\templates\products\ajouter_produit.html:400
+msgid "Nom du produit"
+msgstr ""
+
+#: .\apps\products\models.py:108
+msgid "Slug URL"
+msgstr ""
+
+#: .\apps\products\models.py:118 .\templates\admin_dashboard.html:2478
+#: .\templates\products\ajouter_produit.html:417
+msgid "Description courte"
+msgstr ""
+
+#: .\apps\products\models.py:125 .\templates\admin_dashboard.html:2528
+msgid "Prix (FCFA)"
+msgstr ""
+
+#: .\apps\products\models.py:134
+msgid "Prix promotionnel (FCFA)"
+msgstr ""
+
+#: .\apps\products\models.py:139
+msgid "Quantité en stock"
+msgstr ""
+
+#: .\apps\products\models.py:144
+msgid "Seuil d'alerte stock"
+msgstr ""
+
+#: .\apps\products\models.py:159 .\apps\users\models.py:109
+#: .\templates\admin_dashboard.html:3493 .\templates\users\profile.html:363
+msgid "Vendeur"
+msgstr ""
+
+#: .\apps\products\models.py:171 .\templates\products\ajouter_produit.html:701
+msgid "Produit en vedette"
+msgstr ""
+
+#: .\apps\products\models.py:178 .\templates\products\ajouter_produit.html:738
+msgid "Note moyenne"
+msgstr ""
+
+#: .\apps\products\models.py:183
+msgid "Nombre d'avis"
+msgstr ""
+
+#: .\apps\products\models.py:198 .\templates\admin_dashboard.html:1774
+#: .\templates\admin_dashboard.html:2320 .\templates\admin_dashboard.html:3470
+#: .\templates\products\gestion_categories.html:159
+#: .\templates\users\profile.html:195 .\templates\vendeur\commandes.html:87
+msgid "Produits"
+msgstr ""
+
+#: .\apps\products\models.py:272
+msgid "Texte alternatif"
+msgstr ""
+
+#: .\apps\products\models.py:277
+msgid "Ordre d'affichage"
+msgstr ""
+
+#: .\apps\products\models.py:282
+msgid "Image principale"
+msgstr ""
+
+#: .\apps\products\models.py:288
+msgid "Image produit"
+msgstr ""
+
+#: .\apps\products\models.py:289
+msgid "Images produit"
+msgstr ""
+
+#: .\apps\products\models.py:321
+msgid "Entrée stock"
+msgstr ""
+
+#: .\apps\products\models.py:322
+msgid "Sortie stock"
+msgstr ""
+
+#: .\apps\products\models.py:323
+msgid "Ajustement"
+msgstr ""
+
+#: .\apps\products\models.py:324
+msgid "Retour client"
+msgstr ""
+
+#: .\apps\products\models.py:343
+msgid "Stock avant"
+msgstr ""
+
+#: .\apps\products\models.py:344
+msgid "Stock après"
+msgstr ""
+
+#: .\apps\products\models.py:355
+msgid "Effectué par"
+msgstr ""
+
+#: .\apps\products\models.py:361
+msgid "Mouvement de stock"
+msgstr ""
+
+#: .\apps\products\models.py:362
+msgid "Mouvements de stock"
+msgstr ""
+
+#: .\apps\products\serializers.py:200
+msgid "Le prix doit être supérieur à 0."
+msgstr ""
+
+#: .\apps\products\serializers.py:207
+msgid "Le prix promotionnel doit être supérieur à 0."
+msgstr ""
+
+#: .\apps\products\serializers.py:217
+msgid "Le prix promotionnel doit être inférieur au prix normal."
+msgstr ""
+
+#: .\apps\products\views.py:260
+msgid "Veuillez remplir tous les champs obligatoires."
+msgstr ""
+
+#: .\apps\products\views.py:291
+#, python-format
+msgid "Produit « %(nom)s » créé avec succès !"
+msgstr ""
+
+#: .\apps\products\views.py:295
+#, python-format
+msgid "Erreur lors de la création : %(err)s"
+msgstr ""
+
+#: .\apps\products\views.py:351
+msgid "Produit modifié avec succès !"
+msgstr ""
+
+#: .\apps\products\views.py:354 .\apps\products\views.py:443
+#, python-format
+msgid "Erreur : %(err)s"
+msgstr ""
+
+#: .\apps\products\views.py:386
+#, python-format
+msgid "Produit « %(nom)s » supprimé."
+msgstr ""
+
+#: .\apps\products\views.py:413
+msgid "Le nom est obligatoires."
+msgstr ""
+
+#: .\apps\products\views.py:427
+#, python-format
+msgid "Catégorie « %(nom)s » modifiée avec succès !"
+msgstr ""
+
+#: .\apps\products\views.py:440
+#, python-format
+msgid "Catégorie « %(nom)s » créée avec succès !"
+msgstr ""
+
+#: .\apps\products\views.py:480
+msgid "Le nom est obligatoire."
+msgstr ""
+
+#: .\apps\products\views.py:534
+msgid "cat_id manquant"
+msgstr ""
+
+#: .\apps\products\views.py:543
+msgid "Méthode non autorisée"
+msgstr ""
+
+#: .\apps\products\views.py:555
+#, python-format
+msgid "Catégorie « %(nom)s » supprimée."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:126
+msgid "Vous ne pouvez supprimer que votre propre avis."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:142
+msgid "Cet avis est déjà validé."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:150
+#, python-format
+msgid "Avis #%(id)s validé. Note moyenne du produit mise à jour."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:166
+msgid "Cet avis est déjà invalide."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:174
+#, python-format
+msgid "Avis #%(id)s invalidé. Note moyenne du produit recalculée."
+msgstr ""
+
+#: .\apps\reviews\api_views.py:207
+msgid "Avis soumis, en attente de validation."
+msgstr ""
+
+#: .\apps\reviews\models.py:52 .\apps\reviews\models.py:115
+msgid "Auteur"
+msgstr ""
+
+#: .\apps\reviews\models.py:64
+msgid "La note minimale est 1 étoile."
+msgstr ""
+
+#: .\apps\reviews\models.py:65
+msgid "La note maximale est 5 étoiles."
+msgstr ""
+
+#: .\apps\reviews\models.py:67 .\apps\reviews\models.py:123
+msgid "Note (1 à 5)"
+msgstr ""
+
+#: .\apps\reviews\models.py:72 .\apps\reviews\models.py:126
+#: .\templates\admin_dashboard.html:2949
+msgid "Commentaire"
+msgstr ""
+
+#: .\apps\reviews\models.py:77
+msgid "Validé par un admin"
+msgstr ""
+
+#: .\apps\reviews\models.py:80
+msgid "Date de l'avis"
+msgstr ""
+
+#: .\apps\reviews\models.py:120
+msgid "Note minimale : 1."
+msgstr ""
+
+#: .\apps\reviews\models.py:121
+msgid "Note maximale : 5."
+msgstr ""
+
+#: .\apps\reviews\models.py:130
+msgid "Validé (affiché sur la home)"
+msgstr ""
+
+#: .\apps\reviews\models.py:136 .\apps\reviews\models.py:137
+msgid "Avis sur l'application"
+msgstr ""
+
+#: .\apps\reviews\serializers.py:128
+msgid "Ce produit n'accepte plus d'avis."
+msgstr ""
+
+#: .\apps\reviews\serializers.py:148
+msgid ""
+"Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette "
+"fonctionnalité est réservée aux clients."
+msgstr ""
+
+#: .\apps\reviews\serializers.py:165
+msgid "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+msgstr ""
+
+#: .\apps\reviews\serializers.py:178 .\apps\reviews\serializers.py:199
+msgid "Vous avez déjà laissé un avis sur ce produit."
+msgstr ""
+
+#: .\apps\reviews\serializers.py:240 .\apps\reviews\serializers.py:250
+msgid "Vous avez déjà laissé un avis sur la plateforme."
+msgstr ""
+
+#: .\apps\users\api_views.py:50 .\apps\users\views.py:44
+#, python-format
+msgid "Compte créé ! Vérifiez votre email %(email)s pour activer votre compte."
+msgstr ""
+
+#: .\apps\users\api_views.py:78
+msgid "Déconnexion réussie."
+msgstr ""
+
+#: .\apps\users\api_views.py:83
+msgid "Token invalide."
+msgstr ""
+
+#: .\apps\users\api_views.py:127
+msgid "Mot de passe changé avec succès."
+msgstr ""
+
+#: .\apps\users\forms.py:25 .\apps\users\forms.py:28 .\apps\users\forms.py:111
+#: .\apps\users\forms.py:113 .\templates\users\login.html:147
+#: .\templates\users\register.html:194
+msgid "Mot de passe"
+msgstr ""
+
+#: .\apps\users\forms.py:33 .\apps\users\forms.py:35
+#: .\apps\users\serializers.py:84 .\templates\users\register.html:261
+msgid "Confirmer le mot de passe"
+msgstr ""
+
+#: .\apps\users\forms.py:44 .\apps\users\models.py:67
+#: .\templates\users\profile.html:501 .\templates\users\register.html:125
+msgid "Nom d'utilisateur"
+msgstr ""
+
+#: .\apps\users\forms.py:48 .\apps\users\forms.py:103 .\apps\users\models.py:71
+#: .\templates\users\login.html:114 .\templates\users\profile.html:534
+#: .\templates\users\register.html:159
+msgid "Adresse email"
+msgstr ""
+
+#: .\apps\users\forms.py:56 .\apps\users\models.py:81
+#: .\templates\users\profile.html:121 .\templates\users\profile.html:488
+msgid "Prénom"
+msgstr ""
+
+#: .\apps\users\forms.py:60
+msgid "Téléphone (ex: +237 6XX XXX XXX)"
+msgstr ""
+
+#: .\apps\users\forms.py:68
+msgid "Un compte existe déjà avec cet email."
+msgstr ""
+
+#: .\apps\users\forms.py:76
+msgid "Les mots de passe ne correspondent pas."
+msgstr ""
+
+#: .\apps\users\forms.py:106 .\templates\admin_dashboard.html:2896
+#: .\templates\admin_dashboard.html:3242 .\templates\legal\contact.html:106
+#: .\templates\legal\mentions.html:64
+msgid "Email"
+msgstr ""
+
+#: .\apps\users\models.py:28
+msgid "L'adresse email est obligatoire"
+msgstr ""
+
+#: .\apps\users\models.py:30
+msgid "Le nom d'utilisateur est obligatoire"
+msgstr ""
+
+#: .\apps\users\models.py:86 .\apps\users\models.py:168
+#: .\templates\legal\mentions.html:65 .\templates\users\adresse_form.html:141
+#: .\templates\users\profile.html:129 .\templates\users\profile.html:516
+msgid "Téléphone"
+msgstr ""
+
+#: .\apps\users\models.py:92 .\templates\users\profile.html:295
+msgid "Photo de profil"
+msgstr ""
+
+#: .\apps\users\models.py:97
+msgid "Compte actif"
+msgstr ""
+
+#: .\apps\users\models.py:101
+msgid "Staff"
+msgstr ""
+
+#: .\apps\users\models.py:105 .\templates\admin_dashboard.html:1647
+#: .\templates\users\profile.html:95
+msgid "Administrateur"
+msgstr ""
+
+#: .\apps\users\models.py:113 .\templates\admin_dashboard.html:2899
+#: .\templates\users\profile.html:347
+msgid "Email vérifié"
+msgstr ""
+
+#: .\apps\users\models.py:118
+msgid "Date d'inscription"
+msgstr ""
+
+#: .\apps\users\models.py:123
+msgid "Dernière connexion"
+msgstr ""
+
+#: .\apps\users\models.py:137 .\templates\admin_dashboard.html:1857
+#: .\templates\admin_dashboard.html:2854 .\templates\users\profile.html:203
+msgid "Utilisateurs"
+msgstr ""
+
+#: .\apps\users\models.py:167
+msgid "Nom complet"
+msgstr ""
+
+#: .\apps\users\models.py:173 .\templates\users\adresse_form.html:238
+msgid "Code postal"
+msgstr ""
+
+#: .\apps\users\models.py:175
+msgid "Adresse par défaut"
+msgstr ""
+
+#: .\apps\users\models.py:180 .\templates\orders\checkout.html:158
+msgid "Adresse de livraison"
+msgstr ""
+
+#: .\apps\users\models.py:181 .\templates\users\profile.html:579
+msgid "Adresses de livraison"
+msgstr ""
+
+#: .\apps\users\serializers.py:103
+msgid "Un compte existe déjà avec cette adresse email."
+msgstr ""
+
+#: .\apps\users\serializers.py:114 .\apps\users\serializers.py:174
+msgid "Les deux mots de passe ne correspondent pas."
+msgstr ""
+
+#: .\apps\users\serializers.py:160
+msgid "Confirmer le nouveau mot de passe"
+msgstr ""
+
+#: .\apps\users\serializers.py:167
+msgid "L'ancien mot de passe est incorrect."
+msgstr ""
+
+#: .\apps\users\views.py:48
+msgid "Veuillez corriger les erreurs ci-dessous."
+msgstr ""
+
+#: .\apps\users\views.py:81
+msgid "Votre compte n'est pas encore activé. Vérifiez votre email."
+msgstr ""
+
+#: .\apps\users\views.py:89
+#, python-format
+msgid "Bienvenue %(prenom)s !"
+msgstr ""
+
+#: .\apps\users\views.py:95
+msgid "Email ou mot de passe incorrect."
+msgstr ""
+
+#: .\apps\users\views.py:113
+msgid "Vous êtes déconnecté."
+msgstr ""
+
+#: .\apps\users\views.py:131
+msgid "Lien de vérification invalide."
+msgstr ""
+
+#: .\apps\users\views.py:135
+msgid "Ce lien a expiré. Inscrivez-vous à nouveau."
+msgstr ""
+
+#: .\apps\users\views.py:146
+msgid "Votre compte est activé ! Vous pouvez vous connecter."
+msgstr ""
+
+#: .\apps\users\views.py:176
+msgid "Profil mis à jour avec succès."
+msgstr ""
+
+#: .\apps\users\views.py:202
+msgid "Adresse ajoutée avec succès."
+msgstr ""
+
+#: .\apps\users\views.py:228
+msgid "Adresse supprimée."
+msgstr ""
+
+#: .\apps\users\views.py:272
+msgid "Erreur de sécurité OAuth. Réessayez."
+msgstr ""
+
+#: .\apps\users\views.py:277
+msgid "Connexion Google annulée ou refusée."
+msgstr ""
+
+#: .\apps\users\views.py:291
+msgid "Impossible de contacter Google. Réessayez."
+msgstr ""
+
+#: .\apps\users\views.py:296
+msgid "Échec de l'authentification Google."
+msgstr ""
+
+#: .\apps\users\views.py:308
+msgid "Impossible de récupérer le profil Google."
+msgstr ""
+
+#: .\apps\users\views.py:317
+msgid "Impossible de récupérer votre email Google."
+msgstr ""
+
+#: .\apps\users\views.py:350
+#, python-format
+msgid "Bienvenue %(prenom)s ! 👋"
+msgstr ""
+
+#: .\config\settings.py:306 .\templates\partials\navbar.html:703
+msgid "Français"
+msgstr ""
+
+#: .\config\settings.py:307
+msgid "English"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:57 .\templates\partials\navbar.html:822
+#: .\templates\partials\navbar.html:1023
+msgid "Administration"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1501
+msgid "Ouvrir le menu"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1540 .\templates\partials\navbar.html:922
+#: .\templates\products\gestion_categories.html:315
+msgid "Rechercher…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1552 .\templates\partials\navbar.html:715
+msgid "Mode sombre"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1553 .\templates\partials\navbar.html:716
+msgid "Basculer le mode sombre"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1600 .\templates\admin_dashboard.html:2085
+#: .\templates\users\profile.html:219 .\templates\users\profile.html:699
+#: .\templates\vendeur\dashboard.html:132
+#: .\templates\vendeur\dashboard.html:211
+msgid "Voir tout"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1618
+msgid "Voir le site public"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1669 .\templates\partials\footer.html:349
+#: .\templates\partials\navbar.html:781 .\templates\partials\navbar.html:985
+msgid "Mon profil"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1680
+#: .\templates\products\gestion_categories.html:162
+msgid "Voir le site"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1692 .\templates\partials\navbar.html:839
+#: .\templates\partials\navbar.html:1034 .\templates\users\profile.html:171
+#: .\templates\users\profile.html:430
+msgid "Déconnexion"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1724
+msgid "Site en ligne"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1739
+msgid "Général"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1753 .\templates\admin_dashboard.html:1965
+msgid "Tableau de bord"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1760 .\templates\cart\cart.html:425
+#: .\templates\orders\history.html:103 .\templates\partials\footer.html:233
+#: .\templates\partials\navbar.html:946 .\templates\products\detail.html:506
+#: .\templates\products\gestion_categories.html:157
+#: .\templates\products\list.html:4 .\templates\users\profile.html:239
+msgid "Catalogue"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1801
+msgid "Gestion stocks"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1808
+msgid "Ventes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1835 .\templates\admin_dashboard.html:2063
+#: .\templates\admin_dashboard.html:2920
+#: .\templates\products\ajouter_produit.html:742
+#: .\templates\products\detail.html:623
+msgid "Avis clients"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1850 .\templates\admin_dashboard.html:3231
+msgid "Paniers actifs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1871
+msgid "Comptes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1914 .\templates\admin_dashboard.html:3327
+msgid "Journal d'audit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1928
+msgid "Retour au site"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1966
+msgid "Chargement de la date…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1977
+msgid "Actualiser"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:1987 .\templates\admin_dashboard.html:2141
+#: .\templates\admin_dashboard.html:2331
+#: .\templates\products\ajouter_produit.html:58
+#: .\templates\vendeur\dashboard.html:51 .\templates\vendeur\dashboard.html:190
+#: .\templates\vendeur\produits.html:40
+msgid "Ajouter un produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2010 .\templates\vendeur\dashboard.html:74
+msgid "Produits actifs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2028
+msgid "Commandes totales"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2047
+msgid "Utilisateurs inscrits"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2082 .\templates\users\profile.html:694
+#: .\templates\vendeur\dashboard.html:206
+msgid "Commandes récentes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2099 .\templates\admin_dashboard.html:2729
+#: .\templates\notifications\emails\order_confirm.html:169
+#: .\templates\notifications\emails\status_update.html:80
+msgid "Référence"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2101 .\templates\admin_dashboard.html:2732
+msgid "Montant"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2109 .\templates\admin_dashboard.html:2739
+msgid "Chargement des commandes…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2125
+msgid "Actions rapides"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2155
+msgid "Commandes en attente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2172
+msgid "Avis à modérer"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2190
+msgid "Vérifier les stocks"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2206
+msgid "Gérer les comptes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2229
+msgid "Alertes stock"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2232
+msgid "Gérer"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2258
+msgid "Activité récente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2261
+msgid "Tout voir"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2291
+msgid "Vue système"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2297
+msgid "Conversations chat"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2301
+msgid "Notifications envoyées"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2305
+msgid "Paniers non vides"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2321
+msgid "Gestion du catalogue"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2349 .\templates\partials\navbar.html:622
+#: .\templates\products\list.html:763
+msgid "Rechercher un produit…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2364
+msgid "Tableau"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2371
+msgid "Cartes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2387
+#: .\templates\products\ajouter_produit.html:506
+#: .\templates\vendeur\produits.html:75
+msgid "Prix"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2390 .\templates\admin_dashboard.html:2628
+#: .\templates\admin_dashboard.html:2735 .\templates\admin_dashboard.html:2951
+#: .\templates\products\gestion_categories.html:340
+#: .\templates\vendeur\produits.html:79
+msgid "Actions"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2394
+msgid "Chargement des produits…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2432 .\templates\admin_dashboard.html:2978
+#: .\templates\admin_dashboard.html:3498
+#: .\templates\products\ajouter_produit.html:324
+msgid "Nouveau produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2433
+msgid "Remplissez le formulaire pour publier"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2443
+#: .\templates\products\ajouter_produit.html:319
+msgid "Retour aux produits"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2469
+#: .\templates\products\ajouter_produit.html:393
+msgid "Informations de base"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2475
+msgid "Ex: Samsung Galaxy S24 Ultra 256Go"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2478
+msgid "(max 500 car.)"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2479
+msgid "Résumé affiché dans la liste produits"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2482
+#: .\templates\products\ajouter_produit.html:428
+msgid "Description complète"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2483
+msgid "Caractéristiques, contenu, garantie…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2488
+msgid "— Choisir une catégorie —"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2511 .\templates\admin_dashboard.html:3079
+msgid "Ajouter une catégorie"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2530
+msgid "150 000"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2535
+#: .\templates\products\ajouter_produit.html:521
+msgid "Prix promo"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2535 .\templates\admin_dashboard.html:2781
+#: .\templates\admin_dashboard.html:3135 .\templates\admin_dashboard.html:3161
+#: .\templates\admin_dashboard.html:3419
+#: .\templates\users\adresse_form.html:239
+msgid "(optionnel)"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2537
+msgid "120 000"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2543
+msgid "Stock initial"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2547
+#: .\templates\products\ajouter_produit.html:549
+msgid "Seuil d'alerte"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2547
+msgid "(défaut : 5)"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2572
+msgid ""
+"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez vos images"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2573
+msgid "JPG, PNG, WebP — Max 5 Mo — 1ère = principale"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2590
+#: .\templates\products\ajouter_produit.html:664
+msgid "Statut de vente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2594
+msgid "Actif — en vente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2595
+msgid "Inactif — masqué"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2606
+#: .\templates\products\ajouter_produit.html:691
+msgid "Options"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2617 .\templates\partials\footer.html:278
+msgid "En vedette"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2618
+msgid "Affiché en page d'accueil"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2634
+#: .\templates\products\ajouter_produit.html:832
+msgid "Publier le produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2639
+#: .\templates\products\ajouter_produit.html:820
+msgid "Brouillon"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2643 .\templates\admin_dashboard.html:2789
+#: .\templates\admin_dashboard.html:3207 .\templates\admin_dashboard.html:3436
+#: .\templates\base.html:270 .\templates\products\ajouter_produit.html:812
+#: .\templates\products\ajouter_produit.html:886
+#: .\templates\products\gestion_categories.html:295
+#: .\templates\products\gestion_categories.html:456
+#: .\templates\users\adresse_form.html:295
+msgid "Annuler"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2648
+msgid "Supprimer le produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2681
+msgid "Suivi et gestion des commandes clients"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2690 .\templates\admin_dashboard.html:2875
+#: .\templates\admin_dashboard.html:2927 .\templates\admin_dashboard.html:3032
+msgid "Tous"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2692
+msgid "Confirmées"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2694
+msgid "Expédiées"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2695
+msgid "Livrées"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2696
+msgid "Annulées"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2708
+msgid "Référence, client…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2720
+msgid "Toutes les commandes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2759
+msgid "Ajustement stock"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2762
+msgid "Stock actuel"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2768
+msgid "Type de mouvement"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2770
+msgid "Entrée — réapprovisionnement"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2771
+msgid "Sortie — retrait"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2772
+msgid "Ajustement — valeur exacte"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2783
+msgid "Ex: Livraison fournisseur…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2797 .\templates\admin_dashboard.html:3487
+msgid "Valider"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2855
+msgid "Gestion des comptes clients et vendeurs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2864
+msgid "Nom, email…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2876 .\templates\legal\faq.html:99
+#: .\templates\legal\faq.html:262 .\templates\legal\politique.html:167
+msgid "Vendeurs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2877
+msgid "Admins"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2878
+msgid "Actifs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2879
+msgid "Inactifs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2886
+msgid "Tous les comptes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2897 .\templates\legal\politique.html:111
+#: .\templates\users\register.html:38
+msgid "Inscription"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2898
+msgid "Rôle"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2921
+msgid "Modération des avis produits"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2929
+msgid "Validés"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2930
+msgid "Invalidés"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2937
+msgid "Tous les avis"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2970
+msgid "Gestion des stocks"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2971
+msgid "Niveaux de stock et réapprovisionnements"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:2998
+msgid "Produits total"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3011 .\templates\admin_dashboard.html:3033
+#: .\templates\admin_dashboard.html:3517 .\templates\users\profile.html:235
+msgid "Stock faible"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3025 .\templates\admin_dashboard.html:3034
+msgid "Épuisés"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3035 .\templates\admin_dashboard.html:3518
+msgid "Stock OK"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3041 .\templates\admin_dashboard.html:3519
+#: .\templates\partials\footer.html:244 .\templates\partials\footer.html:309
+#: .\templates\partials\navbar.html:577 .\templates\products\list.html:784
+msgid "Tous les produits"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3042
+msgid "Cliquer sur le stock pour ajuster"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3050
+msgid "Seuil"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3051
+msgid "Niveau"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3072
+msgid "Arborescence du catalogue"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3084 .\templates\products\list.html:834
+#: .\templates\products\list.html:960
+msgid "Toutes les catégories"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3093 .\templates\admin_dashboard.html:3387
+#: .\templates\products\gestion_categories.html:204
+msgid "Nouvelle catégorie"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3094
+msgid "Remplissez le formulaire"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3101
+msgid "Retour"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3124
+#: .\templates\products\ajouter_produit.html:724
+#: .\templates\users\profile.html:114
+msgid "Informations"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3131
+msgid "Ex: Smartphones, PC portables…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3137 .\templates\admin_dashboard.html:3420
+msgid "Description courte…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3141 .\templates\admin_dashboard.html:3425
+msgid "(vide = racine)"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3143 .\templates\admin_dashboard.html:3427
+#: .\templates\admin_dashboard.html:3504
+msgid "— Aucun parent —"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3181
+msgid ""
+"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez une image "
+"ici"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3183
+#: .\templates\products\gestion_categories.html:268
+msgid "JPG, PNG, WebP — recommandé 400×400px"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3204 .\templates\cart\cart.html:681
+#: .\templates\products\ajouter_produit.html:597
+#: .\templates\users\profile.html:650 .\templates\vendeur\produits.html:165
+msgid "Supprimer"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3214 .\templates\admin_dashboard.html:3443
+#: .\templates\admin_dashboard.html:3499
+#: .\templates\products\gestion_categories.html:292
+msgid "Créer la catégorie"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3232
+msgid "Paniers non finalisés en cours"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3237
+msgid "Paniers en cours"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3243
+msgid "Articles"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3244
+msgid "Montant estimé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3245
+msgid "Dernière activité"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3264
+msgid "Messages entre utilisateurs"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3269
+msgid "Toutes les conversations"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3273
+msgid "Participants"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3274
+msgid "Dernier message"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3275
+msgid "Non lus"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3295
+msgid "Historique des notifications système"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3300
+msgid "Notifications récentes"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3328
+msgid "Traçabilité de toutes les actions système"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3334
+msgid "Activité système"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3414
+msgid "Ex: Smartphones, PC Portables…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3465
+msgid "Aucun résultat pour"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3467
+msgid "Erreur de recherche"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3468
+msgid "Données non disponibles"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3469
+msgid "Recherche…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3472 .\templates\partials\navbar.html:1209
+#: .\templates\products\list.html:1153
+msgid "Aucun produit trouvé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3473 .\templates\vendeur\produits.html:186
+msgid "Aucun produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3474
+msgid "Aucune commande trouvée"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3475
+msgid "Aucune commande récente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3476
+msgid "Aucun utilisateur trouvé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3477
+msgid "Aucun avis trouvé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3478
+msgid "Aucun panier actif"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3479
+msgid "Aucune conversation"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3480 .\templates\partials\navbar.html:1211
+msgid "Aucune notification"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3481
+msgid "Aucune activité enregistrée"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3482
+msgid "Aucune activité récente"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3483
+msgid "Aucune catégorie"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3484
+msgid "Non lu"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3485 .\templates\admin_dashboard.html:5517
+msgid "Mis à jour"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3486
+#: .\templates\products\ajouter_produit.html:595
+msgid "Principal"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3488
+msgid "Invalider"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3489
+msgid "Validé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3490
+msgid "Invalidé"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3492
+msgid "Admin"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3497
+msgid "Modifier →"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3500
+msgid "Enregistrer"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3501
+msgid "Création…"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3502
+msgid "Le nom de la catégorie est obligatoire."
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3503
+msgid "Erreur lors de la création. Vérifiez les données."
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3505
+msgid "irréversible"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3506
+msgid "Client :"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3507
+msgid "Statut :"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3508
+msgid "Date :"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3509
+msgid "Paiement :"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3510 .\templates\legal\mentions.html:75
+#: .\templates\legal\politique.html:98 .\templates\legal\politique.html:229
+msgid "Adresse :"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3512
+msgid "Qté"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3513
+msgid "P.U."
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3514 .\templates\cart\cart.html:595
+#: .\templates\cart\cart.html:645
+#: .\templates\notifications\emails\order_confirm.html:191
+#: .\templates\orders\checkout.html:450
+msgid "Total"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3515
+msgid "FCFA"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3516
+msgid "stock:"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3520 .\templates\products\detail.html:550
+#: .\templates\products\gestion_categories.html:357
+#: .\templates\products\gestion_categories.html:374
+#: .\templates\products\gestion_categories.html:404
+#: .\templates\products\gestion_categories.html:426
+#: .\templates\vendeur\produits.html:154
+msgid "Modifier"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3521
+msgid "Modifier le produit"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3522
+msgid "Modifier la cat\\u00e9gorie"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3523
+msgid "Enregistrement\\u2026"
+msgstr ""
+
+#: .\templates\admin_dashboard.html:3524
+msgid "Aucun r\\u00e9sultat pour"
+msgstr ""
+
+#: .\templates\base.html:42
+msgid ""
+"HooYia Market — Électronique & Informatique au meilleur prix au Cameroun"
+msgstr ""
+
+#: .\templates\base.html:145 .\templates\partials\toast.html:75
+msgid "Fermer"
+msgstr ""
+
+#: .\templates\cart\cart.html:53 .\templates\cart\cart.html:427
+#: .\templates\cart\cart.html:535
+msgid "Mon Panier"
+msgstr ""
+
+#: .\templates\cart\cart.html:422
+msgid "Fil d\\"
+msgstr ""
+
+#: .\templates\cart\cart.html:423 .\templates\partials\footer.html:298
+#: .\templates\partials\navbar.html:547 .\templates\partials\navbar.html:938
+#: .\templates\products\detail.html:504
+msgid "Accueil"
+msgstr ""
+
+#: .\templates\cart\cart.html:496
+msgid "Votre panier est vide"
+msgstr ""
+
+#: .\templates\cart\cart.html:498
+msgid "Vous n'avez encore rien ajouté à votre panier."
+msgstr ""
+
+#: .\templates\cart\cart.html:499
+msgid "Découvrez notre catalogue et faites-vous plaisir !"
+msgstr ""
+
+#: .\templates\cart\cart.html:512 .\templates\orders\history.html:143
+msgid "Voir le catalogue"
+msgstr ""
+
+#: .\templates\cart\cart.html:544
+msgid "Vider tout le panier"
+msgstr ""
+
+#: .\templates\cart\cart.html:553
+msgid "Vider"
+msgstr ""
+
+#: .\templates\cart\cart.html:559
+msgid "Articles dans votre panier"
+msgstr ""
+
+#: .\templates\cart\cart.html:566
+#: .\templates\notifications\emails\order_confirm.html:167
+msgid "Récapitulatif de commande"
+msgstr ""
+
+#: .\templates\cart\cart.html:571
+msgid "Récapitulatif"
+msgstr ""
+
+#: .\templates\cart\cart.html:579 .\templates\orders\checkout.html:438
+msgid "Sous-total"
+msgstr ""
+
+#: .\templates\cart\cart.html:586 .\templates\legal\assistance.html:172
+#: .\templates\legal\faq.html:96 .\templates\legal\faq.html:175
+#: .\templates\legal\politique.html:113
+#: .\templates\notifications\emails\order_confirm.html:178
+#: .\templates\notifications\emails\order_confirm.html:212
+#: .\templates\orders\checkout.html:429 .\templates\orders\checkout.html:443
+#: .\templates\orders\confirm.html:208
+msgid "Livraison"
+msgstr ""
+
+#: .\templates\cart\cart.html:587 .\templates\orders\checkout.html:444
+msgid "Gratuite"
+msgstr ""
+
+#: .\templates\cart\cart.html:603
+msgid "Passer la commande"
+msgstr ""
+
+#: .\templates\cart\cart.html:614 .\templates\orders\confirm.html:277
+msgid "Continuer mes achats"
+msgstr ""
+
+#: .\templates\cart\cart.html:626
+#, python-format
+msgid "Paiement 100%% sécurisé"
+msgstr ""
+
+#: .\templates\cart\cart.html:649
+msgid "Commander"
+msgstr ""
+
+#: .\templates\cart\cart.html:666
+msgid "article"
+msgstr ""
+
+#: .\templates\cart\cart.html:667
+msgid "articles"
+msgstr ""
+
+#: .\templates\cart\cart.html:668
+msgid "Produit supprimé"
+msgstr ""
+
+#: .\templates\cart\cart.html:669 .\templates\products\detail.html:769
+msgid "Produit épuisé"
+msgstr ""
+
+#: .\templates\cart\cart.html:670 .\templates\orders\checkout.html:508
+msgid "/ unité"
+msgstr ""
+
+#: .\templates\cart\cart.html:671
+msgid "Article supprimé."
+msgstr ""
+
+#: .\templates\cart\cart.html:673
+msgid "Panier vidé."
+msgstr ""
+
+#: .\templates\cart\cart.html:674
+msgid "Vider le panier ?"
+msgstr ""
+
+#: .\templates\cart\cart.html:675
+msgid "Tous les articles seront supprimés."
+msgstr ""
+
+#: .\templates\cart\cart.html:676
+msgid "🗑 Vider le panier"
+msgstr ""
+
+#: .\templates\cart\cart.html:677
+msgid "Diminuer la quantité"
+msgstr ""
+
+#: .\templates\cart\cart.html:678
+msgid "Augmenter la quantité"
+msgstr ""
+
+#: .\templates\cart\cart.html:679
+msgid "Quantité de"
+msgstr ""
+
+#: .\templates\cart\cart.html:680
+msgid "Voir"
+msgstr ""
+
+#: .\templates\chat\chat_detail.html:4
+msgid "Chat"
+msgstr ""
+
+#: .\templates\chat\chat_detail.html:20 .\templates\products\detail.html:766
+msgid "Connexion…"
+msgstr ""
+
+#: .\templates\chat\chat_detail.html:54
+msgid "Votre message…"
+msgstr ""
+
+#: .\templates\chat\chat_detail.html:63
+msgid "Envoyer"
+msgstr ""
+
+#: .\templates\chat\chat_detail.html:67
+msgid "Entrée pour envoyer · Maj+Entrée pour nouvelle ligne"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:13
+msgid "Vos conversations avec les vendeurs"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:35
+msgid "Aucun message"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:36
+msgid "Vos conversations avec les vendeurs apparaîtront ici."
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:38
+msgid "Parcourir le catalogue"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:51
+msgid "Démarrez la conversation…"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:53
+msgid "À l\\\\"
+msgstr ""
+
+#: .\templates\chat\chat_liste.html:54 .\templates\orders\checkout.html:513
+msgid "Une erreur est survenue. Veuillez réessayer."
+msgstr ""
+
+#: .\templates\home.html:18
+msgid "HooYia Market — Électronique & Informatique"
+msgstr ""
+
+#: .\templates\home.html:351
+msgid "La performance"
+msgstr ""
+
+#: .\templates\home.html:351
+msgid "commence ici."
+msgstr ""
+
+#: .\templates\home.html:353
+msgid ""
+"Découvrez les meilleurs équipements et accessoires informatiques pour "
+"booster votre productivité."
+msgstr ""
+
+#: .\templates\home.html:356
+msgid "Découvrir nos produits"
+msgstr ""
+
+#: .\templates\home.html:463
+msgid "À ne pas manquer"
+msgstr ""
+
+#: .\templates\home.html:465
+msgid "Les produits"
+msgstr ""
+
+#: .\templates\home.html:465
+msgid "phares du moment"
+msgstr ""
+
+#: .\templates\home.html:467
+msgid "Les meilleures offres et équipements tech choisis pour vous."
+msgstr ""
+
+#: .\templates\home.html:470 .\templates\home.html:598
+msgid "Précédent"
+msgstr ""
+
+#: .\templates\home.html:476 .\templates\home.html:604
+msgid "Suivant"
+msgstr ""
+
+#: .\templates\home.html:534 .\templates\home.html:668
+#: .\templates\products\detail.html:591 .\templates\products\detail.html:764
+#: .\templates\products\list.html:1119
+msgid "Ajouter au panier"
+msgstr ""
+
+#: .\templates\home.html:535 .\templates\home.html:669
+#, python-format
+msgid "Ajouter %(nom)s au panier"
+msgstr ""
+
+#: .\templates\home.html:557 .\templates\products\list.html:777
+msgid "Voir tous les produits"
+msgstr ""
+
+#: .\templates\home.html:591
+msgid "Nouveautés du moment"
+msgstr ""
+
+#: .\templates\home.html:593
+msgid "Tout juste"
+msgstr ""
+
+#: .\templates\home.html:593
+msgid "en ligne"
+msgstr ""
+
+#: .\templates\home.html:595
+msgid "Soyez parmi les premiers à découvrir nos derniers produits."
+msgstr ""
+
+#: .\templates\home.html:647
+msgid "Nouveau"
+msgstr ""
+
+#: .\templates\home.html:691
+msgid "Voir tous les arrivages"
+msgstr ""
+
+#: .\templates\home.html:727
+msgid "Ce qui nous"
+msgstr ""
+
+#: .\templates\home.html:727
+msgid "distingue"
+msgstr ""
+
+#: .\templates\home.html:729
+msgid ""
+"Nous privilégions la qualité, la transparence et un service réellement "
+"efficace."
+msgstr ""
+
+#: .\templates\home.html:742
+msgid "Commandez en moins d'une minute"
+msgstr ""
+
+#: .\templates\home.html:743
+msgid ""
+"Parcourez, choisissez, validez. Pas de parcours interminable. HooYia est "
+"conçu pour aller vite — comme vous."
+msgstr ""
+
+#: .\templates\home.html:756
+msgid "Vendeurs triés sur le volet"
+msgstr ""
+
+#: .\templates\home.html:757
+msgid ""
+"Chaque vendeur est validé avant d'ouvrir boutique. Vous achetez à des "
+"professionnels sérieux — pas à n'importe qui."
+msgstr ""
+
+#: .\templates\home.html:771
+msgid "Payez à la réception, sans stress"
+msgstr ""
+
+#: .\templates\home.html:772
+msgid ""
+"Vous réglez uniquement quand le colis est entre vos mains. Votre argent ne "
+"bouge qu'au moment où vous êtes satisfait."
+msgstr ""
+
+#: .\templates\home.html:789
+msgid "Votre commande, visible à chaque étape"
+msgstr ""
+
+#: .\templates\home.html:790
+msgid ""
+"De la confirmation à la livraison, suivez l'état de votre commande en temps "
+"réel. Vous savez toujours où en est votre achat."
+msgstr ""
+
+#: .\templates\home.html:806
+msgid "La marketplace qui fait vivre le local"
+msgstr ""
+
+#: .\templates\home.html:807
+msgid ""
+"Chaque achat soutient un entrepreneur camerounais. HooYia n'est pas juste "
+"une boutique — c'est l'économie locale qui se digitalise."
+msgstr ""
+
+#: .\templates\home.html:858
+msgid "Ce qu'ils disent"
+msgstr ""
+
+#: .\templates\home.html:860
+msgid "Ils font confiance à"
+msgstr ""
+
+#: .\templates\home.html:862
+msgid "Retours authentiques de notre communauté d'acheteurs et vendeurs."
+msgstr ""
+
+#: .\templates\home.html:871 .\templates\orders\confirm.html:254
+#: .\templates\products\avis_plateforme.html:10
+#: .\templates\products\detail.html:630
+msgid "Laisser un avis"
+msgstr ""
+
+#: .\templates\home.html:949
+msgid "Aucun avis pour le moment."
+msgstr ""
+
+#: .\templates\home.html:950
+msgid "Soyez le premier !"
+msgstr ""
+
+#: .\templates\legal\apropos.html:4 .\templates\partials\footer.html:369
+msgid "À propos"
+msgstr ""
+
+#: .\templates\legal\apropos.html:93 .\templates\legal\apropos.html:120
+msgid "Notre histoire"
+msgstr ""
+
+#: .\templates\legal\apropos.html:94
+msgid "La marketplace électronique"
+msgstr ""
+
+#: .\templates\legal\apropos.html:94
+msgid "du"
+msgstr ""
+
+#: .\templates\legal\apropos.html:94 .\templates\legal\politique.html:98
+msgid "Cameroun"
+msgstr ""
+
+#: .\templates\legal\apropos.html:95
+msgid ""
+"HooYia Market connecte acheteurs et vendeurs de confiance pour rendre "
+"l'électronique et l'informatique accessibles à tous les Camerounais."
+msgstr ""
+
+#: .\templates\legal\apropos.html:102
+msgid "Produits disponibles"
+msgstr ""
+
+#: .\templates\legal\apropos.html:106
+msgid "Clients satisfaits"
+msgstr ""
+
+#: .\templates\legal\apropos.html:110
+msgid "Vendeurs vérifiés"
+msgstr ""
+
+#: .\templates\legal\apropos.html:113
+msgid "villes"
+msgstr ""
+
+#: .\templates\legal\apropos.html:114
+msgid "Douala · Yaoundé · Bafoussam"
+msgstr ""
+
+#: .\templates\legal\apropos.html:121
+msgid ""
+"HooYia Market est née d'un constat simple : acheter de l'électronique de "
+"qualité au Cameroun relevait du parcours du combattant. Entre les produits "
+"contrefaits, les prix opaques et l'absence de garanties, les consommateurs "
+"manquaient d'une plateforme de confiance."
+msgstr ""
+
+#: .\templates\legal\apropos.html:122
+msgid ""
+"Fondée en 2024 à Douala, notre équipe a décidé de changer ça en construisant "
+"une marketplace transparente, où chaque vendeur est vérifié, chaque produit "
+"est décrit avec honnêteté et chaque transaction est sécurisée."
+msgstr ""
+
+#: .\templates\legal\apropos.html:129
+msgid "Mission"
+msgstr ""
+
+#: .\templates\legal\apropos.html:130
+msgid ""
+"Rendre l'accès à l'électronique et à l'informatique simple, transparent et "
+"sécurisé pour tous les Camerounais."
+msgstr ""
+
+#: .\templates\legal\apropos.html:134
+msgid "Vision"
+msgstr ""
+
+#: .\templates\legal\apropos.html:135
+msgid ""
+"Devenir la référence du e-commerce tech en Afrique centrale d'ici 2027, avec "
+"une présence dans 10 pays."
+msgstr ""
+
+#: .\templates\legal\apropos.html:139
+msgid "Valeurs"
+msgstr ""
+
+#: .\templates\legal\apropos.html:140
+msgid ""
+"Confiance, transparence, proximité. Nous croyons au commerce équitable entre "
+"vendeurs locaux et acheteurs exigeants."
+msgstr ""
+
+#: .\templates\legal\apropos.html:146
+msgid "Notre équipe"
+msgstr ""
+
+#: .\templates\legal\apropos.html:147
+msgid ""
+"Une équipe passionnée de technologie et de commerce, engagée à construire la "
+"meilleure expérience d'achat en ligne du Cameroun."
+msgstr ""
+
+#: .\templates\legal\apropos.html:152
+msgid "Fondateur & CEO"
+msgstr ""
+
+#: .\templates\legal\apropos.html:153
+msgid ""
+"Ingénieur passionné par le e-commerce et le développement du numérique en "
+"Afrique."
+msgstr ""
+
+#: .\templates\legal\apropos.html:157
+msgid "Équipe Technique"
+msgstr ""
+
+#: .\templates\legal\apropos.html:158
+msgid "Développement & Infrastructure"
+msgstr ""
+
+#: .\templates\legal\apropos.html:159
+msgid ""
+"Architectures robustes, performance et sécurité au service des utilisateurs."
+msgstr ""
+
+#: .\templates\legal\apropos.html:163
+msgid "Service Client"
+msgstr ""
+
+#: .\templates\legal\apropos.html:164
+msgid "Support & Médiation"
+msgstr ""
+
+#: .\templates\legal\apropos.html:165
+msgid ""
+"Disponible 7j/7 pour résoudre vos questions et garantir votre satisfaction."
+msgstr ""
+
+#: .\templates\legal\apropos.html:172
+msgid "Rejoignez la communauté HooYia"
+msgstr ""
+
+#: .\templates\legal\apropos.html:173
+msgid ""
+"Achetez en toute confiance ou devenez vendeur et touchez des milliers de "
+"clients."
+msgstr ""
+
+#: .\templates\legal\apropos.html:177
+msgid "Découvrir les produits"
+msgstr ""
+
+#: .\templates\legal\apropos.html:181 .\templates\legal\contact.html:4
+#: .\templates\legal\contact.html:90 .\templates\legal\faq.html:297
+#: .\templates\partials\footer.html:404
+msgid "Nous contacter"
+msgstr ""
+
+#: .\templates\legal\assistance.html:4 .\templates\partials\footer.html:381
+msgid "Assistance"
+msgstr ""
+
+#: .\templates\legal\assistance.html:95
+msgid "Centre d'aide"
+msgstr ""
+
+#: .\templates\legal\assistance.html:96
+msgid "Comment pouvons-nous vous aider ?"
+msgstr ""
+
+#: .\templates\legal\assistance.html:97
+msgid ""
+"Trouvez rapidement les réponses à vos questions ou contactez notre équipe."
+msgstr ""
+
+#: .\templates\legal\assistance.html:99
+msgid "Rechercher une aide…"
+msgstr ""
+
+#: .\templates\legal\assistance.html:100 .\templates\legal\faq.html:87
+msgid "Chercher"
+msgstr ""
+
+#: .\templates\legal\assistance.html:110 .\templates\legal\contact.html:177
+msgid "Chat en direct"
+msgstr ""
+
+#: .\templates\legal\assistance.html:111
+msgid "Échangez en temps réel avec un conseiller via la messagerie intégrée."
+msgstr ""
+
+#: .\templates\legal\assistance.html:113 .\templates\legal\contact.html:179
+msgid "Ouvrir le chat"
+msgstr ""
+
+#: .\templates\legal\assistance.html:115 .\templates\legal\contact.html:179
+#: .\templates\users\login.html:196 .\templates\users\register.html:73
+msgid "Se connecter"
+msgstr ""
+
+#: .\templates\legal\assistance.html:123
+msgid "Envoyez-nous un message, nous répondons sous 24h ouvrées."
+msgstr ""
+
+#: .\templates\legal\assistance.html:124
+msgid "Écrire un message"
+msgstr ""
+
+#: .\templates\legal\assistance.html:131
+msgid "Disponible du lundi au samedi, 8h–20h (heure de Douala)."
+msgstr ""
+
+#: .\templates\legal\assistance.html:138
+msgid "Sujets populaires"
+msgstr ""
+
+#: .\templates\legal\assistance.html:144
+msgid "Suivi de commande"
+msgstr ""
+
+#: .\templates\legal\assistance.html:144
+msgid "Vérifier le statut et les étapes de votre commande"
+msgstr ""
+
+#: .\templates\legal\assistance.html:151
+msgid "Paiement & Facturation"
+msgstr ""
+
+#: .\templates\legal\assistance.html:151
+msgid "Modes de paiement acceptés et reçus"
+msgstr ""
+
+#: .\templates\legal\assistance.html:158 .\templates\legal\faq.html:204
+msgid "Retours & Remboursements"
+msgstr ""
+
+#: .\templates\legal\assistance.html:158
+msgid "Procédure et délais pour un retour produit"
+msgstr ""
+
+#: .\templates\legal\assistance.html:165
+msgid "Gestion du compte"
+msgstr ""
+
+#: .\templates\legal\assistance.html:165
+msgid "Modifier profil, mot de passe, adresses"
+msgstr ""
+
+#: .\templates\legal\assistance.html:172
+msgid "Zones desservies, délais et frais de port"
+msgstr ""
+
+#: .\templates\legal\assistance.html:179 .\templates\legal\contact.html:121
+msgid "Devenir vendeur"
+msgstr ""
+
+#: .\templates\legal\assistance.html:179
+msgid "Comment créer et gérer votre boutique"
+msgstr ""
+
+#: .\templates\legal\assistance.html:187
+msgid "Comment passer une commande ?"
+msgstr ""
+
+#: .\templates\legal\assistance.html:191
+msgid "Parcourez le catalogue"
+msgstr ""
+
+#: .\templates\legal\assistance.html:191
+msgid ""
+"Recherchez un produit par nom ou catégorie, comparez les offres des "
+"différents vendeurs."
+msgstr ""
+
+#: .\templates\legal\assistance.html:195
+msgid "Ajoutez au panier"
+msgstr ""
+
+#: .\templates\legal\assistance.html:195
+msgid ""
+"Sélectionnez la quantité souhaitée et cliquez sur « Ajouter au panier »."
+msgstr ""
+
+#: .\templates\legal\assistance.html:199
+msgid "Renseignez votre adresse"
+msgstr ""
+
+#: .\templates\legal\assistance.html:199
+msgid ""
+"Indiquez l'adresse de livraison ou sélectionnez une adresse enregistrée."
+msgstr ""
+
+#: .\templates\legal\assistance.html:203
+msgid "Confirmez et payez"
+msgstr ""
+
+#: .\templates\legal\assistance.html:203
+msgid "Choisissez votre mode de paiement (livraison, Mobile Money) et validez."
+msgstr ""
+
+#: .\templates\legal\assistance.html:207
+msgid "Suivez votre commande"
+msgstr ""
+
+#: .\templates\legal\assistance.html:207
+msgid ""
+"Recevez les notifications de statut et suivez votre livraison depuis votre "
+"espace client."
+msgstr ""
+
+#: .\templates\legal\assistance.html:218 .\templates\legal\faq.html:295
+msgid "Vous n'avez pas trouvé votre réponse ?"
+msgstr ""
+
+#: .\templates\legal\assistance.html:219
+msgid ""
+"Consultez notre FAQ complète ou contactez directement notre équipe support."
+msgstr ""
+
+#: .\templates\legal\assistance.html:220
+msgid "Voir la FAQ complète"
+msgstr ""
+
+#: .\templates\legal\conditions.html:4 .\templates\legal\conditions.html:171
+#: .\templates\partials\footer.html:433
+msgid "Conditions d'utilisation"
+msgstr ""
+
+#: .\templates\legal\conditions.html:170 .\templates\legal\mentions.html:50
+#: .\templates\legal\politique.html:70
+msgid "Documents légaux"
+msgstr ""
+
+#: .\templates\legal\conditions.html:172 .\templates\legal\mentions.html:52
+#: .\templates\legal\politique.html:72
+msgid "Dernière mise à jour : 1er mars 2026"
+msgstr ""
+
+#: .\templates\legal\conditions.html:172 .\templates\legal\mentions.html:52
+#: .\templates\legal\politique.html:72
+msgid "Version 1.0"
+msgstr ""
+
+#: .\templates\legal\conditions.html:176 .\templates\legal\politique.html:76
+msgid "Sommaire"
+msgstr ""
+
+#: .\templates\legal\conditions.html:178 .\templates\legal\conditions.html:194
+msgid "Présentation de la plateforme"
+msgstr ""
+
+#: .\templates\legal\conditions.html:179 .\templates\legal\conditions.html:200
+msgid "Acceptation des conditions"
+msgstr ""
+
+#: .\templates\legal\conditions.html:180 .\templates\legal\conditions.html:209
+msgid "Inscription et compte utilisateur"
+msgstr ""
+
+#: .\templates\legal\conditions.html:181 .\templates\legal\conditions.html:222
+msgid "Utilisation de la plateforme"
+msgstr ""
+
+#: .\templates\legal\conditions.html:182 .\templates\legal\conditions.html:235
+msgid "Obligations des vendeurs"
+msgstr ""
+
+#: .\templates\legal\conditions.html:183 .\templates\legal\conditions.html:248
+msgid "Obligations des acheteurs"
+msgstr ""
+
+#: .\templates\legal\conditions.html:184 .\templates\legal\conditions.html:259
+msgid "Paiements et transactions"
+msgstr ""
+
+#: .\templates\legal\conditions.html:185 .\templates\legal\conditions.html:270
+msgid "Retours et litiges"
+msgstr ""
+
+#: .\templates\legal\conditions.html:186 .\templates\legal\conditions.html:276
+#: .\templates\legal\mentions.html:81
+msgid "Propriété intellectuelle"
+msgstr ""
+
+#: .\templates\legal\conditions.html:187 .\templates\legal\conditions.html:282
+#: .\templates\legal\mentions.html:87
+msgid "Responsabilité"
+msgstr ""
+
+#: .\templates\legal\conditions.html:188 .\templates\legal\conditions.html:292
+msgid "Résiliation"
+msgstr ""
+
+#: .\templates\legal\conditions.html:189 .\templates\legal\conditions.html:297
+#: .\templates\legal\mentions.html:104
+msgid "Droit applicable"
+msgstr ""
+
+#: .\templates\legal\conditions.html:195
+msgid ""
+"HooYia Market est une marketplace en ligne dédiée à l'électronique et "
+"l'informatique, opérée depuis Douala, Cameroun. La plateforme met en "
+"relation des acheteurs et des vendeurs particuliers ou professionnels pour "
+"la vente de produits neufs ou reconditionnés."
+msgstr ""
+
+#: .\templates\legal\conditions.html:196
+msgid "L'accès à la plateforme est disponible via le site web"
+msgstr ""
+
+#: .\templates\legal\conditions.html:196
+msgid "ainsi que via les applications mobiles HooYia Market."
+msgstr ""
+
+#: .\templates\legal\conditions.html:201
+msgid ""
+"En accédant à HooYia Market, en créant un compte ou en effectuant une "
+"transaction, vous acceptez sans réserve les présentes Conditions "
+"d'utilisation."
+msgstr ""
+
+#: .\templates\legal\conditions.html:203
+msgid ""
+"Si vous n'acceptez pas ces conditions, vous devez cesser immédiatement "
+"d'utiliser la plateforme."
+msgstr ""
+
+#: .\templates\legal\conditions.html:205
+msgid ""
+"HooYia Market se réserve le droit de modifier ces conditions à tout moment. "
+"Les utilisateurs seront informés par email en cas de changement substantiel."
+msgstr ""
+
+#: .\templates\legal\conditions.html:210
+msgid ""
+"Pour accéder aux fonctionnalités complètes de la plateforme, vous devez "
+"créer un compte en fournissant :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:212
+msgid "Une adresse email valide et personnelle"
+msgstr ""
+
+#: .\templates\legal\conditions.html:213
+msgid "Un nom d'utilisateur unique"
+msgstr ""
+
+#: .\templates\legal\conditions.html:214
+msgid "Un mot de passe sécurisé (minimum 8 caractères)"
+msgstr ""
+
+#: .\templates\legal\conditions.html:215
+msgid "Un numéro de téléphone valide (pour la livraison)"
+msgstr ""
+
+#: .\templates\legal\conditions.html:217
+msgid ""
+"Vous êtes seul responsable de la confidentialité de vos identifiants. Toute "
+"activité réalisée depuis votre compte vous est imputable."
+msgstr ""
+
+#: .\templates\legal\conditions.html:218
+msgid ""
+"L'inscription est réservée aux personnes physiques âgées d'au moins 18 ans "
+"ou aux personnes morales légalement constituées."
+msgstr ""
+
+#: .\templates\legal\conditions.html:223
+msgid ""
+"Vous vous engagez à utiliser HooYia Market de manière loyale et conformément "
+"aux lois en vigueur. Sont strictement interdits :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:225
+msgid "La publication de faux avis ou évaluations"
+msgstr ""
+
+#: .\templates\legal\conditions.html:226
+msgid "L'utilisation de la plateforme à des fins frauduleuses"
+msgstr ""
+
+#: .\templates\legal\conditions.html:227
+msgid "La vente de produits contrefaits, dangereux ou illégaux"
+msgstr ""
+
+#: .\templates\legal\conditions.html:228
+msgid ""
+"Le harcèlement ou les comportements abusifs envers d'autres utilisateurs"
+msgstr ""
+
+#: .\templates\legal\conditions.html:229
+msgid "Toute tentative de contournement des systèmes de paiement"
+msgstr ""
+
+#: .\templates\legal\conditions.html:230
+msgid "La création de plusieurs comptes pour un même utilisateur"
+msgstr ""
+
+#: .\templates\legal\conditions.html:236
+msgid "Les vendeurs s'engagent à :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:238
+msgid ""
+"Décrire les produits avec exactitude (photos réelles, état, caractéristiques)"
+msgstr ""
+
+#: .\templates\legal\conditions.html:239
+msgid "Fixer des prix conformes à la réglementation en vigueur"
+msgstr ""
+
+#: .\templates\legal\conditions.html:240
+msgid "Honorer toutes les commandes confirmées dans les délais annoncés"
+msgstr ""
+
+#: .\templates\legal\conditions.html:241
+msgid "Fournir un service après-vente de qualité"
+msgstr ""
+
+#: .\templates\legal\conditions.html:242
+msgid ""
+"Déclarer leurs revenus conformément à la législation fiscale camerounaise"
+msgstr ""
+
+#: .\templates\legal\conditions.html:244
+msgid ""
+"HooYia Market se réserve le droit de suspendre ou supprimer tout vendeur ne "
+"respectant pas ces obligations."
+msgstr ""
+
+#: .\templates\legal\conditions.html:249
+msgid "Les acheteurs s'engagent à :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:251
+msgid "Fournir des informations de livraison exactes et complètes"
+msgstr ""
+
+#: .\templates\legal\conditions.html:252
+msgid "Procéder au paiement dans les délais convenus"
+msgstr ""
+
+#: .\templates\legal\conditions.html:253
+msgid "Réceptionner les commandes dans les conditions prévues"
+msgstr ""
+
+#: .\templates\legal\conditions.html:254
+msgid "Signaler tout problème de manière honnête et constructive"
+msgstr ""
+
+#: .\templates\legal\conditions.html:260
+msgid "HooYia Market propose actuellement les modes de paiement suivants :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:262
+msgid "en espèces à la réception de la commande"
+msgstr ""
+
+#: .\templates\legal\conditions.html:263 .\templates\legal\conditions.html:264
+msgid "paiement mobile sécurisé (à venir)"
+msgstr ""
+
+#: .\templates\legal\conditions.html:266
+msgid ""
+"Tous les prix sont exprimés en Francs CFA (XAF). HooYia Market ne stocke "
+"aucune donnée bancaire sur ses serveurs."
+msgstr ""
+
+#: .\templates\legal\conditions.html:271
+msgid ""
+"En cas de litige entre acheteur et vendeur, HooYia Market propose une "
+"médiation gratuite. Les demandes de retour sont acceptées dans un délai de"
+msgstr ""
+
+#: .\templates\legal\conditions.html:271 .\templates\legal\faq.html:211
+msgid "48h après la livraison"
+msgstr ""
+
+#: .\templates\legal\conditions.html:271
+msgid "pour les produits défectueux ou non conformes à la description."
+msgstr ""
+
+#: .\templates\legal\conditions.html:272
+msgid ""
+"Pour initier un retour, contactez notre service client via la messagerie "
+"intégrée ou à l'adresse"
+msgstr ""
+
+#: .\templates\legal\conditions.html:277
+msgid ""
+"L'ensemble des contenus de HooYia Market (logo, design, code source, textes, "
+"images) est protégé par le droit de la propriété intellectuelle. Toute "
+"reproduction sans autorisation est interdite."
+msgstr ""
+
+#: .\templates\legal\conditions.html:278
+msgid ""
+"Les vendeurs garantissent détenir tous les droits sur les images et "
+"descriptions qu'ils publient, et accordent à HooYia Market une licence "
+"d'utilisation non-exclusive pour leur diffusion sur la plateforme."
+msgstr ""
+
+#: .\templates\legal\conditions.html:283
+msgid ""
+"HooYia Market agit en qualité d'intermédiaire technique. La responsabilité "
+"de la qualité des produits incombe au vendeur. HooYia Market ne peut être "
+"tenu responsable :"
+msgstr ""
+
+#: .\templates\legal\conditions.html:285
+msgid "Des dommages directs ou indirects liés à l'utilisation de la plateforme"
+msgstr ""
+
+#: .\templates\legal\conditions.html:286
+msgid "Des interruptions temporaires de service pour maintenance"
+msgstr ""
+
+#: .\templates\legal\conditions.html:287
+msgid "Des litiges entre acheteurs et vendeurs"
+msgstr ""
+
+#: .\templates\legal\conditions.html:293
+msgid ""
+"Vous pouvez supprimer votre compte à tout moment depuis votre espace profil. "
+"HooYia Market se réserve le droit de suspendre ou supprimer tout compte en "
+"cas de violation des présentes conditions, sans préavis ni remboursement."
+msgstr ""
+
+#: .\templates\legal\conditions.html:298
+msgid ""
+"Les présentes conditions sont régies par le droit camerounais. Tout litige "
+"relatif à leur interprétation ou exécution sera soumis à la compétence "
+"exclusive des tribunaux de Douala, Cameroun."
+msgstr ""
+
+#: .\templates\legal\conditions.html:306
+msgid "Une question sur nos conditions ?"
+msgstr ""
+
+#: .\templates\legal\conditions.html:307
+msgid "Notre équipe est disponible pour vous répondre. Écrivez-nous à"
+msgstr ""
+
+#: .\templates\legal\conditions.html:307 .\templates\legal\politique.html:240
+msgid "ou consultez notre"
+msgstr ""
+
+#: .\templates\legal\conditions.html:307 .\templates\legal\politique.html:240
+msgid "page de contact"
+msgstr ""
+
+#: .\templates\legal\contact.html:89
+msgid "Support client"
+msgstr ""
+
+#: .\templates\legal\contact.html:91
+msgid ""
+"Une question, un problème ou une suggestion ? Notre équipe vous répond sous "
+"24h."
+msgstr ""
+
+#: .\templates\legal\contact.html:98
+msgid "Envoyer un message"
+msgstr ""
+
+#: .\templates\legal\contact.html:103
+msgid "Votre nom"
+msgstr ""
+
+#: .\templates\legal\contact.html:115
+msgid "-- Choisir un sujet --"
+msgstr ""
+
+#: .\templates\legal\contact.html:116
+msgid "Problème avec une commande"
+msgstr ""
+
+#: .\templates\legal\contact.html:117
+msgid "Question sur le paiement"
+msgstr ""
+
+#: .\templates\legal\contact.html:118
+msgid "Suivi de livraison"
+msgstr ""
+
+#: .\templates\legal\contact.html:119
+msgid "Retour / Remboursement"
+msgstr ""
+
+#: .\templates\legal\contact.html:120
+msgid "Problème de compte"
+msgstr ""
+
+#: .\templates\legal\contact.html:122
+msgid "Problème technique"
+msgstr ""
+
+#: .\templates\legal\contact.html:123
+msgid "Autre"
+msgstr ""
+
+#: .\templates\legal\contact.html:128
+msgid "Téléphone (optionnel)"
+msgstr ""
+
+#: .\templates\legal\contact.html:134
+msgid "Décrivez votre demande en détail…"
+msgstr ""
+
+#: .\templates\legal\contact.html:138 .\templates\legal\contact.html:200
+msgid "Envoyer le message"
+msgstr ""
+
+#: .\templates\legal\contact.html:142
+msgid "Message envoyé ! Notre équipe vous répondra sous 24h ouvrées."
+msgstr ""
+
+#: .\templates\legal\contact.html:156
+msgid "Réponse sous 24h ouvrées"
+msgstr ""
+
+#: .\templates\legal\contact.html:167
+msgid "Lun–Sam · 8h–20h"
+msgstr ""
+
+#: .\templates\legal\contact.html:178
+msgid "Messagerie intégrée pour les utilisateurs connectés"
+msgstr ""
+
+#: .\templates\legal\contact.html:184
+msgid "Horaires du support"
+msgstr ""
+
+#: .\templates\legal\contact.html:185
+msgid "Lundi – Vendredi"
+msgstr ""
+
+#: .\templates\legal\contact.html:186
+msgid "Samedi"
+msgstr ""
+
+#: .\templates\legal\contact.html:187
+msgid "Dimanche"
+msgstr ""
+
+#: .\templates\legal\contact.html:187
+msgid "Fermé"
+msgstr ""
+
+#: .\templates\legal\contact.html:197
+msgid "⚠️ Veuillez remplir tous les champs obligatoires."
+msgstr ""
+
+#: .\templates\legal\contact.html:198
+msgid "⚠️ Adresse email invalide."
+msgstr ""
+
+#: .\templates\legal\contact.html:199
+#: .\templates\products\avis_plateforme.html:194
+msgid "Envoi en cours…"
+msgstr ""
+
+#: .\templates\legal\faq.html:4 .\templates\partials\footer.html:393
+msgid "FAQ"
+msgstr ""
+
+#: .\templates\legal\faq.html:82
+msgid "Questions fréquentes"
+msgstr ""
+
+#: .\templates\legal\faq.html:83
+msgid "Tout ce que vous devez savoir"
+msgstr ""
+
+#: .\templates\legal\faq.html:84
+msgid "Trouvez rapidement les réponses à vos questions sur HooYia Market."
+msgstr ""
+
+#: .\templates\legal\faq.html:86
+msgid "Rechercher une question…"
+msgstr ""
+
+#: .\templates\legal\faq.html:93
+msgid "Tout"
+msgstr ""
+
+#: .\templates\legal\faq.html:97
+msgid "Retours"
+msgstr ""
+
+#: .\templates\legal\faq.html:98 .\templates\partials\navbar.html:1038
+msgid "Compte"
+msgstr ""
+
+#: .\templates\legal\faq.html:104
+msgid "Aucun résultat pour votre recherche."
+msgstr ""
+
+#: .\templates\legal\faq.html:113
+msgid "Comment passer une commande sur HooYia Market ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:116
+msgid ""
+"Parcourez le catalogue, ajoutez les produits au panier, renseignez votre "
+"adresse de livraison, puis confirmez et choisissez votre mode de paiement. "
+"Vous recevrez une confirmation par email ou notification."
+msgstr ""
+
+#: .\templates\legal\faq.html:121
+msgid "Comment suivre l'état de ma commande ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:124
+msgid "Connectez-vous et allez dans"
+msgstr ""
+
+#: .\templates\legal\faq.html:124
+msgid "Mon compte → Mes commandes"
+msgstr ""
+
+#: .\templates\legal\faq.html:124
+msgid ""
+"Vous verrez le statut en temps réel : En attente → Confirmée → En "
+"préparation → Expédiée → Livrée. Des notifications vous sont envoyées à "
+"chaque étape."
+msgstr ""
+
+#: .\templates\legal\faq.html:129
+msgid "Puis-je annuler une commande ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:132
+msgid "L'annulation est possible tant que la commande est au statut"
+msgstr ""
+
+#: .\templates\legal\faq.html:132
+msgid "Une fois confirmée ou en préparation, contactez notre"
+msgstr ""
+
+#: .\templates\legal\faq.html:132
+msgid "service client"
+msgstr ""
+
+#: .\templates\legal\faq.html:132
+msgid "dans les plus brefs délais."
+msgstr ""
+
+#: .\templates\legal\faq.html:137
+msgid "Puis-je modifier ma commande après validation ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:140
+msgid ""
+"Il n'est pas possible de modifier une commande confirmée. Vous devez "
+"l'annuler (si encore possible) et en passer une nouvelle, ou contacter notre "
+"équipe via le"
+msgstr ""
+
+#: .\templates\legal\faq.html:140 .\templates\legal\mentions.html:114
+msgid "formulaire de contact"
+msgstr ""
+
+#: .\templates\legal\faq.html:150
+msgid "Quels modes de paiement sont acceptés ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:153
+msgid "Nous acceptons :"
+msgstr ""
+
+#: .\templates\legal\faq.html:153
+msgid "paiement à la livraison"
+msgstr ""
+
+#: .\templates\legal\faq.html:153
+msgid "espèces"
+msgstr ""
+
+#: .\templates\legal\faq.html:153 .\templates\legal\faq.html:182
+msgid "et"
+msgstr ""
+
+#: .\templates\legal\faq.html:153
+msgid "bientôt disponibles"
+msgstr ""
+
+#: .\templates\legal\faq.html:153
+msgid "Aucune carte bancaire pour l'instant."
+msgstr ""
+
+#: .\templates\legal\faq.html:158
+msgid "Le paiement en ligne est-il sécurisé ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:161
+msgid ""
+"Oui. Toutes les communications sont chiffrées via HTTPS. HooYia Market ne "
+"stocke aucune donnée bancaire sur ses serveurs. Les paiements mobiles sont "
+"traités directement par Orange et MTN."
+msgstr ""
+
+#: .\templates\legal\faq.html:166
+msgid "Puis-je obtenir une facture ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:169
+msgid ""
+"Un récapitulatif de commande est disponible dans votre espace client. Pour "
+"une facture officielle, contactez-nous à"
+msgstr ""
+
+#: .\templates\legal\faq.html:179
+msgid "Dans quelles villes livrez-vous ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:182
+msgid "Nous livrons actuellement à"
+msgstr ""
+
+#: .\templates\legal\faq.html:182
+msgid ""
+"D'autres villes seront ajoutées prochainement. Pour toute autre localisation,"
+msgstr ""
+
+#: .\templates\legal\faq.html:182 .\templates\legal\faq.html:285
+msgid "contactez-nous"
+msgstr ""
+
+#: .\templates\legal\faq.html:187
+msgid "Quels sont les délais de livraison ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:190
+msgid ""
+"Ces délais s'entendent en jours ouvrés à partir de la confirmation de "
+"commande."
+msgstr ""
+
+#: .\templates\legal\faq.html:195
+msgid "Quels sont les frais de livraison ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:198
+msgid ""
+"Les frais de livraison sont calculés selon la zone et le poids du colis. Ils "
+"sont affichés clairement avant la validation de votre commande. La livraison "
+"gratuite est disponible au-delà d'un certain montant d'achat."
+msgstr ""
+
+#: .\templates\legal\faq.html:208
+msgid "Puis-je retourner un produit ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:211
+msgid "Oui, dans un délai de"
+msgstr ""
+
+#: .\templates\legal\faq.html:211
+msgid ""
+"pour tout produit défectueux ou non conforme à la description. Le produit "
+"doit être dans son emballage d'origine."
+msgstr ""
+
+#: .\templates\legal\faq.html:216
+msgid "Comment initier un retour ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:219
+msgid "Contactez notre équipe via la messagerie intégrée ou à"
+msgstr ""
+
+#: .\templates\legal\faq.html:219
+msgid ""
+"en indiquant votre numéro de commande et la raison du retour. Nous vous "
+"guiderons dans la procédure."
+msgstr ""
+
+#: .\templates\legal\faq.html:224
+msgid "Dans quel délai suis-je remboursé ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:227
+msgid ""
+"Une fois le retour validé par notre équipe, le remboursement est effectué "
+"sous"
+msgstr ""
+
+#: .\templates\legal\faq.html:227
+msgid "5 à 7 jours ouvrés"
+msgstr ""
+
+#: .\templates\legal\faq.html:227
+msgid "via le même moyen de paiement utilisé lors de la commande."
+msgstr ""
+
+#: .\templates\legal\faq.html:233
+msgid "Compte utilisateur"
+msgstr ""
+
+#: .\templates\legal\faq.html:237
+msgid "Comment créer un compte ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:240
+msgid "Cliquez sur"
+msgstr ""
+
+#: .\templates\legal\faq.html:240 .\templates\partials\navbar.html:868
+#: .\templates\partials\navbar.html:1056
+msgid "S'inscrire"
+msgstr ""
+
+#: .\templates\legal\faq.html:240
+msgid ""
+"en haut à droite, renseignez votre email, un nom d'utilisateur et un mot de "
+"passe. Un email de confirmation vous sera envoyé."
+msgstr ""
+
+#: .\templates\legal\faq.html:245
+msgid "J'ai oublié mon mot de passe, que faire ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:248
+msgid "Sur la page de connexion, cliquez sur"
+msgstr ""
+
+#: .\templates\legal\faq.html:248
+msgid "Mot de passe oublié"
+msgstr ""
+
+#: .\templates\legal\faq.html:248
+msgid ""
+"Entrez votre email et vous recevrez un lien de réinitialisation valable 24h."
+msgstr ""
+
+#: .\templates\legal\faq.html:253
+msgid "Comment supprimer mon compte ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:256
+msgid "Rendez-vous dans"
+msgstr ""
+
+#: .\templates\legal\faq.html:256
+msgid "Mon compte → Paramètres"
+msgstr ""
+
+#: .\templates\legal\faq.html:256
+msgid "puis cliquez sur \\"
+msgstr ""
+
+#: .\templates\legal\faq.html:256 .\templates\legal\mentions.html:94
+#: .\templates\legal\mentions.html:100 .\templates\legal\politique.html:4
+#: .\templates\legal\politique.html:71 .\templates\partials\footer.html:434
+msgid "Politique de confidentialité"
+msgstr ""
+
+#: .\templates\legal\faq.html:266
+msgid "Comment devenir vendeur sur HooYia Market ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:269
+msgid "Créez un compte, puis contactez notre équipe à"
+msgstr ""
+
+#: .\templates\legal\faq.html:269
+msgid ""
+"pour demander l'activation du statut vendeur. Nous vous accompagnons dans la "
+"configuration de votre boutique."
+msgstr ""
+
+#: .\templates\legal\faq.html:274
+msgid "Quels types de produits puis-je vendre ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:277
+msgid ""
+"HooYia Market est spécialisé en électronique et informatique : smartphones, "
+"PC, accessoires, périphériques, TV, appareils connectés. Les produits "
+"contrefaits ou dangereux sont strictement interdits."
+msgstr ""
+
+#: .\templates\legal\faq.html:282
+msgid "Quelles sont les commissions de HooYia Market ?"
+msgstr ""
+
+#: .\templates\legal\faq.html:285
+msgid ""
+"Les conditions tarifaires sont communiquées lors de l'activation du compte "
+"vendeur. Pour en savoir plus,"
+msgstr ""
+
+#: .\templates\legal\faq.html:296
+msgid "Notre équipe support est disponible pour vous aider."
+msgstr ""
+
+#: .\templates\legal\mentions.html:4 .\templates\legal\mentions.html:51
+#: .\templates\partials\footer.html:435
+msgid "Mentions légales"
+msgstr ""
+
+#: .\templates\legal\mentions.html:56
+msgid "Éditeur du site"
+msgstr ""
+
+#: .\templates\legal\mentions.html:58
+msgid "Société"
+msgstr ""
+
+#: .\templates\legal\mentions.html:59
+msgid "Forme juridique"
+msgstr ""
+
+#: .\templates\legal\mentions.html:59
+msgid "Société à Responsabilité Limitée"
+msgstr ""
+
+#: .\templates\legal\mentions.html:60
+msgid "Siège social"
+msgstr ""
+
+#: .\templates\legal\mentions.html:60 .\templates\legal\politique.html:229
+msgid "Douala, Cameroun"
+msgstr ""
+
+#: .\templates\legal\mentions.html:61
+msgid "Capital social"
+msgstr ""
+
+#: .\templates\legal\mentions.html:62
+msgid "Registre du commerce"
+msgstr ""
+
+#: .\templates\legal\mentions.html:63
+msgid "Numéro contribuable"
+msgstr ""
+
+#: .\templates\legal\mentions.html:67
+msgid "Directeur de la publication :"
+msgstr ""
+
+#: .\templates\legal\mentions.html:71
+msgid "Hébergement"
+msgstr ""
+
+#: .\templates\legal\mentions.html:73
+msgid "Hébergeur :"
+msgstr ""
+
+#: .\templates\legal\mentions.html:74
+msgid "Site web :"
+msgstr ""
+
+#: .\templates\legal\mentions.html:75
+msgid "États-Unis"
+msgstr ""
+
+#: .\templates\legal\mentions.html:77
+msgid ""
+"Les données des utilisateurs camerounais sont traitées conformément aux "
+"engagements contractuels de protection des données de Render Inc."
+msgstr ""
+
+#: .\templates\legal\mentions.html:82
+msgid ""
+"L'ensemble des éléments constituant le site HooYia Market (structure, "
+"design, textes, logos, images, base de données, code source) est la "
+"propriété exclusive de HooYia Market SARL et est protégé par les lois sur la "
+"propriété intellectuelle en vigueur au Cameroun."
+msgstr ""
+
+#: .\templates\legal\mentions.html:83
+msgid ""
+"Toute reproduction, représentation, modification, publication ou adaptation "
+"de tout ou partie des éléments du site, quel que soit le moyen ou le procédé "
+"utilisé, est interdite sans autorisation écrite préalable."
+msgstr ""
+
+#: .\templates\legal\mentions.html:88
+msgid ""
+"HooYia Market met tout en œuvre pour assurer l'exactitude et la mise à jour "
+"des informations publiées. Toutefois, la société ne peut garantir "
+"l'exhaustivité, la précision ou l'actualité des informations diffusées sur "
+"le site."
+msgstr ""
+
+#: .\templates\legal\mentions.html:89
+msgid ""
+"HooYia Market ne saurait être tenu responsable des dommages directs ou "
+"indirects résultant de l'accès au site ou de l'utilisation de son contenu, "
+"ni des dommages pouvant survenir du fait des sites tiers vers lesquels des "
+"liens sont proposés."
+msgstr ""
+
+#: .\templates\legal\mentions.html:93
+msgid "Données personnelles"
+msgstr ""
+
+#: .\templates\legal\mentions.html:94
+msgid ""
+"Le traitement des données personnelles collectées sur HooYia Market est régi "
+"par notre"
+msgstr ""
+
+#: .\templates\legal\mentions.html:95
+msgid ""
+"Conformément à la législation camerounaise en vigueur, vous disposez d'un "
+"droit d'accès, de rectification et de suppression de vos données. Pour "
+"exercer ces droits :"
+msgstr ""
+
+#: .\templates\legal\mentions.html:99
+msgid "Cookies"
+msgstr ""
+
+#: .\templates\legal\mentions.html:100
+msgid ""
+"Le site utilise des cookies techniques indispensables à son fonctionnement "
+"(session, authentification, panier). Ces cookies ne collectent aucune donnée "
+"personnelle à des fins publicitaires. Pour plus d'informations, consultez "
+"notre"
+msgstr ""
+
+#: .\templates\legal\mentions.html:105
+msgid ""
+"Les présentes mentions légales sont régies par le droit camerounais. En cas "
+"de litige, et après échec de toute tentative de résolution amiable, les "
+"tribunaux de Douala seront seuls compétents."
+msgstr ""
+
+#: .\templates\legal\mentions.html:113
+msgid "Une question juridique ?"
+msgstr ""
+
+#: .\templates\legal\mentions.html:114
+msgid "Contactez notre équipe à"
+msgstr ""
+
+#: .\templates\legal\mentions.html:114
+msgid "ou via notre"
+msgstr ""
+
+#: .\templates\legal\politique.html:78 .\templates\legal\politique.html:94
+msgid "Responsable du traitement"
+msgstr ""
+
+#: .\templates\legal\politique.html:79 .\templates\legal\politique.html:104
+msgid "Données collectées"
+msgstr ""
+
+#: .\templates\legal\politique.html:80 .\templates\legal\politique.html:123
+msgid "Finalités du traitement"
+msgstr ""
+
+#: .\templates\legal\politique.html:81
+msgid "Base légale"
+msgstr ""
+
+#: .\templates\legal\politique.html:82 .\templates\legal\politique.html:147
+#: .\templates\legal\politique.html:150
+msgid "Durée de conservation"
+msgstr ""
+
+#: .\templates\legal\politique.html:83 .\templates\legal\politique.html:163
+msgid "Partage des données"
+msgstr ""
+
+#: .\templates\legal\politique.html:85
+msgid "Sécurité"
+msgstr ""
+
+#: .\templates\legal\politique.html:86 .\templates\legal\politique.html:202
+msgid "Vos droits"
+msgstr ""
+
+#: .\templates\legal\politique.html:87 .\templates\legal\politique.html:215
+msgid "Mineurs"
+msgstr ""
+
+#: .\templates\legal\politique.html:88 .\templates\legal\politique.html:220
+msgid "Modifications"
+msgstr ""
+
+#: .\templates\legal\politique.html:89
+msgid "Contact DPO"
+msgstr ""
+
+#: .\templates\legal\politique.html:95
+msgid ""
+"Le responsable du traitement des données personnelles collectées sur HooYia "
+"Market est :"
+msgstr ""
+
+#: .\templates\legal\politique.html:97
+msgid "Société :"
+msgstr ""
+
+#: .\templates\legal\politique.html:99 .\templates\legal\politique.html:228
+msgid "Email :"
+msgstr ""
+
+#: .\templates\legal\politique.html:105
+msgid ""
+"Nous collectons les données suivantes selon votre utilisation de la "
+"plateforme :"
+msgstr ""
+
+#: .\templates\legal\politique.html:108
+msgid "Données"
+msgstr ""
+
+#: .\templates\legal\politique.html:108
+msgid "Source"
+msgstr ""
+
+#: .\templates\legal\politique.html:111
+msgid "Identité"
+msgstr ""
+
+#: .\templates\legal\politique.html:111
+msgid "Nom, prénom, nom d'utilisateur"
+msgstr ""
+
+#: .\templates\legal\politique.html:112
+msgid "Contact"
+msgstr ""
+
+#: .\templates\legal\politique.html:112
+msgid "Email, téléphone"
+msgstr ""
+
+#: .\templates\legal\politique.html:112
+msgid "Inscription / Profil"
+msgstr ""
+
+#: .\templates\legal\politique.html:113
+msgid "Adresse postale, ville, région"
+msgstr ""
+
+#: .\templates\legal\politique.html:114
+msgid "Transactions"
+msgstr ""
+
+#: .\templates\legal\politique.html:114
+msgid "Historique des commandes, montants"
+msgstr ""
+
+#: .\templates\legal\politique.html:114
+msgid "Activité"
+msgstr ""
+
+#: .\templates\legal\politique.html:115 .\templates\partials\navbar.html:931
+#: .\templates\products\gestion_categories.html:155
+msgid "Navigation"
+msgstr ""
+
+#: .\templates\legal\politique.html:115
+msgid "Adresse IP, pages visitées, appareil"
+msgstr ""
+
+#: .\templates\legal\politique.html:115
+msgid "Automatique"
+msgstr ""
+
+#: .\templates\legal\politique.html:116
+msgid "Communications"
+msgstr ""
+
+#: .\templates\legal\politique.html:116
+msgid "Messages chat, avis publiés"
+msgstr ""
+
+#: .\templates\legal\politique.html:116
+msgid "Utilisation"
+msgstr ""
+
+#: .\templates\legal\politique.html:119
+msgid "Nous ne collectons"
+msgstr ""
+
+#: .\templates\legal\politique.html:119
+msgid "aucune donnée bancaire"
+msgstr ""
+
+#: .\templates\legal\politique.html:119
+msgid ""
+"Les paiements mobiles (Orange Money, MTN MoMo) sont traités directement par "
+"les opérateurs concernés."
+msgstr ""
+
+#: .\templates\legal\politique.html:124
+msgid "Vos données sont traitées pour les finalités suivantes :"
+msgstr ""
+
+#: .\templates\legal\politique.html:126
+msgid "Gestion de votre compte et authentification"
+msgstr ""
+
+#: .\templates\legal\politique.html:127
+msgid "Traitement et suivi de vos commandes"
+msgstr ""
+
+#: .\templates\legal\politique.html:128
+msgid "Communication entre acheteurs et vendeurs"
+msgstr ""
+
+#: .\templates\legal\politique.html:129
+msgid ""
+"Envoi de notifications transactionnelles (confirmation, statut commande)"
+msgstr ""
+
+#: .\templates\legal\politique.html:130
+msgid "Amélioration de l'expérience utilisateur et des performances"
+msgstr ""
+
+#: .\templates\legal\politique.html:131
+msgid "Prévention de la fraude et sécurité de la plateforme"
+msgstr ""
+
+#: .\templates\legal\politique.html:132
+msgid "Respect de nos obligations légales"
+msgstr ""
+
+#: .\templates\legal\politique.html:137
+msgid "Base légale du traitement"
+msgstr ""
+
+#: .\templates\legal\politique.html:139
+msgid "Exécution du contrat"
+msgstr ""
+
+#: .\templates\legal\politique.html:139
+msgid "traitement des commandes, gestion du compte"
+msgstr ""
+
+#: .\templates\legal\politique.html:140
+msgid "Intérêt légitime"
+msgstr ""
+
+#: .\templates\legal\politique.html:140
+msgid "sécurité, prévention fraude, amélioration du service"
+msgstr ""
+
+#: .\templates\legal\politique.html:141
+msgid "Obligation légale"
+msgstr ""
+
+#: .\templates\legal\politique.html:141
+msgid "conservation des données comptables"
+msgstr ""
+
+#: .\templates\legal\politique.html:142
+msgid "Consentement"
+msgstr ""
+
+#: .\templates\legal\politique.html:142
+msgid "emails marketing (révocable à tout moment)"
+msgstr ""
+
+#: .\templates\legal\politique.html:150
+msgid "Type de données"
+msgstr ""
+
+#: .\templates\legal\politique.html:153
+msgid "Données de compte actif"
+msgstr ""
+
+#: .\templates\legal\politique.html:153
+msgid "Durée d'activité du compte + 3 ans"
+msgstr ""
+
+#: .\templates\legal\politique.html:154
+msgid "Données de commande"
+msgstr ""
+
+#: .\templates\legal\politique.html:154
+msgid "10 ans (obligation comptable)"
+msgstr ""
+
+#: .\templates\legal\politique.html:155
+msgid "Logs de connexion"
+msgstr ""
+
+#: .\templates\legal\politique.html:155
+msgid "12 mois"
+msgstr ""
+
+#: .\templates\legal\politique.html:156
+msgid "Messages chat"
+msgstr ""
+
+#: .\templates\legal\politique.html:156
+msgid "2 ans après la dernière activité"
+msgstr ""
+
+#: .\templates\legal\politique.html:157
+msgid "Données après suppression du compte"
+msgstr ""
+
+#: .\templates\legal\politique.html:157
+msgid "30 jours (purge complète)"
+msgstr ""
+
+#: .\templates\legal\politique.html:164
+msgid ""
+"Nous ne vendons jamais vos données personnelles. Elles peuvent être "
+"partagées uniquement avec :"
+msgstr ""
+
+#: .\templates\legal\politique.html:166
+msgid "Prestataires techniques"
+msgstr ""
+
+#: .\templates\legal\politique.html:166
+msgid "hébergement, emails transactionnels (sous accord de confidentialité)"
+msgstr ""
+
+#: .\templates\legal\politique.html:167
+msgid ""
+"uniquement les données nécessaires à la livraison (nom, adresse, téléphone)"
+msgstr ""
+
+#: .\templates\legal\politique.html:168
+msgid "Autorités compétentes"
+msgstr ""
+
+#: .\templates\legal\politique.html:168
+msgid "sur réquisition judiciaire uniquement"
+msgstr ""
+
+#: .\templates\legal\politique.html:171
+msgid ""
+"Vos données ne sont jamais transférées hors du territoire camerounais sans "
+"garanties appropriées."
+msgstr ""
+
+#: .\templates\legal\politique.html:177
+msgid ""
+"HooYia Market utilise des cookies pour le bon fonctionnement de la "
+"plateforme :"
+msgstr ""
+
+#: .\templates\legal\politique.html:179
+msgid "Cookies essentiels"
+msgstr ""
+
+#: .\templates\legal\politique.html:179
+msgid "session, authentification, panier (non désactivables)"
+msgstr ""
+
+#: .\templates\legal\politique.html:180
+msgid "Cookies de performance"
+msgstr ""
+
+#: .\templates\legal\politique.html:180
+msgid "mesure d'audience anonyme (avec consentement)"
+msgstr ""
+
+#: .\templates\legal\politique.html:182
+msgid ""
+"Vous pouvez gérer vos préférences cookies depuis les paramètres de votre "
+"navigateur."
+msgstr ""
+
+#: .\templates\legal\politique.html:186
+msgid "Sécurité des données"
+msgstr ""
+
+#: .\templates\legal\politique.html:189
+msgid "Données protégées"
+msgstr ""
+
+#: .\templates\legal\politique.html:191
+msgid ""
+"Nous mettons en œuvre les mesures techniques suivantes pour protéger vos "
+"données :"
+msgstr ""
+
+#: .\templates\legal\politique.html:193
+msgid "Chiffrement HTTPS (TLS 1.3) sur toutes les communications"
+msgstr ""
+
+#: .\templates\legal\politique.html:194
+msgid "Mots de passe hashés (bcrypt) — jamais stockés en clair"
+msgstr ""
+
+#: .\templates\legal\politique.html:195
+msgid "Accès aux données restreint au personnel habilité"
+msgstr ""
+
+#: .\templates\legal\politique.html:196
+msgid "Sauvegardes chiffrées quotidiennes"
+msgstr ""
+
+#: .\templates\legal\politique.html:197
+msgid "Journal d'audit de toutes les actions sensibles"
+msgstr ""
+
+#: .\templates\legal\politique.html:203
+msgid ""
+"Conformément à la législation applicable, vous disposez des droits suivants "
+"sur vos données :"
+msgstr ""
+
+#: .\templates\legal\politique.html:205
+msgid "Droit d'accès"
+msgstr ""
+
+#: .\templates\legal\politique.html:205
+msgid "obtenir une copie de vos données"
+msgstr ""
+
+#: .\templates\legal\politique.html:206
+msgid "Droit de rectification"
+msgstr ""
+
+#: .\templates\legal\politique.html:206
+msgid "corriger des données inexactes"
+msgstr ""
+
+#: .\templates\legal\politique.html:207
+msgid "Droit à l'effacement"
+msgstr ""
+
+#: .\templates\legal\politique.html:207
+msgid "supprimer votre compte et vos données"
+msgstr ""
+
+#: .\templates\legal\politique.html:208
+msgid "Droit à la portabilité"
+msgstr ""
+
+#: .\templates\legal\politique.html:208
+msgid "recevoir vos données dans un format structuré"
+msgstr ""
+
+#: .\templates\legal\politique.html:209
+msgid "Droit d'opposition"
+msgstr ""
+
+#: .\templates\legal\politique.html:209
+msgid "s'opposer à certains traitements"
+msgstr ""
+
+#: .\templates\legal\politique.html:211
+msgid "Pour exercer ces droits, contactez-nous à"
+msgstr ""
+
+#: .\templates\legal\politique.html:211
+msgid "Nous répondrons dans un délai de"
+msgstr ""
+
+#: .\templates\legal\politique.html:211
+msgid "30 jours"
+msgstr ""
+
+#: .\templates\legal\politique.html:216
+msgid ""
+"HooYia Market est réservé aux personnes de 18 ans et plus. Nous ne "
+"collectons pas sciemment de données concernant des mineurs. Si vous pensez "
+"qu'un mineur a créé un compte, contactez-nous immédiatement."
+msgstr ""
+
+#: .\templates\legal\politique.html:221
+msgid ""
+"Nous pouvons mettre à jour cette politique à tout moment. En cas de "
+"modification substantielle, vous serez notifié par email au moins 15 jours "
+"avant l'entrée en vigueur des changements. La date de dernière mise à jour "
+"est toujours indiquée en haut de ce document."
+msgstr ""
+
+#: .\templates\legal\politique.html:225
+msgid "Contact — Délégué à la Protection des Données"
+msgstr ""
+
+#: .\templates\legal\politique.html:226
+msgid ""
+"Pour toute question relative à vos données personnelles ou pour exercer vos "
+"droits :"
+msgstr ""
+
+#: .\templates\legal\politique.html:230
+msgid "Délai de réponse :"
+msgstr ""
+
+#: .\templates\legal\politique.html:230
+msgid "30 jours maximum"
+msgstr ""
+
+#: .\templates\legal\politique.html:239
+msgid "Vos données vous appartiennent"
+msgstr ""
+
+#: .\templates\legal\politique.html:240
+msgid "Pour exercer vos droits ou poser une question, écrivez-nous à"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:7
+#: .\templates\notifications\emails\order_confirm.html:200
+#: .\templates\orders\confirm.html:50
+msgid "Commande confirmée"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:155
+msgid "Merci pour votre confiance, nous préparons votre colis."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:160
+#: .\templates\notifications\emails\status_update.html:64
+#, python-format
+msgid "Bonjour <strong>%(nom)s</strong>,"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:162
+msgid ""
+"Votre commande a bien été reçue et confirmée. Voici le récapitulatif de "
+"votre achat."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:163
+msgid "Vous recevrez un nouvel email dès l'expédition de votre colis."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:197
+msgid "Que se passe-t-il maintenant ?"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:200
+msgid "Votre paiement a bien été enregistré."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:204
+msgid "Préparation en cours"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:204
+msgid "Notre équipe prépare votre colis avec soin."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:208
+msgid "Expédition"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:208
+msgid "Vous recevrez un email avec le suivi dès l'envoi."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:212
+msgid "Votre colis arrive à l'adresse indiquée."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:217
+msgid "Suivre ma commande"
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:224
+#: .\templates\notifications\emails\status_update.html:105
+#, python-format
+msgid ""
+"Des questions ? Contactez-nous via <a href=\"%(lien)s\">notre messagerie</a>."
+msgstr ""
+
+#: .\templates\notifications\emails\order_confirm.html:225
+#: .\templates\notifications\emails\status_update.html:106
+msgid ""
+"Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y "
+"répondre."
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:7
+msgid "Mise à jour de commande"
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:73
+msgid ""
+"Votre commande a été annulée. Si vous aviez effectué un paiement, le "
+"remboursement sera traité sous 5 à 7 jours ouvrés. Pour toute question, "
+"contactez notre support."
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:78
+msgid "Détails de la commande"
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:88
+msgid "Nouveau statut"
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:92
+msgid "Montant total"
+msgstr ""
+
+#: .\templates\notifications\emails\status_update.html:98
+msgid "Voir ma commande"
+msgstr ""
+
+#: .\templates\orders\checkout.html:44 .\templates\orders\checkout.html:137
+msgid "Finaliser ma commande"
+msgstr ""
+
+#: .\templates\orders\checkout.html:45
+msgid ""
+"Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun"
+msgstr ""
+
+#: .\templates\orders\checkout.html:138
+msgid ""
+"Renseignez votre adresse de livraison et choisissez votre mode de paiement."
+msgstr ""
+
+#: .\templates\orders\checkout.html:159
+msgid "Où devons-nous livrer votre commande ?"
+msgstr ""
+
+#: .\templates\orders\checkout.html:174
+msgid "Mes adresses"
+msgstr ""
+
+#: .\templates\orders\checkout.html:183 .\templates\users\adresse_form.html:38
+#: .\templates\users\adresse_form.html:71
+msgid "Nouvelle adresse"
+msgstr ""
+
+#: .\templates\orders\checkout.html:190
+msgid "Sélectionner une adresse"
+msgstr ""
+
+#: .\templates\orders\checkout.html:210 .\templates\users\profile.html:615
+msgid "Par défaut"
+msgstr ""
+
+#: .\templates\orders\checkout.html:222
+msgid ""
+"Remplissez les champs ci-dessous pour une nouvelle adresse de livraison."
+msgstr ""
+
+#: .\templates\orders\checkout.html:233 .\templates\users\adresse_form.html:110
+msgid "Nom complet du destinataire"
+msgstr ""
+
+#: .\templates\orders\checkout.html:244
+msgid "Ex : Jean-Pierre Nkomo"
+msgstr ""
+
+#: .\templates\orders\checkout.html:254
+msgid "Numéro de téléphone"
+msgstr ""
+
+#: .\templates\orders\checkout.html:271
+msgid "Adresse précise"
+msgstr ""
+
+#: .\templates\orders\checkout.html:273
+msgid "Quartier, rue, numéro de porte…"
+msgstr ""
+
+#: .\templates\orders\checkout.html:281
+msgid "Ex : Yaoundé"
+msgstr ""
+
+#: .\templates\orders\checkout.html:290
+msgid "Ex : Centre"
+msgstr ""
+
+#: .\templates\orders\checkout.html:320
+msgid "Choisissez comment vous souhaitez régler."
+msgstr ""
+
+#: .\templates\orders\checkout.html:338
+msgid "Payez en cash à la réception de votre commande"
+msgstr ""
+
+#: .\templates\orders\checkout.html:340
+msgid "Disponible"
+msgstr ""
+
+#: .\templates\orders\checkout.html:353 .\templates\orders\checkout.html:370
+msgid "Paiement mobile — Cameroun"
+msgstr ""
+
+#: .\templates\orders\checkout.html:355 .\templates\orders\checkout.html:372
+msgid "Bientôt"
+msgstr ""
+
+#: .\templates\orders\checkout.html:400
+msgid "Votre commande"
+msgstr ""
+
+#: .\templates\orders\checkout.html:429
+msgid "gratuite"
+msgstr ""
+
+#: .\templates\orders\checkout.html:465 .\templates\orders\checkout.html:511
+msgid "Confirmer la commande"
+msgstr ""
+
+#: .\templates\orders\checkout.html:476
+msgid "Commande sécurisée"
+msgstr ""
+
+#: .\templates\orders\checkout.html:476
+msgid "Conditions de vente"
+msgstr ""
+
+#: .\templates\orders\checkout.html:487
+msgid "Modifier le panier"
+msgstr ""
+
+#: .\templates\orders\checkout.html:509
+msgid "Veuillez remplir tous les champs obligatoires (*)."
+msgstr ""
+
+#: .\templates\orders\checkout.html:510
+msgid "Traitement en cours…"
+msgstr ""
+
+#: .\templates\orders\checkout.html:512
+msgid "Impossible de charger le panier. Actualisez la page."
+msgstr ""
+
+#: .\templates\orders\confirm.html:51
+msgid "Votre commande a bien été enregistrée sur HooYia Market."
+msgstr ""
+
+#: .\templates\orders\confirm.html:188
+msgid "Commande enregistrée !"
+msgstr ""
+
+#: .\templates\orders\confirm.html:189
+msgid "Merci pour votre achat. Confirmation email en cours."
+msgstr ""
+
+#: .\templates\orders\confirm.html:237
+msgid "Articles commandés"
+msgstr ""
+
+#: .\templates\orders\confirm.html:242
+msgid "Total payé"
+msgstr ""
+
+#: .\templates\orders\confirm.html:256
+msgid "Votre commande a été livrée. Partagez votre expérience !"
+msgstr ""
+
+#: .\templates\orders\confirm.html:269
+msgid "Voir mes commandes"
+msgstr ""
+
+#: .\templates\orders\confirm.html:308
+msgid "Aucun article."
+msgstr ""
+
+#: .\templates\orders\confirm.html:309
+msgid "Votre commentaire (optionnel)…"
+msgstr ""
+
+#: .\templates\orders\confirm.html:310
+msgid "Envoyer mon avis"
+msgstr ""
+
+#: .\templates\orders\confirm.html:311
+msgid "Veuillez sélectionner une note (étoiles)."
+msgstr ""
+
+#: .\templates\orders\confirm.html:312
+msgid "Envoi…"
+msgstr ""
+
+#: .\templates\orders\confirm.html:313
+msgid "Avis envoyé — Merci !"
+msgstr ""
+
+#: .\templates\orders\confirm.html:314
+msgid "Erreur lors de l'envoi. Réessayez."
+msgstr ""
+
+#: .\templates\orders\confirm.html:315
+msgid "Impossible de charger la commande."
+msgstr ""
+
+#: .\templates\orders\history.html:40 .\templates\orders\history.html:94
+#: .\templates\partials\footer.html:330 .\templates\partials\navbar.html:794
+#: .\templates\partials\navbar.html:995 .\templates\users\profile.html:399
+#: .\templates\vendeur\commandes.html:27
+msgid "Mes commandes"
+msgstr ""
+
+#: .\templates\orders\history.html:41
+msgid "Historique de vos commandes sur HooYia Market"
+msgstr ""
+
+#: .\templates\orders\history.html:139 .\templates\vendeur\commandes.html:144
+msgid "Aucune commande"
+msgstr ""
+
+#: .\templates\orders\history.html:141
+msgid "Vous n'avez pas encore passé de commande. Découvrez notre catalogue !"
+msgstr ""
+
+#: .\templates\partials\footer.html:171 .\templates\partials\navbar.html:533
+msgid "HooYia Market — Accueil"
+msgstr ""
+
+#: .\templates\partials\footer.html:179
+msgid ""
+"Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs "
+"camerounais à ceux qui veulent le meilleur — sans compromis."
+msgstr ""
+
+#: .\templates\partials\footer.html:190
+msgid "Bafoussam, Cameroun"
+msgstr ""
+
+#: .\templates\partials\footer.html:255
+msgid "Nouveautés"
+msgstr ""
+
+#: .\templates\partials\footer.html:268 .\templates\partials\navbar.html:605
+#: .\templates\partials\navbar.html:955 .\templates\products\list.html:1049
+msgid "Promotions"
+msgstr ""
+
+#: .\templates\partials\footer.html:289
+msgid "Liens utiles"
+msgstr ""
+
+#: .\templates\partials\footer.html:319 .\templates\users\profile.html:409
+msgid "Mon panier"
+msgstr ""
+
+#: .\templates\partials\footer.html:358
+msgid "Aide & Informations"
+msgstr ""
+
+#: .\templates\partials\footer.html:428
+msgid "Tous droits réservés."
+msgstr ""
+
+#: .\templates\partials\navbar.html:595
+msgid "Aucune catégorie disponible"
+msgstr ""
+
+#: .\templates\partials\navbar.html:624
+msgid "Rechercher"
+msgstr ""
+
+#: .\templates\partials\navbar.html:627
+msgid "Lancer la recherche"
+msgstr ""
+
+#: .\templates\partials\navbar.html:656
+msgid "Tout marquer lu"
+msgstr ""
+
+#: .\templates\partials\navbar.html:661 .\templates\users\profile.html:223
+#: .\templates\users\profile.html:243 .\templates\users\profile.html:703
+msgid "Chargement…"
+msgstr ""
+
+#: .\templates\partials\navbar.html:665
+msgid "Voir toutes les notifications"
+msgstr ""
+
+#: .\templates\partials\navbar.html:678
+#, python-format
+msgid "Panier (%(count)s article)"
+msgid_plural "Panier (%(count)s articles)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\templates\partials\navbar.html:693
+msgid "Langue"
+msgstr ""
+
+#: .\templates\partials\navbar.html:693
+msgid "Changer la langue"
+msgstr ""
+
+#: .\templates\partials\navbar.html:808 .\templates\partials\navbar.html:1013
+msgid "Espace Vendeur"
+msgstr ""
+
+#: .\templates\partials\navbar.html:856 .\templates\partials\navbar.html:1046
+#: .\templates\users\login.html:21 .\templates\users\login.html:57
+msgid "Connexion"
+msgstr ""
+
+#: .\templates\partials\navbar.html:882
+msgid "Menu"
+msgstr ""
+
+#: .\templates\partials\navbar.html:909
+msgid "Menu mobile"
+msgstr ""
+
+#: .\templates\partials\navbar.html:978
+msgid "Mon compte"
+msgstr ""
+
+#: .\templates\partials\navbar.html:1210
+msgid "Voir tous les résultats"
+msgstr ""
+
+#: .\templates\partials\navbar.html:1212
+msgid "À l\\"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:58
+#, python-format
+msgid "Modifier — %(nom)s"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:324
+#, python-format
+msgid "Modifier «&nbsp;%(nom)s&nbsp;»"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:327
+msgid "Mettez à jour les informations de ce produit"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:327
+msgid "Remplissez les champs pour publier un produit"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:342
+msgid "Voir sur le site"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:394
+msgid "Nom, description et catégorie du produit"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:403
+msgid "Ex: Samsung Galaxy S24 Ultra 256Go — Titane Gris"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:418
+msgid "max 500 caractères"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:422
+msgid "Résumé affiché dans les cartes produit du catalogue…"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:430
+msgid "Description détaillée : caractéristiques, contenu, garantie…"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:445
+msgid "— Sélectionner une catégorie —"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:474
+msgid "Créer une nouvelle catégorie →"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:498
+msgid "Prix & Stock"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:499
+msgid "Tarification et gestion des quantités disponibles"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:521
+#: .\templates\products\gestion_categories.html:231
+#: .\templates\products\gestion_categories.html:253
+msgid "optionnel"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:549
+msgid "défaut : 5"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:554
+msgid "Notification envoyée si stock ≤ ce seuil"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:580
+#: .\templates\products\detail.html:554
+msgid "Images du produit"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:581
+msgid "La 1ʳᵉ image uploadée sera l'image principale"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:590
+msgid "Images actuelles"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:606
+msgid "Ajouter de nouvelles images"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:624
+#: .\templates\products\gestion_categories.html:267
+msgid "Cliquez"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:624
+msgid "ou glissez vos images ici"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:626
+msgid "JPG, PNG, WebP — Max 5 Mo/image"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:670
+msgid "Actif — visible et en vente"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:671
+msgid "Inactif — masqué du catalogue"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:672
+msgid "Épuisé — affiché sans achat"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:673
+msgid "Archivé — retiré définitivement"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:702
+msgid "Affiché sur la page d'accueil"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:734
+msgid "Slug"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:743
+#, python-format
+msgid "%(count)s avis"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:765
+msgid "Zone de danger"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:769
+msgid "Suppression définitive du produit et de toutes ses images."
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:781
+msgid "Supprimer ce produit"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:803
+msgid "Modifications non sauvegardées"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:803
+msgid "Formulaire en cours"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:829
+#: .\templates\products\gestion_categories.html:292
+#: .\templates\users\profile.html:557
+msgid "Enregistrer les modifications"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:871
+msgid "Supprimer ce produit ?"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:872
+msgid "Action irréversible"
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:878
+#, python-format
+msgid ""
+"Le produit <strong style=\"color:#0F1923;\">«&nbsp;%(nom)s&nbsp;»</strong> "
+"sera définitivement supprimé avec toutes ses images et données associées."
+msgstr ""
+
+#: .\templates\products\ajouter_produit.html:896
+msgid "Confirmer la suppression"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:114
+msgid "Avis déjà soumis"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:117
+msgid ""
+"Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:125
+#: .\templates\products\avis_plateforme.html:180
+msgid "Retour à l'accueil"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:140
+msgid "Votre avis compte"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:142
+msgid "Partagez votre expérience avec HooYia Market."
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:143
+msgid "Votre avis sera affiché sur la page d'accueil après validation."
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:158
+#: .\templates\products\avis_plateforme.html:191
+msgid "Sélectionnez une note"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:162
+msgid "Décrivez votre expérience avec HooYia Market…"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:175
+#: .\templates\products\avis_plateforme.html:197
+msgid "Soumettre mon avis"
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:192
+msgid "Veuillez sélectionner une note (1 à 5 étoiles)."
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:193
+msgid "Veuillez écrire un commentaire."
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:195
+msgid "Merci ! Votre avis est en attente de validation par notre équipe."
+msgstr ""
+
+#: .\templates\products\avis_plateforme.html:196
+msgid "Une erreur est survenue. Réessayez."
+msgstr ""
+
+#: .\templates\products\detail.html:503
+msgid "Fil d"
+msgstr ""
+
+#: .\templates\products\detail.html:579
+msgid "Diminuer"
+msgstr ""
+
+#: .\templates\products\detail.html:581
+msgid "Augmenter"
+msgstr ""
+
+#: .\templates\products\detail.html:605 .\templates\products\detail.html:767
+msgid "Contacter le vendeur"
+msgstr ""
+
+#: .\templates\products\detail.html:639
+msgid "Votre avis"
+msgstr ""
+
+#: .\templates\products\detail.html:643
+msgid "Note de 0.5 à 5"
+msgstr ""
+
+#: .\templates\products\detail.html:669
+msgid "Partagez votre expérience avec ce produit…"
+msgstr ""
+
+#: .\templates\products\detail.html:688
+msgid "Publier l'avis"
+msgstr ""
+
+#: .\templates\products\detail.html:694
+msgid "Chargement des avis…"
+msgstr ""
+
+#: .\templates\products\detail.html:704
+msgid "Recommandations"
+msgstr ""
+
+#: .\templates\products\detail.html:705
+msgid "Vous pourriez"
+msgstr ""
+
+#: .\templates\products\detail.html:705
+msgid "aimer"
+msgstr ""
+
+#: .\templates\products\detail.html:711
+msgid "Voir plus dans cette catégorie"
+msgstr ""
+
+#: .\templates\products\detail.html:734
+msgid "Produit introuvable."
+msgstr ""
+
+#: .\templates\products\detail.html:735
+msgid "← Retour au catalogue"
+msgstr ""
+
+#: .\templates\products\detail.html:759
+msgid "En stock"
+msgstr ""
+
+#: .\templates\products\detail.html:760
+msgid "disponible"
+msgstr ""
+
+#: .\templates\products\detail.html:761
+msgid "disponibles"
+msgstr ""
+
+#: .\templates\products\detail.html:763
+msgid "Ajout en cours…"
+msgstr ""
+
+#: .\templates\products\detail.html:765
+msgid "Produit ajouté au panier !"
+msgstr ""
+
+#: .\templates\products\detail.html:768
+msgid "Impossible d'ouvrir la conversation."
+msgstr ""
+
+#: .\templates\products\detail.html:770
+msgid "Impossible de charger les avis."
+msgstr ""
+
+#: .\templates\products\detail.html:771
+msgid "Aucun avis pour l'instant. Soyez le premier !"
+msgstr ""
+
+#: .\templates\products\detail.html:772
+msgid "Anonyme"
+msgstr ""
+
+#: .\templates\products\detail.html:773
+msgid "× Annuler"
+msgstr ""
+
+#: .\templates\products\detail.html:774
+msgid "+ Laisser un avis"
+msgstr ""
+
+#: .\templates\products\detail.html:775
+msgid "Sélectionnez une note."
+msgstr ""
+
+#: .\templates\products\detail.html:776
+msgid "Avis soumis ! Merci."
+msgstr ""
+
+#: .\templates\products\detail.html:777
+msgid "Erreur."
+msgstr ""
+
+#: .\templates\products\detail.html:778
+msgid "avis"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:4
+msgid "Gestion des Catégories"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:156
+msgid "Dashboard"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:160
+msgid "Ajouter produit"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:161
+msgid "Site"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:167
+msgid "Retour au Dashboard"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:170
+msgid "Gestion des catégories"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:171
+msgid "Créez et organisez les catégories de votre catalogue"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:179
+msgid "Catégories actives"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:183
+msgid "Catégories principales"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:187
+msgid "Sous-catégories"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:204
+msgid "Modifier la catégorie"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:205
+msgid "Mise à jour des informations"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:205
+msgid "Remplissez les champs ci-dessous"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:211
+#, python-format
+msgid "Vous modifiez : <strong>%(nom)s</strong>"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:223
+msgid "obligatoire"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:226
+msgid "Ex: Smartphones, Ordinateurs portables…"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:233
+msgid "Courte description de la catégorie…"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:238
+msgid "laisser vide si catégorie principale"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:240
+msgid "— Aucun parent (catégorie racine) —"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:257
+msgid "Image actuelle — déposer une nouvelle pour remplacer"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:267
+msgid "ou glissez votre image ici"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:284
+msgid "Catégorie active"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:285
+msgid "Visible sur le site"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:297
+msgid "Réinitialiser"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:309
+msgid "Catégories existantes"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:310
+msgid "Cliquez sur Modifier pour éditer une catégorie"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:337
+msgid "Nom / Slug"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:354
+#: .\templates\products\gestion_categories.html:397
+msgid "Principale"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:355
+#: .\templates\products\gestion_categories.html:372
+#: .\templates\products\gestion_categories.html:398
+#: .\templates\products\gestion_categories.html:420
+msgid "Active"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:355
+#: .\templates\products\gestion_categories.html:372
+#: .\templates\products\gestion_categories.html:399
+#: .\templates\products\gestion_categories.html:421
+msgid "Inactive"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:371
+#: .\templates\products\gestion_categories.html:419
+msgid "Sous-cat."
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:439
+msgid "Aucune catégorie créée pour l'instant."
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:439
+msgid "Utilisez le formulaire pour commencer."
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:453
+msgid "Supprimer cette catégorie ?"
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:454
+msgid "Action irréversible. Les produits associés seront sans catégorie."
+msgstr ""
+
+#: .\templates\products\gestion_categories.html:459
+msgid "Confirmer"
+msgstr ""
+
+#: .\templates\products\list.html:766
+msgid "Rechercher un produit"
+msgstr ""
+
+#: .\templates\products\list.html:797
+msgid "Filtrer par catégorie"
+msgstr ""
+
+#: .\templates\products\list.html:863 .\templates\products\list.html:903
+msgid "Filtres"
+msgstr ""
+
+#: .\templates\products\list.html:868
+msgid "Trier par"
+msgstr ""
+
+#: .\templates\products\list.html:870
+msgid "Plus récents"
+msgstr ""
+
+#: .\templates\products\list.html:871
+msgid "Prix croissant"
+msgstr ""
+
+#: .\templates\products\list.html:872
+msgid "Prix décroissant"
+msgstr ""
+
+#: .\templates\products\list.html:873
+msgid "Mieux notés"
+msgstr ""
+
+#: .\templates\products\list.html:909
+msgid "Fermer les filtres"
+msgstr ""
+
+#: .\templates\products\list.html:994
+#, python-format
+msgid "Afficher les sous-catégories de %(nom)s"
+msgstr ""
+
+#: .\templates\products\list.html:1062
+msgid "Promotions uniquement"
+msgstr ""
+
+#: .\templates\products\list.html:1077 .\templates\products\list.html:1155
+msgid "Réinitialiser les filtres"
+msgstr ""
+
+#: .\templates\products\list.html:1119 .\templates\users\profile.html:586
+msgid "Ajouter"
+msgstr ""
+
+#: .\templates\products\list.html:1119
+msgid "au panier"
+msgstr ""
+
+#: .\templates\products\list.html:1154
+msgid "Essayez d'autres filtres ou catégories."
+msgstr ""
+
+#: .\templates\products\list.html:1169
+msgid "ce produit"
+msgstr ""
+
+#: .\templates\products\list.html:1170
+msgid "a été ajouté au panier"
+msgstr ""
+
+#: .\templates\users\adresse_form.html:62
+msgid "Retour au profil"
+msgstr ""
+
+#: .\templates\users\adresse_form.html:74
+msgid "Adresse de livraison pour vos commandes."
+msgstr ""
+
+#: .\templates\users\adresse_form.html:182
+msgid "Quartier, rue, numéro…"
+msgstr ""
+
+#: .\templates\users\adresse_form.html:276
+msgid "Définir comme adresse par défaut"
+msgstr ""
+
+#: .\templates\users\adresse_form.html:279
+msgid "Pré-remplie automatiquement lors du checkout."
+msgstr ""
+
+#: .\templates\users\adresse_form.html:308
+msgid "Enregistrer l'adresse"
+msgstr ""
+
+#: .\templates\users\login.html:60
+msgid "Pas encore de compte ?"
+msgstr ""
+
+#: .\templates\users\login.html:65
+msgid "S'inscrire gratuitement"
+msgstr ""
+
+#: .\templates\users\login.html:169 .\templates\users\register.html:212
+msgid "Afficher ou masquer le mot de passe"
+msgstr ""
+
+#: .\templates\users\login.html:213 .\templates\users\register.html:334
+msgid "ou continuer avec"
+msgstr ""
+
+#: .\templates\users\login.html:229
+msgid "Continuer avec Google"
+msgstr ""
+
+#: .\templates\users\login.html:236 .\templates\users\register.html:65
+msgid "Créer un compte"
+msgstr ""
+
+#: .\templates\users\login.html:242
+msgid "En continuant, vous acceptez nos"
+msgstr ""
+
+#: .\templates\users\login.html:243 .\templates\users\register.html:377
+msgid "conditions d'utilisation"
+msgstr ""
+
+#: .\templates\users\login.html:244
+msgid "et notre"
+msgstr ""
+
+#: .\templates\users\login.html:245
+msgid "politique de confidentialité"
+msgstr ""
+
+#: .\templates\users\profile.html:53
+msgid "Mon Profil"
+msgstr ""
+
+#: .\templates\users\profile.html:134
+msgid "Mettre à jour"
+msgstr ""
+
+#: .\templates\users\profile.html:143
+msgid "Accès rapides"
+msgstr ""
+
+#: .\templates\users\profile.html:153
+msgid "Dashboard admin"
+msgstr ""
+
+#: .\templates\users\profile.html:162
+msgid "Voir les commandes"
+msgstr ""
+
+#: .\templates\users\profile.html:216
+msgid "Dernières commandes"
+msgstr ""
+
+#: .\templates\users\profile.html:310
+msgid "Changer la photo de profil"
+msgstr ""
+
+#: .\templates\users\profile.html:354
+msgid "Non vérifié"
+msgstr ""
+
+#: .\templates\users\profile.html:372
+msgid "Membre depuis"
+msgstr ""
+
+#: .\templates\users\profile.html:419
+msgid "Mes messages"
+msgstr ""
+
+#: .\templates\users\profile.html:465
+msgid "Informations personnelles"
+msgstr ""
+
+#: .\templates\users\profile.html:547
+msgid "L'adresse email ne peut pas être modifiée."
+msgstr ""
+
+#: .\templates\users\profile.html:671
+msgid "Aucune adresse enregistrée."
+msgstr ""
+
+#: .\templates\users\profile.html:674
+msgid "Ajouter une adresse"
+msgstr ""
+
+#: .\templates\users\profile.html:753
+msgid "Aucune commande."
+msgstr ""
+
+#: .\templates\users\profile.html:754 .\templates\vendeur\dashboard.html:253
+msgid "Aucune commande pour le moment."
+msgstr ""
+
+#: .\templates\users\profile.html:755
+msgid "Impossible de charger les commandes."
+msgstr ""
+
+#: .\templates\users\profile.html:756
+msgid "Aucun produit en stock faible. ✓"
+msgstr ""
+
+#: .\templates\users\profile.html:758
+msgid "restant"
+msgstr ""
+
+#: .\templates\users\profile.html:759
+msgid "restants"
+msgstr ""
+
+#: .\templates\users\register.html:68
+msgid "Déjà inscrit ?"
+msgstr ""
+
+#: .\templates\users\register.html:203
+msgid "8 caractères minimum"
+msgstr ""
+
+#: .\templates\users\register.html:276
+msgid "Afficher ou masquer la confirmation"
+msgstr ""
+
+#: .\templates\users\register.html:318
+msgid "Créer mon compte"
+msgstr ""
+
+#: .\templates\users\register.html:350
+msgid "S'inscrire avec Google"
+msgstr ""
+
+#: .\templates\users\register.html:369
+msgid ""
+"Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les "
+"spams) pour activer votre compte."
+msgstr ""
+
+#: .\templates\users\register.html:376
+msgid "En créant un compte, vous acceptez nos"
+msgstr ""
+
+#: .\templates\vendeur\commandes.html:17
+msgid "Mes Commandes"
+msgstr ""
+
+#: .\templates\vendeur\commandes.html:30
+msgid "commande"
+msgstr ""
+
+#: .\templates\vendeur\commandes.html:31 .\templates\vendeur\produits.html:32
+msgid "filtre :"
+msgstr ""
+
+#: .\templates\vendeur\commandes.html:144 .\templates\vendeur\produits.html:186
+msgid "avec ce statut"
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:27
+msgid "Mon Espace Vendeur"
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:41
+msgid "Voici un résumé de votre activité sur HooYia Market."
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:89
+msgid "Commandes reçues"
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:106
+msgid "CA total (livré)"
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:127
+msgid "Produits récents"
+msgstr ""
+
+#: .\templates\vendeur\dashboard.html:187
+msgid "Aucun produit pour le moment."
+msgstr ""
+
+#: .\templates\vendeur\produits.html:17
+msgid "Mes Produits"
+msgstr ""
+
+#: .\templates\vendeur\produits.html:28
+msgid "Mes produits"
+msgstr ""
+
+#: .\templates\vendeur\produits.html:31
+msgid "produit"
+msgstr ""
+
+#: .\templates\vendeur\produits.html:189
+msgid "Ajouter mon premier produit"
+msgstr ""

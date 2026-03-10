@@ -127,7 +127,7 @@ const API = (() => {
 
     if (!res.ok) {
       // Extraction message d'erreur lisible
-      const msg = extractErrorMessage(data) || `Erreur ${res.status}`;
+      const msg = extractErrorMessage(data) || interpolate(gettext('Erreur %s'), [res.status]);
       if (!options.silentError) {
         window.toast && window.toast(msg, 'error');
       }

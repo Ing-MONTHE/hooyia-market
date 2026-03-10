@@ -76,7 +76,7 @@ const Chat = (() => {
       if (messages.length === 0) {
         list.innerHTML = `
           <div class="text-center py-8">
-            <p class="text-ink/30 font-body text-sm">Démarrez la conversation 👋</p>
+            <p class="text-ink/30 font-body text-sm">${gettext('Démarrez la conversation 👋')}</p>
           </div>`;
       } else {
         list.innerHTML = messages.map(m => renderMessage(m)).join('');
@@ -89,7 +89,7 @@ const Chat = (() => {
       if (e && e.status === 401) {
         window.location.href = '/compte/connexion/?next=/chat/';
       } else {
-        list.innerHTML = `<p class="text-center text-ink/40 font-body text-sm py-8">Impossible de charger les messages.</p>`;
+        list.innerHTML = `<p class="text-center text-ink/40 font-body text-sm py-8">${gettext('Impossible de charger les messages.')}</p>`;
       }
     }
   }
@@ -147,7 +147,7 @@ const Chat = (() => {
     if (!contenu) return;
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      window.toast && window.toast('Connexion perdue. Reconnexion en cours…', 'warning');
+      window.toast && window.toast(gettext('Connexion perdue. Reconnexion en cours…'), 'warning');
       return;
     }
 
@@ -224,9 +224,9 @@ const Chat = (() => {
   function setStatut(state) {
     const { statusDot, wsStatus } = els();
     const etats = {
-      connecting   : { dot: 'bg-amber-400',  text: 'Connexion…' },
-      connected    : { dot: 'bg-green-400',   text: 'Connecté' },
-      disconnected : { dot: 'bg-red-400',     text: 'Déconnecté — Reconnexion…' },
+      connecting   : { dot: 'bg-amber-400',  text: gettext('Connexion…') },
+      connected    : { dot: 'bg-green-400',   text: gettext('Connecté') },
+      disconnected : { dot: 'bg-red-400',     text: gettext('Déconnecté — Reconnexion…') },
     };
     const s = etats[state] || etats.disconnected;
     if (statusDot) statusDot.className = `w-2.5 h-2.5 rounded-full transition-colors duration-300 ${s.dot}`;
@@ -274,10 +274,11 @@ const Chat = (() => {
     if (!isoStr) return '';
     const d   = new Date(isoStr);
     const now = new Date();
+    const locale = document.documentElement.lang || 'fr-FR';
     if (now - d < 86400000) {
-      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
     }
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   }
 
   function escapeHtml(str) {

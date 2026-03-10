@@ -1,0 +1,4225 @@
+# HooYia Market — English Translation
+# Copyright (C) 2026 HooYia Market
+# This file is distributed under the same license as the HooYia Market package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HooYia Market\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-10 12:28+0100\n"
+"PO-Revision-Date: 2026-03-10 12:28+0100\n"
+"Last-Translator: HooYia Market Team\n"
+"Language-Team: English <en@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\apps\audit\models.py:16 .\apps\cart\models.py:43
+#: .\apps\users\models.py:136 .\apps\users\models.py:164
+#: .\templates\admin_dashboard.html:2895 .\templates\admin_dashboard.html:3241
+#: .\templates\chat\chat_liste.html:52
+msgid "Utilisateur"
+msgstr "User"
+
+#: .\apps\audit\models.py:19 .\templates\admin_dashboard.html:2901
+#: .\templates\admin_dashboard.html:3052
+msgid "Action"
+msgstr "Action"
+
+#: .\apps\audit\models.py:20
+msgid "URL"
+msgstr "URL"
+
+#: .\apps\audit\models.py:21
+msgid "Code HTTP"
+msgstr "HTTP Code"
+
+#: .\apps\audit\models.py:22 .\templates\admin_dashboard.html:2102
+#: .\templates\admin_dashboard.html:2733 .\templates\admin_dashboard.html:3276
+#: .\templates\admin_dashboard.html:3307
+#: .\templates\notifications\emails\order_confirm.html:173
+msgid "Date"
+msgstr "Date"
+
+#: .\apps\audit\models.py:23 .\apps\products\models.py:348
+#: .\templates\admin_dashboard.html:2781 .\templates\admin_dashboard.html:2948
+msgid "Note"
+msgstr "Note"
+
+#: .\apps\audit\models.py:27
+msgid "Log Audit"
+msgstr "Audit Log"
+
+#: .\apps\audit\models.py:28
+msgid "Logs Audit"
+msgstr "Audit Logs"
+
+#: .\apps\cart\api_views.py:102
+msgid "Article ajouté au panier."
+msgstr "Item added to cart."
+
+#: .\apps\cart\api_views.py:137 .\apps\cart\api_views.py:174
+#: .\apps\cart\api_views.py:211
+msgid "Panier introuvable."
+msgstr "Cart not found."
+
+#: .\apps\cart\api_views.py:153 .\apps\cart\api_views.py:184
+#: .\templates\cart\cart.html:672
+msgid "Article supprimé du panier."
+msgstr "Item removed from cart."
+
+#: .\apps\cart\api_views.py:159
+msgid "Quantité mise à jour."
+msgstr "Quantity updated."
+
+#: .\apps\cart\api_views.py:218
+msgid "Panier vidé avec succès."
+msgstr "Cart cleared successfully."
+
+#: .\apps\cart\models.py:48
+msgid "Date de création"
+msgstr "Creation date"
+
+#: .\apps\cart\models.py:53 .\apps\reviews\models.py:81
+msgid "Dernière modification"
+msgstr "Last modified"
+
+#: .\apps\cart\models.py:57 .\apps\cart\models.py:126
+#: .\templates\partials\navbar.html:1003
+msgid "Panier"
+msgstr "Cart"
+
+#: .\apps\cart\models.py:58
+msgid "Paniers"
+msgstr "Carts"
+
+#: .\apps\cart\models.py:134 .\apps\orders\models.py:241
+#: .\apps\products\models.py:197 .\apps\products\models.py:261
+#: .\apps\products\models.py:330 .\apps\reviews\models.py:59
+#: .\templates\admin_dashboard.html:2385 .\templates\admin_dashboard.html:2946
+#: .\templates\admin_dashboard.html:3047 .\templates\admin_dashboard.html:3511
+#: .\templates\vendeur\produits.html:74
+msgid "Produit"
+msgstr "Product"
+
+#: .\apps\cart\models.py:140 .\apps\orders\models.py:251
+#: .\apps\products\models.py:340 .\templates\admin_dashboard.html:2776
+#: .\templates\products\detail.html:578
+msgid "Quantité"
+msgstr "Quantity"
+
+#: .\apps\cart\models.py:147
+msgid "Prix au moment de l'ajout (FCFA)"
+msgstr "Price at time of addition (FCFA)"
+
+#: .\apps\cart\models.py:152
+msgid "Date d'ajout"
+msgstr "Date added"
+
+#: .\apps\cart\models.py:156
+msgid "Article du panier"
+msgstr "Cart item"
+
+#: .\apps\cart\models.py:157
+msgid "Articles du panier"
+msgstr "Cart items"
+
+#: .\apps\cart\services.py:72
+msgid "Ce produit n'est pas disponible."
+msgstr "This product is not available."
+
+#: .\apps\cart\services.py:76 .\apps\products\api_views.py:264
+msgid "La quantité doit être supérieure à 0."
+msgstr "Quantity must be greater than 0."
+
+#: .\apps\cart\services.py:81 .\apps\cart\services.py:178
+#, python-format
+msgid "Stock insuffisant. Il reste %(stock)s unité(s) disponible(s)."
+msgstr "Insufficient stock. %(stock)s unit(s) remaining."
+
+#: .\apps\cart\services.py:106
+#, python-format
+msgid ""
+"Quantité maximale atteinte. Vous avez déjà %(dans_panier)s unité(s) dans "
+"votre panier et il reste %(en_stock)s unité(s) en stock."
+msgstr ""
+"Maximum quantity reached. You already have %(dans_panier)s unit(s) in your "
+"cart and %(en_stock)s unit(s) remain in stock."
+
+#: .\apps\cart\services.py:145 .\apps\cart\services.py:168
+msgid "Cet article n'existe pas dans votre panier."
+msgstr "This item is not in your cart."
+
+#: .\apps\cart\views.py:26
+msgid "Les administrateurs n'ont pas accès au panier."
+msgstr "Administrators do not have access to the cart."
+
+#: .\apps\cart\views.py:30
+msgid "Mon Panier — HooYia Market"
+msgstr "My Cart — HooYia Market"
+
+#: .\apps\chat\api_views.py:156
+msgid "Le message ne peut pas être vide."
+msgstr "Message cannot be empty."
+
+#: .\apps\chat\api_views.py:202
+#, python-format
+msgid "%(n)s message(s) marqué(s) comme lu(s)."
+msgstr "%(n)s message(s) marked as read."
+
+#: .\apps\chat\models.py:44
+msgid "Participant 1"
+msgstr "Participant 1"
+
+#: .\apps\chat\models.py:51
+msgid "Participant 2"
+msgstr "Participant 2"
+
+#: .\apps\chat\models.py:54 .\apps\notifications\models.py:75
+msgid "Créée le"
+msgstr "Created on"
+
+#: .\apps\chat\models.py:57 .\apps\chat\models.py:123
+msgid "Conversation"
+msgstr "Conversation"
+
+#: .\apps\chat\models.py:58 .\templates\admin_dashboard.html:1883
+#: .\templates\admin_dashboard.html:3263
+msgid "Conversations"
+msgstr "Conversations"
+
+#: .\apps\chat\models.py:131
+msgid "Expéditeur"
+msgstr "Sender"
+
+#: .\apps\chat\models.py:134 .\apps\chat\models.py:141
+#: .\apps\notifications\models.py:62 .\templates\legal\contact.html:133
+msgid "Message"
+msgstr "Message"
+
+#: .\apps\chat\models.py:136 .\templates\admin_dashboard.html:3308
+msgid "Lu"
+msgstr "Read"
+
+#: .\apps\chat\models.py:138 .\apps\notifications\models.py:138
+msgid "Envoyé le"
+msgstr "Sent on"
+
+#: .\apps\chat\models.py:142 .\templates\chat\chat_liste.html:4
+#: .\templates\chat\chat_liste.html:12 .\templates\partials\footer.html:339
+msgid "Messages"
+msgstr "Messages"
+
+#: .\apps\chat\serializers.py:168
+msgid "Utilisateur introuvable ou inactif."
+msgstr "User not found or inactive."
+
+#: .\apps\chat\serializers.py:175
+msgid "Vous ne pouvez pas démarrer une conversation avec vous-même."
+msgstr "You cannot start a conversation with yourself."
+
+#: .\apps\chat\views.py:40
+msgid "Vous n'êtes pas membre de cette conversation."
+msgstr "You are not a member of this conversation."
+
+#: .\apps\notifications\api_views.py:71
+msgid "Notification introuvable."
+msgstr "Notification not found."
+
+#: .\apps\notifications\api_views.py:77
+msgid "Notification déjà lue."
+msgstr "Notification already read."
+
+#: .\apps\notifications\api_views.py:91
+msgid "Notification marquée comme lue."
+msgstr "Notification marked as read."
+
+#: .\apps\notifications\api_views.py:120
+#, python-format
+msgid "%(n)s notification(s) marquée(s) comme lue(s)."
+msgstr "%(n)s notification(s) marked as read."
+
+#: .\apps\notifications\models.py:48 .\apps\orders\models.py:135
+#: .\apps\orders\models.py:233 .\apps\orders\models.py:304
+#: .\templates\legal\politique.html:113
+#: .\templates\notifications\emails\status_update.html:59
+#: .\templates\users\profile.html:757
+msgid "Commande"
+msgstr "Order"
+
+#: .\apps\notifications\models.py:49 .\apps\reviews\models.py:84
+#: .\apps\reviews\models.py:85 .\templates\users\profile.html:207
+msgid "Avis"
+msgstr "Review"
+
+#: .\apps\notifications\models.py:50 .\templates\admin_dashboard.html:2388
+#: .\templates\admin_dashboard.html:3049
+#: .\templates\products\ajouter_produit.html:539
+#: .\templates\vendeur\produits.html:76
+msgid "Stock"
+msgstr "Stock"
+
+#: .\apps\notifications\models.py:51 .\templates\admin_dashboard.html:1890
+msgid "Système"
+msgstr "System"
+
+#: .\apps\notifications\models.py:58 .\apps\notifications\models.py:121
+#: .\templates\admin_dashboard.html:3305
+msgid "Destinataire"
+msgstr "Recipient"
+
+#: .\apps\notifications\models.py:61 .\templates\admin_dashboard.html:3306
+msgid "Titre"
+msgstr "Title"
+
+#: .\apps\notifications\models.py:68 .\apps\products\models.py:336
+#: .\templates\admin_dashboard.html:3304
+#: .\templates\products\gestion_categories.html:338
+msgid "Type"
+msgstr "Type"
+
+#: .\apps\notifications\models.py:71
+msgid "Lue"
+msgstr "Read"
+
+#: .\apps\notifications\models.py:73
+msgid "Lien (optionnel)"
+msgstr "Link (optional)"
+
+#: .\apps\notifications\models.py:78
+msgid "Notification"
+msgstr "Notification"
+
+#: .\apps\notifications\models.py:79 .\templates\admin_dashboard.html:1587
+#: .\templates\admin_dashboard.html:1599 .\templates\admin_dashboard.html:1902
+#: .\templates\admin_dashboard.html:3294 .\templates\partials\navbar.html:646
+#: .\templates\partials\navbar.html:655
+msgid "Notifications"
+msgstr "Notifications"
+
+#: .\apps\notifications\models.py:111 .\apps\orders\models.py:78
+#: .\apps\orders\models.py:295 .\templates\admin_dashboard.html:2691
+#: .\templates\admin_dashboard.html:2928 .\templates\admin_dashboard.html:3491
+#: .\templates\legal\faq.html:132 .\templates\orders\confirm.html:300
+#: .\templates\orders\confirm.html:307 .\templates\users\profile.html:747
+#: .\templates\vendeur\commandes.html:115
+#: .\templates\vendeur\dashboard.html:240
+msgid "En attente"
+msgstr "Pending"
+
+#: .\apps\notifications\models.py:112
+msgid "Envoyé"
+msgstr "Sent"
+
+#: .\apps\notifications\models.py:113
+msgid "Échec"
+msgstr "Failed"
+
+#: .\apps\notifications\models.py:124 .\templates\legal\contact.html:113
+msgid "Sujet"
+msgstr "Subject"
+
+#: .\apps\notifications\models.py:125
+msgid "Corps de l'email"
+msgstr "Email body"
+
+#: .\apps\notifications\models.py:126
+msgid "Email destinataire"
+msgstr "Recipient email"
+
+#: .\apps\notifications\models.py:132 .\apps\orders\models.py:122
+#: .\apps\products\models.py:166 .\templates\admin_dashboard.html:2103
+#: .\templates\admin_dashboard.html:2389 .\templates\admin_dashboard.html:2734
+#: .\templates\admin_dashboard.html:2900 .\templates\admin_dashboard.html:2950
+#: .\templates\products\ajouter_produit.html:668
+#: .\templates\products\gestion_categories.html:276
+#: .\templates\products\gestion_categories.html:339
+#: .\templates\vendeur\produits.html:77
+msgid "Statut"
+msgstr "Status"
+
+#: .\apps\notifications\models.py:135
+msgid "Détail erreur"
+msgstr "Error detail"
+
+#: .\apps\notifications\models.py:137
+#: .\templates\products\ajouter_produit.html:730
+#: .\templates\vendeur\produits.html:78
+msgid "Créé le"
+msgstr "Created on"
+
+#: .\apps\notifications\models.py:141
+msgid "Email asynchrone"
+msgstr "Async email"
+
+#: .\apps\notifications\models.py:142
+msgid "Emails asynchrones"
+msgstr "Async emails"
+
+#: .\apps\notifications\tasks.py:120
+#, python-format
+msgid "[HooYia Market] Commande #%(ref)s confirmée ✓"
+msgstr "[HooYia Market] Order #%(ref)s confirmed ✓"
+
+#: .\apps\notifications\tasks.py:122
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"Votre commande #%(ref)s a bien été confirmée.\n"
+"Montant total : %(montant)s FCFA\n"
+"\n"
+"Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n"
+"\n"
+"Merci pour votre confiance !\n"
+"L'équipe HooYia Market"
+msgstr ""
+"Hello %(username)s,\n"
+"\n"
+"Your order #%(ref)s has been confirmed.\n"
+"Total amount: %(montant)s FCFA\n"
+"\n"
+"We are preparing your package. You will receive an email once shipped.\n"
+"\n"
+"Thank you for your trust!\n"
+"The HooYia Market Team"
+
+#: .\apps\notifications\tasks.py:153
+#: .\templates\notifications\emails\order_confirm.html:154
+msgid "Commande confirmée !"
+msgstr "Order confirmed!"
+
+#: .\apps\notifications\tasks.py:154
+#, python-format
+msgid "Votre commande #%(ref)s est confirmée."
+msgstr "Your order #%(ref)s is confirmed."
+
+#: .\apps\notifications\tasks.py:173 .\apps\notifications\tasks.py:200
+msgid "En préparation 📦"
+msgstr "Being prepared 📦"
+
+#: .\apps\notifications\tasks.py:173
+msgid "Votre commande est en cours de préparation."
+msgstr "Your order is being prepared."
+
+#: .\apps\notifications\tasks.py:174
+msgid "Commande expédiée 🚚"
+msgstr "Order shipped 🚚"
+
+#: .\apps\notifications\tasks.py:174
+msgid "Votre commande est en route !"
+msgstr "Your order is on its way!"
+
+#: .\apps\notifications\tasks.py:175
+msgid "Commande livrée ✓"
+msgstr "Order delivered ✓"
+
+#: .\apps\notifications\tasks.py:175
+msgid "Votre commande a bien été livrée."
+msgstr "Your order has been delivered."
+
+#: .\apps\notifications\tasks.py:176
+msgid "Commande annulée"
+msgstr "Order cancelled"
+
+#: .\apps\notifications\tasks.py:176
+msgid "Votre commande a été annulée."
+msgstr "Your order has been cancelled."
+
+#: .\apps\notifications\tasks.py:185
+msgid "Mise à jour commande"
+msgstr "Order update"
+
+#: .\apps\notifications\tasks.py:185
+#, python-format
+msgid "Statut : %(statut)s"
+msgstr "Status: %(statut)s"
+
+#: .\apps\notifications\tasks.py:188
+#, python-format
+msgid "[HooYia Market] Commande #%(ref)s — %(titre)s"
+msgstr "[HooYia Market] Order #%(ref)s — %(titre)s"
+
+#: .\apps\notifications\tasks.py:192
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"%(msg)s\n"
+"Référence : #%(ref)s\n"
+"\n"
+"L'équipe HooYia Market"
+msgstr ""
+"Hello %(username)s,\n"
+"\n"
+"%(msg)s\n"
+"Reference: #%(ref)s\n"
+"\n"
+"The HooYia Market Team"
+
+#: .\apps\notifications\tasks.py:201
+msgid "Expédiée 🚚"
+msgstr "Shipped 🚚"
+
+#: .\apps\notifications\tasks.py:202
+msgid "Livrée ✅"
+msgstr "Delivered ✅"
+
+#: .\apps\notifications\tasks.py:203
+msgid "Annulée ❌"
+msgstr "Cancelled ❌"
+
+#: .\apps\notifications\tasks.py:238
+msgid "[HooYia Market] Votre avis nous intéresse !"
+msgstr "[HooYia Market] We'd love your feedback!"
+
+#: .\apps\notifications\tasks.py:240
+#, python-format
+msgid ""
+"Bonjour %(username)s,\n"
+"\n"
+"Votre commande #%(ref)s a été livrée.\n"
+"Nous espérons que vous êtes satisfait(e) de vos achats :\n"
+"\n"
+"%(produits)s\n"
+"\n"
+"Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n"
+"\n"
+"L'équipe HooYia Market"
+msgstr ""
+"Hello %(username)s,\n"
+"\n"
+"Your order #%(ref)s has been delivered.\n"
+"We hope you are satisfied with your purchase:\n"
+"\n"
+"%(produits)s\n"
+"\n"
+"Take 2 minutes to leave a review and help other buyers!\n"
+"\n"
+"The HooYia Market Team"
+
+#: .\apps\notifications\tasks.py:256
+msgid "Partagez votre avis !"
+msgstr "Share your review!"
+
+#: .\apps\notifications\tasks.py:257
+#, python-format
+msgid "Donnez votre avis sur votre commande #%(ref)s."
+msgstr "Leave a review for your order #%(ref)s."
+
+#: .\apps\notifications\tasks.py:289
+#, python-format
+msgid "[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)"
+msgstr "[HooYia Market] ⚠️ Low stock alert — %(nb)s product(s)"
+
+#: .\apps\notifications\tasks.py:291
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"%(nb)s produit(s) sont en stock faible :\n"
+"\n"
+"%(liste)s\n"
+"\n"
+"Pensez à réapprovisionner ces articles.\n"
+"\n"
+"HooYia Market — Système automatique"
+msgstr ""
+"Hello,\n"
+"\n"
+"%(nb)s product(s) are low in stock:\n"
+"\n"
+"%(liste)s\n"
+"\n"
+"Please restock these items.\n"
+"\n"
+"HooYia Market — Automated System"
+
+#: .\apps\notifications\tasks.py:302
+#, python-format
+msgid "⚠️ Stock faible : %(nb)s produit(s)"
+msgstr "⚠️ Low stock: %(nb)s product(s)"
+
+#: .\apps\notifications\tasks.py:303
+#, python-format
+msgid "%(nb)s produit(s) nécessitent un réapprovisionnement."
+msgstr "%(nb)s product(s) need restocking."
+
+#: .\apps\orders\api_views.py:101
+msgid "Adresse de livraison introuvable."
+msgstr "Delivery address not found."
+
+#: .\apps\orders\api_views.py:184 .\apps\orders\api_views.py:229
+msgid "Commande introuvable."
+msgstr "Order not found."
+
+#: .\apps\orders\api_views.py:194
+msgid "Cette commande ne peut pas être annulée dans son état actuel."
+msgstr "This order cannot be cancelled in its current state."
+
+#: .\apps\orders\api_views.py:199
+msgid "Commande annulée avec succès."
+msgstr "Order cancelled successfully."
+
+#: .\apps\orders\api_views.py:239
+#, python-format
+msgid "Transition '%(t)s' non autorisée depuis le statut actuel."
+msgstr "Transition '%(t)s' not allowed from current status."
+
+#: .\apps\orders\models.py:79 .\templates\orders\confirm.html:301
+#: .\templates\users\profile.html:748 .\templates\vendeur\commandes.html:117
+msgid "Confirmée"
+msgstr "Confirmed"
+
+#: .\apps\orders\models.py:80 .\templates\admin_dashboard.html:2693
+#: .\templates\orders\confirm.html:302 .\templates\users\profile.html:749
+#: .\templates\vendeur\commandes.html:119
+msgid "En préparation"
+msgstr "Being prepared"
+
+#: .\apps\orders\models.py:81 .\templates\orders\confirm.html:303
+#: .\templates\users\profile.html:750 .\templates\vendeur\commandes.html:121
+#: .\templates\vendeur\dashboard.html:242
+msgid "Expédiée"
+msgstr "Shipped"
+
+#: .\apps\orders\models.py:82 .\templates\orders\confirm.html:304
+#: .\templates\users\profile.html:751 .\templates\vendeur\commandes.html:111
+#: .\templates\vendeur\dashboard.html:236
+msgid "Livrée"
+msgstr "Delivered"
+
+#: .\apps\orders\models.py:83 .\templates\orders\confirm.html:305
+#: .\templates\users\profile.html:752 .\templates\vendeur\commandes.html:113
+#: .\templates\vendeur\dashboard.html:238
+msgid "Annulée"
+msgstr "Cancelled"
+
+#: .\apps\orders\models.py:93
+msgid "Référence commande"
+msgstr "Order reference"
+
+#: .\apps\orders\models.py:101 .\templates\admin_dashboard.html:2100
+#: .\templates\admin_dashboard.html:2730 .\templates\admin_dashboard.html:2947
+#: .\templates\admin_dashboard.html:3494 .\templates\vendeur\commandes.html:78
+msgid "Client"
+msgstr "Customer"
+
+#: .\apps\orders\models.py:104
+msgid "Nom destinataire"
+msgstr "Recipient name"
+
+#: .\apps\orders\models.py:105
+msgid "Téléphone livraison"
+msgstr "Delivery phone"
+
+#: .\apps\orders\models.py:106 .\apps\users\models.py:169
+#: .\templates\admin_dashboard.html:2731
+#: .\templates\users\adresse_form.html:172
+msgid "Adresse"
+msgstr "Address"
+
+#: .\apps\orders\models.py:107 .\apps\users\models.py:170
+#: .\templates\orders\checkout.html:279 .\templates\users\adresse_form.html:202
+msgid "Ville"
+msgstr "City"
+
+#: .\apps\orders\models.py:108 .\apps\users\models.py:171
+#: .\templates\orders\checkout.html:288 .\templates\users\adresse_form.html:217
+msgid "Région"
+msgstr "Region"
+
+#: .\apps\orders\models.py:109 .\apps\users\models.py:172
+#: .\templates\orders\checkout.html:295 .\templates\users\adresse_form.html:250
+msgid "Pays"
+msgstr "Country"
+
+#: .\apps\orders\models.py:115
+msgid "Montant total (FCFA)"
+msgstr "Total amount (FCFA)"
+
+#: .\apps\orders\models.py:127
+msgid "Note / Instructions de livraison"
+msgstr "Note / Delivery instructions"
+
+#: .\apps\orders\models.py:130
+#: .\templates\notifications\emails\status_update.html:84
+msgid "Date de commande"
+msgstr "Order date"
+
+#: .\apps\orders\models.py:131
+msgid "Dernière mise à jour"
+msgstr "Last updated"
+
+#: .\apps\orders\models.py:132
+msgid "Date de livraison"
+msgstr "Delivery date"
+
+#: .\apps\orders\models.py:136 .\templates\admin_dashboard.html:1821
+#: .\templates\admin_dashboard.html:2680 .\templates\admin_dashboard.html:3471
+#: .\templates\legal\faq.html:94 .\templates\legal\faq.html:109
+#: .\templates\users\profile.html:199
+msgid "Commandes"
+msgstr "Orders"
+
+#: .\apps\orders\models.py:246
+msgid "Nom du produit (au moment de la commande)"
+msgstr "Product name (at time of order)"
+
+#: .\apps\orders\models.py:258
+msgid "Prix unitaire (FCFA)"
+msgstr "Unit price (FCFA)"
+
+#: .\apps\orders\models.py:262
+msgid "Ligne de commande"
+msgstr "Order line"
+
+#: .\apps\orders\models.py:263
+msgid "Lignes de commande"
+msgstr "Order lines"
+
+#: .\apps\orders\models.py:289 .\templates\legal\conditions.html:262
+#: .\templates\orders\checkout.html:337 .\templates\orders\confirm.html:306
+msgid "Paiement à la livraison"
+msgstr "Cash on delivery"
+
+#: .\apps\orders\models.py:290 .\templates\orders\checkout.html:352
+msgid "Orange Money"
+msgstr "Orange Money"
+
+#: .\apps\orders\models.py:291 .\templates\orders\checkout.html:369
+msgid "MTN Mobile Money"
+msgstr "MTN Mobile Money"
+
+#: .\apps\orders\models.py:292
+msgid "Carte bancaire"
+msgstr "Credit card"
+
+#: .\apps\orders\models.py:296
+msgid "Réussi"
+msgstr "Successful"
+
+#: .\apps\orders\models.py:297
+msgid "Échoué"
+msgstr "Failed"
+
+#: .\apps\orders\models.py:298
+msgid "Remboursé"
+msgstr "Refunded"
+
+#: .\apps\orders\models.py:311 .\templates\orders\checkout.html:319
+msgid "Mode de paiement"
+msgstr "Payment method"
+
+#: .\apps\orders\models.py:318
+msgid "Statut du paiement"
+msgstr "Payment status"
+
+#: .\apps\orders\models.py:325
+msgid "Montant (FCFA)"
+msgstr "Amount (FCFA)"
+
+#: .\apps\orders\models.py:331
+msgid "Référence externe (transaction)"
+msgstr "External reference (transaction)"
+
+#: .\apps\orders\models.py:336
+msgid "Date du paiement"
+msgstr "Payment date"
+
+#: .\apps\orders\models.py:340 .\templates\legal\faq.html:95
+#: .\templates\legal\faq.html:146 .\templates\orders\confirm.html:222
+msgid "Paiement"
+msgstr "Payment"
+
+#: .\apps\orders\models.py:341
+msgid "Paiements"
+msgstr "Payments"
+
+#: .\apps\orders\serializers.py:233
+#, python-format
+msgid "Champs obligatoires manquants : %(champs)s"
+msgstr "Missing required fields: %(champs)s"
+
+#: .\apps\orders\services.py:74
+msgid "Vous n'avez pas de panier."
+msgstr "You have no cart."
+
+#: .\apps\orders\services.py:77
+msgid "Votre panier est vide."
+msgstr "Your cart is empty."
+
+#: .\apps\orders\services.py:87
+msgid ""
+"Un produit de votre panier n'est plus disponible. Veuillez le retirer de "
+"votre panier."
+msgstr ""
+"A product in your cart is no longer available. Please remove it from your "
+"cart."
+
+#: .\apps\orders\services.py:92
+#, python-format
+msgid ""
+"Stock insuffisant pour « %(nom)s ». Disponible : %(stock)s — Demandé : "
+"%(quantite)s."
+msgstr ""
+"Insufficient stock for \"%(nom)s\". Available: %(stock)s — Requested: "
+"%(quantite)s."
+
+#: .\apps\orders\services.py:176
+msgid "Vous n'êtes pas autorisé à annuler cette commande."
+msgstr "You are not authorized to cancel this order."
+
+#: .\apps\orders\services.py:180
+msgid "Cette commande ne peut plus être annulée (déjà livrée ou déjà annulée)."
+msgstr "This order can no longer be cancelled (already delivered or cancelled)."
+
+#: .\apps\orders\views.py:20
+msgid "Cette fonctionnalité est réservée aux clients."
+msgstr "This feature is reserved for customers."
+
+#: .\apps\orders\views.py:41
+msgid "Finaliser ma commande — HooYia Market"
+msgstr "Complete my order — HooYia Market"
+
+#: .\apps\orders\views.py:63
+#, python-format
+msgid "Commande #%(ref)s — HooYia Market"
+msgstr "Order #%(ref)s — HooYia Market"
+
+#: .\apps\orders\views.py:79
+msgid "Mes commandes — HooYia Market"
+msgstr "My orders — HooYia Market"
+
+#: .\apps\products\api_views.py:227 .\apps\products\api_views.py:254
+msgid "Permission refusée."
+msgstr "Permission denied."
+
+#: .\apps\products\api_views.py:275
+msgid "Stock insuffisant."
+msgstr "Insufficient stock."
+
+#: .\apps\products\api_views.py:283
+msgid "Type de mouvement invalide."
+msgstr "Invalid movement type."
+
+#: .\apps\products\api_views.py:301
+msgid "Stock mis à jour."
+msgstr "Stock updated."
+
+#: .\apps\products\models.py:33 .\apps\users\forms.py:52
+#: .\apps\users\models.py:76 .\templates\admin_dashboard.html:3129
+#: .\templates\admin_dashboard.html:3413 .\templates\legal\contact.html:102
+#: .\templates\products\gestion_categories.html:223
+#: .\templates\users\profile.html:125 .\templates\users\profile.html:492
+msgid "Nom"
+msgstr "Name"
+
+#: .\apps\products\models.py:44 .\apps\products\models.py:112
+#: .\templates\admin_dashboard.html:3135 .\templates\admin_dashboard.html:3419
+#: .\templates\products\detail.html:611
+#: .\templates\products\gestion_categories.html:231
+msgid "Description"
+msgstr "Description"
+
+#: .\apps\products\models.py:51 .\apps\products\models.py:266
+#: .\templates\admin_dashboard.html:3161
+#: .\templates\products\gestion_categories.html:253
+#: .\templates\products\gestion_categories.html:336
+msgid "Image"
+msgstr "Image"
+
+#: .\apps\products\models.py:60 .\templates\admin_dashboard.html:3141
+#: .\templates\admin_dashboard.html:3425
+#: .\templates\products\gestion_categories.html:238
+msgid "Catégorie parente"
+msgstr "Parent category"
+
+#: .\apps\products\models.py:70 .\apps\products\models.py:152
+#: .\templates\admin_dashboard.html:2386 .\templates\admin_dashboard.html:2486
+#: .\templates\admin_dashboard.html:3048 .\templates\legal\politique.html:108
+#: .\templates\products\ajouter_produit.html:443
+msgid "Catégorie"
+msgstr "Category"
+
+#: .\apps\products\models.py:71 .\templates\admin_dashboard.html:1787
+#: .\templates\admin_dashboard.html:3071 .\templates\partials\navbar.html:556
+#: .\templates\partials\navbar.html:961
+#: .\templates\products\gestion_categories.html:158
+#: .\templates\products\list.html:807 .\templates\products\list.html:940
+msgid "Catégories"
+msgstr "Categories"
+
+#: .\apps\products\models.py:94 .\templates\admin_dashboard.html:3495
+#: .\templates\vendeur\dashboard.html:175 .\templates\vendeur\produits.html:132
+msgid "Actif"
+msgstr "Active"
+
+#: .\apps\products\models.py:95 .\templates\admin_dashboard.html:3496
+#: .\templates\vendeur\produits.html:136
+msgid "Inactif"
+msgstr "Inactive"
+
+#: .\apps\products\models.py:96 .\templates\admin_dashboard.html:2596
+#: .\templates\products\detail.html:762 .\templates\vendeur\dashboard.html:177
+#: .\templates\vendeur\produits.html:134
+msgid "Épuisé"
+msgstr "Out of stock"
+
+#: .\apps\products\models.py:97 .\templates\admin_dashboard.html:2597
+msgid "Archivé"
+msgstr "Archived"
+
+#: .\apps\products\models.py:101 .\templates\admin_dashboard.html:2474
+#: .\templates\products\ajouter_produit.html:400
+msgid "Nom du produit"
+msgstr "Product name"
+
+#: .\apps\products\models.py:108
+msgid "Slug URL"
+msgstr "URL Slug"
+
+#: .\apps\products\models.py:118 .\templates\admin_dashboard.html:2478
+#: .\templates\products\ajouter_produit.html:417
+msgid "Description courte"
+msgstr "Short description"
+
+#: .\apps\products\models.py:125 .\templates\admin_dashboard.html:2528
+msgid "Prix (FCFA)"
+msgstr "Price (FCFA)"
+
+#: .\apps\products\models.py:134
+msgid "Prix promotionnel (FCFA)"
+msgstr "Sale price (FCFA)"
+
+#: .\apps\products\models.py:139
+msgid "Quantité en stock"
+msgstr "Stock quantity"
+
+#: .\apps\products\models.py:144
+msgid "Seuil d'alerte stock"
+msgstr "Low stock alert threshold"
+
+#: .\apps\products\models.py:159 .\apps\users\models.py:109
+#: .\templates\admin_dashboard.html:3493 .\templates\users\profile.html:363
+msgid "Vendeur"
+msgstr "Seller"
+
+#: .\apps\products\models.py:171 .\templates\products\ajouter_produit.html:701
+msgid "Produit en vedette"
+msgstr "Featured product"
+
+#: .\apps\products\models.py:178 .\templates\products\ajouter_produit.html:738
+msgid "Note moyenne"
+msgstr "Average rating"
+
+#: .\apps\products\models.py:183
+msgid "Nombre d'avis"
+msgstr "Number of reviews"
+
+#: .\apps\products\models.py:198 .\templates\admin_dashboard.html:1774
+#: .\templates\admin_dashboard.html:2320 .\templates\admin_dashboard.html:3470
+#: .\templates\products\gestion_categories.html:159
+#: .\templates\users\profile.html:195 .\templates\vendeur\commandes.html:87
+msgid "Produits"
+msgstr "Products"
+
+#: .\apps\products\models.py:272
+msgid "Texte alternatif"
+msgstr "Alt text"
+
+#: .\apps\products\models.py:277
+msgid "Ordre d'affichage"
+msgstr "Display order"
+
+#: .\apps\products\models.py:282
+msgid "Image principale"
+msgstr "Main image"
+
+#: .\apps\products\models.py:288
+msgid "Image produit"
+msgstr "Product image"
+
+#: .\apps\products\models.py:289
+msgid "Images produit"
+msgstr "Product images"
+
+#: .\apps\products\models.py:321
+msgid "Entrée stock"
+msgstr "Stock entry"
+
+#: .\apps\products\models.py:322
+msgid "Sortie stock"
+msgstr "Stock exit"
+
+#: .\apps\products\models.py:323
+msgid "Ajustement"
+msgstr "Adjustment"
+
+#: .\apps\products\models.py:324
+msgid "Retour client"
+msgstr "Customer return"
+
+#: .\apps\products\models.py:343
+msgid "Stock avant"
+msgstr "Stock before"
+
+#: .\apps\products\models.py:344
+msgid "Stock après"
+msgstr "Stock after"
+
+#: .\apps\products\models.py:355
+msgid "Effectué par"
+msgstr "Done by"
+
+#: .\apps\products\models.py:361
+msgid "Mouvement de stock"
+msgstr "Stock movement"
+
+#: .\apps\products\models.py:362
+msgid "Mouvements de stock"
+msgstr "Stock movements"
+
+#: .\apps\products\serializers.py:200
+msgid "Le prix doit être supérieur à 0."
+msgstr "Price must be greater than 0."
+
+#: .\apps\products\serializers.py:207
+msgid "Le prix promotionnel doit être supérieur à 0."
+msgstr "Sale price must be greater than 0."
+
+#: .\apps\products\serializers.py:217
+msgid "Le prix promotionnel doit être inférieur au prix normal."
+msgstr "Sale price must be lower than the regular price."
+
+#: .\apps\products\views.py:260
+msgid "Veuillez remplir tous les champs obligatoires."
+msgstr "Please fill in all required fields."
+
+#: .\apps\products\views.py:291
+#, python-format
+msgid "Produit « %(nom)s » créé avec succès !"
+msgstr "Product \"%(nom)s\" created successfully!"
+
+#: .\apps\products\views.py:295
+#, python-format
+msgid "Erreur lors de la création : %(err)s"
+msgstr "Error during creation: %(err)s"
+
+#: .\apps\products\views.py:351
+msgid "Produit modifié avec succès !"
+msgstr "Product updated successfully!"
+
+#: .\apps\products\views.py:354 .\apps\products\views.py:443
+#, python-format
+msgid "Erreur : %(err)s"
+msgstr "Error: %(err)s"
+
+#: .\apps\products\views.py:386
+#, python-format
+msgid "Produit « %(nom)s » supprimé."
+msgstr "Product \"%(nom)s\" deleted."
+
+#: .\apps\products\views.py:413
+msgid "Le nom est obligatoires."
+msgstr "Name is required."
+
+#: .\apps\products\views.py:427
+#, python-format
+msgid "Catégorie « %(nom)s » modifiée avec succès !"
+msgstr "Category \"%(nom)s\" updated successfully!"
+
+#: .\apps\products\views.py:440
+#, python-format
+msgid "Catégorie « %(nom)s » créée avec succès !"
+msgstr "Category \"%(nom)s\" created successfully!"
+
+#: .\apps\products\views.py:480
+msgid "Le nom est obligatoire."
+msgstr "Name is required."
+
+#: .\apps\products\views.py:534
+msgid "cat_id manquant"
+msgstr "cat_id missing"
+
+#: .\apps\products\views.py:543
+msgid "Méthode non autorisée"
+msgstr "Method not allowed"
+
+#: .\apps\products\views.py:555
+#, python-format
+msgid "Catégorie « %(nom)s » supprimée."
+msgstr "Category \"%(nom)s\" deleted."
+
+#: .\apps\reviews\api_views.py:126
+msgid "Vous ne pouvez supprimer que votre propre avis."
+msgstr "You can only delete your own review."
+
+#: .\apps\reviews\api_views.py:142
+msgid "Cet avis est déjà validé."
+msgstr "This review is already approved."
+
+#: .\apps\reviews\api_views.py:150
+#, python-format
+msgid "Avis #%(id)s validé. Note moyenne du produit mise à jour."
+msgstr "Review #%(id)s approved. Product average rating updated."
+
+#: .\apps\reviews\api_views.py:166
+msgid "Cet avis est déjà invalide."
+msgstr "This review is already rejected."
+
+#: .\apps\reviews\api_views.py:174
+#, python-format
+msgid "Avis #%(id)s invalidé. Note moyenne du produit recalculée."
+msgstr "Review #%(id)s rejected. Product average rating recalculated."
+
+#: .\apps\reviews\api_views.py:207
+msgid "Avis soumis, en attente de validation."
+msgstr "Review submitted, pending approval."
+
+#: .\apps\reviews\models.py:52 .\apps\reviews\models.py:115
+msgid "Auteur"
+msgstr "Author"
+
+#: .\apps\reviews\models.py:64
+msgid "La note minimale est 1 étoile."
+msgstr "Minimum rating is 1 star."
+
+#: .\apps\reviews\models.py:65
+msgid "La note maximale est 5 étoiles."
+msgstr "Maximum rating is 5 stars."
+
+#: .\apps\reviews\models.py:67 .\apps\reviews\models.py:123
+msgid "Note (1 à 5)"
+msgstr "Rating (1 to 5)"
+
+#: .\apps\reviews\models.py:72 .\apps\reviews\models.py:126
+#: .\templates\admin_dashboard.html:2949
+msgid "Commentaire"
+msgstr "Comment"
+
+#: .\apps\reviews\models.py:77
+msgid "Validé par un admin"
+msgstr "Approved by admin"
+
+#: .\apps\reviews\models.py:80
+msgid "Date de l'avis"
+msgstr "Review date"
+
+#: .\apps\reviews\models.py:120
+msgid "Note minimale : 1."
+msgstr "Minimum rating: 1."
+
+#: .\apps\reviews\models.py:121
+msgid "Note maximale : 5."
+msgstr "Maximum rating: 5."
+
+#: .\apps\reviews\models.py:130
+msgid "Validé (affiché sur la home)"
+msgstr "Approved (shown on homepage)"
+
+#: .\apps\reviews\models.py:136 .\apps\reviews\models.py:137
+msgid "Avis sur l'application"
+msgstr "App review"
+
+#: .\apps\reviews\serializers.py:128
+msgid "Ce produit n'accepte plus d'avis."
+msgstr "This product no longer accepts reviews."
+
+#: .\apps\reviews\serializers.py:148
+msgid ""
+"Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette "
+"fonctionnalité est réservée aux clients."
+msgstr ""
+"Administrators and sellers cannot leave reviews. This feature is reserved "
+"for customers."
+
+#: .\apps\reviews\serializers.py:165
+msgid "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+msgstr "You can only review a product you have received."
+
+#: .\apps\reviews\serializers.py:178 .\apps\reviews\serializers.py:199
+msgid "Vous avez déjà laissé un avis sur ce produit."
+msgstr "You have already reviewed this product."
+
+#: .\apps\reviews\serializers.py:240 .\apps\reviews\serializers.py:250
+msgid "Vous avez déjà laissé un avis sur la plateforme."
+msgstr "You have already left a review on the platform."
+
+#: .\apps\users\api_views.py:50 .\apps\users\views.py:44
+#, python-format
+msgid "Compte créé ! Vérifiez votre email %(email)s pour activer votre compte."
+msgstr "Account created! Check your email %(email)s to activate your account."
+
+#: .\apps\users\api_views.py:78
+msgid "Déconnexion réussie."
+msgstr "Logged out successfully."
+
+#: .\apps\users\api_views.py:83
+msgid "Token invalide."
+msgstr "Invalid token."
+
+#: .\apps\users\api_views.py:127
+msgid "Mot de passe changé avec succès."
+msgstr "Password changed successfully."
+
+#: .\apps\users\forms.py:25 .\apps\users\forms.py:28 .\apps\users\forms.py:111
+#: .\apps\users\forms.py:113 .\templates\users\login.html:147
+#: .\templates\users\register.html:194
+msgid "Mot de passe"
+msgstr "Password"
+
+#: .\apps\users\forms.py:33 .\apps\users\forms.py:35
+#: .\apps\users\serializers.py:84 .\templates\users\register.html:261
+msgid "Confirmer le mot de passe"
+msgstr "Confirm password"
+
+#: .\apps\users\forms.py:44 .\apps\users\models.py:67
+#: .\templates\users\profile.html:501 .\templates\users\register.html:125
+msgid "Nom d'utilisateur"
+msgstr "Username"
+
+#: .\apps\users\forms.py:48 .\apps\users\forms.py:103 .\apps\users\models.py:71
+#: .\templates\users\login.html:114 .\templates\users\profile.html:534
+#: .\templates\users\register.html:159
+msgid "Adresse email"
+msgstr "Email address"
+
+#: .\apps\users\forms.py:56 .\apps\users\models.py:81
+#: .\templates\users\profile.html:121 .\templates\users\profile.html:488
+msgid "Prénom"
+msgstr "First name"
+
+#: .\apps\users\forms.py:60
+msgid "Téléphone (ex: +237 6XX XXX XXX)"
+msgstr "Phone (e.g. +237 6XX XXX XXX)"
+
+#: .\apps\users\forms.py:68
+msgid "Un compte existe déjà avec cet email."
+msgstr "An account already exists with this email."
+
+#: .\apps\users\forms.py:76
+msgid "Les mots de passe ne correspondent pas."
+msgstr "Passwords do not match."
+
+#: .\apps\users\forms.py:106 .\templates\admin_dashboard.html:2896
+#: .\templates\admin_dashboard.html:3242 .\templates\legal\contact.html:106
+#: .\templates\legal\mentions.html:64
+msgid "Email"
+msgstr "Email"
+
+#: .\apps\users\models.py:28
+msgid "L'adresse email est obligatoire"
+msgstr "Email address is required"
+
+#: .\apps\users\models.py:30
+msgid "Le nom d'utilisateur est obligatoire"
+msgstr "Username is required"
+
+#: .\apps\users\models.py:86 .\apps\users\models.py:168
+#: .\templates\legal\mentions.html:65 .\templates\users\adresse_form.html:141
+#: .\templates\users\profile.html:129 .\templates\users\profile.html:516
+msgid "Téléphone"
+msgstr "Phone"
+
+#: .\apps\users\models.py:92 .\templates\users\profile.html:295
+msgid "Photo de profil"
+msgstr "Profile picture"
+
+#: .\apps\users\models.py:97
+msgid "Compte actif"
+msgstr "Active account"
+
+#: .\apps\users\models.py:101
+msgid "Staff"
+msgstr "Staff"
+
+#: .\apps\users\models.py:105 .\templates\admin_dashboard.html:1647
+#: .\templates\users\profile.html:95
+msgid "Administrateur"
+msgstr "Administrator"
+
+#: .\apps\users\models.py:113 .\templates\admin_dashboard.html:2899
+#: .\templates\users\profile.html:347
+msgid "Email vérifié"
+msgstr "Email verified"
+
+#: .\apps\users\models.py:118
+msgid "Date d'inscription"
+msgstr "Registration date"
+
+#: .\apps\users\models.py:123
+msgid "Dernière connexion"
+msgstr "Last login"
+
+#: .\apps\users\models.py:137 .\templates\admin_dashboard.html:1857
+#: .\templates\admin_dashboard.html:2854 .\templates\users\profile.html:203
+msgid "Utilisateurs"
+msgstr "Users"
+
+#: .\apps\users\models.py:167
+msgid "Nom complet"
+msgstr "Full name"
+
+#: .\apps\users\models.py:173 .\templates\users\adresse_form.html:238
+msgid "Code postal"
+msgstr "Postal code"
+
+#: .\apps\users\models.py:175
+msgid "Adresse par défaut"
+msgstr "Default address"
+
+#: .\apps\users\models.py:180 .\templates\orders\checkout.html:158
+msgid "Adresse de livraison"
+msgstr "Delivery address"
+
+#: .\apps\users\models.py:181 .\templates\users\profile.html:579
+msgid "Adresses de livraison"
+msgstr "Delivery addresses"
+
+#: .\apps\users\serializers.py:103
+msgid "Un compte existe déjà avec cette adresse email."
+msgstr "An account already exists with this email address."
+
+#: .\apps\users\serializers.py:114 .\apps\users\serializers.py:174
+msgid "Les deux mots de passe ne correspondent pas."
+msgstr "The two passwords do not match."
+
+#: .\apps\users\serializers.py:160
+msgid "Confirmer le nouveau mot de passe"
+msgstr "Confirm new password"
+
+#: .\apps\users\serializers.py:167
+msgid "L'ancien mot de passe est incorrect."
+msgstr "The current password is incorrect."
+
+#: .\apps\users\views.py:48
+msgid "Veuillez corriger les erreurs ci-dessous."
+msgstr "Please correct the errors below."
+
+#: .\apps\users\views.py:81
+msgid "Votre compte n'est pas encore activé. Vérifiez votre email."
+msgstr "Your account is not yet activated. Please check your email."
+
+#: .\apps\users\views.py:89
+#, python-format
+msgid "Bienvenue %(prenom)s !"
+msgstr "Welcome %(prenom)s!"
+
+#: .\apps\users\views.py:95
+msgid "Email ou mot de passe incorrect."
+msgstr "Incorrect email or password."
+
+#: .\apps\users\views.py:113
+msgid "Vous êtes déconnecté."
+msgstr "You are logged out."
+
+#: .\apps\users\views.py:131
+msgid "Lien de vérification invalide."
+msgstr "Invalid verification link."
+
+#: .\apps\users\views.py:135
+msgid "Ce lien a expiré. Inscrivez-vous à nouveau."
+msgstr "This link has expired. Please register again."
+
+#: .\apps\users\views.py:146
+msgid "Votre compte est activé ! Vous pouvez vous connecter."
+msgstr "Your account is activated! You can now log in."
+
+#: .\apps\users\views.py:176
+msgid "Profil mis à jour avec succès."
+msgstr "Profile updated successfully."
+
+#: .\apps\users\views.py:202
+msgid "Adresse ajoutée avec succès."
+msgstr "Address added successfully."
+
+#: .\apps\users\views.py:228
+msgid "Adresse supprimée."
+msgstr "Address deleted."
+
+#: .\apps\users\views.py:272
+msgid "Erreur de sécurité OAuth. Réessayez."
+msgstr "OAuth security error. Please try again."
+
+#: .\apps\users\views.py:277
+msgid "Connexion Google annulée ou refusée."
+msgstr "Google login cancelled or denied."
+
+#: .\apps\users\views.py:291
+msgid "Impossible de contacter Google. Réessayez."
+msgstr "Unable to contact Google. Please try again."
+
+#: .\apps\users\views.py:296
+msgid "Échec de l'authentification Google."
+msgstr "Google authentication failed."
+
+#: .\apps\users\views.py:308
+msgid "Impossible de récupérer le profil Google."
+msgstr "Unable to retrieve Google profile."
+
+#: .\apps\users\views.py:317
+msgid "Impossible de récupérer votre email Google."
+msgstr "Unable to retrieve your Google email."
+
+#: .\apps\users\views.py:350
+#, python-format
+msgid "Bienvenue %(prenom)s ! 👋"
+msgstr "Welcome %(prenom)s! 👋"
+
+#: .\config\settings.py:306 .\templates\partials\navbar.html:703
+msgid "Français"
+msgstr "French"
+
+#: .\config\settings.py:307
+msgid "English"
+msgstr "English"
+
+#: .\templates\admin_dashboard.html:57 .\templates\partials\navbar.html:822
+#: .\templates\partials\navbar.html:1023
+msgid "Administration"
+msgstr "Administration"
+
+#: .\templates\admin_dashboard.html:1501
+msgid "Ouvrir le menu"
+msgstr "Open menu"
+
+#: .\templates\admin_dashboard.html:1540 .\templates\partials\navbar.html:922
+#: .\templates\products\gestion_categories.html:315
+msgid "Rechercher…"
+msgstr "Search…"
+
+#: .\templates\admin_dashboard.html:1552 .\templates\partials\navbar.html:715
+msgid "Mode sombre"
+msgstr "Dark mode"
+
+#: .\templates\admin_dashboard.html:1553 .\templates\partials\navbar.html:716
+msgid "Basculer le mode sombre"
+msgstr "Toggle dark mode"
+
+#: .\templates\admin_dashboard.html:1600 .\templates\admin_dashboard.html:2085
+#: .\templates\users\profile.html:219 .\templates\users\profile.html:699
+#: .\templates\vendeur\dashboard.html:132
+#: .\templates\vendeur\dashboard.html:211
+msgid "Voir tout"
+msgstr "View all"
+
+#: .\templates\admin_dashboard.html:1618
+msgid "Voir le site public"
+msgstr "View public site"
+
+#: .\templates\admin_dashboard.html:1669 .\templates\partials\footer.html:349
+#: .\templates\partials\navbar.html:781 .\templates\partials\navbar.html:985
+msgid "Mon profil"
+msgstr "My profile"
+
+#: .\templates\admin_dashboard.html:1680
+#: .\templates\products\gestion_categories.html:162
+msgid "Voir le site"
+msgstr "View site"
+
+#: .\templates\admin_dashboard.html:1692 .\templates\partials\navbar.html:839
+#: .\templates\partials\navbar.html:1034 .\templates\users\profile.html:171
+#: .\templates\users\profile.html:430
+msgid "Déconnexion"
+msgstr "Logout"
+
+#: .\templates\admin_dashboard.html:1724
+msgid "Site en ligne"
+msgstr "Site online"
+
+#: .\templates\admin_dashboard.html:1739
+msgid "Général"
+msgstr "General"
+
+#: .\templates\admin_dashboard.html:1753 .\templates\admin_dashboard.html:1965
+msgid "Tableau de bord"
+msgstr "Dashboard"
+
+#: .\templates\admin_dashboard.html:1760 .\templates\cart\cart.html:425
+#: .\templates\orders\history.html:103 .\templates\partials\footer.html:233
+#: .\templates\partials\navbar.html:946 .\templates\products\detail.html:506
+#: .\templates\products\gestion_categories.html:157
+#: .\templates\products\list.html:4 .\templates\users\profile.html:239
+msgid "Catalogue"
+msgstr "Catalogue"
+
+#: .\templates\admin_dashboard.html:1801
+msgid "Gestion stocks"
+msgstr "Stock management"
+
+#: .\templates\admin_dashboard.html:1808
+msgid "Ventes"
+msgstr "Sales"
+
+#: .\templates\admin_dashboard.html:1835 .\templates\admin_dashboard.html:2063
+#: .\templates\admin_dashboard.html:2920
+#: .\templates\products\ajouter_produit.html:742
+#: .\templates\products\detail.html:623
+msgid "Avis clients"
+msgstr "Customer reviews"
+
+#: .\templates\admin_dashboard.html:1850 .\templates\admin_dashboard.html:3231
+msgid "Paniers actifs"
+msgstr "Active carts"
+
+#: .\templates\admin_dashboard.html:1871
+msgid "Comptes"
+msgstr "Accounts"
+
+#: .\templates\admin_dashboard.html:1914 .\templates\admin_dashboard.html:3327
+msgid "Journal d'audit"
+msgstr "Audit log"
+
+#: .\templates\admin_dashboard.html:1928
+msgid "Retour au site"
+msgstr "Back to site"
+
+#: .\templates\admin_dashboard.html:1966
+msgid "Chargement de la date…"
+msgstr "Loading date…"
+
+#: .\templates\admin_dashboard.html:1977
+msgid "Actualiser"
+msgstr "Refresh"
+
+#: .\templates\admin_dashboard.html:1987 .\templates\admin_dashboard.html:2141
+#: .\templates\admin_dashboard.html:2331
+#: .\templates\products\ajouter_produit.html:58
+#: .\templates\vendeur\dashboard.html:51 .\templates\vendeur\dashboard.html:190
+#: .\templates\vendeur\produits.html:40
+msgid "Ajouter un produit"
+msgstr "Add a product"
+
+#: .\templates\admin_dashboard.html:2010 .\templates\vendeur\dashboard.html:74
+msgid "Produits actifs"
+msgstr "Active products"
+
+#: .\templates\admin_dashboard.html:2028
+msgid "Commandes totales"
+msgstr "Total orders"
+
+#: .\templates\admin_dashboard.html:2047
+msgid "Utilisateurs inscrits"
+msgstr "Registered users"
+
+#: .\templates\admin_dashboard.html:2082 .\templates\users\profile.html:694
+#: .\templates\vendeur\dashboard.html:206
+msgid "Commandes récentes"
+msgstr "Recent orders"
+
+#: .\templates\admin_dashboard.html:2099 .\templates\admin_dashboard.html:2729
+#: .\templates\notifications\emails\order_confirm.html:169
+#: .\templates\notifications\emails\status_update.html:80
+msgid "Référence"
+msgstr "Reference"
+
+#: .\templates\admin_dashboard.html:2101 .\templates\admin_dashboard.html:2732
+msgid "Montant"
+msgstr "Amount"
+
+#: .\templates\admin_dashboard.html:2109 .\templates\admin_dashboard.html:2739
+msgid "Chargement des commandes…"
+msgstr "Loading orders…"
+
+#: .\templates\admin_dashboard.html:2125
+msgid "Actions rapides"
+msgstr "Quick actions"
+
+#: .\templates\admin_dashboard.html:2155
+msgid "Commandes en attente"
+msgstr "Pending orders"
+
+#: .\templates\admin_dashboard.html:2172
+msgid "Avis à modérer"
+msgstr "Reviews to moderate"
+
+#: .\templates\admin_dashboard.html:2190
+msgid "Vérifier les stocks"
+msgstr "Check stocks"
+
+#: .\templates\admin_dashboard.html:2206
+msgid "Gérer les comptes"
+msgstr "Manage accounts"
+
+#: .\templates\admin_dashboard.html:2229
+msgid "Alertes stock"
+msgstr "Stock alerts"
+
+#: .\templates\admin_dashboard.html:2232
+msgid "Gérer"
+msgstr "Manage"
+
+#: .\templates\admin_dashboard.html:2258
+msgid "Activité récente"
+msgstr "Recent activity"
+
+#: .\templates\admin_dashboard.html:2261
+msgid "Tout voir"
+msgstr "See all"
+
+#: .\templates\admin_dashboard.html:2291
+msgid "Vue système"
+msgstr "System view"
+
+#: .\templates\admin_dashboard.html:2297
+msgid "Conversations chat"
+msgstr "Chat conversations"
+
+#: .\templates\admin_dashboard.html:2301
+msgid "Notifications envoyées"
+msgstr "Notifications sent"
+
+#: .\templates\admin_dashboard.html:2305
+msgid "Paniers non vides"
+msgstr "Non-empty carts"
+
+#: .\templates\admin_dashboard.html:2321
+msgid "Gestion du catalogue"
+msgstr "Catalogue management"
+
+#: .\templates\admin_dashboard.html:2349 .\templates\partials\navbar.html:622
+#: .\templates\products\list.html:763
+msgid "Rechercher un produit…"
+msgstr "Search for a product…"
+
+#: .\templates\admin_dashboard.html:2364
+msgid "Tableau"
+msgstr "Table"
+
+#: .\templates\admin_dashboard.html:2371
+msgid "Cartes"
+msgstr "Cards"
+
+#: .\templates\admin_dashboard.html:2387
+#: .\templates\products\ajouter_produit.html:506
+#: .\templates\vendeur\produits.html:75
+msgid "Prix"
+msgstr "Price"
+
+#: .\templates\admin_dashboard.html:2390 .\templates\admin_dashboard.html:2628
+#: .\templates\admin_dashboard.html:2735 .\templates\admin_dashboard.html:2951
+#: .\templates\products\gestion_categories.html:340
+#: .\templates\vendeur\produits.html:79
+msgid "Actions"
+msgstr "Actions"
+
+#: .\templates\admin_dashboard.html:2394
+msgid "Chargement des produits…"
+msgstr "Loading products…"
+
+#: .\templates\admin_dashboard.html:2432 .\templates\admin_dashboard.html:2978
+#: .\templates\admin_dashboard.html:3498
+#: .\templates\products\ajouter_produit.html:324
+msgid "Nouveau produit"
+msgstr "New product"
+
+#: .\templates\admin_dashboard.html:2433
+msgid "Remplissez le formulaire pour publier"
+msgstr "Fill in the form to publish"
+
+#: .\templates\admin_dashboard.html:2443
+#: .\templates\products\ajouter_produit.html:319
+msgid "Retour aux produits"
+msgstr "Back to products"
+
+#: .\templates\admin_dashboard.html:2469
+#: .\templates\products\ajouter_produit.html:393
+msgid "Informations de base"
+msgstr "Basic information"
+
+#: .\templates\admin_dashboard.html:2475
+msgid "Ex: Samsung Galaxy S24 Ultra 256Go"
+msgstr "E.g. Samsung Galaxy S24 Ultra 256GB"
+
+#: .\templates\admin_dashboard.html:2478
+msgid "(max 500 car.)"
+msgstr "(max 500 chars)"
+
+#: .\templates\admin_dashboard.html:2479
+msgid "Résumé affiché dans la liste produits"
+msgstr "Summary shown in product list"
+
+#: .\templates\admin_dashboard.html:2482
+#: .\templates\products\ajouter_produit.html:428
+msgid "Description complète"
+msgstr "Full description"
+
+#: .\templates\admin_dashboard.html:2483
+msgid "Caractéristiques, contenu, garantie…"
+msgstr "Features, contents, warranty…"
+
+#: .\templates\admin_dashboard.html:2488
+msgid "— Choisir une catégorie —"
+msgstr "— Choose a category —"
+
+#: .\templates\admin_dashboard.html:2511 .\templates\admin_dashboard.html:3079
+msgid "Ajouter une catégorie"
+msgstr "Add a category"
+
+#: .\templates\admin_dashboard.html:2535
+#: .\templates\products\ajouter_produit.html:521
+msgid "Prix promo"
+msgstr "Sale price"
+
+#: .\templates\admin_dashboard.html:2535 .\templates\admin_dashboard.html:2781
+#: .\templates\admin_dashboard.html:3135 .\templates\admin_dashboard.html:3161
+#: .\templates\admin_dashboard.html:3419
+#: .\templates\users\adresse_form.html:239
+msgid "(optionnel)"
+msgstr "(optional)"
+
+#: .\templates\admin_dashboard.html:2543
+msgid "Stock initial"
+msgstr "Initial stock"
+
+#: .\templates\admin_dashboard.html:2547
+#: .\templates\products\ajouter_produit.html:549
+msgid "Seuil d'alerte"
+msgstr "Alert threshold"
+
+#: .\templates\admin_dashboard.html:2547
+msgid "(défaut : 5)"
+msgstr "(default: 5)"
+
+#: .\templates\admin_dashboard.html:2572
+msgid ""
+"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez vos images"
+msgstr ""
+"<strong style=\"color:var(--accent);\">Click</strong> or drag your images"
+
+#: .\templates\admin_dashboard.html:2573
+msgid "JPG, PNG, WebP — Max 5 Mo — 1ère = principale"
+msgstr "JPG, PNG, WebP — Max 5 MB — 1st = main"
+
+#: .\templates\admin_dashboard.html:2590
+#: .\templates\products\ajouter_produit.html:664
+msgid "Statut de vente"
+msgstr "Sale status"
+
+#: .\templates\admin_dashboard.html:2594
+msgid "Actif — en vente"
+msgstr "Active — for sale"
+
+#: .\templates\admin_dashboard.html:2595
+msgid "Inactif — masqué"
+msgstr "Inactive — hidden"
+
+#: .\templates\admin_dashboard.html:2606
+#: .\templates\products\ajouter_produit.html:691
+msgid "Options"
+msgstr "Options"
+
+#: .\templates\admin_dashboard.html:2617 .\templates\partials\footer.html:278
+msgid "En vedette"
+msgstr "Featured"
+
+#: .\templates\admin_dashboard.html:2618
+msgid "Affiché en page d'accueil"
+msgstr "Shown on homepage"
+
+#: .\templates\admin_dashboard.html:2634
+#: .\templates\products\ajouter_produit.html:832
+msgid "Publier le produit"
+msgstr "Publish product"
+
+#: .\templates\admin_dashboard.html:2639
+#: .\templates\products\ajouter_produit.html:820
+msgid "Brouillon"
+msgstr "Draft"
+
+#: .\templates\admin_dashboard.html:2643 .\templates\admin_dashboard.html:2789
+#: .\templates\admin_dashboard.html:3207 .\templates\admin_dashboard.html:3436
+#: .\templates\base.html:270 .\templates\products\ajouter_produit.html:812
+#: .\templates\products\ajouter_produit.html:886
+#: .\templates\products\gestion_categories.html:295
+#: .\templates\products\gestion_categories.html:456
+#: .\templates\users\adresse_form.html:295
+msgid "Annuler"
+msgstr "Cancel"
+
+#: .\templates\admin_dashboard.html:2648
+msgid "Supprimer le produit"
+msgstr "Delete product"
+
+#: .\templates\admin_dashboard.html:2681
+msgid "Suivi et gestion des commandes clients"
+msgstr "Customer order tracking and management"
+
+#: .\templates\admin_dashboard.html:2690 .\templates\admin_dashboard.html:2875
+#: .\templates\admin_dashboard.html:2927 .\templates\admin_dashboard.html:3032
+msgid "Tous"
+msgstr "All"
+
+#: .\templates\admin_dashboard.html:2692
+msgid "Confirmées"
+msgstr "Confirmed"
+
+#: .\templates\admin_dashboard.html:2693
+msgid "En préparation"
+msgstr "Being prepared"
+
+#: .\templates\admin_dashboard.html:2694
+msgid "Expédiées"
+msgstr "Shipped"
+
+#: .\templates\admin_dashboard.html:2695
+msgid "Livrées"
+msgstr "Delivered"
+
+#: .\templates\admin_dashboard.html:2696
+msgid "Annulées"
+msgstr "Cancelled"
+
+#: .\templates\admin_dashboard.html:2708
+msgid "Référence, client…"
+msgstr "Reference, customer…"
+
+#: .\templates\admin_dashboard.html:2720
+msgid "Toutes les commandes"
+msgstr "All orders"
+
+#: .\templates\admin_dashboard.html:2759
+msgid "Ajustement stock"
+msgstr "Stock adjustment"
+
+#: .\templates\admin_dashboard.html:2762
+msgid "Stock actuel"
+msgstr "Current stock"
+
+#: .\templates\admin_dashboard.html:2768
+msgid "Type de mouvement"
+msgstr "Movement type"
+
+#: .\templates\admin_dashboard.html:2770
+msgid "Entrée — réapprovisionnement"
+msgstr "Entry — restocking"
+
+#: .\templates\admin_dashboard.html:2771
+msgid "Sortie — retrait"
+msgstr "Exit — withdrawal"
+
+#: .\templates\admin_dashboard.html:2772
+msgid "Ajustement — valeur exacte"
+msgstr "Adjustment — exact value"
+
+#: .\templates\admin_dashboard.html:2783
+msgid "Ex: Livraison fournisseur…"
+msgstr "E.g. Supplier delivery…"
+
+#: .\templates\admin_dashboard.html:2797 .\templates\admin_dashboard.html:3487
+msgid "Valider"
+msgstr "Confirm"
+
+#: .\templates\admin_dashboard.html:2855
+msgid "Gestion des comptes clients et vendeurs"
+msgstr "Customer and seller account management"
+
+#: .\templates\admin_dashboard.html:2864
+msgid "Nom, email…"
+msgstr "Name, email…"
+
+#: .\templates\admin_dashboard.html:2876 .\templates\legal\faq.html:99
+#: .\templates\legal\faq.html:262 .\templates\legal\politique.html:167
+msgid "Vendeurs"
+msgstr "Sellers"
+
+#: .\templates\admin_dashboard.html:2877
+msgid "Admins"
+msgstr "Admins"
+
+#: .\templates\admin_dashboard.html:2878
+msgid "Actifs"
+msgstr "Active"
+
+#: .\templates\admin_dashboard.html:2879
+msgid "Inactifs"
+msgstr "Inactive"
+
+#: .\templates\admin_dashboard.html:2886
+msgid "Tous les comptes"
+msgstr "All accounts"
+
+#: .\templates\admin_dashboard.html:2897 .\templates\legal\politique.html:111
+#: .\templates\users\register.html:38
+msgid "Inscription"
+msgstr "Registration"
+
+#: .\templates\admin_dashboard.html:2898
+msgid "Rôle"
+msgstr "Role"
+
+#: .\templates\admin_dashboard.html:2921
+msgid "Modération des avis produits"
+msgstr "Product review moderation"
+
+#: .\templates\admin_dashboard.html:2929
+msgid "Validés"
+msgstr "Approved"
+
+#: .\templates\admin_dashboard.html:2930
+msgid "Invalidés"
+msgstr "Rejected"
+
+#: .\templates\admin_dashboard.html:2937
+msgid "Tous les avis"
+msgstr "All reviews"
+
+#: .\templates\admin_dashboard.html:2970
+msgid "Gestion des stocks"
+msgstr "Stock management"
+
+#: .\templates\admin_dashboard.html:2971
+msgid "Niveaux de stock et réapprovisionnements"
+msgstr "Stock levels and restocking"
+
+#: .\templates\admin_dashboard.html:2998
+msgid "Produits total"
+msgstr "Total products"
+
+#: .\templates\admin_dashboard.html:3011 .\templates\admin_dashboard.html:3033
+#: .\templates\admin_dashboard.html:3517 .\templates\users\profile.html:235
+msgid "Stock faible"
+msgstr "Low stock"
+
+#: .\templates\admin_dashboard.html:3025 .\templates\admin_dashboard.html:3034
+msgid "Épuisés"
+msgstr "Out of stock"
+
+#: .\templates\admin_dashboard.html:3035 .\templates\admin_dashboard.html:3518
+msgid "Stock OK"
+msgstr "Stock OK"
+
+#: .\templates\admin_dashboard.html:3041 .\templates\admin_dashboard.html:3519
+#: .\templates\partials\footer.html:244 .\templates\partials\footer.html:309
+#: .\templates\partials\navbar.html:577 .\templates\products\list.html:784
+msgid "Tous les produits"
+msgstr "All products"
+
+#: .\templates\admin_dashboard.html:3042
+msgid "Cliquer sur le stock pour ajuster"
+msgstr "Click on stock to adjust"
+
+#: .\templates\admin_dashboard.html:3050
+msgid "Seuil"
+msgstr "Threshold"
+
+#: .\templates\admin_dashboard.html:3051
+msgid "Niveau"
+msgstr "Level"
+
+#: .\templates\admin_dashboard.html:3072
+msgid "Arborescence du catalogue"
+msgstr "Catalogue tree"
+
+#: .\templates\admin_dashboard.html:3084 .\templates\products\list.html:834
+#: .\templates\products\list.html:960
+msgid "Toutes les catégories"
+msgstr "All categories"
+
+#: .\templates\admin_dashboard.html:3093 .\templates\admin_dashboard.html:3387
+#: .\templates\products\gestion_categories.html:204
+msgid "Nouvelle catégorie"
+msgstr "New category"
+
+#: .\templates\admin_dashboard.html:3094
+msgid "Remplissez le formulaire"
+msgstr "Fill in the form"
+
+#: .\templates\admin_dashboard.html:3101
+msgid "Retour"
+msgstr "Back"
+
+#: .\templates\admin_dashboard.html:3124
+#: .\templates\products\ajouter_produit.html:724
+#: .\templates\users\profile.html:114
+msgid "Informations"
+msgstr "Information"
+
+#: .\templates\admin_dashboard.html:3131
+msgid "Ex: Smartphones, PC portables…"
+msgstr "E.g. Smartphones, Laptops…"
+
+#: .\templates\admin_dashboard.html:3137 .\templates\admin_dashboard.html:3420
+msgid "Description courte…"
+msgstr "Short description…"
+
+#: .\templates\admin_dashboard.html:3141 .\templates\admin_dashboard.html:3425
+msgid "(vide = racine)"
+msgstr "(empty = root)"
+
+#: .\templates\admin_dashboard.html:3143 .\templates\admin_dashboard.html:3427
+#: .\templates\admin_dashboard.html:3504
+msgid "— Aucun parent —"
+msgstr "— No parent —"
+
+#: .\templates\admin_dashboard.html:3181
+msgid ""
+"<strong style=\"color:var(--accent);\">Cliquez</strong> ou glissez une image "
+"ici"
+msgstr ""
+"<strong style=\"color:var(--accent);\">Click</strong> or drag an image here"
+
+#: .\templates\admin_dashboard.html:3183
+#: .\templates\products\gestion_categories.html:268
+msgid "JPG, PNG, WebP — recommandé 400×400px"
+msgstr "JPG, PNG, WebP — recommended 400×400px"
+
+#: .\templates\admin_dashboard.html:3204 .\templates\cart\cart.html:681
+#: .\templates\products\ajouter_produit.html:597
+#: .\templates\users\profile.html:650 .\templates\vendeur\produits.html:165
+msgid "Supprimer"
+msgstr "Delete"
+
+#: .\templates\admin_dashboard.html:3214 .\templates\admin_dashboard.html:3443
+#: .\templates\admin_dashboard.html:3499
+#: .\templates\products\gestion_categories.html:292
+msgid "Créer la catégorie"
+msgstr "Create category"
+
+#: .\templates\admin_dashboard.html:3232
+msgid "Paniers non finalisés en cours"
+msgstr "Pending incomplete carts"
+
+#: .\templates\admin_dashboard.html:3237
+msgid "Paniers en cours"
+msgstr "Carts in progress"
+
+#: .\templates\admin_dashboard.html:3243
+msgid "Articles"
+msgstr "Items"
+
+#: .\templates\admin_dashboard.html:3244
+msgid "Montant estimé"
+msgstr "Estimated amount"
+
+#: .\templates\admin_dashboard.html:3245
+msgid "Dernière activité"
+msgstr "Last activity"
+
+#: .\templates\admin_dashboard.html:3264
+msgid "Messages entre utilisateurs"
+msgstr "Messages between users"
+
+#: .\templates\admin_dashboard.html:3269
+msgid "Toutes les conversations"
+msgstr "All conversations"
+
+#: .\templates\admin_dashboard.html:3273
+msgid "Participants"
+msgstr "Participants"
+
+#: .\templates\admin_dashboard.html:3274
+msgid "Dernier message"
+msgstr "Last message"
+
+#: .\templates\admin_dashboard.html:3275
+msgid "Non lus"
+msgstr "Unread"
+
+#: .\templates\admin_dashboard.html:3295
+msgid "Historique des notifications système"
+msgstr "System notification history"
+
+#: .\templates\admin_dashboard.html:3300
+msgid "Notifications récentes"
+msgstr "Recent notifications"
+
+#: .\templates\admin_dashboard.html:3328
+msgid "Traçabilité de toutes les actions système"
+msgstr "Traceability of all system actions"
+
+#: .\templates\admin_dashboard.html:3334
+msgid "Activité système"
+msgstr "System activity"
+
+#: .\templates\admin_dashboard.html:3414
+msgid "Ex: Smartphones, PC Portables…"
+msgstr "E.g. Smartphones, Laptops…"
+
+#: .\templates\admin_dashboard.html:3465
+msgid "Aucun résultat pour"
+msgstr "No results for"
+
+#: .\templates\admin_dashboard.html:3467
+msgid "Erreur de recherche"
+msgstr "Search error"
+
+#: .\templates\admin_dashboard.html:3468
+msgid "Données non disponibles"
+msgstr "Data unavailable"
+
+#: .\templates\admin_dashboard.html:3469
+msgid "Recherche…"
+msgstr "Searching…"
+
+#: .\templates\admin_dashboard.html:3472 .\templates\partials\navbar.html:1209
+#: .\templates\products\list.html:1153
+msgid "Aucun produit trouvé"
+msgstr "No product found"
+
+#: .\templates\admin_dashboard.html:3473 .\templates\vendeur\produits.html:186
+msgid "Aucun produit"
+msgstr "No products"
+
+#: .\templates\admin_dashboard.html:3474
+msgid "Aucune commande trouvée"
+msgstr "No order found"
+
+#: .\templates\admin_dashboard.html:3475
+msgid "Aucune commande récente"
+msgstr "No recent orders"
+
+#: .\templates\admin_dashboard.html:3476
+msgid "Aucun utilisateur trouvé"
+msgstr "No user found"
+
+#: .\templates\admin_dashboard.html:3477
+msgid "Aucun avis trouvé"
+msgstr "No review found"
+
+#: .\templates\admin_dashboard.html:3478
+msgid "Aucun panier actif"
+msgstr "No active cart"
+
+#: .\templates\admin_dashboard.html:3479
+msgid "Aucune conversation"
+msgstr "No conversation"
+
+#: .\templates\admin_dashboard.html:3480 .\templates\partials\navbar.html:1211
+msgid "Aucune notification"
+msgstr "No notification"
+
+#: .\templates\admin_dashboard.html:3481
+msgid "Aucune activité enregistrée"
+msgstr "No activity recorded"
+
+#: .\templates\admin_dashboard.html:3482
+msgid "Aucune activité récente"
+msgstr "No recent activity"
+
+#: .\templates\admin_dashboard.html:3483
+msgid "Aucune catégorie"
+msgstr "No category"
+
+#: .\templates\admin_dashboard.html:3484
+msgid "Non lu"
+msgstr "Unread"
+
+#: .\templates\admin_dashboard.html:3485 .\templates\admin_dashboard.html:5517
+msgid "Mis à jour"
+msgstr "Updated"
+
+#: .\templates\admin_dashboard.html:3486
+#: .\templates\products\ajouter_produit.html:595
+msgid "Principal"
+msgstr "Main"
+
+#: .\templates\admin_dashboard.html:3488
+msgid "Invalider"
+msgstr "Reject"
+
+#: .\templates\admin_dashboard.html:3489
+msgid "Validé"
+msgstr "Approved"
+
+#: .\templates\admin_dashboard.html:3490
+msgid "Invalidé"
+msgstr "Rejected"
+
+#: .\templates\admin_dashboard.html:3492
+msgid "Admin"
+msgstr "Admin"
+
+#: .\templates\admin_dashboard.html:3497
+msgid "Modifier →"
+msgstr "Edit →"
+
+#: .\templates\admin_dashboard.html:3500
+msgid "Enregistrer"
+msgstr "Save"
+
+#: .\templates\admin_dashboard.html:3501
+msgid "Création…"
+msgstr "Creating…"
+
+#: .\templates\admin_dashboard.html:3502
+msgid "Le nom de la catégorie est obligatoire."
+msgstr "Category name is required."
+
+#: .\templates\admin_dashboard.html:3503
+msgid "Erreur lors de la création. Vérifiez les données."
+msgstr "Error during creation. Please check the data."
+
+#: .\templates\admin_dashboard.html:3505
+msgid "irréversible"
+msgstr "irreversible"
+
+#: .\templates\admin_dashboard.html:3506
+msgid "Client :"
+msgstr "Customer:"
+
+#: .\templates\admin_dashboard.html:3507
+msgid "Statut :"
+msgstr "Status:"
+
+#: .\templates\admin_dashboard.html:3508
+msgid "Date :"
+msgstr "Date:"
+
+#: .\templates\admin_dashboard.html:3509
+msgid "Paiement :"
+msgstr "Payment:"
+
+#: .\templates\admin_dashboard.html:3510 .\templates\legal\mentions.html:75
+#: .\templates\legal\politique.html:98 .\templates\legal\politique.html:229
+msgid "Adresse :"
+msgstr "Address:"
+
+#: .\templates\admin_dashboard.html:3512
+msgid "Qté"
+msgstr "Qty"
+
+#: .\templates\admin_dashboard.html:3513
+msgid "P.U."
+msgstr "U.P."
+
+#: .\templates\admin_dashboard.html:3514 .\templates\cart\cart.html:595
+#: .\templates\cart\cart.html:645
+#: .\templates\notifications\emails\order_confirm.html:191
+#: .\templates\orders\checkout.html:450
+msgid "Total"
+msgstr "Total"
+
+#: .\templates\admin_dashboard.html:3515
+msgid "FCFA"
+msgstr "FCFA"
+
+#: .\templates\admin_dashboard.html:3516
+msgid "stock:"
+msgstr "stock:"
+
+#: .\templates\admin_dashboard.html:3520 .\templates\products\detail.html:550
+#: .\templates\products\gestion_categories.html:357
+#: .\templates\products\gestion_categories.html:374
+#: .\templates\products\gestion_categories.html:404
+#: .\templates\products\gestion_categories.html:426
+#: .\templates\vendeur\produits.html:154
+msgid "Modifier"
+msgstr "Edit"
+
+#: .\templates\admin_dashboard.html:3521
+msgid "Modifier le produit"
+msgstr "Edit product"
+
+#: .\templates\base.html:42
+msgid ""
+"HooYia Market — Électronique & Informatique au meilleur prix au Cameroun"
+msgstr "HooYia Market — Electronics & IT at the best price in Cameroon"
+
+#: .\templates\base.html:145 .\templates\partials\toast.html:75
+msgid "Fermer"
+msgstr "Close"
+
+#: .\templates\cart\cart.html:53 .\templates\cart\cart.html:427
+#: .\templates\cart\cart.html:535
+msgid "Mon Panier"
+msgstr "My Cart"
+
+#: .\templates\cart\cart.html:423 .\templates\partials\footer.html:298
+#: .\templates\partials\navbar.html:547 .\templates\partials\navbar.html:938
+#: .\templates\products\detail.html:504
+msgid "Accueil"
+msgstr "Home"
+
+#: .\templates\cart\cart.html:496
+msgid "Votre panier est vide"
+msgstr "Your cart is empty"
+
+#: .\templates\cart\cart.html:498
+msgid "Vous n'avez encore rien ajouté à votre panier."
+msgstr "You haven't added anything to your cart yet."
+
+#: .\templates\cart\cart.html:499
+msgid "Découvrez notre catalogue et faites-vous plaisir !"
+msgstr "Explore our catalogue and treat yourself!"
+
+#: .\templates\cart\cart.html:512 .\templates\orders\history.html:143
+msgid "Voir le catalogue"
+msgstr "View catalogue"
+
+#: .\templates\cart\cart.html:544
+msgid "Vider tout le panier"
+msgstr "Clear entire cart"
+
+#: .\templates\cart\cart.html:553
+msgid "Vider"
+msgstr "Clear"
+
+#: .\templates\cart\cart.html:559
+msgid "Articles dans votre panier"
+msgstr "Items in your cart"
+
+#: .\templates\cart\cart.html:566
+#: .\templates\notifications\emails\order_confirm.html:167
+msgid "Récapitulatif de commande"
+msgstr "Order summary"
+
+#: .\templates\cart\cart.html:571
+msgid "Récapitulatif"
+msgstr "Summary"
+
+#: .\templates\cart\cart.html:579 .\templates\orders\checkout.html:438
+msgid "Sous-total"
+msgstr "Subtotal"
+
+#: .\templates\cart\cart.html:586 .\templates\legal\assistance.html:172
+#: .\templates\legal\faq.html:96 .\templates\legal\faq.html:175
+#: .\templates\legal\politique.html:113
+#: .\templates\notifications\emails\order_confirm.html:178
+#: .\templates\notifications\emails\order_confirm.html:212
+#: .\templates\orders\checkout.html:429 .\templates\orders\checkout.html:443
+#: .\templates\orders\confirm.html:208
+msgid "Livraison"
+msgstr "Delivery"
+
+#: .\templates\cart\cart.html:587 .\templates\orders\checkout.html:444
+msgid "Gratuite"
+msgstr "Free"
+
+#: .\templates\cart\cart.html:603
+msgid "Passer la commande"
+msgstr "Place order"
+
+#: .\templates\cart\cart.html:614 .\templates\orders\confirm.html:277
+msgid "Continuer mes achats"
+msgstr "Continue shopping"
+
+#: .\templates\cart\cart.html:626
+#, python-format
+msgid "Paiement 100%% sécurisé"
+msgstr "100%% secure payment"
+
+#: .\templates\cart\cart.html:649
+msgid "Commander"
+msgstr "Order"
+
+#: .\templates\cart\cart.html:666
+msgid "article"
+msgstr "item"
+
+#: .\templates\cart\cart.html:667
+msgid "articles"
+msgstr "items"
+
+#: .\templates\cart\cart.html:668
+msgid "Produit supprimé"
+msgstr "Product removed"
+
+#: .\templates\cart\cart.html:669 .\templates\products\detail.html:769
+msgid "Produit épuisé"
+msgstr "Out of stock"
+
+#: .\templates\cart\cart.html:670 .\templates\orders\checkout.html:508
+msgid "/ unité"
+msgstr "/ unit"
+
+#: .\templates\cart\cart.html:671
+msgid "Article supprimé."
+msgstr "Item removed."
+
+#: .\templates\cart\cart.html:673
+msgid "Panier vidé."
+msgstr "Cart cleared."
+
+#: .\templates\cart\cart.html:674
+msgid "Vider le panier ?"
+msgstr "Clear cart?"
+
+#: .\templates\cart\cart.html:675
+msgid "Tous les articles seront supprimés."
+msgstr "All items will be removed."
+
+#: .\templates\cart\cart.html:676
+msgid "🗑 Vider le panier"
+msgstr "🗑 Clear cart"
+
+#: .\templates\cart\cart.html:677
+msgid "Diminuer la quantité"
+msgstr "Decrease quantity"
+
+#: .\templates\cart\cart.html:678
+msgid "Augmenter la quantité"
+msgstr "Increase quantity"
+
+#: .\templates\cart\cart.html:679
+msgid "Quantité de"
+msgstr "Quantity of"
+
+#: .\templates\cart\cart.html:680
+msgid "Voir"
+msgstr "View"
+
+#: .\templates\chat\chat_detail.html:4
+msgid "Chat"
+msgstr "Chat"
+
+#: .\templates\chat\chat_detail.html:20 .\templates\products\detail.html:766
+msgid "Connexion…"
+msgstr "Connecting…"
+
+#: .\templates\chat\chat_detail.html:54
+msgid "Votre message…"
+msgstr "Your message…"
+
+#: .\templates\chat\chat_detail.html:63
+msgid "Envoyer"
+msgstr "Send"
+
+#: .\templates\chat\chat_detail.html:67
+msgid "Entrée pour envoyer · Maj+Entrée pour nouvelle ligne"
+msgstr "Enter to send · Shift+Enter for new line"
+
+#: .\templates\chat\chat_liste.html:13
+msgid "Vos conversations avec les vendeurs"
+msgstr "Your conversations with sellers"
+
+#: .\templates\chat\chat_liste.html:35
+msgid "Aucun message"
+msgstr "No messages"
+
+#: .\templates\chat\chat_liste.html:36
+msgid "Vos conversations avec les vendeurs apparaîtront ici."
+msgstr "Your conversations with sellers will appear here."
+
+#: .\templates\chat\chat_liste.html:38
+msgid "Parcourir le catalogue"
+msgstr "Browse catalogue"
+
+#: .\templates\chat\chat_liste.html:51
+msgid "Démarrez la conversation…"
+msgstr "Start the conversation…"
+
+#: .\templates\chat\chat_liste.html:54 .\templates\orders\checkout.html:513
+msgid "Une erreur est survenue. Veuillez réessayer."
+msgstr "An error occurred. Please try again."
+
+#: .\templates\home.html:18
+msgid "HooYia Market — Électronique & Informatique"
+msgstr "HooYia Market — Electronics & IT"
+
+#: .\templates\home.html:351
+msgid "La performance"
+msgstr "Performance"
+
+#: .\templates\home.html:351
+msgid "commence ici."
+msgstr "starts here."
+
+#: .\templates\home.html:353
+msgid ""
+"Découvrez les meilleurs équipements et accessoires informatiques pour "
+"booster votre productivité."
+msgstr ""
+"Discover the best tech equipment and accessories to boost your productivity."
+
+#: .\templates\home.html:356
+msgid "Découvrir nos produits"
+msgstr "Discover our products"
+
+#: .\templates\home.html:463
+msgid "À ne pas manquer"
+msgstr "Not to be missed"
+
+#: .\templates\home.html:465
+msgid "Les produits"
+msgstr "The"
+
+#: .\templates\home.html:465
+msgid "phares du moment"
+msgstr "top products right now"
+
+#: .\templates\home.html:467
+msgid "Les meilleures offres et équipements tech choisis pour vous."
+msgstr "The best deals and tech equipment chosen for you."
+
+#: .\templates\home.html:470 .\templates\home.html:598
+msgid "Précédent"
+msgstr "Previous"
+
+#: .\templates\home.html:476 .\templates\home.html:604
+msgid "Suivant"
+msgstr "Next"
+
+#: .\templates\home.html:534 .\templates\home.html:668
+#: .\templates\products\detail.html:591 .\templates\products\detail.html:764
+#: .\templates\products\list.html:1119
+msgid "Ajouter au panier"
+msgstr "Add to cart"
+
+#: .\templates\home.html:535 .\templates\home.html:669
+#, python-format
+msgid "Ajouter %(nom)s au panier"
+msgstr "Add %(nom)s to cart"
+
+#: .\templates\home.html:557 .\templates\products\list.html:777
+msgid "Voir tous les produits"
+msgstr "View all products"
+
+#: .\templates\home.html:591
+msgid "Nouveautés du moment"
+msgstr "Latest arrivals"
+
+#: .\templates\home.html:593
+msgid "Tout juste"
+msgstr "Just"
+
+#: .\templates\home.html:593
+msgid "en ligne"
+msgstr "online"
+
+#: .\templates\home.html:595
+msgid "Soyez parmi les premiers à découvrir nos derniers produits."
+msgstr "Be among the first to discover our latest products."
+
+#: .\templates\home.html:647
+msgid "Nouveau"
+msgstr "New"
+
+#: .\templates\home.html:691
+msgid "Voir tous les arrivages"
+msgstr "View all new arrivals"
+
+#: .\templates\home.html:727
+msgid "Ce qui nous"
+msgstr "What sets us"
+
+#: .\templates\home.html:727
+msgid "distingue"
+msgstr "apart"
+
+#: .\templates\home.html:729
+msgid ""
+"Nous privilégions la qualité, la transparence et un service réellement "
+"efficace."
+msgstr "We prioritize quality, transparency, and truly effective service."
+
+#: .\templates\home.html:742
+msgid "Commandez en moins d'une minute"
+msgstr "Order in under a minute"
+
+#: .\templates\home.html:756
+msgid "Vendeurs triés sur le volet"
+msgstr "Carefully selected sellers"
+
+#: .\templates\home.html:771
+msgid "Payez à la réception, sans stress"
+msgstr "Pay on delivery, stress-free"
+
+#: .\templates\home.html:789
+msgid "Votre commande, visible à chaque étape"
+msgstr "Track your order at every step"
+
+#: .\templates\home.html:806
+msgid "La marketplace qui fait vivre le local"
+msgstr "The marketplace that supports local business"
+
+#: .\templates\home.html:858
+msgid "Ce qu'ils disent"
+msgstr "What they say"
+
+#: .\templates\home.html:860
+msgid "Ils font confiance à"
+msgstr "They trust"
+
+#: .\templates\home.html:862
+msgid "Retours authentiques de notre communauté d'acheteurs et vendeurs."
+msgstr "Authentic feedback from our community of buyers and sellers."
+
+#: .\templates\home.html:871 .\templates\orders\confirm.html:254
+#: .\templates\products\avis_plateforme.html:10
+#: .\templates\products\detail.html:630
+msgid "Laisser un avis"
+msgstr "Leave a review"
+
+#: .\templates\home.html:949
+msgid "Aucun avis pour le moment."
+msgstr "No reviews yet."
+
+#: .\templates\home.html:950
+msgid "Soyez le premier !"
+msgstr "Be the first!"
+
+#: .\templates\legal\apropos.html:4 .\templates\partials\footer.html:369
+msgid "À propos"
+msgstr "About"
+
+#: .\templates\legal\apropos.html:93 .\templates\legal\apropos.html:120
+msgid "Notre histoire"
+msgstr "Our story"
+
+#: .\templates\legal\apropos.html:94 .\templates\legal\politique.html:98
+msgid "Cameroun"
+msgstr "Cameroon"
+
+#: .\templates\legal\apropos.html:129
+msgid "Mission"
+msgstr "Mission"
+
+#: .\templates\legal\apropos.html:134
+msgid "Vision"
+msgstr "Vision"
+
+#: .\templates\legal\apropos.html:139
+msgid "Valeurs"
+msgstr "Values"
+
+#: .\templates\legal\apropos.html:146
+msgid "Notre équipe"
+msgstr "Our team"
+
+#: .\templates\legal\apropos.html:152
+msgid "Fondateur & CEO"
+msgstr "Founder & CEO"
+
+#: .\templates\legal\apropos.html:157
+msgid "Équipe Technique"
+msgstr "Technical Team"
+
+#: .\templates\legal\apropos.html:158
+msgid "Développement & Infrastructure"
+msgstr "Development & Infrastructure"
+
+#: .\templates\legal\apropos.html:163
+msgid "Service Client"
+msgstr "Customer Service"
+
+#: .\templates\legal\apropos.html:164
+msgid "Support & Médiation"
+msgstr "Support & Mediation"
+
+#: .\templates\legal\apropos.html:172
+msgid "Rejoignez la communauté HooYia"
+msgstr "Join the HooYia community"
+
+#: .\templates\legal\apropos.html:177
+msgid "Découvrir les produits"
+msgstr "Discover products"
+
+#: .\templates\legal\apropos.html:181 .\templates\legal\contact.html:4
+#: .\templates\legal\contact.html:90 .\templates\legal\faq.html:297
+#: .\templates\partials\footer.html:404
+msgid "Nous contacter"
+msgstr "Contact us"
+
+#: .\templates\legal\assistance.html:4 .\templates\partials\footer.html:381
+msgid "Assistance"
+msgstr "Help"
+
+#: .\templates\legal\assistance.html:95
+msgid "Centre d'aide"
+msgstr "Help centre"
+
+#: .\templates\legal\assistance.html:96
+msgid "Comment pouvons-nous vous aider ?"
+msgstr "How can we help you?"
+
+#: .\templates\legal\assistance.html:99
+msgid "Rechercher une aide…"
+msgstr "Search for help…"
+
+#: .\templates\legal\assistance.html:100 .\templates\legal\faq.html:87
+msgid "Chercher"
+msgstr "Search"
+
+#: .\templates\legal\assistance.html:110 .\templates\legal\contact.html:177
+msgid "Chat en direct"
+msgstr "Live chat"
+
+#: .\templates\legal\assistance.html:113 .\templates\legal\contact.html:179
+msgid "Ouvrir le chat"
+msgstr "Open chat"
+
+#: .\templates\legal\assistance.html:124
+msgid "Écrire un message"
+msgstr "Write a message"
+
+#: .\templates\legal\assistance.html:144
+msgid "Suivi de commande"
+msgstr "Order tracking"
+
+#: .\templates\legal\assistance.html:151
+msgid "Paiement & Facturation"
+msgstr "Payment & Billing"
+
+#: .\templates\legal\assistance.html:158 .\templates\legal\faq.html:204
+msgid "Retours & Remboursements"
+msgstr "Returns & Refunds"
+
+#: .\templates\legal\assistance.html:165
+msgid "Gestion du compte"
+msgstr "Account management"
+
+#: .\templates\legal\assistance.html:179 .\templates\legal\contact.html:121
+msgid "Devenir vendeur"
+msgstr "Become a seller"
+
+#: .\templates\legal\assistance.html:218 .\templates\legal\faq.html:295
+msgid "Vous n'avez pas trouvé votre réponse ?"
+msgstr "Couldn't find your answer?"
+
+#: .\templates\legal\assistance.html:220
+msgid "Voir la FAQ complète"
+msgstr "View full FAQ"
+
+#: .\templates\legal\conditions.html:4 .\templates\legal\conditions.html:171
+#: .\templates\partials\footer.html:433
+msgid "Conditions d'utilisation"
+msgstr "Terms of use"
+
+#: .\templates\legal\conditions.html:170 .\templates\legal\mentions.html:50
+#: .\templates\legal\politique.html:70
+msgid "Documents légaux"
+msgstr "Legal documents"
+
+#: .\templates\legal\conditions.html:172 .\templates\legal\mentions.html:52
+#: .\templates\legal\politique.html:72
+msgid "Dernière mise à jour : 1er mars 2026"
+msgstr "Last updated: March 1, 2026"
+
+#: .\templates\legal\conditions.html:172 .\templates\legal\mentions.html:52
+#: .\templates\legal\politique.html:72
+msgid "Version 1.0"
+msgstr "Version 1.0"
+
+#: .\templates\legal\conditions.html:307 .\templates\legal\politique.html:240
+msgid "ou consultez notre"
+msgstr "or check our"
+
+#: .\templates\legal\conditions.html:307 .\templates\legal\politique.html:240
+msgid "page de contact"
+msgstr "contact page"
+
+#: .\templates\legal\contact.html:89
+msgid "Support client"
+msgstr "Customer support"
+
+#: .\templates\legal\contact.html:98
+msgid "Envoyer un message"
+msgstr "Send a message"
+
+#: .\templates\legal\contact.html:103
+msgid "Votre nom"
+msgstr "Your name"
+
+#: .\templates\legal\contact.html:115
+msgid "-- Choisir un sujet --"
+msgstr "-- Choose a subject --"
+
+#: .\templates\legal\contact.html:116
+msgid "Problème avec une commande"
+msgstr "Problem with an order"
+
+#: .\templates\legal\contact.html:117
+msgid "Question sur le paiement"
+msgstr "Payment question"
+
+#: .\templates\legal\contact.html:118
+msgid "Suivi de livraison"
+msgstr "Delivery tracking"
+
+#: .\templates\legal\contact.html:119
+msgid "Retour / Remboursement"
+msgstr "Return / Refund"
+
+#: .\templates\legal\contact.html:120
+msgid "Problème de compte"
+msgstr "Account issue"
+
+#: .\templates\legal\contact.html:122
+msgid "Problème technique"
+msgstr "Technical issue"
+
+#: .\templates\legal\contact.html:123
+msgid "Autre"
+msgstr "Other"
+
+#: .\templates\legal\contact.html:128
+msgid "Téléphone (optionnel)"
+msgstr "Phone (optional)"
+
+#: .\templates\legal\contact.html:134
+msgid "Décrivez votre demande en détail…"
+msgstr "Describe your request in detail…"
+
+#: .\templates\legal\contact.html:138 .\templates\legal\contact.html:200
+msgid "Envoyer le message"
+msgstr "Send message"
+
+#: .\templates\legal\contact.html:142
+msgid "Message envoyé ! Notre équipe vous répondra sous 24h ouvrées."
+msgstr "Message sent! Our team will reply within 24 business hours."
+
+#: .\templates\legal\contact.html:156
+msgid "Réponse sous 24h ouvrées"
+msgstr "Response within 24 business hours"
+
+#: .\templates\legal\contact.html:167
+msgid "Lun–Sam · 8h–20h"
+msgstr "Mon–Sat · 8am–8pm"
+
+#: .\templates\legal\contact.html:184
+msgid "Horaires du support"
+msgstr "Support hours"
+
+#: .\templates\legal\contact.html:185
+msgid "Lundi – Vendredi"
+msgstr "Monday – Friday"
+
+#: .\templates\legal\contact.html:186
+msgid "Samedi"
+msgstr "Saturday"
+
+#: .\templates\legal\contact.html:187
+msgid "Dimanche"
+msgstr "Sunday"
+
+#: .\templates\legal\contact.html:187
+msgid "Fermé"
+msgstr "Closed"
+
+#: .\templates\legal\contact.html:197
+msgid "⚠️ Veuillez remplir tous les champs obligatoires."
+msgstr "⚠️ Please fill in all required fields."
+
+#: .\templates\legal\contact.html:198
+msgid "⚠️ Adresse email invalide."
+msgstr "⚠️ Invalid email address."
+
+#: .\templates\legal\contact.html:199
+#: .\templates\products\avis_plateforme.html:194
+msgid "Envoi en cours…"
+msgstr "Sending…"
+
+#: .\templates\legal\faq.html:4 .\templates\partials\footer.html:393
+msgid "FAQ"
+msgstr "FAQ"
+
+#: .\templates\legal\faq.html:82
+msgid "Questions fréquentes"
+msgstr "Frequently asked questions"
+
+#: .\templates\legal\faq.html:83
+msgid "Tout ce que vous devez savoir"
+msgstr "Everything you need to know"
+
+#: .\templates\legal\faq.html:86
+msgid "Rechercher une question…"
+msgstr "Search a question…"
+
+#: .\templates\legal\faq.html:93
+msgid "Tout"
+msgstr "All"
+
+#: .\templates\legal\faq.html:97
+msgid "Retours"
+msgstr "Returns"
+
+#: .\templates\legal\faq.html:98 .\templates\partials\navbar.html:1038
+msgid "Compte"
+msgstr "Account"
+
+#: .\templates\legal\faq.html:211
+msgid "48h après la livraison"
+msgstr "48 hours after delivery"
+
+#: .\templates\legal\faq.html:227
+msgid "5 à 7 jours ouvrés"
+msgstr "5 to 7 business days"
+
+#: .\templates\legal\faq.html:140 .\templates\legal\mentions.html:114
+msgid "formulaire de contact"
+msgstr "contact form"
+
+#: .\templates\legal\faq.html:132
+msgid "service client"
+msgstr "customer service"
+
+#: .\templates\legal\faq.html:248
+msgid "Mot de passe oublié"
+msgstr "Forgot password"
+
+#: .\templates\legal\conditions.html:171 .\templates\legal\politique.html:4
+#: .\templates\legal\politique.html:71 .\templates\partials\footer.html:434
+msgid "Politique de confidentialité"
+msgstr "Privacy policy"
+
+#: .\templates\legal\mentions.html:4 .\templates\legal\mentions.html:51
+#: .\templates\partials\footer.html:435
+msgid "Mentions légales"
+msgstr "Legal notice"
+
+#: .\templates\legal\conditions.html:186 .\templates\legal\conditions.html:276
+#: .\templates\legal\mentions.html:81
+msgid "Propriété intellectuelle"
+msgstr "Intellectual property"
+
+#: .\templates\legal\conditions.html:187 .\templates\legal\conditions.html:282
+#: .\templates\legal\mentions.html:87
+msgid "Responsabilité"
+msgstr "Liability"
+
+#: .\templates\legal\conditions.html:189 .\templates\legal\conditions.html:297
+#: .\templates\legal\mentions.html:104
+msgid "Droit applicable"
+msgstr "Applicable law"
+
+#: .\templates\legal\mentions.html:56
+msgid "Éditeur du site"
+msgstr "Site publisher"
+
+#: .\templates\legal\mentions.html:59
+msgid "Société à Responsabilité Limitée"
+msgstr "Limited Liability Company"
+
+#: .\templates\legal\mentions.html:60 .\templates\legal\politique.html:229
+msgid "Siège social"
+msgstr "Registered office"
+
+#: .\templates\legal\mentions.html:60 .\templates\legal\politique.html:229
+msgid "Douala, Cameroun"
+msgstr "Douala, Cameroon"
+
+#: .\templates\legal\mentions.html:71
+msgid "Hébergement"
+msgstr "Hosting"
+
+#: .\templates\legal\mentions.html:75
+msgid "États-Unis"
+msgstr "United States"
+
+#: .\templates\legal\mentions.html:93
+msgid "Données personnelles"
+msgstr "Personal data"
+
+#: .\templates\legal\mentions.html:99
+msgid "Cookies"
+msgstr "Cookies"
+
+#: .\templates\legal\politique.html:78 .\templates\legal\politique.html:94
+msgid "Responsable du traitement"
+msgstr "Data controller"
+
+#: .\templates\legal\politique.html:79 .\templates\legal\politique.html:104
+msgid "Données collectées"
+msgstr "Data collected"
+
+#: .\templates\legal\politique.html:80 .\templates\legal\politique.html:123
+msgid "Finalités du traitement"
+msgstr "Purposes of processing"
+
+#: .\templates\legal\politique.html:81
+msgid "Base légale"
+msgstr "Legal basis"
+
+#: .\templates\legal\politique.html:82 .\templates\legal\politique.html:147
+#: .\templates\legal\politique.html:150
+msgid "Durée de conservation"
+msgstr "Retention period"
+
+#: .\templates\legal\politique.html:83 .\templates\legal\politique.html:163
+msgid "Partage des données"
+msgstr "Data sharing"
+
+#: .\templates\legal\politique.html:85
+msgid "Sécurité"
+msgstr "Security"
+
+#: .\templates\legal\politique.html:86 .\templates\legal\politique.html:202
+msgid "Vos droits"
+msgstr "Your rights"
+
+#: .\templates\legal\politique.html:87 .\templates\legal\politique.html:215
+msgid "Mineurs"
+msgstr "Minors"
+
+#: .\templates\legal\politique.html:88 .\templates\legal\politique.html:220
+msgid "Modifications"
+msgstr "Modifications"
+
+#: .\templates\legal\politique.html:89
+msgid "Contact DPO"
+msgstr "DPO contact"
+
+#: .\templates\legal\politique.html:186
+msgid "Sécurité des données"
+msgstr "Data security"
+
+#: .\templates\legal\politique.html:211
+msgid "30 jours"
+msgstr "30 days"
+
+#: .\templates\legal\politique.html:230
+msgid "30 jours maximum"
+msgstr "30 days maximum"
+
+#: .\templates\legal\politique.html:239
+msgid "Vos données vous appartiennent"
+msgstr "Your data belongs to you"
+
+#: .\templates\legal\mentions.html:113
+msgid "Une question juridique ?"
+msgstr "A legal question?"
+
+#: .\templates\legal\mentions.html:114
+msgid "ou via notre"
+msgstr "or via our"
+
+#: .\templates\notifications\emails\order_confirm.html:7
+#: .\templates\notifications\emails\order_confirm.html:200
+#: .\templates\orders\confirm.html:50
+msgid "Commande confirmée"
+msgstr "Order confirmed"
+
+#: .\templates\notifications\emails\order_confirm.html:155
+msgid "Merci pour votre confiance, nous préparons votre colis."
+msgstr "Thank you for your trust, we are preparing your package."
+
+#: .\templates\notifications\emails\order_confirm.html:160
+#: .\templates\notifications\emails\status_update.html:64
+#, python-format
+msgid "Bonjour <strong>%(nom)s</strong>,"
+msgstr "Hello <strong>%(nom)s</strong>,"
+
+#: .\templates\notifications\emails\order_confirm.html:162
+msgid ""
+"Votre commande a bien été reçue et confirmée. Voici le récapitulatif de "
+"votre achat."
+msgstr ""
+"Your order has been received and confirmed. Here is a summary of your "
+"purchase."
+
+#: .\templates\notifications\emails\order_confirm.html:163
+msgid "Vous recevrez un nouvel email dès l'expédition de votre colis."
+msgstr "You will receive a new email as soon as your package is shipped."
+
+#: .\templates\notifications\emails\order_confirm.html:197
+msgid "Que se passe-t-il maintenant ?"
+msgstr "What happens next?"
+
+#: .\templates\notifications\emails\order_confirm.html:200
+msgid "Votre paiement a bien été enregistré."
+msgstr "Your payment has been recorded."
+
+#: .\templates\notifications\emails\order_confirm.html:204
+msgid "Préparation en cours"
+msgstr "Preparation in progress"
+
+#: .\templates\notifications\emails\order_confirm.html:204
+msgid "Notre équipe prépare votre colis avec soin."
+msgstr "Our team is carefully preparing your package."
+
+#: .\templates\notifications\emails\order_confirm.html:208
+msgid "Expédition"
+msgstr "Shipping"
+
+#: .\templates\notifications\emails\order_confirm.html:208
+msgid "Vous recevrez un email avec le suivi dès l'envoi."
+msgstr "You will receive a tracking email as soon as it is sent."
+
+#: .\templates\notifications\emails\order_confirm.html:212
+msgid "Votre colis arrive à l'adresse indiquée."
+msgstr "Your package is arriving at the specified address."
+
+#: .\templates\notifications\emails\order_confirm.html:217
+msgid "Suivre ma commande"
+msgstr "Track my order"
+
+#: .\templates\notifications\emails\order_confirm.html:224
+#: .\templates\notifications\emails\status_update.html:105
+#, python-format
+msgid ""
+"Des questions ? Contactez-nous via <a href=\"%(lien)s\">notre messagerie</a>."
+msgstr "Questions? Contact us via <a href=\"%(lien)s\">our messaging</a>."
+
+#: .\templates\notifications\emails\order_confirm.html:225
+#: .\templates\notifications\emails\status_update.html:106
+msgid ""
+"Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y "
+"répondre."
+msgstr ""
+"This email was sent automatically by HooYia Market. Please do not reply."
+
+#: .\templates\notifications\emails\status_update.html:7
+msgid "Mise à jour de commande"
+msgstr "Order update"
+
+#: .\templates\notifications\emails\status_update.html:73
+msgid ""
+"Votre commande a été annulée. Si vous aviez effectué un paiement, le "
+"remboursement sera traité sous 5 à 7 jours ouvrés. Pour toute question, "
+"contactez notre support."
+msgstr ""
+"Your order has been cancelled. If you made a payment, the refund will be "
+"processed within 5 to 7 business days. For any questions, contact our "
+"support."
+
+#: .\templates\notifications\emails\status_update.html:78
+msgid "Détails de la commande"
+msgstr "Order details"
+
+#: .\templates\notifications\emails\status_update.html:88
+msgid "Nouveau statut"
+msgstr "New status"
+
+#: .\templates\notifications\emails\status_update.html:92
+msgid "Montant total"
+msgstr "Total amount"
+
+#: .\templates\notifications\emails\status_update.html:98
+msgid "Voir ma commande"
+msgstr "View my order"
+
+#: .\templates\orders\checkout.html:44 .\templates\orders\checkout.html:137
+msgid "Finaliser ma commande"
+msgstr "Complete my order"
+
+#: .\templates\orders\checkout.html:45
+msgid ""
+"Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun"
+msgstr "Complete your order on HooYia Market — Fast delivery in Cameroon"
+
+#: .\templates\orders\checkout.html:138
+msgid ""
+"Renseignez votre adresse de livraison et choisissez votre mode de paiement."
+msgstr "Enter your delivery address and choose your payment method."
+
+#: .\templates\orders\checkout.html:159
+msgid "Où devons-nous livrer votre commande ?"
+msgstr "Where should we deliver your order?"
+
+#: .\templates\orders\checkout.html:174
+msgid "Mes adresses"
+msgstr "My addresses"
+
+#: .\templates\orders\checkout.html:183 .\templates\users\adresse_form.html:38
+#: .\templates\users\adresse_form.html:71
+msgid "Nouvelle adresse"
+msgstr "New address"
+
+#: .\templates\orders\checkout.html:190
+msgid "Sélectionner une adresse"
+msgstr "Select an address"
+
+#: .\templates\orders\checkout.html:210 .\templates\users\profile.html:615
+msgid "Par défaut"
+msgstr "Default"
+
+#: .\templates\orders\checkout.html:222
+msgid ""
+"Remplissez les champs ci-dessous pour une nouvelle adresse de livraison."
+msgstr "Fill in the fields below for a new delivery address."
+
+#: .\templates\orders\checkout.html:233 .\templates\users\adresse_form.html:110
+msgid "Nom complet du destinataire"
+msgstr "Recipient's full name"
+
+#: .\templates\orders\checkout.html:244
+msgid "Ex : Jean-Pierre Nkomo"
+msgstr "E.g. Jean-Pierre Nkomo"
+
+#: .\templates\orders\checkout.html:254
+msgid "Numéro de téléphone"
+msgstr "Phone number"
+
+#: .\templates\orders\checkout.html:271
+msgid "Adresse précise"
+msgstr "Precise address"
+
+#: .\templates\orders\checkout.html:273
+msgid "Quartier, rue, numéro de porte…"
+msgstr "Neighbourhood, street, door number…"
+
+#: .\templates\orders\checkout.html:281
+msgid "Ex : Yaoundé"
+msgstr "E.g. Yaoundé"
+
+#: .\templates\orders\checkout.html:290
+msgid "Ex : Centre"
+msgstr "E.g. Centre"
+
+#: .\templates\orders\checkout.html:320
+msgid "Choisissez comment vous souhaitez régler."
+msgstr "Choose how you wish to pay."
+
+#: .\templates\orders\checkout.html:338
+msgid "Payez en cash à la réception de votre commande"
+msgstr "Pay in cash upon receipt of your order"
+
+#: .\templates\orders\checkout.html:340
+msgid "Disponible"
+msgstr "Available"
+
+#: .\templates\orders\checkout.html:353 .\templates\orders\checkout.html:370
+msgid "Paiement mobile — Cameroun"
+msgstr "Mobile payment — Cameroon"
+
+#: .\templates\orders\checkout.html:355 .\templates\orders\checkout.html:372
+msgid "Bientôt"
+msgstr "Coming soon"
+
+#: .\templates\orders\checkout.html:400
+msgid "Votre commande"
+msgstr "Your order"
+
+#: .\templates\orders\checkout.html:429
+msgid "gratuite"
+msgstr "free"
+
+#: .\templates\orders\checkout.html:465 .\templates\orders\checkout.html:511
+msgid "Confirmer la commande"
+msgstr "Confirm order"
+
+#: .\templates\orders\checkout.html:476
+msgid "Commande sécurisée"
+msgstr "Secure order"
+
+#: .\templates\orders\checkout.html:476
+msgid "Conditions de vente"
+msgstr "Terms of sale"
+
+#: .\templates\orders\checkout.html:487
+msgid "Modifier le panier"
+msgstr "Edit cart"
+
+#: .\templates\orders\checkout.html:509
+msgid "Veuillez remplir tous les champs obligatoires (*)."
+msgstr "Please fill in all required fields (*)."
+
+#: .\templates\orders\checkout.html:510
+msgid "Traitement en cours…"
+msgstr "Processing…"
+
+#: .\templates\orders\checkout.html:512
+msgid "Impossible de charger le panier. Actualisez la page."
+msgstr "Unable to load cart. Please refresh the page."
+
+#: .\templates\orders\confirm.html:51
+msgid "Votre commande a bien été enregistrée sur HooYia Market."
+msgstr "Your order has been registered on HooYia Market."
+
+#: .\templates\orders\confirm.html:188
+msgid "Commande enregistrée !"
+msgstr "Order registered!"
+
+#: .\templates\orders\confirm.html:189
+msgid "Merci pour votre achat. Confirmation email en cours."
+msgstr "Thank you for your purchase. Confirmation email being sent."
+
+#: .\templates\orders\confirm.html:237
+msgid "Articles commandés"
+msgstr "Ordered items"
+
+#: .\templates\orders\confirm.html:242
+msgid "Total payé"
+msgstr "Total paid"
+
+#: .\templates\orders\confirm.html:256
+msgid "Votre commande a été livrée. Partagez votre expérience !"
+msgstr "Your order has been delivered. Share your experience!"
+
+#: .\templates\orders\confirm.html:269
+msgid "Voir mes commandes"
+msgstr "View my orders"
+
+#: .\templates\orders\confirm.html:308
+msgid "Aucun article."
+msgstr "No items."
+
+#: .\templates\orders\confirm.html:309
+msgid "Votre commentaire (optionnel)…"
+msgstr "Your comment (optional)…"
+
+#: .\templates\orders\confirm.html:310
+msgid "Envoyer mon avis"
+msgstr "Submit my review"
+
+#: .\templates\orders\confirm.html:311
+msgid "Veuillez sélectionner une note (étoiles)."
+msgstr "Please select a rating (stars)."
+
+#: .\templates\orders\confirm.html:312
+msgid "Envoi…"
+msgstr "Sending…"
+
+#: .\templates\orders\confirm.html:313
+msgid "Avis envoyé — Merci !"
+msgstr "Review sent — Thank you!"
+
+#: .\templates\orders\confirm.html:314
+msgid "Erreur lors de l'envoi. Réessayez."
+msgstr "Error while sending. Please try again."
+
+#: .\templates\orders\confirm.html:315
+msgid "Impossible de charger la commande."
+msgstr "Unable to load order."
+
+#: .\templates\orders\history.html:40 .\templates\orders\history.html:94
+#: .\templates\partials\footer.html:330 .\templates\partials\navbar.html:794
+#: .\templates\partials\navbar.html:995 .\templates\users\profile.html:399
+#: .\templates\vendeur\commandes.html:27
+msgid "Mes commandes"
+msgstr "My orders"
+
+#: .\templates\orders\history.html:41
+msgid "Historique de vos commandes sur HooYia Market"
+msgstr "Your order history on HooYia Market"
+
+#: .\templates\orders\history.html:139 .\templates\vendeur\commandes.html:144
+msgid "Aucune commande"
+msgstr "No orders"
+
+#: .\templates\orders\history.html:141
+msgid "Vous n'avez pas encore passé de commande. Découvrez notre catalogue !"
+msgstr "You haven't placed any orders yet. Explore our catalogue!"
+
+#: .\templates\partials\footer.html:171 .\templates\partials\navbar.html:533
+msgid "HooYia Market — Accueil"
+msgstr "HooYia Market — Home"
+
+#: .\templates\partials\footer.html:179
+msgid ""
+"Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs "
+"camerounais à ceux qui veulent le meilleur — sans compromis."
+msgstr ""
+"Shop smart, receive fast. HooYia connects the best Cameroonian sellers "
+"with those who want the best — no compromises."
+
+#: .\templates\partials\footer.html:190
+msgid "Bafoussam, Cameroun"
+msgstr "Bafoussam, Cameroon"
+
+#: .\templates\partials\footer.html:255
+msgid "Nouveautés"
+msgstr "New arrivals"
+
+#: .\templates\partials\footer.html:268 .\templates\partials\navbar.html:605
+#: .\templates\partials\navbar.html:955 .\templates\products\list.html:1049
+msgid "Promotions"
+msgstr "Deals"
+
+#: .\templates\partials\footer.html:289
+msgid "Liens utiles"
+msgstr "Useful links"
+
+#: .\templates\partials\footer.html:319 .\templates\users\profile.html:409
+msgid "Mon panier"
+msgstr "My cart"
+
+#: .\templates\partials\footer.html:358
+msgid "Aide & Informations"
+msgstr "Help & Information"
+
+#: .\templates\partials\footer.html:428
+msgid "Tous droits réservés."
+msgstr "All rights reserved."
+
+#: .\templates\partials\navbar.html:595
+msgid "Aucune catégorie disponible"
+msgstr "No category available"
+
+#: .\templates\partials\navbar.html:622
+msgid "Rechercher"
+msgstr "Search"
+
+#: .\templates\partials\navbar.html:627
+msgid "Lancer la recherche"
+msgstr "Start search"
+
+#: .\templates\partials\navbar.html:656
+msgid "Tout marquer lu"
+msgstr "Mark all as read"
+
+#: .\templates\partials\navbar.html:661 .\templates\users\profile.html:223
+#: .\templates\users\profile.html:243 .\templates\users\profile.html:703
+msgid "Chargement…"
+msgstr "Loading…"
+
+#: .\templates\partials\navbar.html:665
+msgid "Voir toutes les notifications"
+msgstr "View all notifications"
+
+#: .\templates\partials\navbar.html:678
+#, python-format
+msgid "Panier (%(count)s article)"
+msgid_plural "Panier (%(count)s articles)"
+msgstr[0] "Cart (%(count)s item)"
+msgstr[1] "Cart (%(count)s items)"
+
+#: .\templates\partials\navbar.html:693
+msgid "Langue"
+msgstr "Language"
+
+#: .\templates\partials\navbar.html:693
+msgid "Changer la langue"
+msgstr "Change language"
+
+#: .\templates\partials\navbar.html:808 .\templates\partials\navbar.html:1013
+msgid "Espace Vendeur"
+msgstr "Seller Space"
+
+#: .\templates\partials\navbar.html:856 .\templates\partials\navbar.html:1046
+#: .\templates\users\login.html:21 .\templates\users\login.html:57
+msgid "Connexion"
+msgstr "Login"
+
+#: .\templates\partials\navbar.html:868 .\templates\partials\navbar.html:1056
+#: .\templates\legal\faq.html:240
+msgid "S'inscrire"
+msgstr "Sign up"
+
+#: .\templates\partials\navbar.html:882
+msgid "Menu"
+msgstr "Menu"
+
+#: .\templates\partials\navbar.html:909
+msgid "Menu mobile"
+msgstr "Mobile menu"
+
+#: .\templates\partials\navbar.html:978
+msgid "Mon compte"
+msgstr "My account"
+
+#: .\templates\partials\navbar.html:931
+#: .\templates\products\gestion_categories.html:155
+msgid "Navigation"
+msgstr "Navigation"
+
+#: .\templates\partials\navbar.html:547 .\templates\partials\navbar.html:938
+#: .\templates\products\detail.html:504
+msgid "Accueil"
+msgstr "Home"
+
+#: .\templates\partials\navbar.html:1210
+msgid "Voir tous les résultats"
+msgstr "View all results"
+
+#: .\templates\partials\navbar.html:1211
+msgid "Aucune notification"
+msgstr "No notification"
+
+#: .\templates\products\list.html:1153
+msgid "Aucun produit trouvé"
+msgstr "No product found"
+
+#: .\templates\products\ajouter_produit.html:58
+#, python-format
+msgid "Modifier — %(nom)s"
+msgstr "Edit — %(nom)s"
+
+#: .\templates\products\ajouter_produit.html:324
+#, python-format
+msgid "Modifier «&nbsp;%(nom)s&nbsp;»"
+msgstr "Edit «&nbsp;%(nom)s&nbsp;»"
+
+#: .\templates\products\ajouter_produit.html:327
+msgid "Mettez à jour les informations de ce produit"
+msgstr "Update this product's information"
+
+#: .\templates\products\ajouter_produit.html:327
+msgid "Remplissez les champs pour publier un produit"
+msgstr "Fill in the fields to publish a product"
+
+#: .\templates\products\ajouter_produit.html:342
+msgid "Voir sur le site"
+msgstr "View on site"
+
+#: .\templates\products\ajouter_produit.html:394
+msgid "Nom, description et catégorie du produit"
+msgstr "Product name, description and category"
+
+#: .\templates\products\ajouter_produit.html:403
+msgid "Ex: Samsung Galaxy S24 Ultra 256Go — Titane Gris"
+msgstr "E.g. Samsung Galaxy S24 Ultra 256GB — Titanium Grey"
+
+#: .\templates\products\ajouter_produit.html:418
+msgid "max 500 caractères"
+msgstr "max 500 characters"
+
+#: .\templates\products\ajouter_produit.html:422
+msgid "Résumé affiché dans les cartes produit du catalogue…"
+msgstr "Summary shown in catalogue product cards…"
+
+#: .\templates\products\ajouter_produit.html:430
+msgid "Description détaillée : caractéristiques, contenu, garantie…"
+msgstr "Detailed description: features, contents, warranty…"
+
+#: .\templates\products\ajouter_produit.html:445
+msgid "— Sélectionner une catégorie —"
+msgstr "— Select a category —"
+
+#: .\templates\products\ajouter_produit.html:474
+msgid "Créer une nouvelle catégorie →"
+msgstr "Create a new category →"
+
+#: .\templates\products\ajouter_produit.html:498
+msgid "Prix & Stock"
+msgstr "Price & Stock"
+
+#: .\templates\products\ajouter_produit.html:499
+msgid "Tarification et gestion des quantités disponibles"
+msgstr "Pricing and available quantity management"
+
+#: .\templates\products\ajouter_produit.html:521
+#: .\templates\products\gestion_categories.html:231
+#: .\templates\products\gestion_categories.html:253
+msgid "optionnel"
+msgstr "optional"
+
+#: .\templates\products\ajouter_produit.html:549
+msgid "défaut : 5"
+msgstr "default: 5"
+
+#: .\templates\products\ajouter_produit.html:554
+msgid "Notification envoyée si stock ≤ ce seuil"
+msgstr "Notification sent if stock ≤ this threshold"
+
+#: .\templates\products\ajouter_produit.html:580
+#: .\templates\products\detail.html:554
+msgid "Images du produit"
+msgstr "Product images"
+
+#: .\templates\products\ajouter_produit.html:581
+msgid "La 1ʳᵉ image uploadée sera l'image principale"
+msgstr "The 1st uploaded image will be the main image"
+
+#: .\templates\products\ajouter_produit.html:590
+msgid "Images actuelles"
+msgstr "Current images"
+
+#: .\templates\products\ajouter_produit.html:606
+msgid "Ajouter de nouvelles images"
+msgstr "Add new images"
+
+#: .\templates\products\ajouter_produit.html:624
+#: .\templates\products\gestion_categories.html:267
+msgid "Cliquez"
+msgstr "Click"
+
+#: .\templates\products\ajouter_produit.html:624
+msgid "ou glissez vos images ici"
+msgstr "or drag your images here"
+
+#: .\templates\products\ajouter_produit.html:626
+msgid "JPG, PNG, WebP — Max 5 Mo/image"
+msgstr "JPG, PNG, WebP — Max 5 MB/image"
+
+#: .\templates\products\ajouter_produit.html:670
+msgid "Actif — visible et en vente"
+msgstr "Active — visible and for sale"
+
+#: .\templates\products\ajouter_produit.html:671
+msgid "Inactif — masqué du catalogue"
+msgstr "Inactive — hidden from catalogue"
+
+#: .\templates\products\ajouter_produit.html:672
+msgid "Épuisé — affiché sans achat"
+msgstr "Out of stock — shown without purchase"
+
+#: .\templates\products\ajouter_produit.html:673
+msgid "Archivé — retiré définitivement"
+msgstr "Archived — permanently removed"
+
+#: .\templates\products\ajouter_produit.html:702
+msgid "Affiché sur la page d'accueil"
+msgstr "Shown on homepage"
+
+#: .\templates\products\ajouter_produit.html:734
+msgid "Slug"
+msgstr "Slug"
+
+#: .\templates\products\ajouter_produit.html:743
+#, python-format
+msgid "%(count)s avis"
+msgstr "%(count)s review(s)"
+
+#: .\templates\products\ajouter_produit.html:765
+msgid "Zone de danger"
+msgstr "Danger zone"
+
+#: .\templates\products\ajouter_produit.html:769
+msgid "Suppression définitive du produit et de toutes ses images."
+msgstr "Permanent deletion of the product and all its images."
+
+#: .\templates\products\ajouter_produit.html:781
+msgid "Supprimer ce produit"
+msgstr "Delete this product"
+
+#: .\templates\products\ajouter_produit.html:803
+msgid "Modifications non sauvegardées"
+msgstr "Unsaved changes"
+
+#: .\templates\products\ajouter_produit.html:803
+msgid "Formulaire en cours"
+msgstr "Form in progress"
+
+#: .\templates\products\ajouter_produit.html:829
+#: .\templates\products\gestion_categories.html:292
+#: .\templates\users\profile.html:557
+msgid "Enregistrer les modifications"
+msgstr "Save changes"
+
+#: .\templates\products\ajouter_produit.html:871
+msgid "Supprimer ce produit ?"
+msgstr "Delete this product?"
+
+#: .\templates\products\ajouter_produit.html:872
+msgid "Action irréversible"
+msgstr "Irreversible action"
+
+#: .\templates\products\ajouter_produit.html:878
+#, python-format
+msgid ""
+"Le produit <strong style=\"color:#0F1923;\">«&nbsp;%(nom)s&nbsp;»</strong> "
+"sera définitivement supprimé avec toutes ses images et données associées."
+msgstr ""
+"The product <strong style=\"color:#0F1923;\">«&nbsp;%(nom)s&nbsp;»</strong> "
+"will be permanently deleted with all its images and associated data."
+
+#: .\templates\products\ajouter_produit.html:896
+msgid "Confirmer la suppression"
+msgstr "Confirm deletion"
+
+#: .\templates\products\avis_plateforme.html:114
+msgid "Avis déjà soumis"
+msgstr "Review already submitted"
+
+#: .\templates\products\avis_plateforme.html:117
+msgid ""
+"Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !"
+msgstr "You have already left a review on the platform. Thank you for your feedback!"
+
+#: .\templates\products\avis_plateforme.html:125
+#: .\templates\products\avis_plateforme.html:180
+msgid "Retour à l'accueil"
+msgstr "Back to home"
+
+#: .\templates\products\avis_plateforme.html:140
+msgid "Votre avis compte"
+msgstr "Your review matters"
+
+#: .\templates\products\avis_plateforme.html:142
+msgid "Partagez votre expérience avec HooYia Market."
+msgstr "Share your experience with HooYia Market."
+
+#: .\templates\products\avis_plateforme.html:143
+msgid "Votre avis sera affiché sur la page d'accueil après validation."
+msgstr "Your review will be shown on the homepage after approval."
+
+#: .\templates\products\avis_plateforme.html:158
+#: .\templates\products\avis_plateforme.html:191
+msgid "Sélectionnez une note"
+msgstr "Select a rating"
+
+#: .\templates\products\avis_plateforme.html:162
+msgid "Décrivez votre expérience avec HooYia Market…"
+msgstr "Describe your experience with HooYia Market…"
+
+#: .\templates\products\avis_plateforme.html:175
+#: .\templates\products\avis_plateforme.html:197
+msgid "Soumettre mon avis"
+msgstr "Submit my review"
+
+#: .\templates\products\avis_plateforme.html:192
+msgid "Veuillez sélectionner une note (1 à 5 étoiles)."
+msgstr "Please select a rating (1 to 5 stars)."
+
+#: .\templates\products\avis_plateforme.html:193
+msgid "Veuillez écrire un commentaire."
+msgstr "Please write a comment."
+
+#: .\templates\products\avis_plateforme.html:195
+msgid "Merci ! Votre avis est en attente de validation par notre équipe."
+msgstr "Thank you! Your review is pending approval by our team."
+
+#: .\templates\products\avis_plateforme.html:196
+msgid "Une erreur est survenue. Réessayez."
+msgstr "An error occurred. Please try again."
+
+#: .\templates\products\detail.html:579
+msgid "Diminuer"
+msgstr "Decrease"
+
+#: .\templates\products\detail.html:581
+msgid "Augmenter"
+msgstr "Increase"
+
+#: .\templates\products\detail.html:605 .\templates\products\detail.html:767
+msgid "Contacter le vendeur"
+msgstr "Contact seller"
+
+#: .\templates\products\detail.html:639
+msgid "Votre avis"
+msgstr "Your review"
+
+#: .\templates\products\detail.html:643
+msgid "Note de 0.5 à 5"
+msgstr "Rating from 0.5 to 5"
+
+#: .\templates\products\detail.html:669
+msgid "Partagez votre expérience avec ce produit…"
+msgstr "Share your experience with this product…"
+
+#: .\templates\products\detail.html:688
+msgid "Publier l'avis"
+msgstr "Publish review"
+
+#: .\templates\products\detail.html:694
+msgid "Chargement des avis…"
+msgstr "Loading reviews…"
+
+#: .\templates\products\detail.html:704
+msgid "Recommandations"
+msgstr "Recommendations"
+
+#: .\templates\products\detail.html:705
+msgid "Vous pourriez"
+msgstr "You might"
+
+#: .\templates\products\detail.html:705
+msgid "aimer"
+msgstr "like"
+
+#: .\templates\products\detail.html:711
+msgid "Voir plus dans cette catégorie"
+msgstr "View more in this category"
+
+#: .\templates\products\detail.html:734
+msgid "Produit introuvable."
+msgstr "Product not found."
+
+#: .\templates\products\detail.html:735
+msgid "← Retour au catalogue"
+msgstr "← Back to catalogue"
+
+#: .\templates\products\detail.html:759
+msgid "En stock"
+msgstr "In stock"
+
+#: .\templates\products\detail.html:760
+msgid "disponible"
+msgstr "available"
+
+#: .\templates\products\detail.html:761
+msgid "disponibles"
+msgstr "available"
+
+#: .\templates\products\detail.html:763
+msgid "Ajout en cours…"
+msgstr "Adding…"
+
+#: .\templates\products\detail.html:765
+msgid "Produit ajouté au panier !"
+msgstr "Product added to cart!"
+
+#: .\templates\products\detail.html:768
+msgid "Impossible d'ouvrir la conversation."
+msgstr "Unable to open conversation."
+
+#: .\templates\products\detail.html:770
+msgid "Impossible de charger les avis."
+msgstr "Unable to load reviews."
+
+#: .\templates\products\detail.html:771
+msgid "Aucun avis pour l'instant. Soyez le premier !"
+msgstr "No reviews yet. Be the first!"
+
+#: .\templates\products\detail.html:772
+msgid "Anonyme"
+msgstr "Anonymous"
+
+#: .\templates\products\detail.html:773
+msgid "× Annuler"
+msgstr "× Cancel"
+
+#: .\templates\products\detail.html:774
+msgid "+ Laisser un avis"
+msgstr "+ Leave a review"
+
+#: .\templates\products\detail.html:775
+msgid "Sélectionnez une note."
+msgstr "Select a rating."
+
+#: .\templates\products\detail.html:776
+msgid "Avis soumis ! Merci."
+msgstr "Review submitted! Thank you."
+
+#: .\templates\products\detail.html:777
+msgid "Erreur."
+msgstr "Error."
+
+#: .\templates\products\detail.html:778
+msgid "avis"
+msgstr "review(s)"
+
+#: .\templates\products\gestion_categories.html:4
+msgid "Gestion des Catégories"
+msgstr "Category Management"
+
+#: .\templates\products\gestion_categories.html:156
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: .\templates\products\gestion_categories.html:160
+msgid "Ajouter produit"
+msgstr "Add product"
+
+#: .\templates\products\gestion_categories.html:161
+msgid "Site"
+msgstr "Site"
+
+#: .\templates\products\gestion_categories.html:167
+msgid "Retour au Dashboard"
+msgstr "Back to Dashboard"
+
+#: .\templates\products\gestion_categories.html:170
+msgid "Gestion des catégories"
+msgstr "Category management"
+
+#: .\templates\products\gestion_categories.html:171
+msgid "Créez et organisez les catégories de votre catalogue"
+msgstr "Create and organise your catalogue categories"
+
+#: .\templates\products\gestion_categories.html:179
+msgid "Catégories actives"
+msgstr "Active categories"
+
+#: .\templates\products\gestion_categories.html:183
+msgid "Catégories principales"
+msgstr "Main categories"
+
+#: .\templates\products\gestion_categories.html:187
+msgid "Sous-catégories"
+msgstr "Sub-categories"
+
+#: .\templates\products\gestion_categories.html:204
+msgid "Modifier la catégorie"
+msgstr "Edit category"
+
+#: .\templates\products\gestion_categories.html:205
+msgid "Mise à jour des informations"
+msgstr "Update information"
+
+#: .\templates\products\gestion_categories.html:205
+msgid "Remplissez les champs ci-dessous"
+msgstr "Fill in the fields below"
+
+#: .\templates\products\gestion_categories.html:211
+#, python-format
+msgid "Vous modifiez : <strong>%(nom)s</strong>"
+msgstr "You are editing: <strong>%(nom)s</strong>"
+
+#: .\templates\products\gestion_categories.html:223
+msgid "obligatoire"
+msgstr "required"
+
+#: .\templates\products\gestion_categories.html:226
+msgid "Ex: Smartphones, Ordinateurs portables…"
+msgstr "E.g. Smartphones, Laptops…"
+
+#: .\templates\products\gestion_categories.html:233
+msgid "Courte description de la catégorie…"
+msgstr "Short category description…"
+
+#: .\templates\products\gestion_categories.html:238
+msgid "laisser vide si catégorie principale"
+msgstr "leave empty if main category"
+
+#: .\templates\products\gestion_categories.html:240
+msgid "— Aucun parent (catégorie racine) —"
+msgstr "— No parent (root category) —"
+
+#: .\templates\products\gestion_categories.html:257
+msgid "Image actuelle — déposer une nouvelle pour remplacer"
+msgstr "Current image — drop a new one to replace"
+
+#: .\templates\products\gestion_categories.html:267
+msgid "ou glissez votre image ici"
+msgstr "or drag your image here"
+
+#: .\templates\products\gestion_categories.html:284
+msgid "Catégorie active"
+msgstr "Active category"
+
+#: .\templates\products\gestion_categories.html:285
+msgid "Visible sur le site"
+msgstr "Visible on site"
+
+#: .\templates\products\gestion_categories.html:297
+msgid "Réinitialiser"
+msgstr "Reset"
+
+#: .\templates\products\gestion_categories.html:309
+msgid "Catégories existantes"
+msgstr "Existing categories"
+
+#: .\templates\products\gestion_categories.html:310
+msgid "Cliquez sur Modifier pour éditer une catégorie"
+msgstr "Click Edit to edit a category"
+
+#: .\templates\products\gestion_categories.html:337
+msgid "Nom / Slug"
+msgstr "Name / Slug"
+
+#: .\templates\products\gestion_categories.html:354
+#: .\templates\products\gestion_categories.html:397
+msgid "Principale"
+msgstr "Main"
+
+#: .\templates\products\gestion_categories.html:355
+#: .\templates\products\gestion_categories.html:372
+#: .\templates\products\gestion_categories.html:398
+#: .\templates\products\gestion_categories.html:420
+msgid "Active"
+msgstr "Active"
+
+#: .\templates\products\gestion_categories.html:355
+#: .\templates\products\gestion_categories.html:372
+#: .\templates\products\gestion_categories.html:399
+#: .\templates\products\gestion_categories.html:421
+msgid "Inactive"
+msgstr "Inactive"
+
+#: .\templates\products\gestion_categories.html:371
+#: .\templates\products\gestion_categories.html:419
+msgid "Sous-cat."
+msgstr "Sub-cat."
+
+#: .\templates\products\gestion_categories.html:439
+msgid "Aucune catégorie créée pour l'instant."
+msgstr "No category created yet."
+
+#: .\templates\products\gestion_categories.html:439
+msgid "Utilisez le formulaire pour commencer."
+msgstr "Use the form to get started."
+
+#: .\templates\products\gestion_categories.html:453
+msgid "Supprimer cette catégorie ?"
+msgstr "Delete this category?"
+
+#: .\templates\products\gestion_categories.html:454
+msgid "Action irréversible. Les produits associés seront sans catégorie."
+msgstr "Irreversible action. Associated products will have no category."
+
+#: .\templates\products\gestion_categories.html:459
+msgid "Confirmer"
+msgstr "Confirm"
+
+#: .\templates\products\list.html:766
+msgid "Rechercher un produit"
+msgstr "Search for a product"
+
+#: .\templates\products\list.html:797
+msgid "Filtrer par catégorie"
+msgstr "Filter by category"
+
+#: .\templates\products\list.html:863 .\templates\products\list.html:903
+msgid "Filtres"
+msgstr "Filters"
+
+#: .\templates\products\list.html:868
+msgid "Trier par"
+msgstr "Sort by"
+
+#: .\templates\products\list.html:870
+msgid "Plus récents"
+msgstr "Most recent"
+
+#: .\templates\products\list.html:871
+msgid "Prix croissant"
+msgstr "Price ascending"
+
+#: .\templates\products\list.html:872
+msgid "Prix décroissant"
+msgstr "Price descending"
+
+#: .\templates\products\list.html:873
+msgid "Mieux notés"
+msgstr "Best rated"
+
+#: .\templates\products\list.html:909
+msgid "Fermer les filtres"
+msgstr "Close filters"
+
+#: .\templates\products\list.html:994
+#, python-format
+msgid "Afficher les sous-catégories de %(nom)s"
+msgstr "Show subcategories of %(nom)s"
+
+#: .\templates\products\list.html:1062
+msgid "Promotions uniquement"
+msgstr "Deals only"
+
+#: .\templates\products\list.html:1077 .\templates\products\list.html:1155
+msgid "Réinitialiser les filtres"
+msgstr "Reset filters"
+
+#: .\templates\products\list.html:1119 .\templates\users\profile.html:586
+msgid "Ajouter"
+msgstr "Add"
+
+#: .\templates\products\list.html:1119
+msgid "au panier"
+msgstr "to cart"
+
+#: .\templates\products\list.html:1154
+msgid "Essayez d'autres filtres ou catégories."
+msgstr "Try other filters or categories."
+
+#: .\templates\products\list.html:1169
+msgid "ce produit"
+msgstr "this product"
+
+#: .\templates\products\list.html:1170
+msgid "a été ajouté au panier"
+msgstr "has been added to cart"
+
+#: .\templates\users\adresse_form.html:62
+msgid "Retour au profil"
+msgstr "Back to profile"
+
+#: .\templates\users\adresse_form.html:74
+msgid "Adresse de livraison pour vos commandes."
+msgstr "Delivery address for your orders."
+
+#: .\templates\users\adresse_form.html:182
+msgid "Quartier, rue, numéro…"
+msgstr "Neighbourhood, street, number…"
+
+#: .\templates\users\adresse_form.html:276
+msgid "Définir comme adresse par défaut"
+msgstr "Set as default address"
+
+#: .\templates\users\adresse_form.html:279
+msgid "Pré-remplie automatiquement lors du checkout."
+msgstr "Automatically pre-filled at checkout."
+
+#: .\templates\users\adresse_form.html:308
+msgid "Enregistrer l'adresse"
+msgstr "Save address"
+
+#: .\templates\users\login.html:60
+msgid "Pas encore de compte ?"
+msgstr "No account yet?"
+
+#: .\templates\users\login.html:65
+msgid "S'inscrire gratuitement"
+msgstr "Sign up for free"
+
+#: .\templates\users\login.html:169 .\templates\users\register.html:212
+msgid "Afficher ou masquer le mot de passe"
+msgstr "Show or hide password"
+
+#: .\templates\users\login.html:213 .\templates\users\register.html:334
+msgid "ou continuer avec"
+msgstr "or continue with"
+
+#: .\templates\users\login.html:229
+msgid "Continuer avec Google"
+msgstr "Continue with Google"
+
+#: .\templates\users\login.html:236 .\templates\users\register.html:65
+msgid "Créer un compte"
+msgstr "Create an account"
+
+#: .\templates\users\login.html:242
+msgid "En continuant, vous acceptez nos"
+msgstr "By continuing, you accept our"
+
+#: .\templates\users\login.html:243 .\templates\users\register.html:377
+msgid "conditions d'utilisation"
+msgstr "terms of use"
+
+#: .\templates\users\login.html:244
+msgid "et notre"
+msgstr "and our"
+
+#: .\templates\users\login.html:245
+msgid "politique de confidentialité"
+msgstr "privacy policy"
+
+#: .\templates\users\profile.html:53
+msgid "Mon Profil"
+msgstr "My Profile"
+
+#: .\templates\users\profile.html:134
+msgid "Mettre à jour"
+msgstr "Update"
+
+#: .\templates\users\profile.html:143
+msgid "Accès rapides"
+msgstr "Quick access"
+
+#: .\templates\users\profile.html:153
+msgid "Dashboard admin"
+msgstr "Admin dashboard"
+
+#: .\templates\users\profile.html:162
+msgid "Voir les commandes"
+msgstr "View orders"
+
+#: .\templates\users\profile.html:216
+msgid "Dernières commandes"
+msgstr "Latest orders"
+
+#: .\templates\users\profile.html:310
+msgid "Changer la photo de profil"
+msgstr "Change profile picture"
+
+#: .\templates\users\profile.html:354
+msgid "Non vérifié"
+msgstr "Not verified"
+
+#: .\templates\users\profile.html:372
+msgid "Membre depuis"
+msgstr "Member since"
+
+#: .\templates\users\profile.html:419
+msgid "Mes messages"
+msgstr "My messages"
+
+#: .\templates\users\profile.html:465
+msgid "Informations personnelles"
+msgstr "Personal information"
+
+#: .\templates\users\profile.html:547
+msgid "L'adresse email ne peut pas être modifiée."
+msgstr "Email address cannot be changed."
+
+#: .\templates\users\profile.html:671
+msgid "Aucune adresse enregistrée."
+msgstr "No address saved."
+
+#: .\templates\users\profile.html:674
+msgid "Ajouter une adresse"
+msgstr "Add an address"
+
+#: .\templates\users\profile.html:753
+msgid "Aucune commande."
+msgstr "No orders."
+
+#: .\templates\users\profile.html:754 .\templates\vendeur\dashboard.html:253
+msgid "Aucune commande pour le moment."
+msgstr "No orders at the moment."
+
+#: .\templates\users\profile.html:755
+msgid "Impossible de charger les commandes."
+msgstr "Unable to load orders."
+
+#: .\templates\users\profile.html:756
+msgid "Aucun produit en stock faible. ✓"
+msgstr "No low stock products. ✓"
+
+#: .\templates\users\profile.html:758
+msgid "restant"
+msgstr "remaining"
+
+#: .\templates\users\profile.html:759
+msgid "restants"
+msgstr "remaining"
+
+#: .\templates\users\register.html:68
+msgid "Déjà inscrit ?"
+msgstr "Already registered?"
+
+#: .\templates\users\register.html:73 .\templates\legal\assistance.html:115
+#: .\templates\users\login.html:196
+msgid "Se connecter"
+msgstr "Log in"
+
+#: .\templates\users\register.html:203
+msgid "8 caractères minimum"
+msgstr "8 characters minimum"
+
+#: .\templates\users\register.html:276
+msgid "Afficher ou masquer la confirmation"
+msgstr "Show or hide confirmation"
+
+#: .\templates\users\register.html:318
+msgid "Créer mon compte"
+msgstr "Create my account"
+
+#: .\templates\users\register.html:350
+msgid "S'inscrire avec Google"
+msgstr "Sign up with Google"
+
+#: .\templates\users\register.html:369
+msgid ""
+"Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les "
+"spams) pour activer votre compte."
+msgstr ""
+"An activation email will be sent to you. Check your inbox (and spam) to "
+"activate your account."
+
+#: .\templates\users\register.html:376
+msgid "En créant un compte, vous acceptez nos"
+msgstr "By creating an account, you accept our"
+
+#: .\templates\vendeur\commandes.html:17
+msgid "Mes Commandes"
+msgstr "My Orders"
+
+#: .\templates\vendeur\commandes.html:30
+msgid "commande"
+msgstr "order"
+
+#: .\templates\vendeur\commandes.html:31 .\templates\vendeur\produits.html:32
+msgid "filtre :"
+msgstr "filter:"
+
+#: .\templates\vendeur\commandes.html:144 .\templates\vendeur\produits.html:186
+msgid "avec ce statut"
+msgstr "with this status"
+
+#: .\templates\vendeur\dashboard.html:27
+msgid "Mon Espace Vendeur"
+msgstr "My Seller Space"
+
+#: .\templates\vendeur\dashboard.html:41
+msgid "Voici un résumé de votre activité sur HooYia Market."
+msgstr "Here is a summary of your activity on HooYia Market."
+
+#: .\templates\vendeur\dashboard.html:89
+msgid "Commandes reçues"
+msgstr "Orders received"
+
+#: .\templates\vendeur\dashboard.html:106
+msgid "CA total (livré)"
+msgstr "Total revenue (delivered)"
+
+#: .\templates\vendeur\dashboard.html:127
+msgid "Produits récents"
+msgstr "Recent products"
+
+#: .\templates\vendeur\dashboard.html:187
+msgid "Aucun produit pour le moment."
+msgstr "No products at the moment."
+
+#: .\templates\vendeur\produits.html:17
+msgid "Mes Produits"
+msgstr "My Products"
+
+#: .\templates\vendeur\produits.html:28
+msgid "Mes produits"
+msgstr "My products"
+
+#: .\templates\vendeur\produits.html:31
+msgid "produit"
+msgstr "product"
+
+#: .\templates\vendeur\produits.html:189
+msgid "Ajouter mon premier produit"
+msgstr "Add my first product"

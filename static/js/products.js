@@ -88,8 +88,8 @@ const Catalogue = (() => {
 
       if (countEl) {
         countEl.textContent = count === 0
-          ? 'Aucun résultat'
-          : `${count} produit${count > 1 ? 's' : ''}`;
+          ? gettext('Aucun résultat')
+          : interpolate(ngettext('%s produit', '%s produits', count), [count]);
       }
 
       if (produits.length === 0 && state.page === 1) {
@@ -134,8 +134,8 @@ const Catalogue = (() => {
       ? `<span class="text-xs text-ink/30 line-through ml-1 font-body">${formatPrix(p.prix)}</span>`
       : '';
     const stockBadge = p.stock > 0
-      ? `<span class="text-xs text-green-600 font-body">En stock</span>`
-      : `<span class="text-xs text-red-400 font-body">Épuisé</span>`;
+      ? `<span class="text-xs text-green-600 font-body">${gettext('En stock')}</span>`
+      : `<span class="text-xs text-red-400 font-body">${gettext('Épuisé')}</span>`;
 
     return `
     <a href="/produits/${p.slug}/" class="card group flex flex-col overflow-hidden animate-fade-in">
@@ -318,7 +318,7 @@ async function ajouterRapide(produitId, event) {
   event.stopPropagation();
   try {
     await API.post('/api/panier/ajouter/', { produit_id: produitId, quantite: 1 });
-    window.toast && window.toast('Ajouté au panier !', 'success');
+    window.toast && window.toast(gettext('Ajouté au panier !'), 'success');
     // Mettre à jour le badge navbar
     const badge = document.getElementById('cart-badge');
     if (badge) {
@@ -334,7 +334,8 @@ async function ajouterRapide(produitId, event) {
 // ═══════════════════════════════════════════════════════════════
 
 function formatPrix(val) {
-  return parseInt(val).toLocaleString('fr-FR') + ' F';
+  const locale = document.documentElement.lang || 'fr-FR';
+  return parseInt(val).toLocaleString(locale) + ' F';
 }
 
 function escapeHtml(str) {

@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-10 12:29+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\static\js\api.js:130
+#, javascript-format
+msgid "Erreur %s"
+msgstr ""
+
+#: .\static\js\cart.js:52
+#, javascript-format
+msgid "%s article"
+msgid_plural "%s articles"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\js\cart.js:71
+msgid "Produit supprimé"
+msgstr ""
+
+#: .\static\js\cart.js:93
+msgid "unité"
+msgstr ""
+
+#: .\static\js\cart.js:95
+msgid "Produit épuisé"
+msgstr ""
+
+#: .\static\js\cart.js:109
+msgid "Supprimer"
+msgstr ""
+
+#: .\static\js\cart.js:129
+msgid "Article supprimé."
+msgstr ""
+
+#: .\static\js\cart.js:138
+msgid "Article supprimé du panier."
+msgstr ""
+
+#: .\static\js\cart.js:144
+msgid "Vider le panier ?"
+msgstr ""
+
+#: .\static\js\cart.js:144
+msgid "Tous les articles seront supprimés de votre panier."
+msgstr ""
+
+#: .\static\js\cart.js:144
+msgid "🗑 Vider le panier"
+msgstr ""
+
+#: .\static\js\cart.js:149
+msgid "Panier vidé."
+msgstr ""
+
+#: .\static\js\chat.js:79
+msgid "Démarrez la conversation 👋"
+msgstr ""
+
+#: .\static\js\chat.js:92
+msgid "Impossible de charger les messages."
+msgstr ""
+
+#: .\static\js\chat.js:150
+msgid "Connexion perdue. Reconnexion en cours…"
+msgstr ""
+
+#: .\static\js\chat.js:227
+msgid "Connexion…"
+msgstr ""
+
+#: .\static\js\chat.js:228
+msgid "Connecté"
+msgstr ""
+
+#: .\static\js\chat.js:229
+msgid "Déconnecté — Reconnexion…"
+msgstr ""
+
+#: .\static\js\products.js:91
+msgid "Aucun résultat"
+msgstr ""
+
+#: .\static\js\products.js:92
+#, javascript-format
+msgid "%s produit"
+msgid_plural "%s produits"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\static\js\products.js:137
+msgid "En stock"
+msgstr ""
+
+#: .\static\js\products.js:138
+msgid "Épuisé"
+msgstr ""
+
+#: .\static\js\products.js:321
+msgid "Ajouté au panier !"
+msgstr ""

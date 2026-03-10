@@ -49,7 +49,7 @@ const Cart = (() => {
     const countEl = document.getElementById('cart-count');
     if (countEl) {
       const n = data.nombre_articles;
-      countEl.textContent = `${n} article${n > 1 ? 's' : ''}`;
+      countEl.textContent = interpolate(ngettext('%s article', '%s articles', n), [n]);
     }
 
     // Liste des items
@@ -68,7 +68,7 @@ const Cart = (() => {
   // ── Rendu d'une ligne article
   function renderItem(item) {
     const img    = item.image_principale || '/static/img/logo.svg';
-    const nom    = item.produit_nom || 'Produit supprimé';
+    const nom    = item.produit_nom || gettext('Produit supprimé');
     const slug   = item.produit_slug || '#';
     const prix   = parseFloat(item.prix_snapshot);
     const sousTotal = parseFloat(item.sous_total);
@@ -90,9 +90,9 @@ const Cart = (() => {
         <a href="/produits/${slug}/" class="font-body font-semibold text-ink text-sm leading-snug hover:text-brand-600 transition-colors line-clamp-2">
           ${escapeHtml(nom)}
         </a>
-        <p class="text-xs text-ink/40 font-body mt-1">${formatPrix(prix)} / unité</p>
+        <p class="text-xs text-ink/40 font-body mt-1">${formatPrix(prix)} / ${gettext('unité')}</p>
 
-        ${epuise ? `<span class="inline-block mt-1 text-xs text-red-400 font-body font-medium">⚠ Produit épuisé</span>` : ''}
+        ${epuise ? `<span class="inline-block mt-1 text-xs text-red-400 font-body font-medium">⚠ ${gettext('Produit épuisé')}</span>` : ''}
 
         <!-- Contrôle quantité -->
         <div class="flex items-center gap-3 mt-3">
@@ -106,7 +106,7 @@ const Cart = (() => {
           </div>
           <button onclick="Cart.removeItem(${item.id})"
             class="text-xs text-ink/30 hover:text-red-400 transition-colors font-body underline underline-offset-2">
-            Supprimer
+            ${gettext('Supprimer')}
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ const Cart = (() => {
       const data = await API.patch(`/api/panier/items/${itemId}/`, { quantite: nouvelleQty });
       // Recharger pour avoir les données fraîches
       await load();
-      if (nouvelleQty === 0) window.toast && window.toast('Article supprimé.', 'success');
+      if (nouvelleQty === 0) window.toast && window.toast(gettext('Article supprimé.'), 'success');
     } catch(e) {}
   }
 
@@ -135,18 +135,18 @@ const Cart = (() => {
     try {
       await API.delete(`/api/panier/items/${itemId}/`);
       await load();
-      window.toast && window.toast('Article supprimé du panier.', 'success');
+      window.toast && window.toast(gettext('Article supprimé du panier.'), 'success');
     } catch(e) {}
   }
 
   // ── Vider le panier
   async function vider() {
-    const ok = await showConfirm({ title: 'Vider le panier ?', body: 'Tous les articles seront supprimés de votre panier.', confirmText: '🗑 Vider le panier', type: 'warning' });
+    const ok = await showConfirm({ title: gettext('Vider le panier ?'), body: gettext('Tous les articles seront supprimés de votre panier.'), confirmText: gettext('🗑 Vider le panier'), type: 'warning' });
     if (!ok) return;
     try {
       await API.delete('/api/panier/vider/');
       await load();
-      window.toast && window.toast('Panier vidé.', 'success');
+      window.toast && window.toast(gettext('Panier vidé.'), 'success');
     } catch(e) {}
   }
 

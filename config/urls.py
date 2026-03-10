@@ -7,6 +7,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
+from django.views.i18n import JavaScriptCatalog
 from apps.products.api_views import CategorieViewSet, StatsOverviewView
 
 urlpatterns = [
@@ -33,6 +34,7 @@ urlpatterns = [
 # ── Pages HTML avec préfixe langue (/fr/... ou /en/...) ──────
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Catalogue JS i18n
     path('',          include('apps.products.urls')),
     path('compte/',    include('apps.users.urls')),
     path('panier/',   include('apps.cart.urls')),
