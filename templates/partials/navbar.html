@@ -437,8 +437,23 @@
     background: var(--nav-bg, #ffffff);
     padding: 0.75rem;
     gap: 0.25rem;
+    /* Menu scrollable si contenu trop long */
+    overflow-y: auto;
+    max-height: calc(100vh - 64px);
+    overscroll-behavior: contain;
   }
   .mobile-menu.open { display: flex; }
+  /* Quand menu ouvert : navbar fixed pour que la page reste figée */
+  .navbar.menu-open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  /* Compense le saut de layout quand navbar passe en fixed */
+  body.mobile-menu-open {
+    overflow: hidden;
+  }
 
   .mobile-link {
     display: flex;
@@ -1150,7 +1165,6 @@
         document.addEventListener('DOMContentLoaded', syncMobileDark);
         var origToggle = window.toggleDarkMode;
         window.toggleDarkMode = function() { if(origToggle) origToggle(); syncMobileDark(); };
-
         /* next URLs langue */
         var path = window.location.pathname.replace(/^\/en\//, '/');
         var frEl = document.getElementById('mobile-next-fr');
@@ -1219,18 +1233,59 @@
     });
   });
   function toggleMobileMenu() {
-    var m=document.getElementById('mobile-menu'),bb=document.getElementById('burger-btn'),oi=document.getElementById('burger-icon-open'),ci=document.getElementById('burger-icon-close'),op=m.classList.contains('open');
-    m.classList.toggle('open',!op); bb.setAttribute('aria-expanded',String(!op));
-    oi.style.display=op?'block':'none'; ci.style.display=op?'none':'block';
-    document.body.style.overflow = op ? '' : 'hidden';
+    var m  = document.getElementById('mobile-menu');
+    var nb = document.getElementById('main-navbar');
+    var bb = document.getElementById('burger-btn');
+    var oi = document.getElementById('burger-icon-open');
+    var ci = document.getElementById('burger-icon-close');
+    var op = m.classList.contains('open');
+
+    if (!op) {
+      /* --- Ouverture --- */
+      /* Mémorise la position de scroll actuelle et compense */
+      var scrollY = window.scrollY;
+      document.body.style.top = '-' + scrollY + 'px';
+      document.body.classList.add('mobile-menu-open');
+      nb.classList.add('menu-open');
+      nb.style.top = scrollY > 0 ? '0' : '';
+      m.classList.add('open');
+      bb.setAttribute('aria-expanded', 'true');
+      oi.style.display = 'none';
+      ci.style.display = 'block';
+      /* Ajuste max-height selon hauteur réelle de la navbar */
+      m.style.maxHeight = 'calc(100vh - ' + nb.offsetHeight + 'px)';
+    } else {
+      /* --- Fermeture --- */
+      _closeMobileMenu();
+    }
   }
-  document.addEventListener('click',function(e){
-    var m=document.getElementById('mobile-menu'),nb=document.getElementById('main-navbar');
-    if(m&&m.classList.contains('open')&&!nb.contains(e.target)){
-      m.classList.remove('open');
-      var oi=document.getElementById('burger-icon-open'),ci=document.getElementById('burger-icon-close'),bb=document.getElementById('burger-btn');
-      if(oi)oi.style.display='block'; if(ci)ci.style.display='none'; bb.setAttribute('aria-expanded','false');
-      document.body.style.overflow = '';
+
+  function _closeMobileMenu() {
+    var m  = document.getElementById('mobile-menu');
+    var nb = document.getElementById('main-navbar');
+    var bb = document.getElementById('burger-btn');
+    var oi = document.getElementById('burger-icon-open');
+    var ci = document.getElementById('burger-icon-close');
+    if (!m || !m.classList.contains('open')) return;
+
+    /* Restaure la position de scroll */
+    var scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
+    document.body.classList.remove('mobile-menu-open');
+    document.body.style.top = '';
+    nb.classList.remove('menu-open');
+    window.scrollTo(0, scrollY);
+
+    m.classList.remove('open');
+    bb.setAttribute('aria-expanded', 'false');
+    if (oi) oi.style.display = 'block';
+    if (ci) ci.style.display = 'none';
+  }
+
+  document.addEventListener('click', function(e) {
+    var nb = document.getElementById('main-navbar');
+    var m  = document.getElementById('mobile-menu');
+    if (m && m.classList.contains('open') && !nb.contains(e.target)) {
+      _closeMobileMenu();
     }
   });
   function toggleDarkMode() {
