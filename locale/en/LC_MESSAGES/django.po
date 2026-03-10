@@ -4045,3 +4045,1093 @@ msgstr "An activation email will be sent. Check your inbox (and spam) to activat
 #: .\templates\home.html:756
 msgid "Vous réglez uniquement quand le colis est entre vos mains. Votre argent ne bouge qu'au moment où vous êtes satisfait."
 msgstr "You only pay when the package is in your hands. Your money only moves when you're satisfied."
+
+#: .\templates\legal\apropos.html:173
+msgid "Achetez en toute confiance ou devenez vendeur et touchez des milliers de clients."
+msgstr "Buy with confidence or become a seller and reach thousands of customers."
+
+#: .\templates\legal\apropos.html:159
+msgid "Architectures robustes, performance et sécurité au service des utilisateurs."
+msgstr "Robust architectures, performance and security for users."
+
+#: .\templates\legal\apropos.html:106
+msgid "Clients satisfaits"
+msgstr "Satisfied customers"
+
+#: .\templates\legal\apropos.html:140
+msgid "Confiance, transparence, proximité. Nous croyons au commerce équitable entre vendeurs locaux et acheteurs exigeants."
+msgstr "Trust, transparency, proximity. We believe in fair trade between local sellers and demanding buyers."
+
+#: .\templates\legal\apropos.html:135
+msgid "Devenir la référence du e-commerce tech en Afrique centrale d'ici 2027, avec une présence dans 10 pays."
+msgstr "Becoming the reference for tech e-commerce in Central Africa by 2027, with a presence in 10 countries."
+
+#: .\templates\legal\apropos.html:165
+msgid "Disponible 7j/7 pour résoudre vos questions et garantir votre satisfaction."
+msgstr "Available 7 days a week to answer your questions and ensure your satisfaction."
+
+#: .\templates\legal\apropos.html:114
+msgid "Douala · Yaoundé · Bafoussam"
+msgstr "Douala · Yaoundé · Bafoussam"
+
+#: .\templates\legal\apropos.html:122
+msgid "Fondée en 2024 à Douala, notre équipe a décidé de changer ça en construisant une marketplace transparente, où chaque vendeur est vérifié, chaque produit est décrit avec honnêteté et chaque transaction est sécurisée."
+msgstr "Founded in 2024 in Douala, our team decided to change that by building a transparent marketplace where every seller is verified, every product is described honestly, and every transaction is secure."
+
+#: .\templates\legal\apropos.html:95
+msgid "HooYia Market connecte acheteurs et vendeurs de confiance pour rendre l'électronique et l'informatique accessibles à tous les Camerounais."
+msgstr "HooYia Market connects trusted buyers and sellers to make electronics and computers accessible to all Cameroonians."
+
+#: .\templates\legal\apropos.html:121
+msgid "HooYia Market est née d'un constat simple : acheter de l'électronique de qualité au Cameroun relevait du parcours du combattant. Entre les produits contrefaits, les prix opaques et l'absence de garanties, les consommateurs manquaient d'une plateforme de confiance."
+msgstr "HooYia Market was born from a simple observation: buying quality electronics in Cameroon was an obstacle course. Between counterfeit products, opaque prices and lack of guarantees, consumers lacked a trusted platform."
+
+#: .\templates\legal\apropos.html:153
+msgid "Ingénieur passionné par le e-commerce et le développement du numérique en Afrique."
+msgstr "Engineer passionate about e-commerce and digital development in Africa."
+
+#: .\templates\legal\apropos.html:94
+msgid "La marketplace électronique"
+msgstr "The electronics marketplace"
+
+#: .\templates\legal\apropos.html:102
+msgid "Produits disponibles"
+msgstr "Available products"
+
+#: .\templates\legal\apropos.html:130
+msgid "Rendre l'accès à l'électronique et à l'informatique simple, transparent et sécurisé pour tous les Camerounais."
+msgstr "Making access to electronics and computers simple, transparent and secure for all Cameroonians."
+
+#: .\templates\legal\apropos.html:147
+msgid "Une équipe passionnée de technologie et de commerce, engagée à construire la meilleure expérience d'achat en ligne du Cameroun."
+msgstr "A team passionate about technology and commerce, committed to building the best online shopping experience in Cameroon."
+
+#: .\templates\legal\apropos.html:110
+msgid "Vendeurs vérifiés"
+msgstr "Verified sellers"
+
+#: .\templates\legal\apropos.html:94
+msgid "du"
+msgstr "of"
+
+#: .\templates\legal\apropos.html:113
+msgid "villes"
+msgstr "cities"
+
+#: .\templates\legal\assistance.html:195
+msgid "Ajoutez au panier"
+msgstr "Add to cart"
+
+#: .\templates\legal\assistance.html:203
+msgid "Choisissez votre mode de paiement (livraison, Mobile Money) et validez."
+msgstr "Choose your payment method (delivery, Mobile Money) and confirm."
+
+#: .\templates\legal\assistance.html:179
+msgid "Comment créer et gérer votre boutique"
+msgstr "How to create and manage your store"
+
+#: .\templates\legal\assistance.html:187
+msgid "Comment passer une commande ?"
+msgstr "How to place an order?"
+
+#: .\templates\legal\assistance.html:203
+msgid "Confirmez et payez"
+msgstr "Confirm and pay"
+
+#: .\templates\legal\assistance.html:219
+msgid "Consultez notre FAQ complète ou contactez directement notre équipe support."
+msgstr "Check our full FAQ or contact our support team directly."
+
+#: .\templates\legal\assistance.html:131
+msgid "Disponible du lundi au samedi, 8h–20h (heure de Douala)."
+msgstr "Available Monday to Saturday, 8am–8pm (Douala time)."
+
+#: .\templates\legal\assistance.html:123
+msgid "Envoyez-nous un message, nous répondons sous 24h ouvrées."
+msgstr "Send us a message, we reply within 24 business hours."
+
+#: .\templates\legal\assistance.html:199
+msgid "Indiquez l'adresse de livraison ou sélectionnez une adresse enregistrée."
+msgstr "Enter the delivery address or select a saved address."
+
+#: .\templates\legal\assistance.html:151
+msgid "Modes de paiement acceptés et reçus"
+msgstr "Accepted payment methods and receipts"
+
+#: .\templates\legal\assistance.html:165
+msgid "Modifier profil, mot de passe, adresses"
+msgstr "Edit profile, password, addresses"
+
+#: .\templates\legal\assistance.html:191
+msgid "Parcourez le catalogue"
+msgstr "Browse the catalogue"
+
+#: .\templates\legal\assistance.html:158
+msgid "Procédure et délais pour un retour produit"
+msgstr "Return procedure and timelines"
+
+#: .\templates\legal\assistance.html:207
+msgid "Recevez les notifications de statut et suivez votre livraison depuis votre espace client."
+msgstr "Receive status notifications and track your delivery from your account."
+
+#: .\templates\legal\assistance.html:191
+msgid "Recherchez un produit par nom ou catégorie, comparez les offres des différents vendeurs."
+msgstr "Search for a product by name or category, compare offers from different sellers."
+
+#: .\templates\legal\assistance.html:199
+msgid "Renseignez votre adresse"
+msgstr "Enter your address"
+
+#: .\templates\legal\assistance.html:207
+msgid "Suivez votre commande"
+msgstr "Track your order"
+
+#: .\templates\legal\assistance.html:138
+msgid "Sujets populaires"
+msgstr "Popular topics"
+
+#: .\templates\legal\assistance.html:195
+msgid "Sélectionnez la quantité souhaitée et cliquez sur « Ajouter au panier »."
+msgstr "Select the desired quantity and click \"Add to cart\"."
+
+#: .\templates\legal\assistance.html:97
+msgid "Trouvez rapidement les réponses à vos questions ou contactez notre équipe."
+msgstr "Quickly find answers to your questions or contact our team."
+
+#: .\templates\legal\assistance.html:144
+msgid "Vérifier le statut et les étapes de votre commande"
+msgstr "Check the status and steps of your order"
+
+#: .\templates\legal\assistance.html:172
+msgid "Zones desservies, délais et frais de port"
+msgstr "Areas served, timelines and shipping fees"
+
+#: .\templates\legal\assistance.html:111
+msgid "Échangez en temps réel avec un conseiller via la messagerie intégrée."
+msgstr "Chat in real time with an advisor via the integrated messaging."
+
+#: .\templates\legal\conditions.html:179 .\templates\legal\conditions.html:200
+msgid "Acceptation des conditions"
+msgstr "Acceptance of terms"
+
+#: .\templates\legal\conditions.html:285
+msgid "Des dommages directs ou indirects liés à l'utilisation de la plateforme"
+msgstr "Direct or indirect damages related to the use of the platform"
+
+#: .\templates\legal\conditions.html:286
+msgid "Des interruptions temporaires de service pour maintenance"
+msgstr "Temporary service interruptions for maintenance"
+
+#: .\templates\legal\conditions.html:287
+msgid "Des litiges entre acheteurs et vendeurs"
+msgstr "Disputes between buyers and sellers"
+
+#: .\templates\legal\conditions.html:242
+msgid "Déclarer leurs revenus conformément à la législation fiscale camerounaise"
+msgstr "Declare their income in accordance with Cameroonian tax law"
+
+#: .\templates\legal\conditions.html:238
+msgid "Décrire les produits avec exactitude (photos réelles, état, caractéristiques)"
+msgstr "Describe products accurately (real photos, condition, features)"
+
+#: .\templates\legal\conditions.html:201
+msgid "En accédant à HooYia Market, en créant un compte ou en effectuant une transaction, vous acceptez sans réserve les présentes Conditions d'utilisation."
+msgstr "By accessing HooYia Market, creating an account or making a transaction, you unconditionally accept these Terms of Use."
+
+#: .\templates\legal\conditions.html:271
+msgid "En cas de litige entre acheteur et vendeur, HooYia Market propose une médiation gratuite. Les demandes de retour sont acceptées dans un délai de"
+msgstr "In case of dispute between buyer and seller, HooYia Market offers free mediation. Return requests are accepted within"
+
+#: .\templates\legal\conditions.html:239
+msgid "Fixer des prix conformes à la réglementation en vigueur"
+msgstr "Set prices in accordance with applicable regulations"
+
+#: .\templates\legal\conditions.html:251
+msgid "Fournir des informations de livraison exactes et complètes"
+msgstr "Provide accurate and complete delivery information"
+
+#: .\templates\legal\conditions.html:241
+msgid "Fournir un service après-vente de qualité"
+msgstr "Provide quality after-sales service"
+
+#: .\templates\legal\conditions.html:240
+msgid "Honorer toutes les commandes confirmées dans les délais annoncés"
+msgstr "Honor all confirmed orders within the announced timelines"
+
+#: .\templates\legal\conditions.html:283
+msgid "HooYia Market agit en qualité d'intermédiaire technique. La responsabilité de la qualité des produits incombe au vendeur. HooYia Market ne peut être tenu responsable :"
+msgstr "HooYia Market acts as a technical intermediary. Responsibility for product quality lies with the seller. HooYia Market cannot be held liable for:"
+
+#: .\templates\legal\conditions.html:195
+msgid "HooYia Market est une marketplace en ligne dédiée à l'électronique et l'informatique, opérée depuis Douala, Cameroun. La plateforme met en relation des acheteurs et des vendeurs particuliers ou professionnels pour la vente de produits neufs ou reconditionnés."
+msgstr "HooYia Market is an online marketplace dedicated to electronics and computers, operated from Douala, Cameroon. The platform connects buyers and individual or professional sellers for the sale of new or refurbished products."
+
+#: .\templates\legal\conditions.html:260
+msgid "HooYia Market propose actuellement les modes de paiement suivants :"
+msgstr "HooYia Market currently offers the following payment methods:"
+
+#: .\templates\legal\conditions.html:205
+msgid "HooYia Market se réserve le droit de modifier ces conditions à tout moment. Les utilisateurs seront informés par email en cas de changement substantiel."
+msgstr "HooYia Market reserves the right to modify these terms at any time. Users will be notified by email of any substantial change."
+
+#: .\templates\legal\conditions.html:244
+msgid "HooYia Market se réserve le droit de suspendre ou supprimer tout vendeur ne respectant pas ces obligations."
+msgstr "HooYia Market reserves the right to suspend or remove any seller who does not comply with these obligations."
+
+#: .\templates\legal\conditions.html:180 .\templates\legal\conditions.html:209
+msgid "Inscription et compte utilisateur"
+msgstr "Registration and user account"
+
+#: .\templates\legal\conditions.html:196
+msgid "L'accès à la plateforme est disponible via le site web"
+msgstr "Access to the platform is available via the website"
+
+#: .\templates\legal\conditions.html:277
+msgid "L'ensemble des contenus de HooYia Market (logo, design, code source, textes, images) est protégé par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite."
+msgstr "All content on HooYia Market (logo, design, source code, texts, images) is protected by intellectual property law. Any reproduction without authorization is prohibited."
+
+#: .\templates\legal\conditions.html:218
+msgid "L'inscription est réservée aux personnes physiques âgées d'au moins 18 ans ou aux personnes morales légalement constituées."
+msgstr "Registration is reserved for individuals aged at least 18 years or legally constituted legal entities."
+
+#: .\templates\legal\conditions.html:226
+msgid "L'utilisation de la plateforme à des fins frauduleuses"
+msgstr "Using the platform for fraudulent purposes"
+
+#: .\templates\legal\conditions.html:230
+msgid "La création de plusieurs comptes pour un même utilisateur"
+msgstr "Creating multiple accounts for the same user"
+
+#: .\templates\legal\conditions.html:225
+msgid "La publication de faux avis ou évaluations"
+msgstr "Publishing fake reviews or ratings"
+
+#: .\templates\legal\conditions.html:227
+msgid "La vente de produits contrefaits, dangereux ou illégaux"
+msgstr "Selling counterfeit, dangerous or illegal products"
+
+#: .\templates\legal\conditions.html:228
+msgid "Le harcèlement ou les comportements abusifs envers d'autres utilisateurs"
+msgstr "Harassment or abusive behavior towards other users"
+
+#: .\templates\legal\conditions.html:249
+msgid "Les acheteurs s'engagent à :"
+msgstr "Buyers agree to:"
+
+#: .\templates\legal\conditions.html:298
+msgid "Les présentes conditions sont régies par le droit camerounais. Tout litige relatif à leur interprétation ou exécution sera soumis à la compétence exclusive des tribunaux de Douala, Cameroun."
+msgstr "These terms are governed by Cameroonian law. Any dispute relating to their interpretation or execution shall be submitted to the exclusive jurisdiction of the courts of Douala, Cameroon."
+
+#: .\templates\legal\conditions.html:278
+msgid "Les vendeurs garantissent détenir tous les droits sur les images et descriptions qu'ils publient, et accordent à HooYia Market une licence d'utilisation non-exclusive pour leur diffusion sur la plateforme."
+msgstr "Sellers guarantee that they hold all rights to the images and descriptions they publish, and grant HooYia Market a non-exclusive license to distribute them on the platform."
+
+#: .\templates\legal\conditions.html:236
+msgid "Les vendeurs s'engagent à :"
+msgstr "Sellers agree to:"
+
+#: .\templates\legal\conditions.html:307
+msgid "Notre équipe est disponible pour vous répondre. Écrivez-nous à"
+msgstr "Our team is available to answer you. Write to us at"
+
+#: .\templates\legal\conditions.html:183 .\templates\legal\conditions.html:248
+msgid "Obligations des acheteurs"
+msgstr "Buyer obligations"
+
+#: .\templates\legal\conditions.html:182 .\templates\legal\conditions.html:235
+msgid "Obligations des vendeurs"
+msgstr "Seller obligations"
+
+#: .\templates\legal\conditions.html:184 .\templates\legal\conditions.html:259
+msgid "Paiements et transactions"
+msgstr "Payments and transactions"
+
+#: .\templates\legal\conditions.html:210
+msgid "Pour accéder aux fonctionnalités complètes de la plateforme, vous devez créer un compte en fournissant :"
+msgstr "To access all platform features, you must create an account by providing:"
+
+#: .\templates\legal\conditions.html:272
+msgid "Pour initier un retour, contactez notre service client via la messagerie intégrée ou à l'adresse"
+msgstr "To initiate a return, contact our customer service via the integrated messaging or at"
+
+#: .\templates\legal\conditions.html:252
+msgid "Procéder au paiement dans les délais convenus"
+msgstr "Make payment within the agreed timelines"
+
+#: .\templates\legal\conditions.html:178 .\templates\legal\conditions.html:194
+msgid "Présentation de la plateforme"
+msgstr "Platform overview"
+
+#: .\templates\legal\conditions.html:185 .\templates\legal\conditions.html:270
+msgid "Retours et litiges"
+msgstr "Returns and disputes"
+
+#: .\templates\legal\conditions.html:253
+msgid "Réceptionner les commandes dans les conditions prévues"
+msgstr "Receive orders under the agreed conditions"
+
+#: .\templates\legal\conditions.html:188 .\templates\legal\conditions.html:292
+msgid "Résiliation"
+msgstr "Termination"
+
+#: .\templates\legal\conditions.html:203
+msgid "Si vous n'acceptez pas ces conditions, vous devez cesser immédiatement d'utiliser la plateforme."
+msgstr "If you do not accept these terms, you must immediately stop using the platform."
+
+#: .\templates\legal\conditions.html:254
+msgid "Signaler tout problème de manière honnête et constructive"
+msgstr "Report any issue honestly and constructively"
+
+#: .\templates\legal\politique.html:76 .\templates\legal\conditions.html:176
+msgid "Sommaire"
+msgstr "Table of contents"
+
+#: .\templates\legal\conditions.html:266
+msgid "Tous les prix sont exprimés en Francs CFA (XAF). HooYia Market ne stocke aucune donnée bancaire sur ses serveurs."
+msgstr "All prices are expressed in CFA Francs (XAF). HooYia Market does not store any banking data on its servers."
+
+#: .\templates\legal\conditions.html:229
+msgid "Toute tentative de contournement des systèmes de paiement"
+msgstr "Any attempt to circumvent payment systems"
+
+#: .\templates\legal\conditions.html:214
+msgid "Un mot de passe sécurisé (minimum 8 caractères)"
+msgstr "A secure password (minimum 8 characters)"
+
+#: .\templates\legal\conditions.html:213
+msgid "Un nom d'utilisateur unique"
+msgstr "A unique username"
+
+#: .\templates\legal\conditions.html:215
+msgid "Un numéro de téléphone valide (pour la livraison)"
+msgstr "A valid phone number (for delivery)"
+
+#: .\templates\legal\conditions.html:212
+msgid "Une adresse email valide et personnelle"
+msgstr "A valid personal email address"
+
+#: .\templates\legal\conditions.html:306
+msgid "Une question sur nos conditions ?"
+msgstr "A question about our terms?"
+
+#: .\templates\legal\conditions.html:181 .\templates\legal\conditions.html:222
+msgid "Utilisation de la plateforme"
+msgstr "Platform usage"
+
+#: .\templates\legal\conditions.html:293
+msgid "Vous pouvez supprimer votre compte à tout moment depuis votre espace profil. HooYia Market se réserve le droit de suspendre ou supprimer tout compte en cas de violation des présentes conditions, sans préavis ni remboursement."
+msgstr "You can delete your account at any time from your profile. HooYia Market reserves the right to suspend or delete any account in case of violation of these terms, without notice or refund."
+
+#: .\templates\legal\conditions.html:223
+msgid "Vous vous engagez à utiliser HooYia Market de manière loyale et conformément aux lois en vigueur. Sont strictement interdits :"
+msgstr "You agree to use HooYia Market fairly and in accordance with applicable laws. Strictly prohibited are:"
+
+#: .\templates\legal\conditions.html:217
+msgid "Vous êtes seul responsable de la confidentialité de vos identifiants. Toute activité réalisée depuis votre compte vous est imputable."
+msgstr "You are solely responsible for the confidentiality of your credentials. Any activity carried out from your account is your responsibility."
+
+#: .\templates\legal\conditions.html:196
+msgid "ainsi que via les applications mobiles HooYia Market."
+msgstr "as well as via the HooYia Market mobile applications."
+
+#: .\templates\legal\conditions.html:262
+msgid "en espèces à la réception de la commande"
+msgstr "cash on delivery"
+
+#: .\templates\legal\conditions.html:263 .\templates\legal\conditions.html:264
+msgid "paiement mobile sécurisé (à venir)"
+msgstr "secure mobile payment (coming soon)"
+
+#: .\templates\legal\conditions.html:271
+msgid "pour les produits défectueux ou non conformes à la description."
+msgstr "for defective products or those not matching the description."
+
+#: .\templates\legal\contact.html:178
+msgid "Messagerie intégrée pour les utilisateurs connectés"
+msgstr "Integrated messaging for logged-in users"
+
+#: .\templates\legal\contact.html:91
+msgid "Une question, un problème ou une suggestion ? Notre équipe vous répond sous 24h."
+msgstr "A question, a problem or a suggestion? Our team replies within 24 hours."
+
+#: .\templates\legal\faq.html:104
+msgid "Aucun résultat pour votre recherche."
+msgstr "No results for your search."
+
+#: .\templates\legal\faq.html:153
+msgid "Aucune carte bancaire pour l'instant."
+msgstr "No bank card for now."
+
+#: .\templates\legal\faq.html:190
+msgid "Ces délais s'entendent en jours ouvrés à partir de la confirmation de commande."
+msgstr "These timelines are in business days from order confirmation."
+
+#: .\templates\legal\faq.html:240
+msgid "Cliquez sur"
+msgstr "Click on"
+
+#: .\templates\legal\faq.html:237
+msgid "Comment créer un compte ?"
+msgstr "How to create an account?"
+
+#: .\templates\legal\faq.html:266
+msgid "Comment devenir vendeur sur HooYia Market ?"
+msgstr "How to become a seller on HooYia Market?"
+
+#: .\templates\legal\faq.html:216
+msgid "Comment initier un retour ?"
+msgstr "How to initiate a return?"
+
+#: .\templates\legal\faq.html:113
+msgid "Comment passer une commande sur HooYia Market ?"
+msgstr "How to place an order on HooYia Market?"
+
+#: .\templates\legal\faq.html:121
+msgid "Comment suivre l'état de ma commande ?"
+msgstr "How to track the status of my order?"
+
+#: .\templates\legal\faq.html:253
+msgid "Comment supprimer mon compte ?"
+msgstr "How to delete my account?"
+
+#: .\templates\legal\faq.html:233
+msgid "Compte utilisateur"
+msgstr "User account"
+
+#: .\templates\legal\faq.html:124
+msgid "Connectez-vous et allez dans"
+msgstr "Log in and go to"
+
+#: .\templates\legal\faq.html:219
+msgid "Contactez notre équipe via la messagerie intégrée ou à"
+msgstr "Contact our team via the integrated messaging or at"
+
+#: .\templates\legal\faq.html:269
+msgid "Créez un compte, puis contactez notre équipe à"
+msgstr "Create an account, then contact our team at"
+
+#: .\templates\legal\faq.html:182
+msgid "D'autres villes seront ajoutées prochainement. Pour toute autre localisation,"
+msgstr "More cities will be added soon. For any other location,"
+
+#: .\templates\legal\faq.html:224
+msgid "Dans quel délai suis-je remboursé ?"
+msgstr "How long until I get a refund?"
+
+#: .\templates\legal\faq.html:179
+msgid "Dans quelles villes livrez-vous ?"
+msgstr "Which cities do you deliver to?"
+
+#: .\templates\legal\faq.html:248
+msgid "Entrez votre email et vous recevrez un lien de réinitialisation valable 24h."
+msgstr "Enter your email and you will receive a reset link valid for 24 hours."
+
+#: .\templates\legal\faq.html:277
+msgid "HooYia Market est spécialisé en électronique et informatique : smartphones, PC, accessoires, périphériques, TV, appareils connectés. Les produits contrefaits ou dangereux sont strictement interdits."
+msgstr "HooYia Market specializes in electronics and computers: smartphones, PCs, accessories, peripherals, TVs, connected devices. Counterfeit or dangerous products are strictly prohibited."
+
+#: .\templates\legal\faq.html:140
+msgid "Il n'est pas possible de modifier une commande confirmée. Vous devez l'annuler (si encore possible) et en passer une nouvelle, ou contacter notre équipe via le"
+msgstr "It is not possible to modify a confirmed order. You must cancel it (if still possible) and place a new one, or contact our team via"
+
+#: .\templates\legal\faq.html:245
+msgid "J'ai oublié mon mot de passe, que faire ?"
+msgstr "I forgot my password, what should I do?"
+
+#: .\templates\legal\faq.html:132
+msgid "L'annulation est possible tant que la commande est au statut"
+msgstr "Cancellation is possible as long as the order has the status"
+
+#: .\templates\legal\faq.html:158
+msgid "Le paiement en ligne est-il sécurisé ?"
+msgstr "Is online payment secure?"
+
+#: .\templates\legal\faq.html:285
+msgid "Les conditions tarifaires sont communiquées lors de l'activation du compte vendeur. Pour en savoir plus,"
+msgstr "Fee conditions are communicated when the seller account is activated. To learn more,"
+
+#: .\templates\legal\faq.html:198
+msgid "Les frais de livraison sont calculés selon la zone et le poids du colis. Ils sont affichés clairement avant la validation de votre commande. La livraison gratuite est disponible au-delà d'un certain montant d'achat."
+msgstr "Shipping fees are calculated based on the zone and package weight. They are clearly displayed before order validation. Free delivery is available above a certain purchase amount."
+
+#: .\templates\legal\faq.html:124
+msgid "Mon compte → Mes commandes"
+msgstr "My account → My orders"
+
+#: .\templates\legal\faq.html:256
+msgid "Mon compte → Paramètres"
+msgstr "My account → Settings"
+
+#: .\templates\legal\faq.html:296
+msgid "Notre équipe support est disponible pour vous aider."
+msgstr "Our support team is available to help you."
+
+#: .\templates\legal\faq.html:153
+msgid "Nous acceptons :"
+msgstr "We accept:"
+
+#: .\templates\legal\faq.html:182
+msgid "Nous livrons actuellement à"
+msgstr "We currently deliver to"
+
+#: .\templates\legal\faq.html:211
+msgid "Oui, dans un délai de"
+msgstr "Yes, within"
+
+#: .\templates\legal\faq.html:161
+msgid "Oui. Toutes les communications sont chiffrées via HTTPS. HooYia Market ne stocke aucune donnée bancaire sur ses serveurs. Les paiements mobiles sont traités directement par Orange et MTN."
+msgstr "Yes. All communications are encrypted via HTTPS. HooYia Market does not store any banking data on its servers. Mobile payments are processed directly by Orange and MTN."
+
+#: .\templates\legal\faq.html:116
+msgid "Parcourez le catalogue, ajoutez les produits au panier, renseignez votre adresse de livraison, puis confirmez et choisissez votre mode de paiement. Vous recevrez une confirmation par email ou notification."
+msgstr "Browse the catalogue, add products to your cart, enter your delivery address, then confirm and choose your payment method. You will receive a confirmation by email or notification."
+
+#: .\templates\legal\faq.html:129
+msgid "Puis-je annuler une commande ?"
+msgstr "Can I cancel an order?"
+
+#: .\templates\legal\faq.html:137
+msgid "Puis-je modifier ma commande après validation ?"
+msgstr "Can I modify my order after confirmation?"
+
+#: .\templates\legal\faq.html:166
+msgid "Puis-je obtenir une facture ?"
+msgstr "Can I get an invoice?"
+
+#: .\templates\legal\faq.html:208
+msgid "Puis-je retourner un produit ?"
+msgstr "Can I return a product?"
+
+#: .\templates\legal\faq.html:282
+msgid "Quelles sont les commissions de HooYia Market ?"
+msgstr "What are HooYia Market's commissions?"
+
+#: .\templates\legal\faq.html:150
+msgid "Quels modes de paiement sont acceptés ?"
+msgstr "What payment methods are accepted?"
+
+#: .\templates\legal\faq.html:187
+msgid "Quels sont les délais de livraison ?"
+msgstr "What are the delivery timelines?"
+
+#: .\templates\legal\faq.html:195
+msgid "Quels sont les frais de livraison ?"
+msgstr "What are the shipping fees?"
+
+#: .\templates\legal\faq.html:274
+msgid "Quels types de produits puis-je vendre ?"
+msgstr "What types of products can I sell?"
+
+#: .\templates\legal\faq.html:256
+msgid "Rendez-vous dans"
+msgstr "Go to"
+
+#: .\templates\legal\faq.html:248
+msgid "Sur la page de connexion, cliquez sur"
+msgstr "On the login page, click on"
+
+#: .\templates\legal\faq.html:84
+msgid "Trouvez rapidement les réponses à vos questions sur HooYia Market."
+msgstr "Quickly find answers to your questions about HooYia Market."
+
+#: .\templates\legal\faq.html:169
+msgid "Un récapitulatif de commande est disponible dans votre espace client. Pour une facture officielle, contactez-nous à"
+msgstr "An order summary is available in your account. For an official invoice, contact us at"
+
+#: .\templates\legal\faq.html:132
+msgid "Une fois confirmée ou en préparation, contactez notre"
+msgstr "Once confirmed or in preparation, contact our"
+
+#: .\templates\legal\faq.html:227
+msgid "Une fois le retour validé par notre équipe, le remboursement est effectué sous"
+msgstr "Once the return is validated by our team, the refund is processed within"
+
+#: .\templates\legal\faq.html:124
+msgid "Vous verrez le statut en temps réel : En attente → Confirmée → En préparation → Expédiée → Livrée. Des notifications vous sont envoyées à chaque étape."
+msgstr "You will see the status in real time: Pending → Confirmed → In preparation → Shipped → Delivered. Notifications are sent to you at each step."
+
+#: .\templates\legal\faq.html:153
+msgid "bientôt disponibles"
+msgstr "coming soon"
+
+#: .\templates\legal\faq.html:182 .\templates\legal\faq.html:285
+msgid "contactez-nous"
+msgstr "contact us"
+
+#: .\templates\legal\faq.html:132
+msgid "dans les plus brefs délais."
+msgstr "as soon as possible."
+
+#: .\templates\legal\faq.html:240
+msgid "en haut à droite, renseignez votre email, un nom d'utilisateur et un mot de passe. Un email de confirmation vous sera envoyé."
+msgstr "in the top right, enter your email, a username and a password. A confirmation email will be sent."
+
+#: .\templates\legal\faq.html:219
+msgid "en indiquant votre numéro de commande et la raison du retour. Nous vous guiderons dans la procédure."
+msgstr "by indicating your order number and the reason for the return. We will guide you through the procedure."
+
+#: .\templates\legal\faq.html:153
+msgid "espèces"
+msgstr "cash"
+
+#: .\templates\legal\faq.html:153 .\templates\legal\faq.html:182
+msgid "et"
+msgstr "and"
+
+#: .\templates\legal\faq.html:153
+msgid "paiement à la livraison"
+msgstr "cash on delivery"
+
+#: .\templates\legal\faq.html:269
+msgid "pour demander l'activation du statut vendeur. Nous vous accompagnons dans la configuration de votre boutique."
+msgstr "to request seller status activation. We will assist you in setting up your store."
+
+#: .\templates\legal\faq.html:211
+msgid "pour tout produit défectueux ou non conforme à la description. Le produit doit être dans son emballage d'origine."
+msgstr "for any defective product or not matching the description. The product must be in its original packaging."
+
+#: (legal)
+msgid "puis cliquez sur '"
+msgstr "then click on '"
+
+#: .\templates\legal\faq.html:227
+msgid "via le même moyen de paiement utilisé lors de la commande."
+msgstr "via the same payment method used for the order."
+
+#: .\templates\legal\mentions.html:61
+msgid "Capital social"
+msgstr "Share capital"
+
+#: .\templates\legal\mentions.html:95
+msgid "Conformément à la législation camerounaise en vigueur, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits :"
+msgstr "In accordance with applicable Cameroonian legislation, you have the right to access, rectify and delete your data. To exercise these rights:"
+
+#: .\templates\legal\mentions.html:114
+msgid "Contactez notre équipe à"
+msgstr "Contact our team at"
+
+#: .\templates\legal\mentions.html:67
+msgid "Directeur de la publication :"
+msgstr "Publication director:"
+
+#: .\templates\legal\mentions.html:59
+msgid "Forme juridique"
+msgstr "Legal form"
+
+#: .\templates\legal\mentions.html:88
+msgid "HooYia Market met tout en œuvre pour assurer l'exactitude et la mise à jour des informations publiées. Toutefois, la société ne peut garantir l'exhaustivité, la précision ou l'actualité des informations diffusées sur le site."
+msgstr "HooYia Market makes every effort to ensure the accuracy and currency of published information. However, the company cannot guarantee the completeness, accuracy or timeliness of information on the site."
+
+#: .\templates\legal\mentions.html:89
+msgid "HooYia Market ne saurait être tenu responsable des dommages directs ou indirects résultant de l'accès au site ou de l'utilisation de son contenu, ni des dommages pouvant survenir du fait des sites tiers vers lesquels des liens sont proposés."
+msgstr "HooYia Market shall not be liable for direct or indirect damages resulting from access to the site or use of its content, nor for damages that may arise from third-party sites to which links are provided."
+
+#: .\templates\legal\mentions.html:73
+msgid "Hébergeur :"
+msgstr "Host:"
+
+#: .\templates\legal\mentions.html:82
+msgid "L'ensemble des éléments constituant le site HooYia Market (structure, design, textes, logos, images, base de données, code source) est la propriété exclusive de HooYia Market SARL et est protégé par les lois sur la propriété intellectuelle en vigueur au Cameroun."
+msgstr "All elements constituting the HooYia Market site (structure, design, texts, logos, images, database, source code) are the exclusive property of HooYia Market SARL and are protected by intellectual property laws in force in Cameroon."
+
+#: .\templates\legal\mentions.html:100
+msgid "Le site utilise des cookies techniques indispensables à son fonctionnement (session, authentification, panier). Ces cookies ne collectent aucune donnée personnelle à des fins publicitaires. Pour plus d'informations, consultez notre"
+msgstr "The site uses technical cookies essential to its operation (session, authentication, cart). These cookies do not collect any personal data for advertising purposes. For more information, consult our"
+
+#: .\templates\legal\mentions.html:94
+msgid "Le traitement des données personnelles collectées sur HooYia Market est régi par notre"
+msgstr "The processing of personal data collected on HooYia Market is governed by our"
+
+#: .\templates\legal\mentions.html:77
+msgid "Les données des utilisateurs camerounais sont traitées conformément aux engagements contractuels de protection des données de Render Inc."
+msgstr "The data of Cameroonian users is processed in accordance with the contractual data protection commitments of Render Inc."
+
+#: .\templates\legal\mentions.html:105
+msgid "Les présentes mentions légales sont régies par le droit camerounais. En cas de litige, et après échec de toute tentative de résolution amiable, les tribunaux de Douala seront seuls compétents."
+msgstr "These legal notices are governed by Cameroonian law. In case of dispute, and after failure of any attempt at amicable resolution, the courts of Douala shall have sole jurisdiction."
+
+#: .\templates\legal\mentions.html:63
+msgid "Numéro contribuable"
+msgstr "Taxpayer number"
+
+#: .\templates\legal\mentions.html:62
+msgid "Registre du commerce"
+msgstr "Trade register"
+
+#: .\templates\legal\mentions.html:74
+msgid "Site web :"
+msgstr "Website:"
+
+#: .\templates\legal\mentions.html:58
+msgid "Société"
+msgstr "Company"
+
+#: .\templates\legal\mentions.html:83
+msgid "Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sans autorisation écrite préalable."
+msgstr "Any reproduction, representation, modification, publication or adaptation of all or part of the site's elements, regardless of the means or process used, is prohibited without prior written authorization."
+
+#: .\templates\legal\politique.html:154
+msgid "10 ans (obligation comptable)"
+msgstr "10 years (accounting obligation)"
+
+#: .\templates\legal\politique.html:155
+msgid "12 mois"
+msgstr "12 months"
+
+#: .\templates\legal\politique.html:156
+msgid "2 ans après la dernière activité"
+msgstr "2 years after last activity"
+
+#: .\templates\legal\politique.html:157
+msgid "30 jours (purge complète)"
+msgstr "30 days (complete purge)"
+
+#: .\templates\legal\politique.html:195
+msgid "Accès aux données restreint au personnel habilité"
+msgstr "Data access restricted to authorized personnel"
+
+#: .\templates\legal\politique.html:114
+msgid "Activité"
+msgstr "Activity"
+
+#: .\templates\legal\politique.html:115
+msgid "Adresse IP, pages visitées, appareil"
+msgstr "IP address, pages visited, device"
+
+#: .\templates\legal\politique.html:113
+msgid "Adresse postale, ville, région"
+msgstr "Postal address, city, region"
+
+#: .\templates\legal\politique.html:130
+msgid "Amélioration de l'expérience utilisateur et des performances"
+msgstr "Improving user experience and performance"
+
+#: .\templates\legal\politique.html:115
+msgid "Automatique"
+msgstr "Automatic"
+
+#: .\templates\legal\politique.html:168
+msgid "Autorités compétentes"
+msgstr "Competent authorities"
+
+#: .\templates\legal\politique.html:137
+msgid "Base légale du traitement"
+msgstr "Legal basis for processing"
+
+#: .\templates\legal\politique.html:193
+msgid "Chiffrement HTTPS (TLS 1.3) sur toutes les communications"
+msgstr "HTTPS encryption (TLS 1.3) on all communications"
+
+#: .\templates\legal\politique.html:128
+msgid "Communication entre acheteurs et vendeurs"
+msgstr "Communication between buyers and sellers"
+
+#: .\templates\legal\politique.html:116
+msgid "Communications"
+msgstr "Communications"
+
+#: .\templates\legal\politique.html:203
+msgid "Conformément à la législation applicable, vous disposez des droits suivants sur vos données :"
+msgstr "In accordance with applicable legislation, you have the following rights over your data:"
+
+#: .\templates\legal\politique.html:142
+msgid "Consentement"
+msgstr "Consent"
+
+#: .\templates\legal\politique.html:112
+msgid "Contact"
+msgstr "Contact"
+
+#: .\templates\legal\politique.html:225
+msgid "Contact — Délégué à la Protection des Données"
+msgstr "Contact — Data Protection Officer"
+
+#: .\templates\legal\politique.html:180
+msgid "Cookies de performance"
+msgstr "Performance cookies"
+
+#: .\templates\legal\politique.html:179
+msgid "Cookies essentiels"
+msgstr "Essential cookies"
+
+#: .\templates\legal\politique.html:108
+msgid "Données"
+msgstr "Data"
+
+#: .\templates\legal\politique.html:157
+msgid "Données après suppression du compte"
+msgstr "Data after account deletion"
+
+#: .\templates\legal\politique.html:154
+msgid "Données de commande"
+msgstr "Order data"
+
+#: .\templates\legal\politique.html:153
+msgid "Données de compte actif"
+msgstr "Active account data"
+
+#: .\templates\legal\politique.html:189
+msgid "Données protégées"
+msgstr "Protected data"
+
+#: .\templates\legal\politique.html:205
+msgid "Droit d'accès"
+msgstr "Right of access"
+
+#: .\templates\legal\politique.html:209
+msgid "Droit d'opposition"
+msgstr "Right to object"
+
+#: .\templates\legal\politique.html:206
+msgid "Droit de rectification"
+msgstr "Right to rectification"
+
+#: .\templates\legal\politique.html:207
+msgid "Droit à l'effacement"
+msgstr "Right to erasure"
+
+#: .\templates\legal\politique.html:208
+msgid "Droit à la portabilité"
+msgstr "Right to portability"
+
+#: .\templates\legal\politique.html:153
+msgid "Durée d'activité du compte + 3 ans"
+msgstr "Account activity period + 3 years"
+
+#: .\templates\legal\politique.html:230
+msgid "Délai de réponse :"
+msgstr "Response time:"
+
+#: .\templates\legal\politique.html:99 .\templates\legal\politique.html:228
+msgid "Email :"
+msgstr "Email:"
+
+#: .\templates\legal\politique.html:112
+msgid "Email, téléphone"
+msgstr "Email, phone"
+
+#: .\templates\legal\politique.html:129
+msgid "Envoi de notifications transactionnelles (confirmation, statut commande)"
+msgstr "Sending transactional notifications (confirmation, order status)"
+
+#: .\templates\legal\politique.html:139
+msgid "Exécution du contrat"
+msgstr "Contract execution"
+
+#: .\templates\legal\politique.html:126
+msgid "Gestion de votre compte et authentification"
+msgstr "Account management and authentication"
+
+#: .\templates\legal\politique.html:114
+msgid "Historique des commandes, montants"
+msgstr "Order history, amounts"
+
+#: .\templates\legal\politique.html:216
+msgid "HooYia Market est réservé aux personnes de 18 ans et plus. Nous ne collectons pas sciemment de données concernant des mineurs. Si vous pensez qu'un mineur a créé un compte, contactez-nous immédiatement."
+msgstr "HooYia Market is reserved for people aged 18 and over. We do not knowingly collect data about minors. If you believe a minor has created an account, contact us immediately."
+
+#: .\templates\legal\politique.html:177
+msgid "HooYia Market utilise des cookies pour le bon fonctionnement de la plateforme :"
+msgstr "HooYia Market uses cookies for the proper functioning of the platform:"
+
+#: .\templates\legal\politique.html:111
+msgid "Identité"
+msgstr "Identity"
+
+#: .\templates\legal\politique.html:112
+msgid "Inscription / Profil"
+msgstr "Registration / Profile"
+
+#: .\templates\legal\politique.html:140
+msgid "Intérêt légitime"
+msgstr "Legitimate interest"
+
+#: .\templates\legal\politique.html:197
+msgid "Journal d'audit de toutes les actions sensibles"
+msgstr "Audit log of all sensitive actions"
+
+#: .\templates\legal\politique.html:95
+msgid "Le responsable du traitement des données personnelles collectées sur HooYia Market est :"
+msgstr "The controller of personal data collected on HooYia Market is:"
+
+#: .\templates\legal\politique.html:119
+msgid "Les paiements mobiles (Orange Money, MTN MoMo) sont traités directement par les opérateurs concernés."
+msgstr "Mobile payments (Orange Money, MTN MoMo) are processed directly by the respective operators."
+
+#: .\templates\legal\politique.html:155
+msgid "Logs de connexion"
+msgstr "Connection logs"
+
+#: .\templates\legal\politique.html:156
+msgid "Messages chat"
+msgstr "Chat messages"
+
+#: .\templates\legal\politique.html:116
+msgid "Messages chat, avis publiés"
+msgstr "Chat messages, published reviews"
+
+#: .\templates\legal\politique.html:194
+msgid "Mots de passe hashés (bcrypt) — jamais stockés en clair"
+msgstr "Hashed passwords (bcrypt) — never stored in plain text"
+
+#: .\templates\legal\politique.html:111
+msgid "Nom, prénom, nom d'utilisateur"
+msgstr "Last name, first name, username"
+
+#: .\templates\legal\politique.html:105
+msgid "Nous collectons les données suivantes selon votre utilisation de la plateforme :"
+msgstr "We collect the following data depending on your use of the platform:"
+
+#: .\templates\legal\politique.html:191
+msgid "Nous mettons en œuvre les mesures techniques suivantes pour protéger vos données :"
+msgstr "We implement the following technical measures to protect your data:"
+
+#: .\templates\legal\politique.html:119
+msgid "Nous ne collectons"
+msgstr "We only collect"
+
+#: .\templates\legal\politique.html:164
+msgid "Nous ne vendons jamais vos données personnelles. Elles peuvent être partagées uniquement avec :"
+msgstr "We never sell your personal data. It may only be shared with:"
+
+#: .\templates\legal\politique.html:221
+msgid "Nous pouvons mettre à jour cette politique à tout moment. En cas de modification substantielle, vous serez notifié par email au moins 15 jours avant l'entrée en vigueur des changements. La date de dernière mise à jour est toujours indiquée en haut de ce document."
+msgstr "We may update this policy at any time. In case of substantial modification, you will be notified by email at least 15 days before the changes take effect. The date of last update is always indicated at the top of this document."
+
+#: .\templates\legal\politique.html:211
+msgid "Nous répondrons dans un délai de"
+msgstr "We will respond within"
+
+#: .\templates\legal\politique.html:141
+msgid "Obligation légale"
+msgstr "Legal obligation"
+
+#: .\templates\legal\politique.html:211
+msgid "Pour exercer ces droits, contactez-nous à"
+msgstr "To exercise these rights, contact us at"
+
+#: .\templates\legal\politique.html:240
+msgid "Pour exercer vos droits ou poser une question, écrivez-nous à"
+msgstr "To exercise your rights or ask a question, write to us at"
+
+#: .\templates\legal\politique.html:226
+msgid "Pour toute question relative à vos données personnelles ou pour exercer vos droits :"
+msgstr "For any question regarding your personal data or to exercise your rights:"
+
+#: .\templates\legal\politique.html:166
+msgid "Prestataires techniques"
+msgstr "Technical service providers"
+
+#: .\templates\legal\politique.html:131
+msgid "Prévention de la fraude et sécurité de la plateforme"
+msgstr "Fraud prevention and platform security"
+
+#: .\templates\legal\politique.html:132
+msgid "Respect de nos obligations légales"
+msgstr "Compliance with our legal obligations"
+
+#: .\templates\legal\politique.html:196
+msgid "Sauvegardes chiffrées quotidiennes"
+msgstr "Daily encrypted backups"
+
+#: .\templates\legal\politique.html:97
+msgid "Société :"
+msgstr "Company:"
+
+#: .\templates\legal\politique.html:108
+msgid "Source"
+msgstr "Source"
+
+#: .\templates\legal\politique.html:127
+msgid "Traitement et suivi de vos commandes"
+msgstr "Processing and tracking your orders"
+
+#: .\templates\legal\politique.html:114
+msgid "Transactions"
+msgstr "Transactions"
+
+#: .\templates\legal\politique.html:150
+msgid "Type de données"
+msgstr "Data type"
+
+#: .\templates\legal\politique.html:116
+msgid "Utilisation"
+msgstr "Usage"
+
+#: .\templates\legal\politique.html:171
+msgid "Vos données ne sont jamais transférées hors du territoire camerounais sans garanties appropriées."
+msgstr "Your data is never transferred outside Cameroonian territory without appropriate guarantees."
+
+#: .\templates\legal\politique.html:124
+msgid "Vos données sont traitées pour les finalités suivantes :"
+msgstr "Your data is processed for the following purposes:"
+
+#: .\templates\legal\politique.html:182
+msgid "Vous pouvez gérer vos préférences cookies depuis les paramètres de votre navigateur."
+msgstr "You can manage your cookie preferences from your browser settings."
+
+#: .\templates\legal\politique.html:119
+msgid "aucune donnée bancaire"
+msgstr "no banking data"
+
+#: .\templates\legal\politique.html:141
+msgid "conservation des données comptables"
+msgstr "accounting data retention"
+
+#: .\templates\legal\politique.html:206
+msgid "corriger des données inexactes"
+msgstr "correct inaccurate data"
+
+#: .\templates\legal\politique.html:142
+msgid "emails marketing (révocable à tout moment)"
+msgstr "marketing emails (revocable at any time)"
+
+#: .\templates\legal\politique.html:166
+msgid "hébergement, emails transactionnels (sous accord de confidentialité)"
+msgstr "hosting, transactional emails (under confidentiality agreement)"
+
+#: .\templates\legal\politique.html:180
+msgid "mesure d'audience anonyme (avec consentement)"
+msgstr "anonymous audience measurement (with consent)"
+
+#: .\templates\legal\politique.html:205
+msgid "obtenir une copie de vos données"
+msgstr "obtain a copy of your data"
+
+#: .\templates\legal\politique.html:208
+msgid "recevoir vos données dans un format structuré"
+msgstr "receive your data in a structured format"
+
+#: .\templates\legal\politique.html:209
+msgid "s'opposer à certains traitements"
+msgstr "object to certain processing"
+
+#: .\templates\legal\politique.html:179
+msgid "session, authentification, panier (non désactivables)"
+msgstr "session, authentication, cart (non-disableable)"
+
+#: .\templates\legal\politique.html:207
+msgid "supprimer votre compte et vos données"
+msgstr "delete your account and data"
+
+#: .\templates\legal\politique.html:168
+msgid "sur réquisition judiciaire uniquement"
+msgstr "on judicial request only"
+
+#: .\templates\legal\politique.html:140
+msgid "sécurité, prévention fraude, amélioration du service"
+msgstr "security, fraud prevention, service improvement"
+
+#: .\templates\legal\politique.html:139
+msgid "traitement des commandes, gestion du compte"
+msgstr "order processing, account management"
+
+#: .\templates\legal\politique.html:167
+msgid "uniquement les données nécessaires à la livraison (nom, adresse, téléphone)"
+msgstr "only the data necessary for delivery (name, address, phone)"
+
+#: .\templates\products\list.html:1084
+msgid "%(count)s product"
+msgid_plural "%(count)s products"
+msgstr[0] "%(count)s product"
+msgstr[1] "%(count)s products"

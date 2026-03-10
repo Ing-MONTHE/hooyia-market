@@ -1081,7 +1081,7 @@
     </aside>
 
     <div class="products-main">
-      <p class="products-count">{{ total_count }} produit{{ total_count|pluralize }}</p>
+      <p class="products-count">{% blocktranslate count count=total_count %}{{ count }} product{% plural %}{{ count }} products{% endblocktranslate %}</p>
 
       {% if page_obj.object_list %}
       <div class="products-grid" id="products-grid">

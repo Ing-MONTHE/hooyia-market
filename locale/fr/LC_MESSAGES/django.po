@@ -5473,3 +5473,9 @@ msgstr ""
 #: .\templates\vendeur\produits.html:189
 msgid "Ajouter mon premier produit"
 msgstr ""
+
+#: .\templates\products\list.html:1084
+msgid "%(count)s product"
+msgid_plural "%(count)s products"
+msgstr[0] "%(count)s produit"
+msgstr[1] "%(count)s produits"
