@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -24,7 +24,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}Mon Espace Vendeur — HooYia Market{% endblock %}
+{% block title %}{% trans "Mon Espace Vendeur" %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -37,7 +37,7 @@
         Bonjour, {{ request.user.prenom|default:request.user.username }} 👋
       </h1>
       <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
-        Voici un résumé de votre activité sur HooYia Market.
+        {% trans "Voici un résumé de votre activité sur HooYia Market." %}
       </p>
     </div>
     {% comment %} CTA principal — ajouter un produit {% endcomment %}
@@ -45,7 +45,7 @@
        style="display:inline-flex;align-items:center;gap:.5rem;">
       {% comment %} Lucide — Plus {% endcomment %}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Ajouter un produit
+      {% trans "Ajouter un produit" %}
     </a>
   </div>
 
@@ -65,7 +65,7 @@
       </div>
       <div>
         <p style="font-size:1.75rem;font-weight:800;color:var(--brand-600);margin:0;line-height:1;">{{ nb_produits }}</p>
-        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">Produits actifs</p>
+        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">{% trans "Produits actifs" %}</p>
       </div>
     </div>
 
@@ -78,7 +78,7 @@
       </div>
       <div>
         <p style="font-size:1.75rem;font-weight:800;color:var(--brand-600);margin:0;line-height:1;">{{ nb_commandes }}</p>
-        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">Commandes reçues</p>
+        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">{% trans "Commandes reçues" %}</p>
       </div>
     </div>
 
@@ -93,7 +93,7 @@
         <p style="font-size:1.375rem;font-weight:800;color:var(--brand-600);margin:0;line-height:1;">
           {{ ca_total|floatformat:0 }} <span style="font-size:.875rem;font-weight:600;">FCFA</span>
         </p>
-        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">CA total (livré)</p>
+        <p style="font-size:.8125rem;color:var(--text-muted);margin:.25rem 0 0 0;">{% trans "CA total (livré)" %}</p>
       </div>
     </div>
 
@@ -112,12 +112,12 @@
       <div style="display:flex;align-items:center;justify-content:space-between;
                   margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
         <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;">
-          Produits récents
+          {% trans "Produits récents" %}
         </h2>
         <a href="{% url 'products:vendeur_produits' %}"
            style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:.25rem;"
            onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-          Voir tout
+          {% trans "Voir tout" %}
           {% comment %} Lucide — ArrowRight {% endcomment %}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
@@ -157,9 +157,9 @@
             </div>
             {% comment %} Badge statut produit {% endcomment %}
             {% if produit.statut == 'actif' %}
-              <span class="badge badge-success">Actif</span>
+              <span class="badge badge-success">{% trans "Actif" %}</span>
             {% elif produit.statut == 'epuise' %}
-              <span class="badge badge-error">Épuisé</span>
+              <span class="badge badge-error">{% trans "Épuisé" %}</span>
             {% else %}
               <span class="badge badge-muted">{{ produit.statut }}</span>
             {% endif %}
@@ -169,10 +169,10 @@
       {% else %}
         <div style="text-align:center;padding:2rem 0;">
           <p style="font-size:.875rem;color:var(--text-muted);margin:0 0 .75rem 0;">
-            Aucun produit pour le moment.
+            {% trans "Aucun produit pour le moment." %}
           </p>
           <a href="{% url 'products:ajouter' %}" class="btn btn-secondary btn-sm">
-            Ajouter un produit
+            {% trans "Ajouter un produit" %}
           </a>
         </div>
       {% endif %}
@@ -187,12 +187,12 @@
       <div style="display:flex;align-items:center;justify-content:space-between;
                   margin-bottom:1.25rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);">
         <h2 style="font-size:.9375rem;font-weight:700;color:var(--brand-600);margin:0;">
-          Commandes récentes
+          {% trans "Commandes récentes" %}
         </h2>
         <a href="{% url 'products:vendeur_commandes' %}"
            style="font-size:.75rem;color:var(--brand-500);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:.25rem;"
            onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-          Voir tout
+          {% trans "Voir tout" %}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
@@ -216,13 +216,13 @@
               </span>
               {% comment %} Badge statut commande {% endcomment %}
               {% if commande.statut == 'livree' %}
-                <span class="badge badge-success">Livrée</span>
+                <span class="badge badge-success">{% trans "Livrée" %}</span>
               {% elif commande.statut == 'annulee' %}
-                <span class="badge badge-error">Annulée</span>
+                <span class="badge badge-error">{% trans "Annulée" %}</span>
               {% elif commande.statut == 'en_attente' %}
-                <span class="badge badge-warning">En attente</span>
+                <span class="badge badge-warning">{% trans "En attente" %}</span>
               {% elif commande.statut == 'expediee' %}
-                <span class="badge badge-brand">Expédiée</span>
+                <span class="badge badge-brand">{% trans "Expédiée" %}</span>
               {% else %}
                 <span class="badge badge-muted">{{ commande.statut }}</span>
               {% endif %}
@@ -233,7 +233,7 @@
       {% else %}
         <div style="text-align:center;padding:2rem 0;">
           <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
-            Aucune commande pour le moment.
+            {% trans "Aucune commande pour le moment." %}
           </p>
         </div>
       {% endif %}

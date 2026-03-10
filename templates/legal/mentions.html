@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Mentions légales — HooYia Market{% endblock %}
+{% block title %}{% trans "Mentions légales" %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -47,62 +47,62 @@
 <div class="legal-wrap">
 
   <div class="legal-hero">
-    <div class="legal-hero-label">Documents légaux</div>
-    <h1>Mentions légales</h1>
-    <div class="legal-hero-meta">Dernière mise à jour : 1er mars 2026 &nbsp;·&nbsp; Version 1.0</div>
+    <div class="legal-hero-label">{% trans "Documents légaux" %}</div>
+    <h1>{% trans "Mentions légales" %}</h1>
+    <div class="legal-hero-meta">{% trans "Dernière mise à jour : 1er mars 2026" %} &nbsp;·&nbsp; {% trans "Version 1.0" %}</div>
   </div>
 
   <div class="legal-section" id="s1">
-    <h2><span class="num">1</span> Éditeur du site</h2>
+    <h2><span class="num">1</span> {% trans "Éditeur du site" %}</h2>
     <div class="legal-info-grid">
-      <div class="legal-info-card"><div class="label">Société</div><div class="value">HooYia Market SARL</div></div>
-      <div class="legal-info-card"><div class="label">Forme juridique</div><div class="value">Société à Responsabilité Limitée</div></div>
-      <div class="legal-info-card"><div class="label">Siège social</div><div class="value">Douala, Cameroun</div></div>
-      <div class="legal-info-card"><div class="label">Capital social</div><div class="value">0 000 000 FCFA</div></div>
-      <div class="legal-info-card"><div class="label">Registre du commerce</div><div class="value">RC/BAF/2024/B/XXXX</div></div>
-      <div class="legal-info-card"><div class="label">Numéro contribuable</div><div class="value">M XXXX XXXX X</div></div>
-      <div class="legal-info-card"><div class="label">Email</div><div class="value">contact@hooyia.com</div></div>
-      <div class="legal-info-card"><div class="label">Téléphone</div><div class="value">+237 690 992 074</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Société" %}</div><div class="value">HooYia Market SARL</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Forme juridique" %}</div><div class="value">{% trans "Société à Responsabilité Limitée" %}</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Siège social" %}</div><div class="value">{% trans "Douala, Cameroun" %}</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Capital social" %}</div><div class="value">0 000 000 FCFA</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Registre du commerce" %}</div><div class="value">RC/BAF/2024/B/XXXX</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Numéro contribuable" %}</div><div class="value">M XXXX XXXX X</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Email" %}</div><div class="value">contact@hooyia.com</div></div>
+      <div class="legal-info-card"><div class="label">{% trans "Téléphone" %}</div><div class="value">+237 690 992 074</div></div>
     </div>
-    <p>Directeur de la publication : <strong>MONTHE Francklin Junior</strong></p>
+    <p>{% trans "Directeur de la publication :" %} <strong>MONTHE Francklin Junior</strong></p>
   </div>
 
   <div class="legal-section" id="s2">
-    <h2><span class="num">2</span> Hébergement</h2>
+    <h2><span class="num">2</span> {% trans "Hébergement" %}</h2>
     <ul>
-      <li><strong>Hébergeur :</strong> Render Inc.</li>
-      <li><strong>Site web :</strong> render.com</li>
-      <li><strong>Adresse :</strong> 525 Brannan St, Suite 300, San Francisco, CA 94107, États-Unis</li>
+      <li><strong>{% trans "Hébergeur :" %}</strong> Render Inc.</li>
+      <li><strong>{% trans "Site web :" %}</strong> render.com</li>
+      <li><strong>{% trans "Adresse :" %}</strong> 525 Brannan St, Suite 300, San Francisco, CA 94107, {% trans "États-Unis" %}</li>
     </ul>
-    <p>Les données des utilisateurs camerounais sont traitées conformément aux engagements contractuels de protection des données de Render Inc.</p>
+    <p>{% trans "Les données des utilisateurs camerounais sont traitées conformément aux engagements contractuels de protection des données de Render Inc." %}</p>
   </div>
 
   <div class="legal-section" id="s3">
-    <h2><span class="num">3</span> Propriété intellectuelle</h2>
-    <p>L'ensemble des éléments constituant le site HooYia Market (structure, design, textes, logos, images, base de données, code source) est la propriété exclusive de HooYia Market SARL et est protégé par les lois sur la propriété intellectuelle en vigueur au Cameroun.</p>
-    <p>Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sans autorisation écrite préalable.</p>
+    <h2><span class="num">3</span> {% trans "Propriété intellectuelle" %}</h2>
+    <p>{% trans "L'ensemble des éléments constituant le site HooYia Market (structure, design, textes, logos, images, base de données, code source) est la propriété exclusive de HooYia Market SARL et est protégé par les lois sur la propriété intellectuelle en vigueur au Cameroun." %}</p>
+    <p>{% trans "Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sans autorisation écrite préalable." %}</p>
   </div>
 
   <div class="legal-section" id="s4">
-    <h2><span class="num">4</span> Responsabilité</h2>
-    <p>HooYia Market met tout en œuvre pour assurer l'exactitude et la mise à jour des informations publiées. Toutefois, la société ne peut garantir l'exhaustivité, la précision ou l'actualité des informations diffusées sur le site.</p>
-    <p>HooYia Market ne saurait être tenu responsable des dommages directs ou indirects résultant de l'accès au site ou de l'utilisation de son contenu, ni des dommages pouvant survenir du fait des sites tiers vers lesquels des liens sont proposés.</p>
+    <h2><span class="num">4</span> {% trans "Responsabilité" %}</h2>
+    <p>{% trans "HooYia Market met tout en œuvre pour assurer l'exactitude et la mise à jour des informations publiées. Toutefois, la société ne peut garantir l'exhaustivité, la précision ou l'actualité des informations diffusées sur le site." %}</p>
+    <p>{% trans "HooYia Market ne saurait être tenu responsable des dommages directs ou indirects résultant de l'accès au site ou de l'utilisation de son contenu, ni des dommages pouvant survenir du fait des sites tiers vers lesquels des liens sont proposés." %}</p>
   </div>
 
   <div class="legal-section" id="s5">
-    <h2><span class="num">5</span> Données personnelles</h2>
-    <p>Le traitement des données personnelles collectées sur HooYia Market est régi par notre <a href="{% url 'products:politique' %}" style="color:#1E3A8A;font-weight:600;">Politique de confidentialité</a>.</p>
-    <p>Conformément à la législation camerounaise en vigueur, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits : <strong>privacy@hooyia.com</strong></p>
+    <h2><span class="num">5</span> {% trans "Données personnelles" %}</h2>
+    <p>{% trans "Le traitement des données personnelles collectées sur HooYia Market est régi par notre" %} <a href="{% url 'products:politique' %}" style="color:#1E3A8A;font-weight:600;">{% trans "Politique de confidentialité" %}</a>.</p>
+    <p>{% trans "Conformément à la législation camerounaise en vigueur, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits :" %} <strong>privacy@hooyia.com</strong></p>
   </div>
 
   <div class="legal-section" id="s6">
-    <h2><span class="num">6</span> Cookies</h2>
-    <p>Le site utilise des cookies techniques indispensables à son fonctionnement (session, authentification, panier). Ces cookies ne collectent aucune donnée personnelle à des fins publicitaires. Pour plus d'informations, consultez notre <a href="{% url 'products:politique' %}" style="color:#1E3A8A;font-weight:600;">Politique de confidentialité</a>.</p>
+    <h2><span class="num">6</span> {% trans "Cookies" %}</h2>
+    <p>{% trans "Le site utilise des cookies techniques indispensables à son fonctionnement (session, authentification, panier). Ces cookies ne collectent aucune donnée personnelle à des fins publicitaires. Pour plus d'informations, consultez notre" %} <a href="{% url 'products:politique' %}" style="color:#1E3A8A;font-weight:600;">{% trans "Politique de confidentialité" %}</a>.</p>
   </div>
 
   <div class="legal-section" id="s7">
-    <h2><span class="num">7</span> Droit applicable</h2>
-    <p>Les présentes mentions légales sont régies par le droit camerounais. En cas de litige, et après échec de toute tentative de résolution amiable, les tribunaux de Douala seront seuls compétents.</p>
+    <h2><span class="num">7</span> {% trans "Droit applicable" %}</h2>
+    <p>{% trans "Les présentes mentions légales sont régies par le droit camerounais. En cas de litige, et après échec de toute tentative de résolution amiable, les tribunaux de Douala seront seuls compétents." %}</p>
   </div>
 
   <div class="legal-contact-box">
@@ -110,8 +110,8 @@
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
     <div>
-      <h3>Une question juridique ?</h3>
-      <p>Contactez notre équipe à <a href="mailto:legal@hooyia.com">legal@hooyia.com</a> ou via notre <a href="{% url 'products:contact' %}">formulaire de contact</a>.</p>
+      <h3>{% trans "Une question juridique ?" %}</h3>
+      <p>{% trans "Contactez notre équipe à" %} <a href="mailto:legal@hooyia.com">legal@hooyia.com</a> {% trans "ou via notre" %} <a href="{% url 'products:contact' %}">{% trans "formulaire de contact" %}</a>.</p>
     </div>
   </div>
 

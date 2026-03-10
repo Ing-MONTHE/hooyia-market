@@ -7,6 +7,7 @@ afficher et envoyer les messages en temps réel.
 """
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext_lazy as _
 
 from .models import Conversation
 
@@ -36,7 +37,7 @@ def chat_detail(request, pk):
     )
     if conversation.participant1 != request.user and conversation.participant2 != request.user:
         from django.http import HttpResponseForbidden
-        return HttpResponseForbidden("Vous n'êtes pas membre de cette conversation.")
+        return HttpResponseForbidden(_("Vous n'êtes pas membre de cette conversation."))
 
     return render(request, 'chat/chat_detail.html', {
         'conversation_id': pk,

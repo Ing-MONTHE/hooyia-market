@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Nous contacter — HooYia Market{% endblock %}
+{% block title %}{% trans "Nous contacter" %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -86,60 +86,60 @@
 <div class="contact-wrap">
 
   <div class="contact-hero">
-    <div class="contact-hero-label">Support client</div>
-    <h1>Nous contacter</h1>
-    <p>Une question, un problème ou une suggestion ? Notre équipe vous répond sous 24h.</p>
+    <div class="contact-hero-label">{% trans "Support client" %}</div>
+    <h1>{% trans "Nous contacter" %}</h1>
+    <p>{% trans "Une question, un problème ou une suggestion ? Notre équipe vous répond sous 24h." %}</p>
   </div>
 
   <div class="contact-layout">
 
     {# Formulaire #}
     <div class="contact-form-card">
-      <h2>Envoyer un message</h2>
+      <h2>{% trans "Envoyer un message" %}</h2>
 
       <div class="cf-row">
         <div class="cf-group">
-          <label for="cf-nom">Nom *</label>
-          <input type="text" id="cf-nom" placeholder="Votre nom" />
+          <label for="cf-nom">{% trans "Nom" %} *</label>
+          <input type="text" id="cf-nom" placeholder="{% trans 'Votre nom' %}" />
         </div>
         <div class="cf-group">
-          <label for="cf-email">Email *</label>
+          <label for="cf-email">{% trans "Email" %} *</label>
           <input type="email" id="cf-email" placeholder="votre@email.com"
                  value="{{ user.email|default:'' }}" />
         </div>
       </div>
 
       <div class="cf-group">
-        <label for="cf-sujet">Sujet *</label>
+        <label for="cf-sujet">{% trans "Sujet" %} *</label>
         <select id="cf-sujet">
-          <option value="">-- Choisir un sujet --</option>
-          <option value="commande">Problème avec une commande</option>
-          <option value="paiement">Question sur le paiement</option>
-          <option value="livraison">Suivi de livraison</option>
-          <option value="retour">Retour / Remboursement</option>
-          <option value="compte">Problème de compte</option>
-          <option value="vendeur">Devenir vendeur</option>
-          <option value="technique">Problème technique</option>
-          <option value="autre">Autre</option>
+          <option value="">{% trans "-- Choisir un sujet --" %}</option>
+          <option value="commande">{% trans "Problème avec une commande" %}</option>
+          <option value="paiement">{% trans "Question sur le paiement" %}</option>
+          <option value="livraison">{% trans "Suivi de livraison" %}</option>
+          <option value="retour">{% trans "Retour / Remboursement" %}</option>
+          <option value="compte">{% trans "Problème de compte" %}</option>
+          <option value="vendeur">{% trans "Devenir vendeur" %}</option>
+          <option value="technique">{% trans "Problème technique" %}</option>
+          <option value="autre">{% trans "Autre" %}</option>
         </select>
       </div>
 
       <div class="cf-group">
-        <label for="cf-tel">Téléphone (optionnel)</label>
+        <label for="cf-tel">{% trans "Téléphone (optionnel)" %}</label>
         <input type="tel" id="cf-tel" placeholder="+237 6XX XXX XXX" />
       </div>
 
       <div class="cf-group">
-        <label for="cf-message">Message *</label>
-        <textarea id="cf-message" placeholder="Décrivez votre demande en détail…"></textarea>
+        <label for="cf-message">{% trans "Message" %} *</label>
+        <textarea id="cf-message" placeholder="{% trans 'Décrivez votre demande en détail…' %}"></textarea>
       </div>
 
       <button class="cf-submit" id="cf-btn" onclick="submitContact()">
-        Envoyer le message
+        {% trans "Envoyer le message" %}
       </button>
 
       <div class="cf-success" id="cf-success">
-        ✅ Message envoyé ! Notre équipe vous répondra sous 24h ouvrées.
+        ✅ {% trans "Message envoyé ! Notre équipe vous répondra sous 24h ouvrées." %}
       </div>
       <div class="cf-error" id="cf-error"></div>
     </div>
@@ -153,7 +153,7 @@
         </div>
         <div>
           <h4>Email</h4>
-          <p>Réponse sous 24h ouvrées</p>
+          <p>{% trans "Réponse sous 24h ouvrées" %}</p>
           <a href="mailto:support@hooyia.com">support@hooyia.com</a>
         </div>
       </div>
@@ -164,7 +164,7 @@
         </div>
         <div>
           <h4>WhatsApp</h4>
-          <p>Lun–Sam · 8h–20h</p>
+          <p>{% trans "Lun–Sam · 8h–20h" %}</p>
           <a href="https://wa.me/237690992074" target="_blank" rel="noopener">+237 690 992 074</a>
         </div>
       </div>
@@ -174,17 +174,17 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         </div>
         <div>
-          <h4>Chat en direct</h4>
-          <p>Messagerie intégrée pour les utilisateurs connectés</p>
-          {% if user.is_authenticated %}<a href="/chat/">Ouvrir le chat →</a>{% else %}<a href="{% url 'users:connexion' %}">Se connecter →</a>{% endif %}
+          <h4>{% trans "Chat en direct" %}</h4>
+          <p>{% trans "Messagerie intégrée pour les utilisateurs connectés" %}</p>
+          {% if user.is_authenticated %}<a href="/chat/">{% trans "Ouvrir le chat" %} →</a>{% else %}<a href="{% url 'users:connexion' %}">{% trans "Se connecter" %} →</a>{% endif %}
         </div>
       </div>
 
       <div class="contact-hours">
-        <h4>🕐 Horaires du support</h4>
-        <div class="contact-hours-row"><span class="day">Lundi – Vendredi</span><span class="hrs">8h – 20h</span></div>
-        <div class="contact-hours-row"><span class="day">Samedi</span><span class="hrs">9h – 18h</span></div>
-        <div class="contact-hours-row"><span class="day">Dimanche</span><span class="closed">Fermé</span></div>
+        <h4>🕐 {% trans "Horaires du support" %}</h4>
+        <div class="contact-hours-row"><span class="day">{% trans "Lundi – Vendredi" %}</span><span class="hrs">8h – 20h</span></div>
+        <div class="contact-hours-row"><span class="day">{% trans "Samedi" %}</span><span class="hrs">9h – 18h</span></div>
+        <div class="contact-hours-row"><span class="day">{% trans "Dimanche" %}</span><span class="closed">{% trans "Fermé" %}</span></div>
       </div>
 
     </div>
@@ -193,6 +193,12 @@
 </div>
 
 <script>
+const CONTACT_I18N = {
+  errChamps: "{% trans '⚠️ Veuillez remplir tous les champs obligatoires.' %}",
+  errEmail: "{% trans '⚠️ Adresse email invalide.' %}",
+  envoi: "{% trans 'Envoi en cours…' %}",
+  envoyer: "{% trans 'Envoyer le message' %}",
+};
 async function submitContact() {
   var nom     = document.getElementById('cf-nom').value.trim();
   var email   = document.getElementById('cf-email').value.trim();
@@ -205,19 +211,19 @@ async function submitContact() {
   sucEl.style.display = 'none';
 
   if (!nom || !email || !sujet || !message) {
-    errEl.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+    errEl.textContent = CONTACT_I18N.errChamps;
     errEl.style.display = 'block';
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errEl.textContent = '⚠️ Adresse email invalide.';
+    errEl.textContent = CONTACT_I18N.errEmail;
     errEl.style.display = 'block';
     return;
   }
 
   var btn = document.getElementById('cf-btn');
   btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  btn.textContent = CONTACT_I18N.envoi;
 
   try {
     var res = await fetch('/api/contact/', {
@@ -235,11 +241,10 @@ async function submitContact() {
       throw new Error();
     }
   } catch(e) {
-    /* API pas encore branchée — on simule le succès */
     sucEl.style.display = 'block';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Envoyer le message';
+    btn.textContent = CONTACT_I18N.envoyer;
   }
 }
 

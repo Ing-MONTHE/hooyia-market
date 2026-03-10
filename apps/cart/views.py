@@ -6,6 +6,7 @@ via JavaScript (fetch API → JSON depuis api_views.py).
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -22,10 +23,10 @@ def panier(request):
     Les admins/vendeurs sont redirigés vers l'accueil : ils n'ont pas de panier.
     """
     if request.user.is_staff or request.user.is_admin or request.user.is_vendeur:
-        messages.info(request, "Les administrateurs n'ont pas accès au panier.")
+        messages.info(request, _("Les administrateurs n'ont pas accès au panier."))
         return redirect('products:accueil')
 
     context = {
-        'titre': 'Mon Panier — HooYia Market',
+        'titre': _('Mon Panier — HooYia Market'),
     }
     return render(request, 'cart/cart.html', context)

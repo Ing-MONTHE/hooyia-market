@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -14,7 +14,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}Mes Commandes — HooYia Market{% endblock %}
+{% block title %}{% trans "Mes Commandes" %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -23,11 +23,11 @@
   {% comment %} ── EN-TÊTE ── {% endcomment %}
   <div style="margin-bottom:1.75rem;">
     <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:var(--brand-600);margin:0 0 .25rem 0;">
-      Mes commandes
+      {% trans "Mes commandes" %}
     </h1>
     <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
-      {{ commandes|length }} commande{{ commandes|length|pluralize }}
-      {% if statut %} · filtre : <strong>{{ statut }}</strong>{% endif %}
+      {{ commandes|length }} {% trans "commande" %}{{ commandes|length|pluralize }}
+      {% if statut %} · {% trans "filtre :" %} <strong>{{ statut }}</strong>{% endif %}
     </p>
   </div>
 
@@ -70,7 +70,7 @@
 
           {% comment %} Client {% endcomment %}
           <div style="padding-left:1.5rem;border-left:1px solid var(--border);">
-            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .1rem 0;">Client</p>
+            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .1rem 0;">{% trans "Client" %}</p>
             <p style="font-size:.875rem;font-weight:600;color:var(--text-primary);margin:0;">
               {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
             </p>
@@ -78,7 +78,7 @@
 
           {% comment %} Produits commandés (du vendeur uniquement) {% endcomment %}
           <div style="padding-left:1.5rem;border-left:1px solid var(--border);">
-            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .3rem 0;">Produits</p>
+            <p style="font-size:.75rem;color:var(--text-muted);margin:0 0 .3rem 0;">{% trans "Produits" %}</p>
             <div style="display:flex;flex-direction:column;gap:.15rem;">
               {% for ligne in commande.lignes.all %}
                 {% if ligne.produit.vendeur == request.user %}
@@ -101,17 +101,17 @@
             </p>
 
             {% if commande.statut == 'livree' %}
-              <span class="badge badge-success">Livrée</span>
+              <span class="badge badge-success">{% trans "Livrée" %}</span>
             {% elif commande.statut == 'annulee' %}
-              <span class="badge badge-error">Annulée</span>
+              <span class="badge badge-error">{% trans "Annulée" %}</span>
             {% elif commande.statut == 'en_attente' %}
-              <span class="badge badge-warning">En attente</span>
+              <span class="badge badge-warning">{% trans "En attente" %}</span>
             {% elif commande.statut == 'confirmee' %}
-              <span class="badge badge-brand">Confirmée</span>
+              <span class="badge badge-brand">{% trans "Confirmée" %}</span>
             {% elif commande.statut == 'en_preparation' %}
-              <span class="badge badge-accent">En préparation</span>
+              <span class="badge badge-accent">{% trans "En préparation" %}</span>
             {% elif commande.statut == 'expediee' %}
-              <span class="badge badge-brand">Expédiée</span>
+              <span class="badge badge-brand">{% trans "Expédiée" %}</span>
             {% else %}
               <span class="badge badge-muted">{{ commande.statut }}</span>
             {% endif %}
@@ -132,7 +132,7 @@
   <div class="card" style="padding:3rem;text-align:center;">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem auto;display:block;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
     <p style="font-size:.9375rem;color:var(--text-muted);margin:0;">
-      Aucune commande{% if statut %} avec ce statut{% endif %}.
+      {% trans "Aucune commande" %}{% if statut %} {% trans "avec ce statut" %}{% endif %}.
     </p>
   </div>
   {% endif %}

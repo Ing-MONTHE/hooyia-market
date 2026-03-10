@@ -5,6 +5,7 @@ Les données sont chargées via JavaScript (fetch API → JSON).
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from .models import Commande
 
 
@@ -16,7 +17,7 @@ def client_required(view_func):
     @login_required
     def _wrapped(request, *args, **kwargs):
         if request.user.is_staff or request.user.is_admin or request.user.is_vendeur:
-            messages.warning(request, "Cette fonctionnalité est réservée aux clients.")
+            messages.warning(request, _("Cette fonctionnalité est réservée aux clients."))
             return redirect('products:accueil')
         return view_func(request, *args, **kwargs)
     return _wrapped
@@ -37,7 +38,7 @@ def checkout(request):
     # Adresses enregistrées de l'utilisateur (pour le select du formulaire)
     adresses = request.user.adresses.order_by('-is_default', '-date_creation')
     context = {
-        'titre'   : 'Finaliser ma commande — HooYia Market',
+        'titre'   : _('Finaliser ma commande — HooYia Market'),
         'adresses': adresses,
     }
     return render(request, 'orders/checkout.html', context)
@@ -59,7 +60,7 @@ def confirmation(request, pk):
 
     context = {
         'commande': commande,
-        'titre'   : f'Commande #{commande.reference_courte} — HooYia Market',
+        'titre'   : _('Commande #%(ref)s — HooYia Market') % {'ref': commande.reference_courte},
     }
     return render(request, 'orders/confirm.html', context)
 
@@ -75,6 +76,6 @@ def historique(request):
     La liste est chargée via GET /api/commandes/.
     """
     context = {
-        'titre': 'Mes commandes — HooYia Market',
+        'titre': _('Mes commandes — HooYia Market'),
     }
     return render(request, 'orders/history.html', context)

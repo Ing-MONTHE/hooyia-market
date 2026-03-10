@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}FAQ — HooYia Market{% endblock %}
+{% block title %}{% trans "FAQ" %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -79,210 +79,210 @@
 <div class="faq-wrap">
 
   <div class="faq-hero">
-    <div class="faq-hero-label">Questions fréquentes</div>
-    <h1>Tout ce que vous devez savoir</h1>
-    <p>Trouvez rapidement les réponses à vos questions sur HooYia Market.</p>
+    <div class="faq-hero-label">{% trans "Questions fréquentes" %}</div>
+    <h1>{% trans "Tout ce que vous devez savoir" %}</h1>
+    <p>{% trans "Trouvez rapidement les réponses à vos questions sur HooYia Market." %}</p>
     <div class="faq-search">
-      <input type="text" id="faq-search-input" placeholder="Rechercher une question…" oninput="filterFaq(this.value)" />
-      <button onclick="filterFaq(document.getElementById('faq-search-input').value)">Chercher</button>
+      <input type="text" id="faq-search-input" placeholder="{% trans 'Rechercher une question…' %}" oninput="filterFaq(this.value)" />
+      <button onclick="filterFaq(document.getElementById('faq-search-input').value)">{% trans "Chercher" %}</button>
     </div>
   </div>
 
   {# Filtres #}
   <div class="faq-filters">
-    <button class="faq-filter active" onclick="filterCat('all',this)">Tout</button>
-    <button class="faq-filter" onclick="filterCat('commandes',this)">Commandes</button>
-    <button class="faq-filter" onclick="filterCat('paiement',this)">Paiement</button>
-    <button class="faq-filter" onclick="filterCat('livraison',this)">Livraison</button>
-    <button class="faq-filter" onclick="filterCat('retours',this)">Retours</button>
-    <button class="faq-filter" onclick="filterCat('compte',this)">Compte</button>
-    <button class="faq-filter" onclick="filterCat('vendeurs',this)">Vendeurs</button>
+    <button class="faq-filter active" onclick="filterCat('all',this)">{% trans "Tout" %}</button>
+    <button class="faq-filter" onclick="filterCat('commandes',this)">{% trans "Commandes" %}</button>
+    <button class="faq-filter" onclick="filterCat('paiement',this)">{% trans "Paiement" %}</button>
+    <button class="faq-filter" onclick="filterCat('livraison',this)">{% trans "Livraison" %}</button>
+    <button class="faq-filter" onclick="filterCat('retours',this)">{% trans "Retours" %}</button>
+    <button class="faq-filter" onclick="filterCat('compte',this)">{% trans "Compte" %}</button>
+    <button class="faq-filter" onclick="filterCat('vendeurs',this)">{% trans "Vendeurs" %}</button>
   </div>
 
   <div id="faq-no-results">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5" style="margin-bottom:12px;display:block;margin-left:auto;margin-right:auto"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    Aucun résultat pour votre recherche.
+    {% trans "Aucun résultat pour votre recherche." %}
   </div>
 
   {# ── COMMANDES ── #}
   <div class="faq-group" id="group-commandes" data-cat="commandes">
-    <div class="faq-group-title" id="commandes">📦 Commandes</div>
+    <div class="faq-group-title" id="commandes">📦 {% trans "Commandes" %}</div>
 
     <div class="faq-item" data-cat="commandes">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment passer une commande sur HooYia Market ?</span>
+        <span class="faq-q-text">{% trans "Comment passer une commande sur HooYia Market ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Parcourez le catalogue, ajoutez les produits au panier, renseignez votre adresse de livraison, puis confirmez et choisissez votre mode de paiement. Vous recevrez une confirmation par email ou notification.</div>
+      <div class="faq-a">{% trans "Parcourez le catalogue, ajoutez les produits au panier, renseignez votre adresse de livraison, puis confirmez et choisissez votre mode de paiement. Vous recevrez une confirmation par email ou notification." %}</div>
     </div>
 
     <div class="faq-item" data-cat="commandes">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment suivre l'état de ma commande ?</span>
+        <span class="faq-q-text">{% trans "Comment suivre l'état de ma commande ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Connectez-vous et allez dans <strong>Mon compte → Mes commandes</strong>. Vous verrez le statut en temps réel : En attente → Confirmée → En préparation → Expédiée → Livrée. Des notifications vous sont envoyées à chaque étape.</div>
+      <div class="faq-a">{% trans "Connectez-vous et allez dans" %} <strong>{% trans "Mon compte → Mes commandes" %}</strong>. {% trans "Vous verrez le statut en temps réel : En attente → Confirmée → En préparation → Expédiée → Livrée. Des notifications vous sont envoyées à chaque étape." %}</div>
     </div>
 
     <div class="faq-item" data-cat="commandes">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Puis-je annuler une commande ?</span>
+        <span class="faq-q-text">{% trans "Puis-je annuler une commande ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">L'annulation est possible tant que la commande est au statut <strong>En attente</strong>. Une fois confirmée ou en préparation, contactez notre <a href="{% url 'products:assistance' %}">service client</a> dans les plus brefs délais.</div>
+      <div class="faq-a">{% trans "L'annulation est possible tant que la commande est au statut" %} <strong>{% trans "En attente" %}</strong>. {% trans "Une fois confirmée ou en préparation, contactez notre" %} <a href="{% url 'products:assistance' %}">{% trans "service client" %}</a> {% trans "dans les plus brefs délais." %}</div>
     </div>
 
     <div class="faq-item" data-cat="commandes">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Puis-je modifier ma commande après validation ?</span>
+        <span class="faq-q-text">{% trans "Puis-je modifier ma commande après validation ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Il n'est pas possible de modifier une commande confirmée. Vous devez l'annuler (si encore possible) et en passer une nouvelle, ou contacter notre équipe via le <a href="{% url 'products:contact' %}">formulaire de contact</a>.</div>
+      <div class="faq-a">{% trans "Il n'est pas possible de modifier une commande confirmée. Vous devez l'annuler (si encore possible) et en passer une nouvelle, ou contacter notre équipe via le" %} <a href="{% url 'products:contact' %}">{% trans "formulaire de contact" %}</a>.</div>
     </div>
   </div>
 
   {# ── PAIEMENT ── #}
   <div class="faq-group" id="group-paiement" data-cat="paiement">
-    <div class="faq-group-title" id="paiement">💳 Paiement</div>
+    <div class="faq-group-title" id="paiement">💳 {% trans "Paiement" %}</div>
 
     <div class="faq-item" data-cat="paiement">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Quels modes de paiement sont acceptés ?</span>
+        <span class="faq-q-text">{% trans "Quels modes de paiement sont acceptés ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Nous acceptons : <strong>paiement à la livraison</strong> (espèces), <strong>Orange Money</strong> et <strong>MTN Mobile Money</strong> (bientôt disponibles). Aucune carte bancaire pour l'instant.</div>
+      <div class="faq-a">{% trans "Nous acceptons :" %} <strong>{% trans "paiement à la livraison" %}</strong> ({% trans "espèces" %}), <strong>Orange Money</strong> {% trans "et" %} <strong>MTN Mobile Money</strong> ({% trans "bientôt disponibles" %}). {% trans "Aucune carte bancaire pour l'instant." %}</div>
     </div>
 
     <div class="faq-item" data-cat="paiement">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Le paiement en ligne est-il sécurisé ?</span>
+        <span class="faq-q-text">{% trans "Le paiement en ligne est-il sécurisé ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Oui. Toutes les communications sont chiffrées via HTTPS. HooYia Market ne stocke aucune donnée bancaire sur ses serveurs. Les paiements mobiles sont traités directement par Orange et MTN.</div>
+      <div class="faq-a">{% trans "Oui. Toutes les communications sont chiffrées via HTTPS. HooYia Market ne stocke aucune donnée bancaire sur ses serveurs. Les paiements mobiles sont traités directement par Orange et MTN." %}</div>
     </div>
 
     <div class="faq-item" data-cat="paiement">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Puis-je obtenir une facture ?</span>
+        <span class="faq-q-text">{% trans "Puis-je obtenir une facture ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Un récapitulatif de commande est disponible dans votre espace client. Pour une facture officielle, contactez-nous à <a href="mailto:facturation@hooyia.com">facturation@hooyia.com</a>.</div>
+      <div class="faq-a">{% trans "Un récapitulatif de commande est disponible dans votre espace client. Pour une facture officielle, contactez-nous à" %} <a href="mailto:facturation@hooyia.com">facturation@hooyia.com</a>.</div>
     </div>
   </div>
 
   {# ── LIVRAISON ── #}
   <div class="faq-group" id="group-livraison" data-cat="livraison">
-    <div class="faq-group-title" id="livraison">🚚 Livraison</div>
+    <div class="faq-group-title" id="livraison">🚚 {% trans "Livraison" %}</div>
 
     <div class="faq-item" data-cat="livraison">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Dans quelles villes livrez-vous ?</span>
+        <span class="faq-q-text">{% trans "Dans quelles villes livrez-vous ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Nous livrons actuellement à <strong>Douala</strong>, <strong>Yaoundé</strong> et <strong>Bafoussam</strong>. D'autres villes seront ajoutées prochainement. Pour toute autre localisation, <a href="{% url 'products:contact' %}">contactez-nous</a>.</div>
+      <div class="faq-a">{% trans "Nous livrons actuellement à" %} <strong>Douala</strong>, <strong>Yaoundé</strong> {% trans "et" %} <strong>Bafoussam</strong>. {% trans "D'autres villes seront ajoutées prochainement. Pour toute autre localisation," %} <a href="{% url 'products:contact' %}">{% trans "contactez-nous" %}</a>.</div>
     </div>
 
     <div class="faq-item" data-cat="livraison">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Quels sont les délais de livraison ?</span>
+        <span class="faq-q-text">{% trans "Quels sont les délais de livraison ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a"><strong>Douala :</strong> 24–48h · <strong>Yaoundé :</strong> 48–72h · <strong>Bafoussam :</strong> 72–96h. Ces délais s'entendent en jours ouvrés à partir de la confirmation de commande.</div>
+      <div class="faq-a"><strong>Douala :</strong> 24–48h · <strong>Yaoundé :</strong> 48–72h · <strong>Bafoussam :</strong> 72–96h. {% trans "Ces délais s'entendent en jours ouvrés à partir de la confirmation de commande." %}</div>
     </div>
 
     <div class="faq-item" data-cat="livraison">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Quels sont les frais de livraison ?</span>
+        <span class="faq-q-text">{% trans "Quels sont les frais de livraison ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Les frais de livraison sont calculés selon la zone et le poids du colis. Ils sont affichés clairement avant la validation de votre commande. La livraison gratuite est disponible au-delà d'un certain montant d'achat.</div>
+      <div class="faq-a">{% trans "Les frais de livraison sont calculés selon la zone et le poids du colis. Ils sont affichés clairement avant la validation de votre commande. La livraison gratuite est disponible au-delà d'un certain montant d'achat." %}</div>
     </div>
   </div>
 
   {# ── RETOURS ── #}
   <div class="faq-group" id="group-retours" data-cat="retours">
-    <div class="faq-group-title" id="retours">🔄 Retours & Remboursements</div>
+    <div class="faq-group-title" id="retours">🔄 {% trans "Retours & Remboursements" %}</div>
 
     <div class="faq-item" data-cat="retours">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Puis-je retourner un produit ?</span>
+        <span class="faq-q-text">{% trans "Puis-je retourner un produit ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Oui, dans un délai de <strong>48h après la livraison</strong> pour tout produit défectueux ou non conforme à la description. Le produit doit être dans son emballage d'origine.</div>
+      <div class="faq-a">{% trans "Oui, dans un délai de" %} <strong>{% trans "48h après la livraison" %}</strong> {% trans "pour tout produit défectueux ou non conforme à la description. Le produit doit être dans son emballage d'origine." %}</div>
     </div>
 
     <div class="faq-item" data-cat="retours">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment initier un retour ?</span>
+        <span class="faq-q-text">{% trans "Comment initier un retour ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Contactez notre équipe via la messagerie intégrée ou à <a href="mailto:support@hooyia.com">support@hooyia.com</a> en indiquant votre numéro de commande et la raison du retour. Nous vous guiderons dans la procédure.</div>
+      <div class="faq-a">{% trans "Contactez notre équipe via la messagerie intégrée ou à" %} <a href="mailto:support@hooyia.com">support@hooyia.com</a> {% trans "en indiquant votre numéro de commande et la raison du retour. Nous vous guiderons dans la procédure." %}</div>
     </div>
 
     <div class="faq-item" data-cat="retours">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Dans quel délai suis-je remboursé ?</span>
+        <span class="faq-q-text">{% trans "Dans quel délai suis-je remboursé ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Une fois le retour validé par notre équipe, le remboursement est effectué sous <strong>5 à 7 jours ouvrés</strong> via le même moyen de paiement utilisé lors de la commande.</div>
+      <div class="faq-a">{% trans "Une fois le retour validé par notre équipe, le remboursement est effectué sous" %} <strong>{% trans "5 à 7 jours ouvrés" %}</strong> {% trans "via le même moyen de paiement utilisé lors de la commande." %}</div>
     </div>
   </div>
 
   {# ── COMPTE ── #}
   <div class="faq-group" id="group-compte" data-cat="compte">
-    <div class="faq-group-title" id="compte">👤 Compte utilisateur</div>
+    <div class="faq-group-title" id="compte">👤 {% trans "Compte utilisateur" %}</div>
 
     <div class="faq-item" data-cat="compte">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment créer un compte ?</span>
+        <span class="faq-q-text">{% trans "Comment créer un compte ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Cliquez sur <strong>"S'inscrire"</strong> en haut à droite, renseignez votre email, un nom d'utilisateur et un mot de passe. Un email de confirmation vous sera envoyé.</div>
+      <div class="faq-a">{% trans "Cliquez sur" %} <strong>"{% trans "S'inscrire" %}"</strong> {% trans "en haut à droite, renseignez votre email, un nom d'utilisateur et un mot de passe. Un email de confirmation vous sera envoyé." %}</div>
     </div>
 
     <div class="faq-item" data-cat="compte">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">J'ai oublié mon mot de passe, que faire ?</span>
+        <span class="faq-q-text">{% trans "J'ai oublié mon mot de passe, que faire ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Sur la page de connexion, cliquez sur <strong>"Mot de passe oublié"</strong>. Entrez votre email et vous recevrez un lien de réinitialisation valable 24h.</div>
+      <div class="faq-a">{% trans "Sur la page de connexion, cliquez sur" %} <strong>"{% trans "Mot de passe oublié" %}"</strong>. {% trans "Entrez votre email et vous recevrez un lien de réinitialisation valable 24h." %}</div>
     </div>
 
     <div class="faq-item" data-cat="compte">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment supprimer mon compte ?</span>
+        <span class="faq-q-text">{% trans "Comment supprimer mon compte ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Rendez-vous dans <strong>Mon compte → Paramètres</strong> puis cliquez sur "Supprimer mon compte". Vos données seront supprimées sous 30 jours conformément à notre <a href="{% url 'products:politique' %}">Politique de confidentialité</a>.</div>
+      <div class="faq-a">{% trans "Rendez-vous dans" %} <strong>{% trans "Mon compte → Paramètres" %}</strong> {% trans "puis cliquez sur \"Supprimer mon compte\". Vos données seront supprimées sous 30 jours conformément à notre" %} <a href="{% url 'products:politique' %}">{% trans "Politique de confidentialité" %}</a>.</div>
     </div>
   </div>
 
   {# ── VENDEURS ── #}
   <div class="faq-group" id="group-vendeurs" data-cat="vendeurs">
-    <div class="faq-group-title" id="vendeurs">🏪 Vendeurs</div>
+    <div class="faq-group-title" id="vendeurs">🏪 {% trans "Vendeurs" %}</div>
 
     <div class="faq-item" data-cat="vendeurs">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Comment devenir vendeur sur HooYia Market ?</span>
+        <span class="faq-q-text">{% trans "Comment devenir vendeur sur HooYia Market ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Créez un compte, puis contactez notre équipe à <a href="mailto:vendeurs@hooyia.com">vendeurs@hooyia.com</a> pour demander l'activation du statut vendeur. Nous vous accompagnons dans la configuration de votre boutique.</div>
+      <div class="faq-a">{% trans "Créez un compte, puis contactez notre équipe à" %} <a href="mailto:vendeurs@hooyia.com">vendeurs@hooyia.com</a> {% trans "pour demander l'activation du statut vendeur. Nous vous accompagnons dans la configuration de votre boutique." %}</div>
     </div>
 
     <div class="faq-item" data-cat="vendeurs">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Quels types de produits puis-je vendre ?</span>
+        <span class="faq-q-text">{% trans "Quels types de produits puis-je vendre ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">HooYia Market est spécialisé en électronique et informatique : smartphones, PC, accessoires, périphériques, TV, appareils connectés. Les produits contrefaits ou dangereux sont strictement interdits.</div>
+      <div class="faq-a">{% trans "HooYia Market est spécialisé en électronique et informatique : smartphones, PC, accessoires, périphériques, TV, appareils connectés. Les produits contrefaits ou dangereux sont strictement interdits." %}</div>
     </div>
 
     <div class="faq-item" data-cat="vendeurs">
       <div class="faq-q" onclick="toggleFaq(this)">
-        <span class="faq-q-text">Quelles sont les commissions de HooYia Market ?</span>
+        <span class="faq-q-text">{% trans "Quelles sont les commissions de HooYia Market ?" %}</span>
         <span class="faq-q-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
-      <div class="faq-a">Les conditions tarifaires sont communiquées lors de l'activation du compte vendeur. Pour en savoir plus, <a href="{% url 'products:contact' %}">contactez-nous</a>.</div>
+      <div class="faq-a">{% trans "Les conditions tarifaires sont communiquées lors de l'activation du compte vendeur. Pour en savoir plus," %} <a href="{% url 'products:contact' %}">{% trans "contactez-nous" %}</a>.</div>
     </div>
   </div>
 
@@ -292,9 +292,9 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     </div>
     <div>
-      <h3>Vous n'avez pas trouvé votre réponse ?</h3>
-      <p>Notre équipe support est disponible pour vous aider.</p>
-      <a href="{% url 'products:contact' %}">Nous contacter</a>
+      <h3>{% trans "Vous n'avez pas trouvé votre réponse ?" %}</h3>
+      <p>{% trans "Notre équipe support est disponible pour vous aider." %}</p>
+      <a href="{% url 'products:contact' %}">{% trans "Nous contacter" %}</a>
     </div>
   </div>
 

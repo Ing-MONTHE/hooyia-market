@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -55,7 +55,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}{% if produit %}Modifier — {{ produit.nom }}{% else %}Ajouter un produit{% endif %} — HooYia Market{% endblock %}
+{% block title %}{% if produit %}{% blocktrans with nom=produit.nom %}Modifier — {{ nom }}{% endblocktrans %}{% else %}{% trans "Ajouter un produit" %}{% endif %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -313,15 +313,15 @@ select.ap-input {
              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
-        Retour aux produits
+        {% trans "Retour aux produits" %}
       </a>
 
       <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;
                  color:#0D1F5C;margin:0 0 .25rem 0;letter-spacing:-.02em;">
-        {% if produit %}Modifier «&nbsp;{{ produit.nom }}&nbsp;»{% else %}Nouveau produit{% endif %}
+        {% if produit %}{% blocktrans with nom=produit.nom %}Modifier «&nbsp;{{ nom }}&nbsp;»{% endblocktrans %}{% else %}{% trans "Nouveau produit" %}{% endif %}
       </h1>
       <p style="font-size:.875rem;color:#8898AA;margin:0;">
-        {% if produit %}Mettez à jour les informations de ce produit{% else %}Remplissez les champs pour publier un produit{% endif %}
+        {% if produit %}{% trans "Mettez à jour les informations de ce produit" %}{% else %}{% trans "Remplissez les champs pour publier un produit" %}{% endif %}
       </p>
     </div>
 
@@ -335,7 +335,7 @@ select.ap-input {
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
         <circle cx="12" cy="12" r="3"/>
       </svg>
-      Voir sur le site
+      {% trans "Voir sur le site" %}
     </a>
     {% endif %}
   </div>
@@ -382,17 +382,17 @@ select.ap-input {
               </svg>
             </div>
             <div>
-              <p class="ap-card-title">Informations de base</p>
-              <p class="ap-card-subtitle">Nom, description et catégorie du produit</p>
+              <p class="ap-card-title">{% trans "Informations de base" %}</p>
+              <p class="ap-card-subtitle">{% trans "Nom, description et catégorie du produit" %}</p>
             </div>
           </div>
           <div class="ap-card-body">
 
             <div class="ap-field">
-              <label class="ap-label" for="id_nom">Nom du produit</label>
+              <label class="ap-label" for="id_nom">{% trans "Nom du produit" %}</label>
               <input type="text" name="nom" id="id_nom"
                      value="{{ form.nom.value|default:'' }}"
-                     placeholder="Ex: Samsung Galaxy S24 Ultra 256Go — Titane Gris"
+                     placeholder="{% trans 'Ex: Samsung Galaxy S24 Ultra 256Go — Titane Gris' %}"
                      class="ap-input" required autocomplete="off" />
               {% if form.nom.errors %}
               <p class="ap-error">
@@ -405,20 +405,20 @@ select.ap-input {
             {% comment %} Description courte : compteur live géré par updateCounter() {% endcomment %}
             <div class="ap-field">
               <label class="ap-label" for="id_description_courte">
-                Description courte
-                <span class="ap-label-opt">(max 500 caractères)</span>
+                {% trans "Description courte" %}
+                <span class="ap-label-opt">({% trans "max 500 caractères" %})</span>
               </label>
               <input type="text" name="description_courte" id="id_description_courte"
                      value="{{ form.description_courte.value|default:'' }}"
-                     placeholder="Résumé affiché dans les cartes produit du catalogue…"
+                     placeholder="{% trans 'Résumé affiché dans les cartes produit du catalogue…' %}"
                      maxlength="500" class="ap-input" />
               <div class="ap-hint" id="desc-courte-counter" style="text-align:right;">0/500</div>
             </div>
 
             <div class="ap-field">
-              <label class="ap-label" for="id_description">Description complète</label>
+              <label class="ap-label" for="id_description">{% trans "Description complète" %}</label>
               <textarea name="description" id="id_description" rows="5"
-                        placeholder="Description détaillée : caractéristiques, contenu, garantie…"
+                        placeholder="{% trans 'Description détaillée : caractéristiques, contenu, garantie…' %}"
                         class="ap-input" required>{{ form.description.value|default:'' }}</textarea>
               {% if form.description.errors %}
               <p class="ap-error">
@@ -430,9 +430,9 @@ select.ap-input {
 
             {% comment %} Select catégorie : racines + sous-catégories indentées {% endcomment %}
             <div class="ap-field">
-              <label class="ap-label" for="id_categorie">Catégorie</label>
+              <label class="ap-label" for="id_categorie">{% trans "Catégorie" %}</label>
               <select name="categorie" id="id_categorie" class="ap-input" required>
-                <option value="">— Sélectionner une catégorie —</option>
+                <option value="">{% trans "— Sélectionner une catégorie —" %}</option>
                 {% for cat in categories %}
                 <option value="{{ cat.id }}" {% if form.categorie.value == cat.id|stringformat:"s" %}selected{% endif %}>
                   {{ cat.nom }}
@@ -460,7 +460,7 @@ select.ap-input {
                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                Créer une nouvelle catégorie →
+                {% trans "Créer une nouvelle catégorie →" %}
               </a>
             </div>
 
@@ -482,15 +482,15 @@ select.ap-input {
               </svg>
             </div>
             <div>
-              <p class="ap-card-title">Prix &amp; Stock</p>
-              <p class="ap-card-subtitle">Tarification et gestion des quantités disponibles</p>
+              <p class="ap-card-title">{% trans "Prix & Stock" %}</p>
+              <p class="ap-card-subtitle">{% trans "Tarification et gestion des quantités disponibles" %}</p>
             </div>
           </div>
           <div class="ap-card-body">
             <div class="ap-grid-2">
 
               <div class="ap-field">
-                <label class="ap-label" for="id_prix">Prix</label>
+                <label class="ap-label" for="id_prix">{% trans "Prix" %}</label>
                 <div class="ap-input-wrap">
                   <input type="number" name="prix" id="id_prix"
                          value="{{ form.prix.value|default:'' }}"
@@ -504,7 +504,7 @@ select.ap-input {
               {% comment %} Prix promo — badge remise calculé par calcRemise() {% endcomment %}
               <div class="ap-field">
                 <label class="ap-label" for="id_prix_promo">
-                  Prix promo <span class="ap-label-opt">(optionnel)</span>
+                  {% trans "Prix promo" %} <span class="ap-label-opt">({% trans "optionnel" %})</span>
                 </label>
                 <div class="ap-input-wrap">
                   <input type="number" name="prix_promo" id="id_prix_promo"
@@ -521,7 +521,7 @@ select.ap-input {
 
               {% comment %} Stock — indicateur coloré updateStock() {% endcomment %}
               <div class="ap-field">
-                <label class="ap-label" for="id_stock">Stock</label>
+                <label class="ap-label" for="id_stock">{% trans "Stock" %}</label>
                 <input type="number" name="stock" id="id_stock"
                        value="{{ form.stock.value|default:0 }}"
                        min="0" class="ap-input" required />
@@ -531,12 +531,12 @@ select.ap-input {
 
               <div class="ap-field">
                 <label class="ap-label" for="id_stock_minimum">
-                  Seuil d'alerte <span class="ap-label-opt">(défaut : 5)</span>
+                  {% trans "Seuil d'alerte" %} <span class="ap-label-opt">({% trans "défaut : 5" %})</span>
                 </label>
                 <input type="number" name="stock_minimum" id="id_stock_minimum"
                        value="{{ form.stock_minimum.value|default:5 }}"
                        min="0" class="ap-input" />
-                <p class="ap-hint">Notification envoyée si stock ≤ ce seuil</p>
+                <p class="ap-hint">{% trans "Notification envoyée si stock ≤ ce seuil" %}</p>
               </div>
 
             </div>
@@ -560,8 +560,8 @@ select.ap-input {
               </svg>
             </div>
             <div>
-              <p class="ap-card-title">Images du produit</p>
-              <p class="ap-card-subtitle">La 1ʳᵉ image uploadée sera l'image principale</p>
+              <p class="ap-card-title">{% trans "Images du produit" %}</p>
+              <p class="ap-card-subtitle">{% trans "La 1ʳᵉ image uploadée sera l'image principale" %}</p>
             </div>
           </div>
           <div class="ap-card-body">
@@ -569,14 +569,14 @@ select.ap-input {
             {% comment %} Images existantes — mode édition uniquement {% endcomment %}
             {% if produit and produit.images.all %}
             <p style="font-size:.75rem;font-weight:700;color:#8898AA;text-transform:uppercase;
-                      letter-spacing:.06em;margin-bottom:.625rem;">Images actuelles</p>
+                      letter-spacing:.06em;margin-bottom:.625rem;">{% trans "Images actuelles" %}</p>
             <div class="ap-img-grid" style="margin-bottom:1.25rem;">
               {% for img in produit.images.all %}
               <div class="ap-img-thumb">
                 <img src="{{ img.image.url }}" alt="{{ produit.nom }}" loading="lazy" />
-                {% if img.est_principale %}<span class="ap-img-badge">Principal</span>{% endif %}
+                {% if img.est_principale %}<span class="ap-img-badge">{% trans "Principal" %}</span>{% endif %}
                 <button type="button" class="ap-img-del"
-                        onclick="supprimerImage({{ img.id }}, this)" title="Supprimer">
+                        onclick="supprimerImage({{ img.id }}, this)" title="{% trans 'Supprimer' %}">
                   {% comment %} Lucide — X {% endcomment %}
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -584,7 +584,7 @@ select.ap-input {
               {% endfor %}
             </div>
             <p style="font-size:.75rem;font-weight:700;color:#8898AA;text-transform:uppercase;
-                      letter-spacing:.06em;margin-bottom:.625rem;">Ajouter de nouvelles images</p>
+                      letter-spacing:.06em;margin-bottom:.625rem;">{% trans "Ajouter de nouvelles images" %}</p>
             {% endif %}
 
             {% comment %} Zone de dépôt — UploadCloud {% endcomment %}
@@ -601,9 +601,9 @@ select.ap-input {
                 <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
               </svg>
               <p style="font-size:.9375rem;color:#4A5568;margin:0 0 .25rem 0;">
-                <strong style="color:#F97316;">Cliquez</strong> ou glissez vos images ici
+                <strong style="color:#F97316;">{% trans "Cliquez" %}</strong> {% trans "ou glissez vos images ici" %}
               </p>
-              <p style="font-size:.8rem;color:#8898AA;margin:0;">JPG, PNG, WebP — Max 5 Mo/image</p>
+              <p style="font-size:.8rem;color:#8898AA;margin:0;">{% trans "JPG, PNG, WebP — Max 5 Mo/image" %}</p>
             </div>
 
             <input type="file" name="images" id="id_images" multiple accept="image/*"
@@ -636,16 +636,16 @@ select.ap-input {
               <line x1="12" y1="20" x2="12" y2="4"/>
               <line x1="6" y1="20" x2="6" y2="14"/>
             </svg>
-            Statut de vente
+            {% trans "Statut de vente" %}
           </div>
           <div class="ap-side-body">
             <div class="ap-field" style="margin-bottom:0;">
-              <label class="ap-label" for="id_statut">Statut</label>
+              <label class="ap-label" for="id_statut">{% trans "Statut" %}</label>
               <select name="statut" id="id_statut" class="ap-input">
-                <option value="actif"   {% if form.statut.value == 'actif'   or not form.statut.value %}selected{% endif %}>Actif — visible et en vente</option>
-                <option value="inactif" {% if form.statut.value == 'inactif' %}selected{% endif %}>Inactif — masqué du catalogue</option>
-                <option value="epuise"  {% if form.statut.value == 'epuise'  %}selected{% endif %}>Épuisé — affiché sans achat</option>
-                <option value="archive" {% if form.statut.value == 'archive' %}selected{% endif %}>Archivé — retiré définitivement</option>
+                <option value="actif"   {% if form.statut.value == 'actif'   or not form.statut.value %}selected{% endif %}>{% trans "Actif — visible et en vente" %}</option>
+                <option value="inactif" {% if form.statut.value == 'inactif' %}selected{% endif %}>{% trans "Inactif — masqué du catalogue" %}</option>
+                <option value="epuise"  {% if form.statut.value == 'epuise'  %}selected{% endif %}>{% trans "Épuisé — affiché sans achat" %}</option>
+                <option value="archive" {% if form.statut.value == 'archive' %}selected{% endif %}>{% trans "Archivé — retiré définitivement" %}</option>
               </select>
             </div>
           </div>
@@ -661,7 +661,7 @@ select.ap-input {
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
-            Options
+            {% trans "Options" %}
           </div>
           <div class="ap-side-body">
             <div class="ap-toggle-row">
@@ -671,8 +671,8 @@ select.ap-input {
                 <span class="ap-toggle-track"></span>
               </label>
               <div>
-                <div style="font-size:.875rem;font-weight:600;color:#0D1F5C;">Produit en vedette</div>
-                <div style="font-size:.8rem;color:#8898AA;margin-top:.1rem;">Affiché sur la page d'accueil</div>
+                <div style="font-size:.875rem;font-weight:600;color:#0D1F5C;">{% trans "Produit en vedette" %}</div>
+                <div style="font-size:.8rem;color:#8898AA;margin-top:.1rem;">{% trans "Affiché sur la page d'accueil" %}</div>
               </div>
             </div>
           </div>
@@ -692,25 +692,25 @@ select.ap-input {
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
               <line x1="12" y1="22.08" x2="12" y2="12"/>
             </svg>
-            Informations
+            {% trans "Informations" %}
           </div>
           <div class="ap-side-body" style="font-size:.8125rem;">
             {% comment %} Ligne : libellé gris + valeur bold {% endcomment %}
             <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
-              <span style="color:#8898AA;">Créé le</span>
+              <span style="color:#8898AA;">{% trans "Créé le" %}</span>
               <strong>{{ produit.date_creation|date:"d/m/Y" }}</strong>
             </div>
             <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
-              <span style="color:#8898AA;">Slug</span>
+              <span style="color:#8898AA;">{% trans "Slug" %}</span>
               <code style="font-size:.75rem;background:#f0f3fa;padding:1px 6px;border-radius:4px;color:#0D1F5C;">{{ produit.slug }}</code>
             </div>
             <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);">
-              <span style="color:#8898AA;">Note moyenne</span>
+              <span style="color:#8898AA;">{% trans "Note moyenne" %}</span>
               <strong>{{ produit.note_moyenne|default:"—" }} / 5</strong>
             </div>
             <div style="display:flex;justify-content:space-between;padding:.5rem 0;">
-              <span style="color:#8898AA;">Avis clients</span>
-              <strong>{{ produit.nombre_avis }} avis</strong>
+              <span style="color:#8898AA;">{% trans "Avis clients" %}</span>
+              <strong>{% blocktrans with count=produit.nombre_avis %}{{ count }} avis{% endblocktrans %}</strong>
             </div>
           </div>
         </div>
@@ -730,11 +730,11 @@ select.ap-input {
               <path d="M10 11v6"/><path d="M14 11v6"/>
               <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
             </svg>
-            Zone de danger
+            {% trans "Zone de danger" %}
           </div>
           <div class="ap-side-body">
             <p style="font-size:.8rem;color:#64748b;margin:0 0 .875rem 0;line-height:1.5;">
-              Suppression définitive du produit et de toutes ses images.
+              {% trans "Suppression définitive du produit et de toutes ses images." %}
             </p>
             <button type="button"
                     onclick="document.getElementById('modal-del').style.display='flex'"
@@ -746,7 +746,7 @@ select.ap-input {
                     onmouseover="this.style.background='#fee2e2';this.style.borderColor='#ef4444'"
                     onmouseout="this.style.background='#fff5f5';this.style.borderColor='#fecaca'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-              Supprimer ce produit
+              {% trans "Supprimer ce produit" %}
             </button>
           </div>
         </div>
@@ -765,7 +765,7 @@ select.ap-input {
        Le bouton Publier utilise name="action" value="publish" pour la vue Django. {% endcomment %}
     <div class="ap-action-bar">
       <p style="font-size:.8rem;color:#8898AA;margin:0;">
-        {% if produit %}Modifications non sauvegardées{% else %}Formulaire en cours{% endif %}
+        {% if produit %}{% trans "Modifications non sauvegardées" %}{% else %}{% trans "Formulaire en cours" %}{% endif %}
       </p>
       <div class="ap-action-right">
 
@@ -773,27 +773,25 @@ select.ap-input {
         <a href="{% url 'products:vendeur_produits' %}" class="btn btn-secondary"
            style="display:inline-flex;align-items:center;gap:.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Annuler
+          {% trans "Annuler" %}
         </a>
 
         {% comment %} Brouillon — Save {% endcomment %}
         <button type="submit" name="action" value="draft" class="btn btn-secondary"
                 style="display:inline-flex;align-items:center;gap:.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Brouillon
+          {% trans "Brouillon" %}
         </button>
 
         {% comment %} Publier / Enregistrer — CTA orange unique de la page {% endcomment %}
         <button type="submit" name="action" value="publish" class="btn btn-primary"
                 style="display:inline-flex;align-items:center;gap:.4rem;">
           {% if produit %}
-            {% comment %} Mode édition : CheckCircle {% endcomment %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Enregistrer les modifications
+            {% trans "Enregistrer les modifications" %}
           {% else %}
-            {% comment %} Mode ajout : Send (simulant Rocket) {% endcomment %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Publier le produit
+            {% trans "Publier le produit" %}
           {% endif %}
         </button>
 
@@ -830,15 +828,14 @@ select.ap-input {
         </svg>
       </div>
       <div>
-        <h3 style="font-size:1rem;font-weight:700;color:#991b1b;margin:0;">Supprimer ce produit ?</h3>
-        <p style="font-size:.8rem;color:#b91c1c;margin:.15rem 0 0 0;">Action irréversible</p>
+        <h3 style="font-size:1rem;font-weight:700;color:#991b1b;margin:0;">{% trans "Supprimer ce produit ?" %}</h3>
+        <p style="font-size:.8rem;color:#b91c1c;margin:.15rem 0 0 0;">{% trans "Action irréversible" %}</p>
       </div>
     </div>
 
     <div style="padding:1.25rem 1.5rem;">
       <p style="font-size:.875rem;color:#64748b;margin:0 0 1.375rem 0;line-height:1.6;">
-        Le produit <strong style="color:#0F1923;">«&nbsp;{{ produit.nom }}&nbsp;»</strong>
-        sera définitivement supprimé avec toutes ses images et données associées.
+        {% blocktrans with nom=produit.nom %}Le produit <strong style="color:#0F1923;">«&nbsp;{{ nom }}&nbsp;»</strong> sera définitivement supprimé avec toutes ses images et données associées.{% endblocktrans %}
       </p>
       <div style="display:flex;gap:.625rem;justify-content:flex-end;">
         <button onclick="document.getElementById('modal-del').style.display='none'"
@@ -846,7 +843,7 @@ select.ap-input {
                        border:1.5px solid var(--border);background:#fff;
                        color:#4A5568;font-family:'Poppins',sans-serif;
                        font-size:.875rem;font-weight:600;cursor:pointer;">
-          Annuler
+          {% trans "Annuler" %}
         </button>
         <form method="POST" action="{% url 'products:supprimer' produit.id %}" style="display:inline;">
           {% csrf_token %}
@@ -855,9 +852,8 @@ select.ap-input {
                          background:#ef4444;color:#fff;font-family:'Poppins',sans-serif;
                          font-size:.875rem;font-weight:600;cursor:pointer;
                          display:inline-flex;align-items:center;gap:.4rem;">
-            {% comment %} Lucide — Trash2 {% endcomment %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            Confirmer la suppression
+            {% trans "Confirmer la suppression" %}
           </button>
         </form>
       </div>

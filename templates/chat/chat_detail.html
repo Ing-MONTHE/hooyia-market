@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Chat — HooYia Market{% endblock %}
+{% block title %}{% trans 'Chat' %} — HooYia Market{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col" style="height: calc(100vh - 120px);">
@@ -17,7 +17,7 @@
 
     <div class="flex-1 min-w-0">
       <p class="font-body font-semibold text-ink text-sm truncate">{{ interlocuteur.username }}</p>
-      <p id="ws-status" class="text-xs font-mono text-ink/30 mt-0.5">Connexion…</p>
+      <p id="ws-status" class="text-xs font-mono text-ink/30 mt-0.5">{% trans "Connexion…" %}</p>
     </div>
 
     <!-- Indicateur connexion -->
@@ -51,7 +51,7 @@
       <textarea
         id="message-input"
         rows="1"
-        placeholder="Votre message…"
+        placeholder="{% trans 'Votre message…' %}"
         class="field flex-1 resize-none text-sm py-2.5 leading-snug"
         style="max-height: 120px; overflow-y: auto;"
         disabled></textarea>
@@ -60,11 +60,11 @@
         onclick="Chat.envoyer()"
         disabled
         class="btn-primary px-4 py-2.5 text-sm flex-shrink-0 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-        <span>Envoyer</span>
+        <span>{% trans "Envoyer" %}</span>
         <span class="text-base leading-none">↑</span>
       </button>
     </div>
-    <p class="text-ink/25 font-mono text-xs mt-2">Entrée pour envoyer · Maj+Entrée pour nouvelle ligne</p>
+    <p class="text-ink/25 font-mono text-xs mt-2">{% trans "Entrée pour envoyer · Maj+Entrée pour nouvelle ligne" %}</p>
   </div>
 
 </div>

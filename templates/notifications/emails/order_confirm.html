@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commande confirmée — HooYia Market</title>
+  <title>{% trans "Commande confirmée" %} — HooYia Market</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -17,7 +18,6 @@
       margin: 40px auto;
       padding: 0 16px 40px;
     }
-    /* Header */
     .header {
       background: linear-gradient(135deg, #f97316 0%, #ea6000 100%);
       border-radius: 16px 16px 0 0;
@@ -47,7 +47,6 @@
       font-size: 14px;
       margin-top: 6px;
     }
-    /* Corps */
     .body {
       background: #ffffff;
       padding: 36px 40px;
@@ -65,7 +64,6 @@
       line-height: 1.7;
       margin-bottom: 28px;
     }
-    /* Récap commande */
     .recap {
       background: #faf8f5;
       border: 1px solid #e8e3da;
@@ -94,10 +92,7 @@
     .recap-row .value { font-weight: 600; color: #0f0e0c; }
     .recap-row.total .label,
     .recap-row.total .value { font-size: 16px; color: #f97316; font-weight: 700; }
-    /* Étapes */
-    .steps {
-      margin-bottom: 28px;
-    }
+    .steps { margin-bottom: 28px; }
     .steps-title {
       font-size: 13px;
       font-weight: 600;
@@ -126,7 +121,6 @@
     .step-num.done { background: #22c55e; }
     .step-text { font-size: 13px; color: #3d3a35; line-height: 1.5; padding-top: 3px; }
     .step-text strong { color: #0f0e0c; }
-    /* CTA */
     .cta-block { text-align: center; margin-bottom: 28px; }
     .cta-btn {
       display: inline-block;
@@ -139,7 +133,6 @@
       font-weight: 600;
       letter-spacing: 0.2px;
     }
-    /* Footer */
     .footer {
       background: #faf8f5;
       border: 1px solid #e8e3da;
@@ -155,37 +148,34 @@
 <body>
 <div class="wrapper">
 
-  <!-- ── Header ── -->
   <div class="header">
     <div class="header-logo">HooYia<span> Market</span></div>
     <span class="header-icon">✅</span>
-    <h1>Commande confirmée !</h1>
-    <p>Merci pour votre confiance, nous préparons votre colis.</p>
+    <h1>{% trans "Commande confirmée !" %}</h1>
+    <p>{% trans "Merci pour votre confiance, nous préparons votre colis." %}</p>
   </div>
 
-  <!-- ── Corps ── -->
   <div class="body">
 
-    <p class="greeting">Bonjour <strong>{{ client_username }}</strong>,</p>
+    <p class="greeting">{% blocktrans with nom=client_username %}Bonjour <strong>{{ nom }}</strong>,{% endblocktrans %}</p>
     <p class="intro">
-      Votre commande a bien été reçue et confirmée. Voici le récapitulatif de votre achat.
-      Vous recevrez un nouvel email dès l'expédition de votre colis.
+      {% trans "Votre commande a bien été reçue et confirmée. Voici le récapitulatif de votre achat." %}
+      {% trans "Vous recevrez un nouvel email dès l'expédition de votre colis." %}
     </p>
 
-    <!-- Récap -->
     <div class="recap">
-      <div class="recap-title">Récapitulatif de commande</div>
+      <div class="recap-title">{% trans "Récapitulatif de commande" %}</div>
       <div class="recap-row">
-        <span class="label">Référence</span>
+        <span class="label">{% trans "Référence" %}</span>
         <span class="value">#{{ reference }}</span>
       </div>
       <div class="recap-row">
-        <span class="label">Date</span>
+        <span class="label">{% trans "Date" %}</span>
         <span class="value">{{ date }}</span>
       </div>
       {% if adresse_livraison %}
       <div class="recap-row">
-        <span class="label">Livraison</span>
+        <span class="label">{% trans "Livraison" %}</span>
         <span class="value">{{ adresse_livraison }}</span>
       </div>
       {% endif %}
@@ -198,44 +188,41 @@
       {% endfor %}
       {% endif %}
       <div class="recap-row total">
-        <span class="label">Total</span>
+        <span class="label">{% trans "Total" %}</span>
         <span class="value">{{ montant_total }} FCFA</span>
       </div>
     </div>
 
-    <!-- Étapes -->
     <div class="steps">
-      <p class="steps-title">Que se passe-t-il maintenant ?</p>
+      <p class="steps-title">{% trans "Que se passe-t-il maintenant ?" %}</p>
       <div class="step">
         <div class="step-num done">✓</div>
-        <div class="step-text"><strong>Commande confirmée</strong> — Votre paiement a bien été enregistré.</div>
+        <div class="step-text"><strong>{% trans "Commande confirmée" %}</strong> — {% trans "Votre paiement a bien été enregistré." %}</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-text"><strong>Préparation en cours</strong> — Notre équipe prépare votre colis avec soin.</div>
+        <div class="step-text"><strong>{% trans "Préparation en cours" %}</strong> — {% trans "Notre équipe prépare votre colis avec soin." %}</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-text"><strong>Expédition</strong> — Vous recevrez un email avec le suivi dès l'envoi.</div>
+        <div class="step-text"><strong>{% trans "Expédition" %}</strong> — {% trans "Vous recevrez un email avec le suivi dès l'envoi." %}</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text"><strong>Livraison</strong> — Votre colis arrive à l'adresse indiquée.</div>
+        <div class="step-text"><strong>{% trans "Livraison" %}</strong> — {% trans "Votre colis arrive à l'adresse indiquée." %}</div>
       </div>
     </div>
 
-    <!-- CTA -->
     <div class="cta-block">
-      <a href="{{ lien_commande }}" class="cta-btn">Suivre ma commande →</a>
+      <a href="{{ lien_commande }}" class="cta-btn">{% trans "Suivre ma commande" %} →</a>
     </div>
 
   </div>
 
-  <!-- ── Footer ── -->
   <div class="footer">
     <p>
-      Des questions ? Contactez-nous via <a href="{{ lien_chat }}">notre messagerie</a>.<br>
-      Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y répondre.
+      {% blocktrans with lien=lien_chat %}Des questions ? Contactez-nous via <a href="{{ lien }}">notre messagerie</a>.{% endblocktrans %}<br>
+      {% trans "Cet email a été envoyé automatiquement par HooYia Market. Merci de ne pas y répondre." %}
     </p>
   </div>
 

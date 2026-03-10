@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% comment %}
    HooYia Market - avis_plateforme.html
    Page dédiée pour laisser un avis sur la plateforme.
@@ -7,7 +7,7 @@
    Soumission via POST /api/avis-app/creer/
 {% endcomment %}
 
-{% block title %}Laisser un avis — HooYia Market{% endblock %}
+{% block title %}{% trans 'Laisser un avis' %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -110,10 +110,10 @@
         </svg>
       </div>
       <h2 style="font-family:'Poppins',sans-serif;font-size:1.125rem;font-weight:700;color:#0D1F5C;margin:0 0 .5rem;">
-        Avis déjà soumis
+        {% trans "Avis déjà soumis" %}
       </h2>
       <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0 0 1.5rem;">
-        Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !
+        {% trans "Vous avez déjà laissé un avis sur la plateforme. Merci pour votre retour !" %}
       </p>
       <a href="{% url 'products:accueil' %}" class="btn btn-primary"
          style="display:inline-flex;align-items:center;gap:.375rem;">
@@ -121,7 +121,7 @@
              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
-        Retour à l'accueil
+        {% trans "Retour à l'accueil" %}
       </a>
     </div>
 
@@ -135,10 +135,10 @@
       </svg>
     </div>
 
-    <h1 class="avis-card-title">Votre avis compte</h1>
+    <h1 class="avis-card-title">{% trans "Votre avis compte" %}</h1>
     <p class="avis-card-sub">
-      Partagez votre expérience avec HooYia Market.<br>
-      Votre avis sera affiché sur la page d'accueil après validation.
+      {% trans "Partagez votre expérience avec HooYia Market." %}<br>
+      {% trans "Votre avis sera affiché sur la page d'accueil après validation." %}
     </p>
 
     {% comment %} Sélecteur étoiles {% endcomment %}
@@ -152,11 +152,11 @@
         <div class="star-click-ap" data-index="{{ forloop.counter }}"></div>
       </div>
       {% endfor %}
-      <span class="star-note-ap" id="star-label-ap">Sélectionnez une note</span>
+      <span class="star-note-ap" id="star-label-ap">{% trans "Sélectionnez une note" %}</span>
     </div>
 
     <textarea id="commentaire-ap" class="avis-textarea"
-              placeholder="Décrivez votre expérience avec HooYia Market…"></textarea>
+              placeholder="{% trans 'Décrivez votre expérience avec HooYia Market…' %}"></textarea>
 
     <div id="msg-ap" style="display:none;margin-bottom:1rem;padding:.75rem 1rem;border-radius:.5rem;
          font-family:'Poppins',sans-serif;font-size:.875rem;"></div>
@@ -169,12 +169,12 @@
         <line x1="22" y1="2" x2="11" y2="13"/>
         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
       </svg>
-      Soumettre mon avis
+      {% trans "Soumettre mon avis" %}
     </button>
 
     <p style="text-align:center;margin-top:1rem;font-family:'Poppins',sans-serif;font-size:.8125rem;color:#8898AA;">
       <a href="{% url 'products:accueil' %}" style="color:#1E3A8A;text-decoration:none;">
-        &larr; Retour à l'accueil
+        &larr; {% trans "Retour à l'accueil" %}
       </a>
     </p>
     {% endif %}
@@ -184,6 +184,15 @@
 
 {% block extra_scripts %}
 <script>
+  const AP_I18N = {
+    selectNote: "{% trans 'Sélectionnez une note' %}",
+    errNote: "{% trans 'Veuillez sélectionner une note (1 à 5 étoiles).' %}",
+    errCommentaire: "{% trans 'Veuillez écrire un commentaire.' %}",
+    envoi: "{% trans 'Envoi en cours…' %}",
+    merci: "{% trans 'Merci ! Votre avis est en attente de validation par notre équipe.' %}",
+    erreur: "{% trans 'Une erreur est survenue. Réessayez.' %}",
+    soumettre: "{% trans 'Soumettre mon avis' %}",
+  };
 let noteAp = 0;
 
 /* Event delegation — un clic sur une étoile */
@@ -211,7 +220,7 @@ function renderStarsAp(note) {
     else if (note >= i - 0.5) el.classList.add('half');
   }
   const label = document.getElementById('star-label-ap');
-  if (label) label.textContent = note > 0 ? note + ' / 5' : 'Sélectionnez une note';
+  if (label) label.textContent = note > 0 ? note + ' / 5' : AP_I18N.selectNote;
 }
 
 function showMsg(texte, type) {
@@ -225,28 +234,28 @@ function showMsg(texte, type) {
 
 async function soumettreAvisApp() {
   if (!noteAp || noteAp < 1) {
-    showMsg('Veuillez sélectionner une note (1 à 5 étoiles).', 'error'); return;
+    showMsg(AP_I18N.errNote, 'error'); return;
   }
   const commentaire = document.getElementById('commentaire-ap').value.trim();
   if (!commentaire) {
-    showMsg('Veuillez écrire un commentaire.', 'error'); return;
+    showMsg(AP_I18N.errCommentaire, 'error'); return;
   }
 
   const btn = document.getElementById('btn-soumettre-ap');
   btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  btn.textContent = AP_I18N.envoi;
 
   try {
     await API.post('/api/avis-app/creer/', {
       note: Math.round(noteAp),  /* API Django attend un entier 1-5 */
       commentaire: commentaire
     });
-    showMsg('Merci ! Votre avis est en attente de validation par notre équipe.', 'success');
+    showMsg(AP_I18N.merci, 'success');
     btn.style.display = 'none';
     document.getElementById('commentaire-ap').disabled = true;
     document.getElementById('star-row-ap').style.pointerEvents = 'none';
   } catch(e) {
-    showMsg(e?.message || 'Une erreur est survenue. Réessayez.', 'error');
+    showMsg(e?.message || AP_I18N.erreur, 'error');
     btn.disabled = false;
     btn.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -254,7 +263,7 @@ async function soumettreAvisApp() {
         <line x1="22" y1="2" x2="11" y2="13"/>
         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
       </svg>
-      Soumettre mon avis`;
+      ${AP_I18N.soumettre}`;
   }
 }
 </script>

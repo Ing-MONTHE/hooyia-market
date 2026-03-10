@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 ════════════════════════════════════════════════════════════════
@@ -14,7 +14,7 @@
 ════════════════════════════════════════════════════════════════
 {% endcomment %}
 
-{% block title %}Mes Produits — HooYia Market{% endblock %}
+{% block title %}{% trans "Mes Produits" %} — HooYia Market{% endblock %}
 
 {% block content %}
 
@@ -24,18 +24,18 @@
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;">
     <div>
       <h1 style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:var(--brand-600);margin:0 0 .25rem 0;">
-        Mes produits
+        {% trans "Mes produits" %}
       </h1>
       <p style="font-size:.875rem;color:var(--text-muted);margin:0;">
-        {{ produits|length }} produit{{ produits|length|pluralize }}
-        {% if statut %} · filtre : <strong>{{ statut }}</strong>{% endif %}
+        {{ produits|length }} {% trans "produit" %}{{ produits|length|pluralize }}
+        {% if statut %} · {% trans "filtre :" %} <strong>{{ statut }}</strong>{% endif %}
       </p>
     </div>
     <a href="{% url 'products:ajouter' %}" class="btn btn-primary"
        style="display:inline-flex;align-items:center;gap:.5rem;">
       {% comment %} Lucide — Plus {% endcomment %}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Ajouter un produit
+      {% trans "Ajouter un produit" %}
     </a>
   </div>
 
@@ -67,12 +67,12 @@
     <table style="width:100%;border-collapse:collapse;">
       <thead>
         <tr style="background:var(--surface-3);border-bottom:1px solid var(--border);">
-          <th style="padding:.75rem 1.25rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Produit</th>
-          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Prix</th>
-          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Stock</th>
-          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Statut</th>
-          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Créé le</th>
-          <th style="padding:.75rem 1.25rem;text-align:right;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Actions</th>
+          <th style="padding:.75rem 1.25rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Produit" %}</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Prix" %}</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Stock" %}</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Statut" %}</th>
+          <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Créé le" %}</th>
+          <th style="padding:.75rem 1.25rem;text-align:right;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">{% trans "Actions" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -123,11 +123,11 @@
 
           <td style="padding:.875rem 1rem;">
             {% if produit.statut == 'actif' %}
-              <span class="badge badge-success">Actif</span>
+              <span class="badge badge-success">{% trans "Actif" %}</span>
             {% elif produit.statut == 'epuise' %}
-              <span class="badge badge-error">Épuisé</span>
+              <span class="badge badge-error">{% trans "Épuisé" %}</span>
             {% elif produit.statut == 'inactif' %}
-              <span class="badge badge-muted">Inactif</span>
+              <span class="badge badge-muted">{% trans "Inactif" %}</span>
             {% else %}
               <span class="badge badge-muted">{{ produit.statut }}</span>
             {% endif %}
@@ -144,7 +144,7 @@
                  style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;
                         border-radius:8px;background:var(--surface-3);border:1px solid var(--border);
                         color:var(--text-secondary);text-decoration:none;transition:all 150ms;"
-                 title="Modifier"
+                 title="{% trans 'Modifier' %}"
                  onmouseover="this.style.borderColor='var(--brand-500)';this.style.color='var(--brand-500)'"
                  onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
                 {% comment %} Lucide — Edit {% endcomment %}
@@ -154,7 +154,7 @@
                  style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;
                         border-radius:8px;background:var(--surface-3);border:1px solid var(--border);
                         color:var(--text-secondary);text-decoration:none;transition:all 150ms;"
-                 title="Supprimer"
+                 title="{% trans 'Supprimer' %}"
                  onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fef2f2'"
                  onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)';this.style.background='var(--surface-3)'">
                 {% comment %} Lucide — Trash2 {% endcomment %}
@@ -173,10 +173,10 @@
   <div class="card" style="padding:3rem;text-align:center;">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem auto;display:block;"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     <p style="font-size:.9375rem;color:var(--text-muted);margin:0 0 1.25rem 0;">
-      Aucun produit{% if statut %} avec ce statut{% endif %}.
+      {% trans "Aucun produit" %}{% if statut %} {% trans "avec ce statut" %}{% endif %}.
     </p>
     <a href="{% url 'products:ajouter' %}" class="btn btn-primary">
-      Ajouter mon premier produit
+      {% trans "Ajouter mon premier produit" %}
     </a>
   </div>
   {% endif %}

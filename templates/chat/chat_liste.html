@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Messages — HooYia Market{% endblock %}
+{% block title %}{% trans 'Messages' %} — HooYia Market{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -9,8 +9,8 @@
   <!-- ── En-tête ── -->
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="font-display text-2xl text-ink">Messages</h1>
-      <p class="text-ink/40 font-body text-sm mt-0.5">Vos conversations avec les vendeurs</p>
+      <h1 class="font-display text-2xl text-ink">{% trans "Messages" %}</h1>
+      <p class="text-ink/40 font-body text-sm mt-0.5">{% trans "Vos conversations avec les vendeurs" %}</p>
     </div>
     <span id="conversations-count" class="hidden px-3 py-1 bg-cream-warm border border-cream-border rounded-full text-xs font-mono text-ink/50"></span>
   </div>
@@ -32,10 +32,10 @@
   <!-- ── État vide ── -->
   <div id="empty" class="hidden text-center py-20">
     <div class="w-16 h-16 bg-cream-warm rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">💬</div>
-    <p class="font-display text-lg text-ink mb-1">Aucun message</p>
-    <p class="text-ink/40 font-body text-sm">Vos conversations avec les vendeurs apparaîtront ici.</p>
+    <p class="font-display text-lg text-ink mb-1">{% trans "Aucun message" %}</p>
+    <p class="text-ink/40 font-body text-sm">{% trans "Vos conversations avec les vendeurs apparaîtront ici." %}</p>
     <a href="{% url 'products:liste' %}" class="btn-primary inline-block mt-6 px-6 py-2.5 text-sm">
-      Parcourir le catalogue
+      {% trans "Parcourir le catalogue" %}
     </a>
   </div>
 
@@ -47,6 +47,12 @@
 
 {% block extra_scripts %}
 <script>
+const CHAT_I18N = {
+    demarrer: "{% trans 'Démarrez la conversation…' %}",
+    utilisateur: "{% trans 'Utilisateur' %}",
+    aInstant: "{% trans 'À l\\'instant' %}",
+    erreur: "{% trans 'Une erreur est survenue. Veuillez réessayer.' %}",
+  };
 document.addEventListener('DOMContentLoaded', async () => {
   const skeleton = document.getElementById('skeleton');
   const empty    = document.getElementById('empty');
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const initiale   = (autre.username || '?')[0].toUpperCase();
       const nonLus     = conv.messages_non_lus || 0;
       const dernier    = conv.dernier_message;
-      const apercu     = dernier ? dernier.contenu : 'Démarrez la conversation…';
+      const apercu = dernier ? dernier.contenu : CHAT_I18N.demarrer;
       const heure      = dernier ? formatHeure(dernier.date_envoi) : '';
 
       return `
@@ -93,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2">
               <span class="font-body font-semibold text-ink text-sm truncate group-hover:text-brand-600 transition-colors">
-                ${escapeHtml(autre.username || 'Utilisateur')}
+                ${escapeHtml(autre.username || CHAT_I18N.utilisateur)}
               </span>
               <span class="text-ink/30 font-mono text-xs flex-shrink-0">${heure}</span>
             </div>
@@ -113,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e && e.status === 401) {
       window.location.href = '/compte/connexion/?next=/chat/';
     } else {
-      list.innerHTML = `<li class="text-center py-10 text-ink/40 font-body text-sm">Une erreur est survenue. Veuillez réessayer.</li>`;
+      list.innerHTML = `<li class="text-center py-10 text-ink/40 font-body text-sm">${CHAT_I18N.erreur}</li>`;
       list.classList.remove('hidden');
     }
   }
@@ -125,7 +131,7 @@ function formatHeure(isoStr) {
   const now  = new Date();
   const diff = now - d;
 
-  if (diff < 60000)      return 'À l\'instant';
+  if (diff < 60000)      return CHAT_I18N.aInstant;
   if (diff < 3600000)    return `${Math.floor(diff / 60000)} min`;
   if (diff < 86400000)   return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   if (diff < 604800000)  return d.toLocaleDateString('fr-FR', { weekday: 'short' });

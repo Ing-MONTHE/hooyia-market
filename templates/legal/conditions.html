@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Conditions d'utilisation — HooYia Market{% endblock %}
+{% block title %}{% trans "Conditions d'utilisation" %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -167,147 +167,144 @@
 
   {# Hero #}
   <div class="legal-hero">
-    <div class="legal-hero-label">Documents légaux</div>
-    <h1>Conditions d'utilisation</h1>
-    <div class="legal-hero-meta">Dernière mise à jour : 1er mars 2026 &nbsp;·&nbsp; Version 1.0</div>
+    <div class="legal-hero-label">{% trans "Documents légaux" %}</div>
+    <h1>{% trans "Conditions d'utilisation" %}</h1>
+    <div class="legal-hero-meta">{% trans "Dernière mise à jour : 1er mars 2026" %} &nbsp;·&nbsp; {% trans "Version 1.0" %}</div>
   </div>
 
-  {# Sommaire #}
   <div class="legal-toc">
-    <h2>Sommaire</h2>
+    <h2>{% trans "Sommaire" %}</h2>
     <ol>
-      <li><a href="#s1">Présentation de la plateforme</a></li>
-      <li><a href="#s2">Acceptation des conditions</a></li>
-      <li><a href="#s3">Inscription et compte utilisateur</a></li>
-      <li><a href="#s4">Utilisation de la plateforme</a></li>
-      <li><a href="#s5">Obligations des vendeurs</a></li>
-      <li><a href="#s6">Obligations des acheteurs</a></li>
-      <li><a href="#s7">Paiements et transactions</a></li>
-      <li><a href="#s8">Retours et litiges</a></li>
-      <li><a href="#s9">Propriété intellectuelle</a></li>
-      <li><a href="#s10">Responsabilité</a></li>
-      <li><a href="#s11">Résiliation</a></li>
-      <li><a href="#s12">Droit applicable</a></li>
+      <li><a href="#s1">{% trans "Présentation de la plateforme" %}</a></li>
+      <li><a href="#s2">{% trans "Acceptation des conditions" %}</a></li>
+      <li><a href="#s3">{% trans "Inscription et compte utilisateur" %}</a></li>
+      <li><a href="#s4">{% trans "Utilisation de la plateforme" %}</a></li>
+      <li><a href="#s5">{% trans "Obligations des vendeurs" %}</a></li>
+      <li><a href="#s6">{% trans "Obligations des acheteurs" %}</a></li>
+      <li><a href="#s7">{% trans "Paiements et transactions" %}</a></li>
+      <li><a href="#s8">{% trans "Retours et litiges" %}</a></li>
+      <li><a href="#s9">{% trans "Propriété intellectuelle" %}</a></li>
+      <li><a href="#s10">{% trans "Responsabilité" %}</a></li>
+      <li><a href="#s11">{% trans "Résiliation" %}</a></li>
+      <li><a href="#s12">{% trans "Droit applicable" %}</a></li>
     </ol>
   </div>
 
-  {# Sections #}
   <div class="legal-section" id="s1">
-    <h2><span class="num">1</span> Présentation de la plateforme</h2>
-    <p>HooYia Market est une marketplace en ligne dédiée à l'électronique et l'informatique, opérée depuis Douala, Cameroun. La plateforme met en relation des acheteurs et des vendeurs particuliers ou professionnels pour la vente de produits neufs ou reconditionnés.</p>
-    <p>L'accès à la plateforme est disponible via le site web <strong>hooyia.com</strong> ainsi que via les applications mobiles HooYia Market.</p>
+    <h2><span class="num">1</span> {% trans "Présentation de la plateforme" %}</h2>
+    <p>{% trans "HooYia Market est une marketplace en ligne dédiée à l'électronique et l'informatique, opérée depuis Douala, Cameroun. La plateforme met en relation des acheteurs et des vendeurs particuliers ou professionnels pour la vente de produits neufs ou reconditionnés." %}</p>
+    <p>{% trans "L'accès à la plateforme est disponible via le site web" %} <strong>hooyia.com</strong> {% trans "ainsi que via les applications mobiles HooYia Market." %}</p>
   </div>
 
   <div class="legal-section" id="s2">
-    <h2><span class="num">2</span> Acceptation des conditions</h2>
-    <p>En accédant à HooYia Market, en créant un compte ou en effectuant une transaction, vous acceptez sans réserve les présentes Conditions d'utilisation.</p>
+    <h2><span class="num">2</span> {% trans "Acceptation des conditions" %}</h2>
+    <p>{% trans "En accédant à HooYia Market, en créant un compte ou en effectuant une transaction, vous acceptez sans réserve les présentes Conditions d'utilisation." %}</p>
     <div class="legal-highlight">
-      Si vous n'acceptez pas ces conditions, vous devez cesser immédiatement d'utiliser la plateforme.
+      {% trans "Si vous n'acceptez pas ces conditions, vous devez cesser immédiatement d'utiliser la plateforme." %}
     </div>
-    <p>HooYia Market se réserve le droit de modifier ces conditions à tout moment. Les utilisateurs seront informés par email en cas de changement substantiel.</p>
+    <p>{% trans "HooYia Market se réserve le droit de modifier ces conditions à tout moment. Les utilisateurs seront informés par email en cas de changement substantiel." %}</p>
   </div>
 
   <div class="legal-section" id="s3">
-    <h2><span class="num">3</span> Inscription et compte utilisateur</h2>
-    <p>Pour accéder aux fonctionnalités complètes de la plateforme, vous devez créer un compte en fournissant :</p>
+    <h2><span class="num">3</span> {% trans "Inscription et compte utilisateur" %}</h2>
+    <p>{% trans "Pour accéder aux fonctionnalités complètes de la plateforme, vous devez créer un compte en fournissant :" %}</p>
     <ul>
-      <li>Une adresse email valide et personnelle</li>
-      <li>Un nom d'utilisateur unique</li>
-      <li>Un mot de passe sécurisé (minimum 8 caractères)</li>
-      <li>Un numéro de téléphone valide (pour la livraison)</li>
+      <li>{% trans "Une adresse email valide et personnelle" %}</li>
+      <li>{% trans "Un nom d'utilisateur unique" %}</li>
+      <li>{% trans "Un mot de passe sécurisé (minimum 8 caractères)" %}</li>
+      <li>{% trans "Un numéro de téléphone valide (pour la livraison)" %}</li>
     </ul>
-    <p>Vous êtes seul responsable de la confidentialité de vos identifiants. Toute activité réalisée depuis votre compte vous est imputable.</p>
-    <p>L'inscription est réservée aux personnes physiques âgées d'au moins 18 ans ou aux personnes morales légalement constituées.</p>
+    <p>{% trans "Vous êtes seul responsable de la confidentialité de vos identifiants. Toute activité réalisée depuis votre compte vous est imputable." %}</p>
+    <p>{% trans "L'inscription est réservée aux personnes physiques âgées d'au moins 18 ans ou aux personnes morales légalement constituées." %}</p>
   </div>
 
   <div class="legal-section" id="s4">
-    <h2><span class="num">4</span> Utilisation de la plateforme</h2>
-    <p>Vous vous engagez à utiliser HooYia Market de manière loyale et conformément aux lois en vigueur. Sont strictement interdits :</p>
+    <h2><span class="num">4</span> {% trans "Utilisation de la plateforme" %}</h2>
+    <p>{% trans "Vous vous engagez à utiliser HooYia Market de manière loyale et conformément aux lois en vigueur. Sont strictement interdits :" %}</p>
     <ul>
-      <li>La publication de faux avis ou évaluations</li>
-      <li>L'utilisation de la plateforme à des fins frauduleuses</li>
-      <li>La vente de produits contrefaits, dangereux ou illégaux</li>
-      <li>Le harcèlement ou les comportements abusifs envers d'autres utilisateurs</li>
-      <li>Toute tentative de contournement des systèmes de paiement</li>
-      <li>La création de plusieurs comptes pour un même utilisateur</li>
+      <li>{% trans "La publication de faux avis ou évaluations" %}</li>
+      <li>{% trans "L'utilisation de la plateforme à des fins frauduleuses" %}</li>
+      <li>{% trans "La vente de produits contrefaits, dangereux ou illégaux" %}</li>
+      <li>{% trans "Le harcèlement ou les comportements abusifs envers d'autres utilisateurs" %}</li>
+      <li>{% trans "Toute tentative de contournement des systèmes de paiement" %}</li>
+      <li>{% trans "La création de plusieurs comptes pour un même utilisateur" %}</li>
     </ul>
   </div>
 
   <div class="legal-section" id="s5">
-    <h2><span class="num">5</span> Obligations des vendeurs</h2>
-    <p>Les vendeurs s'engagent à :</p>
+    <h2><span class="num">5</span> {% trans "Obligations des vendeurs" %}</h2>
+    <p>{% trans "Les vendeurs s'engagent à :" %}</p>
     <ul>
-      <li>Décrire les produits avec exactitude (photos réelles, état, caractéristiques)</li>
-      <li>Fixer des prix conformes à la réglementation en vigueur</li>
-      <li>Honorer toutes les commandes confirmées dans les délais annoncés</li>
-      <li>Fournir un service après-vente de qualité</li>
-      <li>Déclarer leurs revenus conformément à la législation fiscale camerounaise</li>
+      <li>{% trans "Décrire les produits avec exactitude (photos réelles, état, caractéristiques)" %}</li>
+      <li>{% trans "Fixer des prix conformes à la réglementation en vigueur" %}</li>
+      <li>{% trans "Honorer toutes les commandes confirmées dans les délais annoncés" %}</li>
+      <li>{% trans "Fournir un service après-vente de qualité" %}</li>
+      <li>{% trans "Déclarer leurs revenus conformément à la législation fiscale camerounaise" %}</li>
     </ul>
-    <p>HooYia Market se réserve le droit de suspendre ou supprimer tout vendeur ne respectant pas ces obligations.</p>
+    <p>{% trans "HooYia Market se réserve le droit de suspendre ou supprimer tout vendeur ne respectant pas ces obligations." %}</p>
   </div>
 
   <div class="legal-section" id="s6">
-    <h2><span class="num">6</span> Obligations des acheteurs</h2>
-    <p>Les acheteurs s'engagent à :</p>
+    <h2><span class="num">6</span> {% trans "Obligations des acheteurs" %}</h2>
+    <p>{% trans "Les acheteurs s'engagent à :" %}</p>
     <ul>
-      <li>Fournir des informations de livraison exactes et complètes</li>
-      <li>Procéder au paiement dans les délais convenus</li>
-      <li>Réceptionner les commandes dans les conditions prévues</li>
-      <li>Signaler tout problème de manière honnête et constructive</li>
+      <li>{% trans "Fournir des informations de livraison exactes et complètes" %}</li>
+      <li>{% trans "Procéder au paiement dans les délais convenus" %}</li>
+      <li>{% trans "Réceptionner les commandes dans les conditions prévues" %}</li>
+      <li>{% trans "Signaler tout problème de manière honnête et constructive" %}</li>
     </ul>
   </div>
 
   <div class="legal-section" id="s7">
-    <h2><span class="num">7</span> Paiements et transactions</h2>
-    <p>HooYia Market propose actuellement les modes de paiement suivants :</p>
+    <h2><span class="num">7</span> {% trans "Paiements et transactions" %}</h2>
+    <p>{% trans "HooYia Market propose actuellement les modes de paiement suivants :" %}</p>
     <ul>
-      <li><strong>Paiement à la livraison</strong> — en espèces à la réception de la commande</li>
-      <li><strong>Orange Money</strong> — paiement mobile sécurisé (à venir)</li>
-      <li><strong>MTN Mobile Money</strong> — paiement mobile sécurisé (à venir)</li>
+      <li><strong>{% trans "Paiement à la livraison" %}</strong> — {% trans "en espèces à la réception de la commande" %}</li>
+      <li><strong>Orange Money</strong> — {% trans "paiement mobile sécurisé (à venir)" %}</li>
+      <li><strong>MTN Mobile Money</strong> — {% trans "paiement mobile sécurisé (à venir)" %}</li>
     </ul>
-    <p>Tous les prix sont exprimés en Francs CFA (XAF). HooYia Market ne stocke aucune donnée bancaire sur ses serveurs.</p>
+    <p>{% trans "Tous les prix sont exprimés en Francs CFA (XAF). HooYia Market ne stocke aucune donnée bancaire sur ses serveurs." %}</p>
   </div>
 
   <div class="legal-section" id="s8">
-    <h2><span class="num">8</span> Retours et litiges</h2>
-    <p>En cas de litige entre acheteur et vendeur, HooYia Market propose une médiation gratuite. Les demandes de retour sont acceptées dans un délai de <strong>48h après la livraison</strong> pour les produits défectueux ou non conformes à la description.</p>
-    <p>Pour initier un retour, contactez notre service client via la messagerie intégrée ou à l'adresse <strong>support@hooyia.com</strong>.</p>
+    <h2><span class="num">8</span> {% trans "Retours et litiges" %}</h2>
+    <p>{% trans "En cas de litige entre acheteur et vendeur, HooYia Market propose une médiation gratuite. Les demandes de retour sont acceptées dans un délai de" %} <strong>{% trans "48h après la livraison" %}</strong> {% trans "pour les produits défectueux ou non conformes à la description." %}</p>
+    <p>{% trans "Pour initier un retour, contactez notre service client via la messagerie intégrée ou à l'adresse" %} <strong>support@hooyia.com</strong>.</p>
   </div>
 
   <div class="legal-section" id="s9">
-    <h2><span class="num">9</span> Propriété intellectuelle</h2>
-    <p>L'ensemble des contenus de HooYia Market (logo, design, code source, textes, images) est protégé par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite.</p>
-    <p>Les vendeurs garantissent détenir tous les droits sur les images et descriptions qu'ils publient, et accordent à HooYia Market une licence d'utilisation non-exclusive pour leur diffusion sur la plateforme.</p>
+    <h2><span class="num">9</span> {% trans "Propriété intellectuelle" %}</h2>
+    <p>{% trans "L'ensemble des contenus de HooYia Market (logo, design, code source, textes, images) est protégé par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite." %}</p>
+    <p>{% trans "Les vendeurs garantissent détenir tous les droits sur les images et descriptions qu'ils publient, et accordent à HooYia Market une licence d'utilisation non-exclusive pour leur diffusion sur la plateforme." %}</p>
   </div>
 
   <div class="legal-section" id="s10">
-    <h2><span class="num">10</span> Responsabilité</h2>
-    <p>HooYia Market agit en qualité d'intermédiaire technique. La responsabilité de la qualité des produits incombe au vendeur. HooYia Market ne peut être tenu responsable :</p>
+    <h2><span class="num">10</span> {% trans "Responsabilité" %}</h2>
+    <p>{% trans "HooYia Market agit en qualité d'intermédiaire technique. La responsabilité de la qualité des produits incombe au vendeur. HooYia Market ne peut être tenu responsable :" %}</p>
     <ul>
-      <li>Des dommages directs ou indirects liés à l'utilisation de la plateforme</li>
-      <li>Des interruptions temporaires de service pour maintenance</li>
-      <li>Des litiges entre acheteurs et vendeurs</li>
+      <li>{% trans "Des dommages directs ou indirects liés à l'utilisation de la plateforme" %}</li>
+      <li>{% trans "Des interruptions temporaires de service pour maintenance" %}</li>
+      <li>{% trans "Des litiges entre acheteurs et vendeurs" %}</li>
     </ul>
   </div>
 
   <div class="legal-section" id="s11">
-    <h2><span class="num">11</span> Résiliation</h2>
-    <p>Vous pouvez supprimer votre compte à tout moment depuis votre espace profil. HooYia Market se réserve le droit de suspendre ou supprimer tout compte en cas de violation des présentes conditions, sans préavis ni remboursement.</p>
+    <h2><span class="num">11</span> {% trans "Résiliation" %}</h2>
+    <p>{% trans "Vous pouvez supprimer votre compte à tout moment depuis votre espace profil. HooYia Market se réserve le droit de suspendre ou supprimer tout compte en cas de violation des présentes conditions, sans préavis ni remboursement." %}</p>
   </div>
 
   <div class="legal-section" id="s12">
-    <h2><span class="num">12</span> Droit applicable</h2>
-    <p>Les présentes conditions sont régies par le droit camerounais. Tout litige relatif à leur interprétation ou exécution sera soumis à la compétence exclusive des tribunaux de Douala, Cameroun.</p>
+    <h2><span class="num">12</span> {% trans "Droit applicable" %}</h2>
+    <p>{% trans "Les présentes conditions sont régies par le droit camerounais. Tout litige relatif à leur interprétation ou exécution sera soumis à la compétence exclusive des tribunaux de Douala, Cameroun." %}</p>
   </div>
 
-  {# Contact box #}
   <div class="legal-contact-box">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.0 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14h0v2.92z"/>
     </svg>
     <div>
-      <h3>Une question sur nos conditions ?</h3>
-      <p>Notre équipe est disponible pour vous répondre. Écrivez-nous à <a href="mailto:legal@hooyia.com">legal@hooyia.com</a> ou consultez notre <a href="{% url 'products:contact' %}">page de contact</a>.</p>
+      <h3>{% trans "Une question sur nos conditions ?" %}</h3>
+      <p>{% trans "Notre équipe est disponible pour vous répondre. Écrivez-nous à" %} <a href="mailto:legal@hooyia.com">legal@hooyia.com</a> {% trans "ou consultez notre" %} <a href="{% url 'products:contact' %}">{% trans "page de contact" %}</a>.</p>
     </div>
   </div>
 

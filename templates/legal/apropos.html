@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}À propos — HooYia Market{% endblock %}
+{% block title %}{% trans "À propos" %} — HooYia Market{% endblock %}
 
 {% block content %}
 <style>
@@ -90,95 +90,95 @@
 
   {# Hero #}
   <div class="about-hero">
-    <div class="about-hero-label">Notre histoire</div>
-    <h1>La marketplace électronique<br>du <span>Cameroun</span></h1>
-    <p>HooYia Market connecte acheteurs et vendeurs de confiance pour rendre l'électronique et l'informatique accessibles à tous les Camerounais.</p>
+    <div class="about-hero-label">{% trans "Notre histoire" %}</div>
+    <h1>{% trans "La marketplace électronique" %}<br>{% trans "du" %} <span>{% trans "Cameroun" %}</span></h1>
+    <p>{% trans "HooYia Market connecte acheteurs et vendeurs de confiance pour rendre l'électronique et l'informatique accessibles à tous les Camerounais." %}</p>
   </div>
 
   {# Stats #}
   <div class="about-stats">
     <div class="about-stat">
       <div class="val">500<span>+</span></div>
-      <div class="lbl">Produits disponibles</div>
+      <div class="lbl">{% trans "Produits disponibles" %}</div>
     </div>
     <div class="about-stat">
       <div class="val">1k<span>+</span></div>
-      <div class="lbl">Clients satisfaits</div>
+      <div class="lbl">{% trans "Clients satisfaits" %}</div>
     </div>
     <div class="about-stat">
       <div class="val">50<span>+</span></div>
-      <div class="lbl">Vendeurs vérifiés</div>
+      <div class="lbl">{% trans "Vendeurs vérifiés" %}</div>
     </div>
     <div class="about-stat">
-      <div class="val">3<span> villes</span></div>
-      <div class="lbl">Douala · Yaoundé · Bafoussam</div>
+      <div class="val">3<span> {% trans "villes" %}</span></div>
+      <div class="lbl">{% trans "Douala · Yaoundé · Bafoussam" %}</div>
     </div>
   </div>
 
   {# Notre histoire #}
   <div class="about-section">
-    <h2>Notre histoire</h2>
-    <p>HooYia Market est née d'un constat simple : acheter de l'électronique de qualité au Cameroun relevait du parcours du combattant. Entre les produits contrefaits, les prix opaques et l'absence de garanties, les consommateurs manquaient d'une plateforme de confiance.</p>
-    <p>Fondée en 2024 à Douala, notre équipe a décidé de changer ça en construisant une marketplace transparente, où chaque vendeur est vérifié, chaque produit est décrit avec honnêteté et chaque transaction est sécurisée.</p>
+    <h2>{% trans "Notre histoire" %}</h2>
+    <p>{% trans "HooYia Market est née d'un constat simple : acheter de l'électronique de qualité au Cameroun relevait du parcours du combattant. Entre les produits contrefaits, les prix opaques et l'absence de garanties, les consommateurs manquaient d'une plateforme de confiance." %}</p>
+    <p>{% trans "Fondée en 2024 à Douala, notre équipe a décidé de changer ça en construisant une marketplace transparente, où chaque vendeur est vérifié, chaque produit est décrit avec honnêteté et chaque transaction est sécurisée." %}</p>
   </div>
 
   {# Mission / Vision / Valeurs #}
   <div class="about-mvv">
     <div class="about-mvv-card mission">
       <div class="icon">🎯</div>
-      <h3>Mission</h3>
-      <p>Rendre l'accès à l'électronique et à l'informatique simple, transparent et sécurisé pour tous les Camerounais.</p>
+      <h3>{% trans "Mission" %}</h3>
+      <p>{% trans "Rendre l'accès à l'électronique et à l'informatique simple, transparent et sécurisé pour tous les Camerounais." %}</p>
     </div>
     <div class="about-mvv-card vision">
       <div class="icon">🚀</div>
-      <h3>Vision</h3>
-      <p>Devenir la référence du e-commerce tech en Afrique centrale d'ici 2027, avec une présence dans 10 pays.</p>
+      <h3>{% trans "Vision" %}</h3>
+      <p>{% trans "Devenir la référence du e-commerce tech en Afrique centrale d'ici 2027, avec une présence dans 10 pays." %}</p>
     </div>
     <div class="about-mvv-card valeurs">
       <div class="icon">💚</div>
-      <h3>Valeurs</h3>
-      <p>Confiance, transparence, proximité. Nous croyons au commerce équitable entre vendeurs locaux et acheteurs exigeants.</p>
+      <h3>{% trans "Valeurs" %}</h3>
+      <p>{% trans "Confiance, transparence, proximité. Nous croyons au commerce équitable entre vendeurs locaux et acheteurs exigeants." %}</p>
     </div>
   </div>
 
   {# Notre équipe #}
   <div class="about-section">
-    <h2>Notre équipe</h2>
-    <p>Une équipe passionnée de technologie et de commerce, engagée à construire la meilleure expérience d'achat en ligne du Cameroun.</p>
+    <h2>{% trans "Notre équipe" %}</h2>
+    <p>{% trans "Une équipe passionnée de technologie et de commerce, engagée à construire la meilleure expérience d'achat en ligne du Cameroun." %}</p>
     <div class="about-team">
       <div class="about-team-card">
         <div class="about-team-avatar">FJ</div>
         <h4>Francklin Junior MONTHE</h4>
-        <div class="role">Fondateur & CEO</div>
-        <p>Ingénieur passionné par le e-commerce et le développement du numérique en Afrique.</p>
+        <div class="role">{% trans "Fondateur & CEO" %}</div>
+        <p>{% trans "Ingénieur passionné par le e-commerce et le développement du numérique en Afrique." %}</p>
       </div>
       <div class="about-team-card">
         <div class="about-team-avatar">TK</div>
-        <h4>Équipe Technique</h4>
-        <div class="role">Développement & Infrastructure</div>
-        <p>Architectures robustes, performance et sécurité au service des utilisateurs.</p>
+        <h4>{% trans "Équipe Technique" %}</h4>
+        <div class="role">{% trans "Développement & Infrastructure" %}</div>
+        <p>{% trans "Architectures robustes, performance et sécurité au service des utilisateurs." %}</p>
       </div>
       <div class="about-team-card">
         <div class="about-team-avatar">SC</div>
-        <h4>Service Client</h4>
-        <div class="role">Support & Médiation</div>
-        <p>Disponible 7j/7 pour résoudre vos questions et garantir votre satisfaction.</p>
+        <h4>{% trans "Service Client" %}</h4>
+        <div class="role">{% trans "Support & Médiation" %}</div>
+        <p>{% trans "Disponible 7j/7 pour résoudre vos questions et garantir votre satisfaction." %}</p>
       </div>
     </div>
   </div>
 
   {# CTA #}
   <div class="about-cta">
-    <h2>Rejoignez la communauté HooYia</h2>
-    <p>Achetez en toute confiance ou devenez vendeur et touchez des milliers de clients.</p>
+    <h2>{% trans "Rejoignez la communauté HooYia" %}</h2>
+    <p>{% trans "Achetez en toute confiance ou devenez vendeur et touchez des milliers de clients." %}</p>
     <div class="about-cta-btns">
       <a href="{% url 'products:liste' %}" class="btn-orange">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>
-        Découvrir les produits
+        {% trans "Découvrir les produits" %}
       </a>
       <a href="{% url 'products:contact' %}" class="btn-outline">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Nous contacter
+        {% trans "Nous contacter" %}
       </a>
     </div>
   </div>

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Gestion des Catégories — HooYia Market{% endblock %}
+{% block title %}{% trans "Gestion des Catégories" %} — HooYia Market{% endblock %}
 
 {% block extra_head %}
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -152,23 +152,23 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
       <div class="sb-logo">⚙ Admin</div>
       <div class="sb-sub">HooYia Market</div>
     </div>
-    <div class="sb-lbl">Navigation</div>
-    <a href="{% url 'products:admin_dashboard' %}" class="sb-item">📊 Dashboard</a>
-    <div class="sb-lbl">Catalogue</div>
-    <a href="{% url 'products:gestion_categories' %}" class="sb-item active">🗂 Catégories</a>
-    <a href="{% url 'products:liste' %}" class="sb-item">📦 Produits</a>
-    <a href="{% url 'products:ajouter' %}" class="sb-item">➕ Ajouter produit</a>
-    <div class="sb-lbl">Site</div>
-    <a href="{% url 'products:accueil' %}" class="sb-item">🏠 Voir le site</a>
+    <div class="sb-lbl">{% trans "Navigation" %}</div>
+    <a href="{% url 'products:admin_dashboard' %}" class="sb-item">📊 {% trans "Dashboard" %}</a>
+    <div class="sb-lbl">{% trans "Catalogue" %}</div>
+    <a href="{% url 'products:gestion_categories' %}" class="sb-item active">🗂 {% trans "Catégories" %}</a>
+    <a href="{% url 'products:liste' %}" class="sb-item">📦 {% trans "Produits" %}</a>
+    <a href="{% url 'products:ajouter' %}" class="sb-item">➕ {% trans "Ajouter produit" %}</a>
+    <div class="sb-lbl">{% trans "Site" %}</div>
+    <a href="{% url 'products:accueil' %}" class="sb-item">🏠 {% trans "Voir le site" %}</a>
     <div class="sb-bottom"><div class="sb-version">HooYia Market v1.0</div></div>
   </aside>
 
   <div class="main-content">
-    <a href="{% url 'products:admin_dashboard' %}" class="page-back">← Retour au Dashboard</a>
+    <a href="{% url 'products:admin_dashboard' %}" class="page-back">← {% trans "Retour au Dashboard" %}</a>
     <div class="page-header">
       <div>
-        <div class="page-title">🗂 Gestion des catégories</div>
-        <div class="page-subtitle">Créez et organisez les catégories de votre catalogue</div>
+        <div class="page-title">🗂 {% trans "Gestion des catégories" %}</div>
+        <div class="page-subtitle">{% trans "Créez et organisez les catégories de votre catalogue" %}</div>
       </div>
     </div>
 
@@ -176,15 +176,15 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-val">{{ toutes_categories.count }}</div>
-        <div class="stat-lbl">Catégories actives</div>
+        <div class="stat-lbl">{% trans "Catégories actives" %}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" id="nb-racines">—</div>
-        <div class="stat-lbl">Catégories principales</div>
+        <div class="stat-lbl">{% trans "Catégories principales" %}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" id="nb-sous">—</div>
-        <div class="stat-lbl">Sous-catégories</div>
+        <div class="stat-lbl">{% trans "Sous-catégories" %}</div>
       </div>
     </div>
 
@@ -201,14 +201,14 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
         <div class="card-head">
           <div class="card-head-icon">{% if categorie_edit %}✏️{% else %}➕{% endif %}</div>
           <div>
-            <div class="card-head-title">{% if categorie_edit %}Modifier la catégorie{% else %}Nouvelle catégorie{% endif %}</div>
-            <div class="card-head-sub">{% if categorie_edit %}Mise à jour des informations{% else %}Remplissez les champs ci-dessous{% endif %}</div>
+            <div class="card-head-title">{% if categorie_edit %}{% trans "Modifier la catégorie" %}{% else %}{% trans "Nouvelle catégorie" %}{% endif %}</div>
+            <div class="card-head-sub">{% if categorie_edit %}{% trans "Mise à jour des informations" %}{% else %}{% trans "Remplissez les champs ci-dessous" %}{% endif %}</div>
           </div>
         </div>
         <div class="card-body">
           {% if categorie_edit %}
           <div class="edit-banner">
-            ✏️ Vous modifiez : <strong>{{ categorie_edit.nom }}</strong>
+            ✏️ {% blocktrans with nom=categorie_edit.nom %}Vous modifiez : <strong>{{ nom }}</strong>{% endblocktrans %}
           </div>
           {% endif %}
 
@@ -220,24 +220,24 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
             {% endif %}
 
             <div class="field-group">
-              <label class="field-label" for="id_nom">Nom <span>(obligatoire)</span></label>
+              <label class="field-label" for="id_nom">{% trans "Nom" %} <span>({% trans "obligatoire" %})</span></label>
               <input type="text" name="nom" id="id_nom"
                 value="{% if categorie_edit %}{{ categorie_edit.nom }}{% endif %}"
-                placeholder="Ex: Smartphones, Ordinateurs portables…"
+                placeholder="{% trans 'Ex: Smartphones, Ordinateurs portables…' %}"
                 class="field-input" required autocomplete="off" />
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="id_description">Description <span>(optionnel)</span></label>
+              <label class="field-label" for="id_description">{% trans "Description" %} <span>({% trans "optionnel" %})</span></label>
               <textarea name="description" id="id_description" rows="3"
-                placeholder="Courte description de la catégorie…"
+                placeholder="{% trans 'Courte description de la catégorie…' %}"
                 class="field-input field-textarea">{% if categorie_edit %}{{ categorie_edit.description }}{% endif %}</textarea>
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="id_parent">Catégorie parente <span>(laisser vide si catégorie principale)</span></label>
+              <label class="field-label" for="id_parent">{% trans "Catégorie parente" %} <span>({% trans "laisser vide si catégorie principale" %})</span></label>
               <select name="parent" id="id_parent" class="field-input field-select">
-                <option value="">— Aucun parent (catégorie racine) —</option>
+                <option value="">{% trans "— Aucun parent (catégorie racine) —" %}</option>
                 {% for cat in toutes_categories %}
                   {% if not categorie_edit or cat.id != categorie_edit.id %}
                   <option value="{{ cat.id }}"
@@ -250,11 +250,11 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
             </div>
 
             <div class="field-group">
-              <label class="field-label">Image <span>(optionnel)</span></label>
+              <label class="field-label">{% trans "Image" %} <span>({% trans "optionnel" %})</span></label>
               {% if categorie_edit and categorie_edit.image %}
               <div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;">
                 <img src="{{ categorie_edit.image.url }}" alt="" class="img-preview">
-                <span style="font-size:12px;color:rgba(13,31,92,.4);">Image actuelle — déposer une nouvelle pour remplacer</span>
+                <span style="font-size:12px;color:rgba(13,31,92,.4);">{% trans "Image actuelle — déposer une nouvelle pour remplacer" %}</span>
               </div>
               {% endif %}
               <div class="drop-zone" id="drop-zone-cat"
@@ -264,8 +264,8 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                 ondrop="handleDropCat(event)">
                 <div id="img-preview-new-wrap">
                   <div style="font-size:28px;margin-bottom:8px;">📷</div>
-                  <div style="font-size:13px;color:rgba(13,31,92,.5);"><strong style="color:var(--orange);">Cliquez</strong> ou glissez votre image ici</div>
-                  <div style="font-size:11.5px;color:rgba(13,31,92,.3);margin-top:4px;">JPG, PNG, WebP — recommandé 400×400px</div>
+                  <div style="font-size:13px;color:rgba(13,31,92,.5);"><strong style="color:var(--orange);">{% trans "Cliquez" %}</strong> {% trans "ou glissez votre image ici" %}</div>
+                  <div style="font-size:11.5px;color:rgba(13,31,92,.3);margin-top:4px;">{% trans "JPG, PNG, WebP — recommandé 400×400px" %}</div>
                 </div>
                 <img id="img-preview-new" style="display:none;width:80px;height:80px;border-radius:9px;object-fit:cover;" />
               </div>
@@ -273,7 +273,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
             </div>
 
             <div class="field-group">
-              <label class="field-label">Statut</label>
+              <label class="field-label">{% trans "Statut" %}</label>
               <div class="toggle-row">
                 <label class="toggle">
                   <input type="checkbox" name="est_active"
@@ -281,20 +281,20 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                   <span class="toggle-slider"></span>
                 </label>
                 <div class="toggle-info">
-                  <div class="toggle-title">Catégorie active</div>
-                  <div class="toggle-desc">Visible sur le site</div>
+                  <div class="toggle-title">{% trans "Catégorie active" %}</div>
+                  <div class="toggle-desc">{% trans "Visible sur le site" %}</div>
                 </div>
               </div>
             </div>
 
             <div class="btn-row">
               <button type="submit" class="btn-primary">
-                {% if categorie_edit %}✓ Enregistrer les modifications{% else %}➕ Créer la catégorie{% endif %}
+                {% if categorie_edit %}✓ {% trans "Enregistrer les modifications" %}{% else %}➕ {% trans "Créer la catégorie" %}{% endif %}
               </button>
               {% if categorie_edit %}
-              <a href="{% url 'products:gestion_categories' %}" class="btn-cancel">✕ Annuler</a>
+              <a href="{% url 'products:gestion_categories' %}" class="btn-cancel">✕ {% trans "Annuler" %}</a>
               {% else %}
-              <button type="reset" class="btn-cancel" onclick="resetForm()">↺ Réinitialiser</button>
+              <button type="reset" class="btn-cancel" onclick="resetForm()">↺ {% trans "Réinitialiser" %}</button>
               {% endif %}
             </div>
           </form>
@@ -306,13 +306,13 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
         <div class="card-head">
           <div class="card-head-icon">📋</div>
           <div style="flex:1;">
-            <div class="card-head-title">Catégories existantes</div>
-            <div class="card-head-sub">Cliquez sur Modifier pour éditer une catégorie</div>
+            <div class="card-head-title">{% trans "Catégories existantes" %}</div>
+            <div class="card-head-sub">{% trans "Cliquez sur Modifier pour éditer une catégorie" %}</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
             <div class="search-wrap" style="width:160px;">
               <span class="search-icon">🔍</span>
-              <input type="text" id="cat-search" class="search-input" placeholder="Rechercher…" oninput="filterCats(this.value)" />
+              <input type="text" id="cat-search" class="search-input" placeholder="{% trans 'Rechercher…' %}" oninput="filterCats(this.value)" />
             </div>
             <!-- Toggle vue -->
             <div class="view-toggle">
@@ -333,11 +333,11 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
           <table class="cat-table" id="cat-table">
             <thead>
               <tr>
-                <th>Image</th>
-                <th>Nom / Slug</th>
-                <th>Type</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th>{% trans "Image" %}</th>
+                <th>{% trans "Nom / Slug" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Statut" %}</th>
+                <th>{% trans "Actions" %}</th>
               </tr>
             </thead>
             <tbody id="cat-tbody">
@@ -351,10 +351,10 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                   <div class="cat-nom">{{ cat.nom }}</div>
                   <div class="cat-slug">/{{ cat.slug }}</div>
                 </td>
-                <td><span class="badge badge-parent">🏷 Principale</span></td>
-                <td>{% if cat.est_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+                <td><span class="badge badge-parent">🏷 {% trans "Principale" %}</span></td>
+                <td>{% if cat.est_active %}<span class="badge badge-active">{% trans "Active" %}</span>{% else %}<span class="badge badge-inactive">{% trans "Inactive" %}</span>{% endif %}</td>
                 <td style="display:flex;gap:6px;align-items:center;">
-                  <a href="?modifier={{ cat.id }}" class="action-btn action-edit">✏️ Modifier</a>
+                  <a href="?modifier={{ cat.id }}" class="action-btn action-edit">✏️ {% trans "Modifier" %}</a>
                   <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' cat.id %}', '{{ cat.nom }}')" class="action-btn action-del">🗑</button>
                 </td>
               </tr>
@@ -368,10 +368,10 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                   <div class="cat-nom" style="padding-left:16px;">↳ {{ sous.nom }}</div>
                   <div class="cat-slug" style="padding-left:16px;">/{{ sous.slug }}</div>
                 </td>
-                <td><span class="badge badge-sous">📂 Sous-cat.</span></td>
-                <td>{% if sous.est_active %}<span class="badge badge-active">Active</span>{% else %}<span class="badge badge-inactive">Inactive</span>{% endif %}</td>
+                <td><span class="badge badge-sous">📂 {% trans "Sous-cat." %}</span></td>
+                <td>{% if sous.est_active %}<span class="badge badge-active">{% trans "Active" %}</span>{% else %}<span class="badge badge-inactive">{% trans "Inactive" %}</span>{% endif %}</td>
                 <td style="display:flex;gap:6px;align-items:center;">
-                  <a href="?modifier={{ sous.id }}" class="action-btn action-edit">✏️ Modifier</a>
+                  <a href="?modifier={{ sous.id }}" class="action-btn action-edit">✏️ {% trans "Modifier" %}</a>
                   <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' sous.id %}', '{{ sous.nom }}')" class="action-btn action-del">🗑</button>
                 </td>
               </tr>
@@ -394,14 +394,14 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                 <div class="cat-card-name">{{ cat.nom }}</div>
                 <div class="cat-card-slug">/{{ cat.slug }}</div>
                 <div style="margin-top:7px;display:flex;align-items:center;justify-content:space-between;">
-                  <span class="badge badge-parent" style="font-size:9.5px;">🏷 Principale</span>
-                  {% if cat.est_active %}<span class="badge badge-active" style="font-size:9.5px;">Active</span>
-                  {% else %}<span class="badge badge-inactive" style="font-size:9.5px;">Inactive</span>{% endif %}
+                  <span class="badge badge-parent" style="font-size:9.5px;">🏷 {% trans "Principale" %}</span>
+                  {% if cat.est_active %}<span class="badge badge-active" style="font-size:9.5px;">{% trans "Active" %}</span>
+                  {% else %}<span class="badge badge-inactive" style="font-size:9.5px;">{% trans "Inactive" %}</span>{% endif %}
                 </div>
               </div>
               <div class="cat-card-footer">
                 <div class="cat-card-actions">
-                  <a href="?modifier={{ cat.id }}" class="action-btn action-edit" style="font-size:11px;padding:4px 9px;">✏️ Modifier</a>
+                  <a href="?modifier={{ cat.id }}" class="action-btn action-edit" style="font-size:11px;padding:4px 9px;">✏️ {% trans "Modifier" %}</a>
                   <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' cat.id %}', '{{ cat.nom }}')" class="action-btn action-del" style="font-size:11px;padding:4px 9px;">🗑</button>
                 </div>
               </div>
@@ -416,14 +416,14 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
                 <div class="cat-card-name" style="font-size:12px;">↳ {{ sous.nom }}</div>
                 <div class="cat-card-slug">/{{ sous.slug }}</div>
                 <div style="margin-top:7px;display:flex;align-items:center;justify-content:space-between;">
-                  <span class="badge badge-sous" style="font-size:9.5px;">📂 Sous-cat.</span>
-                  {% if sous.est_active %}<span class="badge badge-active" style="font-size:9.5px;">Active</span>
-                  {% else %}<span class="badge badge-inactive" style="font-size:9.5px;">Inactive</span>{% endif %}
+                  <span class="badge badge-sous" style="font-size:9.5px;">📂 {% trans "Sous-cat." %}</span>
+                  {% if sous.est_active %}<span class="badge badge-active" style="font-size:9.5px;">{% trans "Active" %}</span>
+                  {% else %}<span class="badge badge-inactive" style="font-size:9.5px;">{% trans "Inactive" %}</span>{% endif %}
                 </div>
               </div>
               <div class="cat-card-footer">
                 <div class="cat-card-actions">
-                  <a href="?modifier={{ sous.id }}" class="action-btn action-edit" style="font-size:11px;padding:4px 9px;">✏️ Modifier</a>
+                  <a href="?modifier={{ sous.id }}" class="action-btn action-edit" style="font-size:11px;padding:4px 9px;">✏️ {% trans "Modifier" %}</a>
                   <button onclick="confirmSupprimerCat('{% url 'products:supprimer_categorie' sous.id %}', '{{ sous.nom }}')" class="action-btn action-del" style="font-size:11px;padding:4px 9px;">🗑</button>
                 </div>
               </div>
@@ -436,7 +436,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
           {% else %}
           <div class="empty-state">
             <div class="icon">🗂</div>
-            <p>Aucune catégorie créée pour l'instant.<br>Utilisez le formulaire pour commencer.</p>
+            <p>{% trans "Aucune catégorie créée pour l'instant." %}<br>{% trans "Utilisez le formulaire pour commencer." %}</p>
           </div>
           {% endif %}
         </div>
@@ -450,13 +450,13 @@ body { background: var(--bg) !important; font-family: 'DM Sans', sans-serif; }
 <div id="modal-del-cat" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="modal-icon">⚠️</div>
-    <div class="modal-title">Supprimer cette catégorie ?</div>
-    <p class="modal-body" id="modal-del-body">Action irréversible. Les produits associés seront sans catégorie.</p>
+    <div class="modal-title">{% trans "Supprimer cette catégorie ?" %}</div>
+    <p class="modal-body" id="modal-del-body">{% trans "Action irréversible. Les produits associés seront sans catégorie." %}</p>
     <div class="btn-row" style="justify-content:flex-end;">
-      <button onclick="document.getElementById('modal-del-cat').classList.add('hidden')" class="btn-secondary">Annuler</button>
+      <button onclick="document.getElementById('modal-del-cat').classList.add('hidden')" class="btn-secondary">{% trans "Annuler" %}</button>
       <form method="POST" id="del-cat-form">
         {% csrf_token %}
-        <button type="submit" style="padding:11px 20px;border-radius:9px;border:none;cursor:pointer;background:var(--red);color:white;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;display:inline-flex;align-items:center;gap:7px;">🗑 Confirmer</button>
+        <button type="submit" style="padding:11px 20px;border-radius:9px;border:none;cursor:pointer;background:var(--red);color:white;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;display:inline-flex;align-items:center;gap:7px;">🗑 {% trans "Confirmer" %}</button>
       </form>
     </div>
   </div>
