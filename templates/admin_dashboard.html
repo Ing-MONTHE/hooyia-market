@@ -1539,6 +1539,54 @@ html, body {
         <div id="global-search-results" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:600;overflow:hidden;max-height:360px;overflow-y:auto;"></div>
       </div>
 
+      {# ── Sélecteur de langue ── #}
+      {% get_current_language as CURRENT_LANG %}
+      <div style="position:relative;" id="dash-lang-wrap">
+        <button onclick="document.getElementById('dash-lang-dd').style.display=document.getElementById('dash-lang-dd').style.display==='block'?'none':'block'"
+                class="da-topbar-btn" style="width:40px;height:40px;"
+                title="{% trans 'Changer de langue' %}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </button>
+        <div id="dash-lang-dd" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:600;overflow:hidden;min-width:130px;">
+          <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="fr">
+            <input type="hidden" name="next" id="dash-next-fr" value="/">
+            <button type="submit" style="width:100%;padding:10px 16px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);{% if CURRENT_LANG == 'fr' %}font-weight:700;{% endif %}">
+              🇫🇷 Français {% if CURRENT_LANG == 'fr' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+            </button>
+          </form>
+          <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="en">
+            <input type="hidden" name="next" id="dash-next-en" value="/en/">
+            <button type="submit" style="width:100%;padding:10px 16px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);{% if CURRENT_LANG == 'en' %}font-weight:700;{% endif %}">
+              🇬🇧 English {% if CURRENT_LANG == 'en' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+      <script>
+        (function() {
+          var path = window.location.pathname.replace(/^\/en\//, '/');
+          var frEl = document.getElementById('dash-next-fr');
+          var enEl = document.getElementById('dash-next-en');
+          if (frEl) frEl.value = path;
+          if (enEl) enEl.value = '/en' + path;
+          /* Fermer le dropdown au clic extérieur */
+          document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('dash-lang-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+              document.getElementById('dash-lang-dd').style.display = 'none';
+            }
+          });
+        })();
+      </script>
+
       {# ── Bouton Dark Mode Dashboard ── #}
       <button class="da-topbar-btn" id="dash-dark-btn" title="{% trans "Mode sombre" %}"
               onclick="dashToggleDark()" aria-label="{% trans "Basculer le mode sombre" %}">
