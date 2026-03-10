@@ -164,6 +164,30 @@
                         chargé uniquement si l'utilisateur est connecté {% endcomment %}
   <script src="{% url 'javascript-catalog' %}"></script>
   <script src="{% static 'js/api.js' %}"></script>
+
+  {% comment %} ── Transfert JWT cookie → localStorage ──
+     Après un login HTML, la vue Django dépose les tokens dans des cookies
+     éphémères (_jwt_access, _jwt_refresh, 5s max).
+     Ce script les lit, les stocke dans localStorage via API.setTokens(),
+     puis efface les cookies. {% endcomment %}
+  <script>
+  (function() {
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[1]) : null;
+    }
+    function deleteCookie(name) {
+      document.cookie = name + '=;Max-Age=0;path=/;SameSite=Lax';
+    }
+    var access  = getCookie('_jwt_access');
+    var refresh = getCookie('_jwt_refresh');
+    if (access && refresh && typeof API !== 'undefined') {
+      API.setTokens(access, refresh);
+      deleteCookie('_jwt_access');
+      deleteCookie('_jwt_refresh');
+    }
+  })();
+  </script>
   {% comment %} ══ BADGE PANIER TEMPS RÉEL ══
      Charge le nombre d'articles du panier via l'API au chargement
      de chaque page, pour que le badge navbar soit toujours à jour. {% endcomment %}

@@ -185,11 +185,18 @@ const STATUTS_ICON = {
 async function loadCommandes() {
   try {
     const data = await API.get('/api/commandes/', { silentError: true });
-    const commandes = data.results || data;
 
     document.getElementById('skeleton').classList.add('hidden');
 
-    if (!commandes.length) {
+    if (!data) {
+      // JWT absent ou session expirée → redirection login
+      window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
+    const commandes = data.results || data;
+
+    if (!Array.isArray(commandes) || !commandes.length) {
       document.getElementById('empty').classList.remove('hidden');
       return;
     }
@@ -203,8 +210,11 @@ async function loadCommandes() {
     list.innerHTML = commandes.map(c => renderCommande(c)).join('');
 
   } catch(e) {
+    document.getElementById('skeleton').classList.add('hidden');
     if (e && e.status === 401) {
-      window.location.href = '/compte/connexion/?next=/commandes/historique/';
+      window.location.href = '/compte/connexion/?next=' + encodeURIComponent(window.location.pathname);
+    } else {
+      document.getElementById('empty').classList.remove('hidden');
     }
   }
 }
@@ -307,6 +317,6 @@ async function annulerCommande(commandeId, btn) {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-loadCommandes();
+document.addEventListener('DOMContentLoaded', loadCommandes);
 </script>
 {% endblock %}

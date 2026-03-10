@@ -16,8 +16,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import AdresseLivraison, TokenVerificationEmail
+
+
+def _get_jwt_tokens(user):
+    """Génère une paire access/refresh JWT pour l'utilisateur."""
+    refresh = RefreshToken.for_user(user)
+    return {
+        'access':  str(refresh.access_token),
+        'refresh': str(refresh),
+    }
 from .forms import InscriptionForm, ConnexionForm
 
 
@@ -88,8 +98,14 @@ def connexion(request):
 
                 messages.success(request, _("Bienvenue %(prenom)s !") % {'prenom': user.get_short_name()})
 
+                # Génère les JWT et les injecte via cookies courts (5s)
+                # base.html les lit et les transfère dans localStorage
+                jwt = _get_jwt_tokens(user)
                 next_url = request.GET.get('next', '/')
-                return redirect(next_url)
+                response = redirect(next_url)
+                response.set_cookie('_jwt_access',  jwt['access'],  max_age=5, httponly=False, samesite='Lax')
+                response.set_cookie('_jwt_refresh', jwt['refresh'], max_age=5, httponly=False, samesite='Lax')
+                return response
 
             else:
                 messages.error(request, _("Email ou mot de passe incorrect."))
@@ -348,4 +364,8 @@ def google_callback(request):
 
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     messages.success(request, _("Bienvenue %(prenom)s ! 👋") % {'prenom': user.prenom or user.username})
-    return redirect(settings.LOGIN_REDIRECT_URL)
+    jwt = _get_jwt_tokens(user)
+    response = redirect(settings.LOGIN_REDIRECT_URL)
+    response.set_cookie('_jwt_access',  jwt['access'],  max_age=5, httponly=False, samesite='Lax')
+    response.set_cookie('_jwt_refresh', jwt['refresh'], max_age=5, httponly=False, samesite='Lax')
+    return response

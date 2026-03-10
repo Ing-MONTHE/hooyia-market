@@ -1123,6 +1123,14 @@ html, body {
   width: 100%;
   border-collapse: collapse;
 }
+/* Wrapper pour scroll horizontal sur mobile */
+.da-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+}
+.da-table-wrap .da-table { border: none; }
 .da-table th {
   font-size: 10.5px;
   font-weight: 700;
@@ -1259,14 +1267,44 @@ html, body {
   .da-section-header { margin-bottom: 16px; }
   .da-table { font-size: 12px; }
   .da-table th, .da-table td { padding: 10px 12px; }
-  /* Masquer colonnes non essentielles sur mobile */
   .da-table .hide-mobile { display: none; }
+
+  /* Formulaire produit : passe en 1 colonne */
+  .ap-form-grid { grid-template-columns: 1fr !important; }
+
+  /* Grilles inline du formulaire */
+  .ap-price-grid { grid-template-columns: 1fr !important; }
+  .ap-img-grid   { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Section stats commandes */
+  .da-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Topbar : masquer texte profil, réduire recherche */
+  .da-profile-info  { display: none; }
+  .da-topbar-sep    { display: none; }
+  #global-search-wrap input { width: 120px !important; }
+
+  /* Section header : stack verticalement */
+  .da-section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .da-section-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
 }
 
 @media (max-width: 479px) {
   .kpi-grid { grid-template-columns: 1fr; }
   .da-section-title { font-size: 18px; }
   .da-main { padding: 16px 12px; }
+
+  /* Topbar : masquer la recherche, garder seulement icônes essentielles */
+  #global-search-wrap { display: none; }
+  .ap-img-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .da-stats-grid { grid-template-columns: 1fr !important; }
+
+  /* KPI cards plus compactes */
+  .kpi-card { padding: 14px; }
+}
+
+/* Scroll lock sidebar mobile */
+body.da-sidebar-open { overflow: hidden; }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -2117,7 +2155,8 @@ html, body {
       </button>
     </div>
     {# Tableau des 5 dernières commandes — rempli par loadOverview() #}
-    <table class="da-table">
+    <div class="da-table-wrap">
+<table class="da-table">
       <thead>
         <tr>
           <th>{% trans "Référence" %}</th>
@@ -2133,6 +2172,7 @@ html, body {
         <tr><td colspan="6" class="da-loading">{% trans "Chargement des commandes…" %}</td></tr>
       </tbody>
     </table>
+</div><!-- /.da-table-wrap -->
   </div>
 
   {# ── Actions rapides ── #}
@@ -2402,7 +2442,8 @@ html, body {
   </div>
 
   {# ── Vue tableau produits ── #}
-  <table class="da-table" id="view-produits-table">
+  <div class="da-table-wrap">
+<table class="da-table" id="view-produits-table">
     <thead>
       <tr>
         <th>{% trans "Produit" %}</th>
@@ -2477,7 +2518,7 @@ html, body {
     <input type="hidden" id="ap-produit-id" name="_produit_id" value="" />
 
     {# Grille : formulaire principal (gauche) + panneau latéral (droite) #}
-    <div style="display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:start;">
+    <div class="ap-form-grid" style="display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:start;">
 
       {# ════ Colonne gauche ════ #}
       <div>
@@ -2544,7 +2585,7 @@ html, body {
             </h3>
           </div>
           <div style="padding:16px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="ap-price-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div class="da-field">
                 <label class="da-label">{% trans "Prix (FCFA)" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
                 <div style="position:relative;">
@@ -2594,7 +2635,7 @@ html, body {
               <p style="font-size:11px;color:var(--text-muted);margin:0;">{% trans "JPG, PNG, WebP — Max 5 Mo — 1ère = principale" %}</p>
             </div>
             <input type="file" name="images" id="ap-images" multiple accept="image/*" onchange="apPreviewImages(this.files)" style="display:none;" />
-            <div id="ap-preview-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;"></div>
+            <div id="ap-preview-grid" class="ap-img-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;"></div>
           </div>
         </div>
 
@@ -2742,7 +2783,8 @@ html, body {
                    padding:2px 9px;border-radius:99px;" id="cmd-count"></span>
     </div>
   </div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Référence" %}</th>
@@ -2905,7 +2947,8 @@ html, body {
                    padding:2px 9px;border-radius:99px;" id="users-count"></span>
     </div>
   </div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Utilisateur" %}</th>
@@ -2955,7 +2998,8 @@ html, body {
                    padding:2px 9px;border-radius:99px;" id="avis-count"></span>
     </div>
   </div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Produit" %}</th>
@@ -2994,7 +3038,7 @@ html, body {
 </div>
 
 {# Mini KPIs stock — 3 cartes #}
-<div id="sec-stocks-kpis" style="display:none;
+<div id="sec-stocks-kpis" class="da-stats-grid" style="display:none;
      display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
 
   <div class="kpi-card">
@@ -3055,7 +3099,8 @@ html, body {
     <h3 id="stocks-title">{% trans "Tous les produits" %}</h3>
     <span style="font-size:11.5px;color:var(--text-muted);">{% trans "Cliquer sur le stock pour ajuster" %}</span>
   </div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Produit" %}</th>
@@ -3247,7 +3292,8 @@ html, body {
 
 <div class="da-card" id="sec-paniers-card" style="display:none;">
   <div class="da-card-head"><h3>{% trans "Paniers en cours" %}</h3></div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Utilisateur" %}</th>
@@ -3261,6 +3307,7 @@ html, body {
       <tr><td colspan="5" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
+</div><!-- /.da-table-wrap -->
 </div>
 
 {% comment %} ════════════════════════════════════════════════════════════════
@@ -3278,7 +3325,8 @@ html, body {
 
 <div class="da-card" id="sec-messages-card" style="display:none;">
   <div class="da-card-head"><h3>{% trans "Toutes les conversations" %}</h3></div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Participants" %}</th>
@@ -3291,6 +3339,7 @@ html, body {
       <tr><td colspan="4" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
+</div><!-- /.da-table-wrap -->
 </div>
 
 {% comment %} ════════════════════════════════════════════════════════════════
@@ -3308,7 +3357,8 @@ html, body {
 
 <div class="da-card" id="sec-notifications-card" style="display:none;">
   <div class="da-card-head"><h3>{% trans "Notifications récentes" %}</h3></div>
-  <table class="da-table">
+  <div class="da-table-wrap">
+<table class="da-table">
     <thead>
       <tr>
         <th>{% trans "Type" %}</th>
@@ -3678,6 +3728,14 @@ var DASH_I18N = {
 
     body.classList.toggle('da-sidebar-open', !isOpen);
     if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+    /* Scroll lock */
+    if (!isOpen) {
+      body.style.top = '-' + window.scrollY + 'px';
+    } else {
+      var scrollY = Math.abs(parseInt(body.style.top || '0', 10));
+      body.style.top = '';
+      window.scrollTo(0, scrollY);
+    }
   };
 
   /**
@@ -3686,7 +3744,10 @@ var DASH_I18N = {
   window.closeSidebar = function() {
     var body = document.body;
     var btn  = document.getElementById('da-burger-btn');
+    var scrollY = Math.abs(parseInt(body.style.top || '0', 10));
     body.classList.remove('da-sidebar-open');
+    body.style.top = '';
+    window.scrollTo(0, scrollY);
     if (btn) btn.setAttribute('aria-expanded', 'false');
   };
 
