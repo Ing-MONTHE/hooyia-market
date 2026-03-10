@@ -2284,6 +2284,10 @@ msgstr "Performance"
 msgid "commence ici."
 msgstr "starts here."
 
+#: .\templates\home.html:348
+msgid "Découvrez les meilleurs équipements et accessoires informatiques pour booster votre productivité."
+msgstr "Discover the best tech equipment and accessories to boost your productivity."
+
 #: .\templates\home.html:356
 msgid "Découvrir nos produits"
 msgstr "Discover our products"
@@ -3984,3 +3988,60 @@ msgstr "product"
 #: .\templates\vendeur\produits.html:189
 msgid "Ajouter mon premier produit"
 msgstr "Add my first product"
+
+
+#: .\templates\home.html:789
+msgid "Chaque achat soutient un entrepreneur camerounais. HooYia n'est pas juste une boutique — c'est l'économie locale qui se digitalise."
+msgstr "Every purchase supports a Cameroonian entrepreneur. HooYia isn't just a store — it's the local economy going digital."
+
+#: .\templates\home.html:742
+msgid "Chaque vendeur est validé avant d'ouvrir boutique. Vous achetez à des professionnels sérieux — pas à n'importe qui."
+msgstr "Every seller is verified before opening shop. You buy from serious professionals — not just anyone."
+
+#: .\templates\partials\footer.html:176
+msgid "Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs camerounais à ceux qui veulent le meilleur — sans compromis."
+msgstr "Shop smart, receive fast. HooYia connects the best Cameroonian sellers with those who want the best — no compromise."
+
+#: .\templates\home.html:773
+msgid "De la confirmation à la livraison, suivez l'état de votre commande en temps réel. Vous savez toujours où en est votre achat."
+msgstr "From confirmation to delivery, track your order status in real time. You always know where your purchase stands."
+
+#: .\templates\products\detail.html:499 .\templates\cart\cart.html:421
+msgid "Fil d'Ariane"
+msgstr "Breadcrumb"
+
+#: .\templates\orders\checkout.html:45
+msgid "Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun"
+msgstr "Complete your order on HooYia Market — Fast delivery in Cameroon"
+
+#: .\templates\base.html:42
+msgid "HooYia Market — Électronique & Informatique au meilleur prix au Cameroun"
+msgstr "HooYia Market — Electronics & Computers at the best price in Cameroon"
+
+#: .\templates\home.html:716
+msgid "Nous privilégions la qualité, la transparence et un service réellement efficace."
+msgstr "We prioritize quality, transparency, and genuinely effective service."
+
+#: .\templates\cart\cart.html:606
+msgid "Paiement 100% sécurisé"
+msgstr "100% Secure Payment"
+
+#: .\templates\home.html:729
+msgid "Parcourez, choisissez, validez. Pas de parcours interminable. HooYia est conçu pour aller vite — comme vous."
+msgstr "Browse, choose, confirm. No endless process. HooYia is built for speed — just like you."
+
+#: .\templates\orders\checkout.html:221
+msgid "Remplissez les champs ci-dessous pour une nouvelle adresse de livraison."
+msgstr "Fill in the fields below for a new delivery address."
+
+#: .\templates\orders\checkout.html:138
+msgid "Renseignez votre adresse de livraison et choisissez votre mode de paiement."
+msgstr "Enter your delivery address and choose your payment method."
+
+#: .\templates\users\register.html:335
+msgid "Un email d'activation vous sera envoyé. Vérifiez votre boîte mail (et les spams) pour activer votre compte."
+msgstr "An activation email will be sent. Check your inbox (and spam) to activate your account."
+
+#: .\templates\home.html:756
+msgid "Vous réglez uniquement quand le colis est entre vos mains. Votre argent ne bouge qu'au moment où vous êtes satisfait."
+msgstr "You only pay when the package is in your hands. Your money only moves when you're satisfied."

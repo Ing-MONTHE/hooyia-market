@@ -365,7 +365,6 @@
    Grille de 4 (desktop) / 2 (tablette) / 1 (mobile).
    Maxi 8 produits passés par la vue.
 ════════════════════════════════════════════════════ {% endcomment %}
-{% if produits_vedette %}
 <style>
   /* ── Carousel vedette ── */
   .vedette-header {
@@ -446,6 +445,8 @@
   @media (min-width: 640px)  { .pcard-sm { flex: 0 0 210px; min-width: 210px; } }
   @media (min-width: 1024px) { .pcard-sm { flex: 0 0 220px; min-width: 220px; } }
 </style>
+
+{% if produits_vedette %}
 
 <section class="section-vedette" style="padding:2rem 0 4rem 0;background:#F4F7FC;">
   <div class="container">
@@ -547,13 +548,18 @@
           <polyline points="12 5 19 12 12 19"/>
         </svg>
         {% trans "Voir tous les produits" %}
+      </a>
+    </div>
+
+  </div><!-- /.container -->
+</section><!-- /.section-vedette -->
 
 <script>
   (function() {
     var carousel = document.getElementById('vedette-carousel');
     var btnPrev  = document.getElementById('vedette-prev');
     var btnNext  = document.getElementById('vedette-next');
-    var step = 240; // px par clic
+    var step = 240;
     if (!carousel) return;
     btnPrev.addEventListener('click', function() {
       carousel.scrollBy({ left: -step, behavior: 'smooth' });

@@ -692,7 +692,7 @@
               <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
             </svg>
             {# Indicateur de la langue active #}
-            <span style="font-size:10px;font-weight:700;margin-left:2px;text-transform:uppercase;">{{ CURRENT_LANG }}</span>
+            <span style="font-size:14px;margin-left:2px;">{% if CURRENT_LANG == 'en' %}🇬🇧{% else %}🇫🇷{% endif %}</span>
           </button>
           <div class="nav-dropdown-menu align-right" style="min-width:150px;">
 
