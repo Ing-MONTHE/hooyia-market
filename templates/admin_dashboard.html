@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %} ═══════════════════════════════════════════════════════════════
    HooYia Market — admin_dashboard.html   [SECTION A : CSS + Header + Sidebar]
@@ -54,7 +54,7 @@
      {{ user.photo_profil }}  — Photo de profil (optionnelle)
 {% endcomment %}
 
-{% block title %}Administration — HooYia Market{% endblock %}
+{% block title %}{% trans "Administration" %} — HooYia Market{% endblock %}
 
 {% comment %} ══ SURCHARGE NAVBAR ET FOOTER ══
    Le dashboard admin a son propre header topbar.
@@ -1491,7 +1491,7 @@ html, body {
          Aria-expanded pour l'accessibilité. {% endcomment %}
       <button class="da-burger" id="da-burger-btn"
               onclick="toggleSidebar()"
-              aria-label="Ouvrir le menu"
+              aria-label="{% trans "Ouvrir le menu" %}"
               aria-expanded="false">
         {# Icône Lucide : Menu (3 lignes horizontales) #}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -1528,7 +1528,7 @@ html, body {
       <div id="global-search-wrap" style="position:relative;">
         <div style="display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:0 12px;height:40px;transition:border-color 150ms;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input id="global-search-input" type="text" placeholder="Rechercher…"
+          <input id="global-search-input" type="text" placeholder="{% trans "Rechercher…" %}"
                  autocomplete="off"
                  style="border:none;background:transparent;outline:none;font-size:13px;color:var(--text);width:180px;"
                  oninput="onGlobalSearch(this.value)"
@@ -1540,8 +1540,8 @@ html, body {
       </div>
 
       {# ── Bouton Dark Mode Dashboard ── #}
-      <button class="da-topbar-btn" id="dash-dark-btn" title="Mode sombre"
-              onclick="dashToggleDark()" aria-label="Basculer le mode sombre">
+      <button class="da-topbar-btn" id="dash-dark-btn" title="{% trans "Mode sombre" %}"
+              onclick="dashToggleDark()" aria-label="{% trans "Basculer le mode sombre" %}">
         {# Lucide Moon — visible en mode clair #}
         <svg id="dash-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -1575,7 +1575,7 @@ html, body {
       </script>
       {# ── Dropdown Notifications ── #}
       <div class="da-notif-wrap" id="notif-wrap" style="position:relative;">
-        <button class="da-topbar-btn" title="Notifications" id="notif-bell-btn"
+        <button class="da-topbar-btn" title="{% trans "Notifications" %}" id="notif-bell-btn"
                 onclick="toggleNotifDropdown(event)">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="1.75"
@@ -1587,11 +1587,11 @@ html, body {
         </button>
         <div id="notif-dropdown" style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:500;overflow:hidden;">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);">
-            <span style="font-weight:700;font-size:14px;color:var(--text);">Notifications</span>
-            <button onclick="navTo('notifications');closeNotifDropdown();" style="font-size:11.5px;color:var(--brand);background:none;border:none;cursor:pointer;font-weight:600;">Voir tout</button>
+            <span style="font-weight:700;font-size:14px;color:var(--text);">{% trans "Notifications" %}</span>
+            <button onclick="navTo('notifications');closeNotifDropdown();" style="font-size:11.5px;color:var(--brand);background:none;border:none;cursor:pointer;font-weight:600;">{% trans "Voir tout" %}</button>
           </div>
           <div id="notif-dropdown-list" style="max-height:340px;overflow-y:auto;padding:8px 0;">
-            <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Chargement…</div>
+            <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">{% trans DASH_I18N.chargement %}</div>
           </div>
         </div>
       </div>
@@ -1605,7 +1605,7 @@ html, body {
 
       {% comment %} ── Lien vers le site public ── {% endcomment %}
       <a class="da-topbar-btn" href="{% url 'products:accueil' %}"
-         title="Voir le site public" target="_blank">
+         title="{% trans "Voir le site public" %}" target="_blank">
         {# Icône Lucide : ExternalLink #}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.75"
@@ -1633,7 +1633,7 @@ html, body {
           </div>
           <div class="da-profile-info">
             <span class="da-profile-name">{{ user.get_full_name|default:user.username }}</span>
-            <span class="da-profile-role">Administrateur</span>
+            <span class="da-profile-role">{% trans "Administrateur" %}</span>
           </div>
           {# Icône Lucide : ChevronDown #}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -1654,7 +1654,7 @@ html, body {
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
-            Mon profil
+            {% trans "Mon profil" %}
           </a>
           <a href="{% url 'products:accueil' %}" class="da-dd-item">
             {# Icône Lucide : Globe #}
@@ -1665,7 +1665,7 @@ html, body {
               <line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
             </svg>
-            Voir le site
+            {% trans "Voir le site" %}
           </a>
           <div class="da-dd-divider"></div>
           <a href="{% url 'users:deconnexion' %}" class="da-dd-item danger">
@@ -1677,7 +1677,7 @@ html, body {
               <polyline points="16 17 21 12 16 7"/>
               <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
-            Déconnexion
+            {% trans "Déconnexion" %}
           </a>
         </div>
       </div>{# fin .da-profile-wrap #}
@@ -1705,7 +1705,7 @@ html, body {
       {% comment %} ── Indicateur statut du site ── {% endcomment %}
       <div class="sb-status">
         <span class="sb-status-dot"></span>
-        <span class="sb-status-text">Site en ligne</span>
+        <span class="sb-status-text">{% trans "Site en ligne" %}</span>
         {# Icône Lucide : Wifi #}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="#34D399" stroke-width="2"
@@ -1719,7 +1719,7 @@ html, body {
       </div>
 
       {% comment %} ── SECTION : TABLEAU DE BORD ── {% endcomment %}
-      <div class="sb-section-label">Général</div>
+      <div class="sb-section-label">{% trans "Général" %}</div>
 
       <button class="sb-item active" data-section="overview" onclick="navTo('overview')">
         <span class="sb-icon">
@@ -1733,13 +1733,13 @@ html, body {
             <rect x="3" y="16" width="7" height="5"/>
           </svg>
         </span>
-        <span class="sb-label">Tableau de bord</span>
+        <span class="sb-label">{% trans "Tableau de bord" %}</span>
       </button>
 
       <hr class="sb-divider"/>
 
       {% comment %} ── SECTION : CATALOGUE ── {% endcomment %}
-      <div class="sb-section-label">Catalogue</div>
+      <div class="sb-section-label">{% trans "Catalogue" %}</div>
 
       <button class="sb-item" data-section="produits" onclick="navTo('produits')">
         <span class="sb-icon">
@@ -1753,7 +1753,7 @@ html, body {
             <line x1="12" y1="22.08" x2="12" y2="12"/>
           </svg>
         </span>
-        <span class="sb-label">Produits</span>
+        <span class="sb-label">{% trans "Produits" %}</span>
       </button>
 
       <button class="sb-item" data-section="categories" onclick="navTo('categories')">
@@ -1766,7 +1766,7 @@ html, body {
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
         </span>
-        <span class="sb-label">Catégories</span>
+        <span class="sb-label">{% trans "Catégories" %}</span>
       </button>
 
       <button class="sb-item" data-section="stocks" onclick="navTo('stocks')">
@@ -1780,13 +1780,13 @@ html, body {
             <line x1="6"  y1="20" x2="6"  y2="14"/>
           </svg>
         </span>
-        <span class="sb-label">Gestion stocks</span>
+        <span class="sb-label">{% trans "Gestion stocks" %}</span>
       </button>
 
       <hr class="sb-divider"/>
 
       {% comment %} ── SECTION : VENTES ── {% endcomment %}
-      <div class="sb-section-label">Ventes</div>
+      <div class="sb-section-label">{% trans "Ventes" %}</div>
 
       <button class="sb-item" data-section="commandes" onclick="navTo('commandes')">
         <span class="sb-icon">
@@ -1799,7 +1799,7 @@ html, body {
             <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
           </svg>
         </span>
-        <span class="sb-label">Commandes</span>
+        <span class="sb-label">{% trans "Commandes" %}</span>
         {# Badge mis à jour par JS avec le nb de commandes en attente #}
         <span class="sb-badge" id="sb-badge-commandes"></span>
       </button>
@@ -1813,7 +1813,7 @@ html, body {
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
         </span>
-        <span class="sb-label">Avis clients</span>
+        <span class="sb-label">{% trans "Avis clients" %}</span>
         <span class="sb-badge blue" id="sb-badge-avis"></span>
       </button>
 
@@ -1828,13 +1828,13 @@ html, body {
             <path d="M16 10a4 4 0 01-8 0"/>
           </svg>
         </span>
-        <span class="sb-label">Paniers actifs</span>
+        <span class="sb-label">{% trans "Paniers actifs" %}</span>
       </button>
 
       <hr class="sb-divider"/>
 
       {% comment %} ── SECTION : UTILISATEURS ── {% endcomment %}
-      <div class="sb-section-label">Utilisateurs</div>
+      <div class="sb-section-label">{% trans "Utilisateurs" %}</div>
 
       <button class="sb-item" data-section="utilisateurs" onclick="navTo('utilisateurs')">
         <span class="sb-icon">
@@ -1848,7 +1848,7 @@ html, body {
             <path d="M16 3.13a4 4 0 010 7.75"/>
           </svg>
         </span>
-        <span class="sb-label">Comptes</span>
+        <span class="sb-label">{% trans "Comptes" %}</span>
       </button>
 
       <button class="sb-item" data-section="messages" onclick="navTo('messages')">
@@ -1860,13 +1860,13 @@ html, body {
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
           </svg>
         </span>
-        <span class="sb-label">Conversations</span>
+        <span class="sb-label">{% trans "Conversations" %}</span>
       </button>
 
       <hr class="sb-divider"/>
 
       {% comment %} ── SECTION : SYSTÈME ── {% endcomment %}
-      <div class="sb-section-label">Système</div>
+      <div class="sb-section-label">{% trans "Système" %}</div>
 
       <button class="sb-item" data-section="notifications" onclick="navTo('notifications')">
         <span class="sb-icon">
@@ -1878,7 +1878,7 @@ html, body {
             <path d="M13.73 21a2 2 0 01-3.46 0"/>
           </svg>
         </span>
-        <span class="sb-label">Notifications</span>
+        <span class="sb-label">{% trans "Notifications" %}</span>
       </button>
 
       <button class="sb-item" data-section="audit" onclick="navTo('audit')">
@@ -1890,7 +1890,7 @@ html, body {
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
         </span>
-        <span class="sb-label">Journal d'audit</span>
+        <span class="sb-label">{% trans "Journal d'audit" %}</span>
       </button>
 
       {% comment %} ── Footer sidebar : retour au site ── {% endcomment %}
@@ -1903,7 +1903,7 @@ html, body {
             <line x1="19" y1="12" x2="5" y2="12"/>
             <polyline points="12 19 5 12 12 5"/>
           </svg>
-          Retour au site
+          {% trans "Retour au site" %}
         </a>
       </div>
 
@@ -1938,8 +1938,8 @@ html, body {
       <div id="sec-overview" class="da-section shown">
         <div class="da-section-header">
           <div>
-            <h1 class="da-section-title">Tableau de bord</h1>
-            <p class="da-section-subtitle" id="da-date-now">Chargement de la date…</p>
+            <h1 class="da-section-title">{% trans "Tableau de bord" %}</h1>
+            <p class="da-section-subtitle" id="da-date-now">{% trans "Chargement de la date…" %}</p>
           </div>
           <div class="da-section-actions">
             <button class="btn btn-secondary" onclick="window.location.reload()">
@@ -1950,7 +1950,7 @@ html, body {
                 <polyline points="23 4 23 10 17 10"/>
                 <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
               </svg>
-              Actualiser
+              {% trans "Actualiser" %}
             </button>
             <button class="btn btn-primary" onclick="navTo('ajouter-produit')">
               {# Icône Lucide : Plus #}
@@ -1960,7 +1960,7 @@ html, body {
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              Ajouter un produit
+              {% trans "Ajouter un produit" %}
             </button>
           </div>
         </div>
@@ -1983,7 +1983,7 @@ html, body {
               </svg>
             </div>
             <div class="kpi-value loading" id="kpi-produits">—</div>
-            <div class="kpi-label">Produits actifs</div>
+            <div class="kpi-label">{% trans "Produits actifs" %}</div>
             <div class="kpi-trend info" id="kpi-produits-trend"></div>
           </div>
 
@@ -2001,7 +2001,7 @@ html, body {
               </svg>
             </div>
             <div class="kpi-value loading" id="kpi-commandes">—</div>
-            <div class="kpi-label">Commandes totales</div>
+            <div class="kpi-label">{% trans "Commandes totales" %}</div>
             <div class="kpi-trend" id="kpi-commandes-trend"></div>
           </div>
 
@@ -2020,7 +2020,7 @@ html, body {
               </svg>
             </div>
             <div class="kpi-value loading" id="kpi-users">—</div>
-            <div class="kpi-label">Utilisateurs inscrits</div>
+            <div class="kpi-label">{% trans "Utilisateurs inscrits" %}</div>
             <div class="kpi-trend up" id="kpi-users-trend"></div>
           </div>
 
@@ -2036,7 +2036,7 @@ html, body {
               </svg>
             </div>
             <div class="kpi-value loading" id="kpi-avis">—</div>
-            <div class="kpi-label">Avis clients</div>
+            <div class="kpi-label">{% trans "Avis clients" %}</div>
             <div class="kpi-trend" id="kpi-avis-trend"></div>
           </div>
 
@@ -2055,10 +2055,10 @@ html, body {
           <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
         </svg>
-        Commandes récentes
+        {% trans "Commandes récentes" %}
       </h3>
       <button class="da-card-action" onclick="navTo('commandes')">
-        Voir tout
+        {% trans "Voir tout" %}
         {# Icône Lucide : ArrowRight #}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"
@@ -2072,17 +2072,17 @@ html, body {
     <table class="da-table">
       <thead>
         <tr>
-          <th>Référence</th>
-          <th>Client</th>
-          <th>Montant</th>
-          <th class="hide-mobile">Date</th>
-          <th>Statut</th>
+          <th>{% trans "Référence" %}</th>
+          <th>{% trans "Client" %}</th>
+          <th>{% trans "Montant" %}</th>
+          <th class="hide-mobile">{% trans "Date" %}</th>
+          <th>{% trans "Statut" %}</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="ov-commandes">
         {# Skeleton de chargement — 3 lignes grises animées #}
-        <tr><td colspan="6" class="da-loading">Chargement des commandes…</td></tr>
+        <tr><td colspan="6" class="da-loading">{% trans "Chargement des commandes…" %}</td></tr>
       </tbody>
     </table>
   </div>
@@ -2098,7 +2098,7 @@ html, body {
              style="display:inline;vertical-align:-2px;margin-right:6px;">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
-        Actions rapides
+        {% trans "Actions rapides" %}
       </h3>
     </div>
     <div class="qa-list">
@@ -2114,7 +2114,7 @@ html, body {
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </span>
-        Ajouter un produit
+        {% trans "Ajouter un produit" %}
       </button>
 
       {# Action 2 : Commandes en attente (bleu) #}
@@ -2128,7 +2128,7 @@ html, body {
             <polyline points="12 6 12 12 16 14"/>
           </svg>
         </span>
-        Commandes en attente
+        {% trans "Commandes en attente" %}
         {# Badge dynamique mis à jour par loadOverview() #}
         <span id="qa-badge-attente" style="display:none;margin-left:auto;
               background:var(--yellow);color:white;font-size:9.5px;font-weight:700;
@@ -2145,7 +2145,7 @@ html, body {
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
         </span>
-        Avis à modérer
+        {% trans "Avis à modérer" %}
         <span id="qa-badge-avis" style="display:none;margin-left:auto;
               background:var(--blue);color:white;font-size:9.5px;font-weight:700;
               padding:1px 7px;border-radius:99px;font-family:var(--font-display);">0</span>
@@ -2163,7 +2163,7 @@ html, body {
             <line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
         </span>
-        Vérifier les stocks
+        {% trans "Vérifier les stocks" %}
       </button>
 
       {# Action 5 : Gérer utilisateurs (bleu) #}
@@ -2179,7 +2179,7 @@ html, body {
             <path d="M16 3.13a4 4 0 010 7.75"/>
           </svg>
         </span>
-        Gérer les comptes
+        {% trans "Gérer les comptes" %}
       </button>
 
     </div>
@@ -2202,10 +2202,10 @@ html, body {
           <line x1="12" y1="9" x2="12" y2="13"/>
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        Alertes stock
+        {% trans "Alertes stock" %}
       </h3>
       <button class="da-card-action" onclick="navTo('stocks')">
-        Gérer
+        {% trans "Gérer" %}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -2216,7 +2216,7 @@ html, body {
     </div>
     {# Liste des produits en stock faible — rempli par loadOverview() #}
     <div id="ov-stocks">
-      <div class="da-loading">Chargement…</div>
+      <div class="da-loading">{% trans DASH_I18N.chargement %}</div>
     </div>
   </div>
 
@@ -2231,10 +2231,10 @@ html, body {
              style="display:inline;vertical-align:-2px;margin-right:6px;">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
-        Activité récente
+        {% trans "Activité récente" %}
       </h3>
       <button class="da-card-action" onclick="navTo('audit')">
-        Tout voir
+        {% trans "Tout voir" %}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -2245,7 +2245,7 @@ html, body {
     </div>
     {# Feed d'activité — rempli par loadOverview() #}
     <div id="ov-activity">
-      <div class="da-loading">Chargement…</div>
+      <div class="da-loading">{% trans DASH_I18N.chargement %}</div>
     </div>
   </div>
 </div>{# fin #ov-row-secondary #}
@@ -2264,21 +2264,21 @@ html, body {
         <line x1="6" y1="6" x2="6.01" y2="6"/>
         <line x1="6" y1="18" x2="6.01" y2="18"/>
       </svg>
-      Vue système
+      {% trans "Vue système" %}
     </h3>
   </div>
   <div class="da-mini">
     <div class="da-mini-cell">
       <div class="da-mini-val" id="ms-convs">—</div>
-      <div class="da-mini-lbl">Conversations chat</div>
+      <div class="da-mini-lbl">{% trans "Conversations chat" %}</div>
     </div>
     <div class="da-mini-cell">
       <div class="da-mini-val" id="ms-notifs">—</div>
-      <div class="da-mini-lbl">Notifications envoyées</div>
+      <div class="da-mini-lbl">{% trans "Notifications envoyées" %}</div>
     </div>
     <div class="da-mini-cell">
       <div class="da-mini-val" id="ms-paniers">—</div>
-      <div class="da-mini-lbl">Paniers non vides</div>
+      <div class="da-mini-lbl">{% trans "Paniers non vides" %}</div>
     </div>
   </div>
 </div>
@@ -2292,8 +2292,8 @@ html, body {
 
 <div class="da-section-header" id="sec-produits-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Produits</h1>
-    <p class="da-section-subtitle">Gestion du catalogue</p>
+    <h1 class="da-section-title">{% trans "Produits" %}</h1>
+    <p class="da-section-subtitle">{% trans "Gestion du catalogue" %}</p>
   </div>
   <div class="da-section-actions">
     <button class="btn btn-primary" onclick="navTo('ajouter-produit')">
@@ -2303,7 +2303,7 @@ html, body {
         <line x1="12" y1="5" x2="12" y2="19"/>
         <line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
-      Ajouter un produit
+      {% trans "Ajouter un produit" %}
     </button>
   </div>
 </div>
@@ -2321,7 +2321,7 @@ html, body {
         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       <input type="text" id="prod-search"
-             placeholder="Rechercher un produit…"
+             placeholder="{% trans "Rechercher un produit…" %}"
              oninput="debounce(()=>loadProduits(1),350)()"
              style="width:100%;padding:8px 14px 8px 36px;border-radius:var(--r-sm);
                     border:1.5px solid #C8D3E0;font-size:13px;
@@ -2336,14 +2336,14 @@ html, body {
                    padding:3px 12px;border-radius:99px;" id="prod-count"></span>
       {# Toggle vue tableau / cartes #}
       <div style="display:flex;gap:6px;">
-        <button id="vt-prod-table" class="vt-btn active" onclick="setProduitsView('table')" title="Tableau">
+        <button id="vt-prod-table" class="vt-btn active" onclick="setProduitsView('table')" title="{% trans "Tableau" %}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="8" y1="6"  x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
             <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6"  x2="3.01" y2="6"/>
             <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
           </svg>
         </button>
-        <button id="vt-prod-card" class="vt-btn" onclick="setProduitsView('card')" title="Cartes">
+        <button id="vt-prod-card" class="vt-btn" onclick="setProduitsView('card')" title="{% trans "Cartes" %}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
             <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -2357,16 +2357,16 @@ html, body {
   <table class="da-table" id="view-produits-table">
     <thead>
       <tr>
-        <th>Produit</th>
-        <th class="hide-mobile">Catégorie</th>
-        <th>Prix</th>
-        <th>Stock</th>
-        <th>Statut</th>
-        <th style="text-align:right;">Actions</th>
+        <th>{% trans "Produit" %}</th>
+        <th class="hide-mobile">{% trans "Catégorie" %}</th>
+        <th>{% trans "Prix" %}</th>
+        <th>{% trans "Stock" %}</th>
+        <th>{% trans "Statut" %}</th>
+        <th style="text-align:right;">{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-produits">
-      <tr><td colspan="6" class="da-loading">Chargement des produits…</td></tr>
+      <tr><td colspan="6" class="da-loading">{% trans "Chargement des produits…" %}</td></tr>
     </tbody>
   </table>
 
@@ -2402,8 +2402,8 @@ html, body {
 
 <div class="da-section-header" id="sec-ajout-prod-header" style="display:none;">
   <div>
-    <h1 class="da-section-title" id="ap-title">Nouveau produit</h1>
-    <p class="da-section-subtitle" id="ap-subtitle">Remplissez le formulaire pour publier</p>
+    <h1 class="da-section-title" id="ap-title">{% trans "Nouveau produit" %}</h1>
+    <p class="da-section-subtitle" id="ap-subtitle">{% trans "Remplissez le formulaire pour publier" %}</p>
   </div>
   <button class="btn btn-secondary" onclick="navTo('produits')">
     {# Icône Lucide : ArrowLeft #}
@@ -2413,7 +2413,7 @@ html, body {
       <line x1="19" y1="12" x2="5" y2="12"/>
       <polyline points="12 19 5 12 12 5"/>
     </svg>
-    Retour aux produits
+    {% trans "Retour aux produits" %}
   </button>
 </div>
 
@@ -2439,26 +2439,26 @@ html, body {
           <div class="da-card-head">
             <h3>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:6px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              Informations de base
+              {% trans "Informations de base" %}
             </h3>
           </div>
           <div style="padding:16px;">
             <div class="da-field">
-              <label class="da-label">Nom du produit <span style="color:var(--accent);font-size:9px;">*</span></label>
-              <input type="text" name="nom" id="ap-nom" placeholder="Ex: Samsung Galaxy S24 Ultra 256Go" class="da-input" required />
+              <label class="da-label">{% trans "Nom du produit" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <input type="text" name="nom" id="ap-nom" placeholder="{% trans "Ex: Samsung Galaxy S24 Ultra 256Go" %}" class="da-input" required />
             </div>
             <div class="da-field">
-              <label class="da-label">Description courte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(max 500 car.)</span></label>
-              <input type="text" name="description_courte" id="ap-desc-courte" placeholder="Résumé affiché dans la liste produits" maxlength="500" class="da-input" />
+              <label class="da-label">{% trans "Description courte" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(max 500 car.)" %}</span></label>
+              <input type="text" name="description_courte" id="ap-desc-courte" placeholder="{% trans "Résumé affiché dans la liste produits" %}" maxlength="500" class="da-input" />
             </div>
             <div class="da-field">
-              <label class="da-label">Description complète <span style="color:var(--accent);font-size:9px;">*</span></label>
-              <textarea name="description" id="ap-desc" rows="4" placeholder="Caractéristiques, contenu, garantie…" class="da-input" style="resize:vertical;min-height:80px;" required></textarea>
+              <label class="da-label">{% trans "Description complète" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <textarea name="description" id="ap-desc" rows="4" placeholder="{% trans "Caractéristiques, contenu, garantie…" %}" class="da-input" style="resize:vertical;min-height:80px;" required></textarea>
             </div>
             <div class="da-field" style="margin-bottom:0;">
-              <label class="da-label">Catégorie <span style="color:var(--accent);font-size:9px;">*</span></label>
+              <label class="da-label">{% trans "Catégorie" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
               <select name="categorie" id="ap-categorie" class="da-input" required>
-                <option value="">— Choisir une catégorie —</option>
+                <option value="">{% trans "— Choisir une catégorie —" %}</option>
                 {% for cat in categories %}
                 <option value="{{ cat.id }}">{{ cat.nom }}</option>
                 {% for sous in cat.sous_categories.all %}
@@ -2481,7 +2481,7 @@ html, body {
                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                Ajouter une catégorie
+                {% trans "Ajouter une catégorie" %}
               </button>
             </div>
           </div>
@@ -2498,26 +2498,26 @@ html, body {
           <div style="padding:16px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div class="da-field">
-                <label class="da-label">Prix (FCFA) <span style="color:var(--accent);font-size:9px;">*</span></label>
+                <label class="da-label">{% trans "Prix (FCFA)" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
                 <div style="position:relative;">
-                  <input type="number" name="prix" id="ap-prix" placeholder="150 000" min="0" step="500" class="da-input" style="padding-right:52px;" required />
+                  <input type="number" name="prix" id="ap-prix" placeholder="{% trans "150 000" %}" min="0" step="500" class="da-input" style="padding-right:52px;" required />
                   <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);font-weight:700;pointer-events:none;">FCFA</span>
                 </div>
               </div>
               <div class="da-field">
-                <label class="da-label">Prix promo <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
+                <label class="da-label">{% trans "Prix promo" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(optionnel)" %}</span></label>
                 <div style="position:relative;">
-                  <input type="number" name="prix_promo" id="ap-prix-promo" placeholder="120 000" min="0" step="500" class="da-input" style="padding-right:52px;" />
+                  <input type="number" name="prix_promo" id="ap-prix-promo" placeholder="{% trans "120 000" %}" min="0" step="500" class="da-input" style="padding-right:52px;" />
                   <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);font-weight:700;pointer-events:none;">FCFA</span>
                 </div>
                 <div id="ap-remise" style="display:none;margin-top:5px;background:var(--green-light);color:#065F46;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;"></div>
               </div>
               <div class="da-field" style="margin-bottom:0;">
-                <label class="da-label">Stock initial <span style="color:var(--accent);font-size:9px;">*</span></label>
+                <label class="da-label">{% trans "Stock initial" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
                 <input type="number" name="stock" id="ap-stock" value="0" min="0" class="da-input" required />
               </div>
               <div class="da-field" style="margin-bottom:0;">
-                <label class="da-label">Seuil d'alerte <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(défaut : 5)</span></label>
+                <label class="da-label">{% trans "Seuil d'alerte" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(défaut : 5)" %}</span></label>
                 <input type="number" name="stock_minimum" id="ap-stock-min" value="5" min="0" class="da-input" />
               </div>
             </div>
@@ -2542,8 +2542,8 @@ html, body {
                  ondragleave="this.style.borderColor='';this.style.background='var(--surface-2)';"
                  ondrop="apHandleDrop(event)">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 8px;display:block;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-              <p style="font-size:12.5px;color:var(--text-2);margin:0 0 3px 0;"><strong style="color:var(--accent);">Cliquez</strong> ou glissez vos images</p>
-              <p style="font-size:11px;color:var(--text-muted);margin:0;">JPG, PNG, WebP — Max 5 Mo — 1ère = principale</p>
+              <p style="font-size:12.5px;color:var(--text-2);margin:0 0 3px 0;">{% blocktrans %}<strong style="color:var(--accent);">Cliquez</strong> ou glissez vos images{% endblocktrans %}</p>
+              <p style="font-size:11px;color:var(--text-muted);margin:0;">{% trans "JPG, PNG, WebP — Max 5 Mo — 1ère = principale" %}</p>
             </div>
             <input type="file" name="images" id="ap-images" multiple accept="image/*" onchange="apPreviewImages(this.files)" style="display:none;" />
             <div id="ap-preview-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;"></div>
@@ -2560,14 +2560,14 @@ html, body {
         <div class="da-card" style="margin-bottom:12px;overflow:hidden;">
           <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Statut de vente
+            {% trans "Statut de vente" %}
           </div>
           <div style="padding:12px 14px;">
             <select name="statut" id="ap-statut" class="da-input">
-              <option value="actif">Actif — en vente</option>
-              <option value="inactif">Inactif — masqué</option>
-              <option value="epuise">Épuisé</option>
-              <option value="archive">Archivé</option>
+              <option value="actif">{% trans "Actif — en vente" %}</option>
+              <option value="inactif">{% trans "Inactif — masqué" %}</option>
+              <option value="epuise">{% trans "Épuisé" %}</option>
+              <option value="archive">{% trans "Archivé" %}</option>
             </select>
           </div>
         </div>
@@ -2576,7 +2576,7 @@ html, body {
         <div class="da-card" style="margin-bottom:12px;overflow:hidden;">
           <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Options
+            {% trans "Options" %}
           </div>
           <div style="padding:12px 14px;">
             <div style="display:flex;align-items:center;gap:10px;">
@@ -2587,8 +2587,8 @@ html, body {
                 </span>
               </label>
               <div>
-                <div style="font-size:12.5px;font-weight:600;color:var(--text);">En vedette</div>
-                <div style="font-size:11px;color:var(--text-muted);">Affiché en page d'accueil</div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--text);">{% trans "En vedette" %}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{% trans "Affiché en page d'accueil" %}</div>
               </div>
             </div>
           </div>
@@ -2598,27 +2598,27 @@ html, body {
         <div class="da-card" style="overflow:hidden;">
           <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-            Actions
+            {% trans "Actions" %}
           </div>
           <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
             {# Publier — CTA orange unique #}
             <button type="submit" name="action" value="publish" id="ap-btn-pub" class="btn btn-primary" style="width:100%;justify-content:center;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              Publier le produit
+              {% trans "Publier le produit" %}
             </button>
             {# Brouillon #}
             <button type="submit" name="action" value="draft" id="ap-btn-draft" class="btn btn-secondary" style="width:100%;justify-content:center;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              Brouillon
+              {% trans "Brouillon" %}
             </button>
             {# Annuler #}
             <button type="button" class="btn btn-secondary" onclick="navTo('produits')" style="width:100%;justify-content:center;">
-              Annuler
+              {% trans "Annuler" %}
             </button>
             {# Supprimer — mode édition uniquement #}
             <button type="button" id="ap-btn-del" class="btn btn-danger" style="display:none;width:100%;justify-content:center;" onclick="supprimerProduit()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-              Supprimer le produit
+              {% trans "Supprimer le produit" %}
             </button>
           </div>
         </div>
@@ -2648,8 +2648,8 @@ html, body {
 
 <div class="da-section-header" id="sec-commandes-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Commandes</h1>
-    <p class="da-section-subtitle">Suivi et gestion des commandes clients</p>
+    <h1 class="da-section-title">{% trans "Commandes" %}</h1>
+    <p class="da-section-subtitle">{% trans "Suivi et gestion des commandes clients" %}</p>
   </div>
 </div>
 
@@ -2658,13 +2658,13 @@ html, body {
      style="display:none;margin-bottom:14px;display:flex;align-items:center;
             justify-content:space-between;flex-wrap:wrap;gap:10px;">
   <div class="filter-btns">
-    <button class="filter-btn active" onclick="filtreCommandes('',this)">Tous</button>
-    <button class="filter-btn" onclick="filtreCommandes('en_attente',this)">En attente</button>
-    <button class="filter-btn" onclick="filtreCommandes('confirmee',this)">Confirmées</button>
-    <button class="filter-btn" onclick="filtreCommandes('en_preparation',this)">En préparation</button>
-    <button class="filter-btn" onclick="filtreCommandes('expediee',this)">Expédiées</button>
-    <button class="filter-btn" onclick="filtreCommandes('livree',this)">Livrées</button>
-    <button class="filter-btn" onclick="filtreCommandes('annulee',this)">Annulées</button>
+    <button class="filter-btn active" onclick="filtreCommandes('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('en_attente',this)">{% trans "En attente" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('confirmee',this)">{% trans "Confirmées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('en_preparation',this)">{% trans "En préparation" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('expediee',this)">{% trans "Expédiées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('livree',this)">{% trans "Livrées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('annulee',this)">{% trans "Annulées" %}</button>
   </div>
   {# Recherche par référence #}
   <div style="position:relative;">
@@ -2676,7 +2676,7 @@ html, body {
       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
     <input type="text" id="cmd-search"
-           placeholder="Référence, client…"
+           placeholder="{% trans "Référence, client…" %}"
            oninput="debounce(()=>loadCommandes(1),350)()"
            style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
                   border:1.5px solid var(--border);font-size:12.5px;
@@ -2688,7 +2688,7 @@ html, body {
 <div class="da-card" id="sec-commandes-card" style="display:none;">
   <div class="da-card-head">
     <div style="display:flex;align-items:center;gap:10px;">
-      <h3>Toutes les commandes</h3>
+      <h3>{% trans "Toutes les commandes" %}</h3>
       <span style="font-size:11px;font-weight:600;color:var(--text-muted);
                    background:var(--surface-2);border:1px solid var(--border);
                    padding:2px 9px;border-radius:99px;" id="cmd-count"></span>
@@ -2697,17 +2697,17 @@ html, body {
   <table class="da-table">
     <thead>
       <tr>
-        <th>Référence</th>
-        <th>Client</th>
-        <th class="hide-mobile">Adresse</th>
-        <th>Montant</th>
-        <th class="hide-mobile">Date</th>
-        <th>Statut</th>
-        <th style="text-align:right;">Actions</th>
+        <th>{% trans "Référence" %}</th>
+        <th>{% trans "Client" %}</th>
+        <th class="hide-mobile">{% trans "Adresse" %}</th>
+        <th>{% trans "Montant" %}</th>
+        <th class="hide-mobile">{% trans "Date" %}</th>
+        <th>{% trans "Statut" %}</th>
+        <th style="text-align:right;">{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-commandes">
-      <tr><td colspan="7" class="da-loading">Chargement des commandes…</td></tr>
+      <tr><td colspan="7" class="da-loading">{% trans "Chargement des commandes…" %}</td></tr>
     </tbody>
   </table>
   <div id="pag-commandes" class="da-pagination" style="display:none;"></div>
@@ -2726,37 +2726,37 @@ html, body {
     <div style="padding:20px 22px 16px;border-bottom:1px solid var(--border);">
       <div style="font-family:var(--font-display);font-size:15px;font-weight:700;
                   color:var(--brand-deep);margin-bottom:4px;" id="modal-stock-nom">
-        Ajustement stock
+        {% trans "Ajustement stock" %}
       </div>
       <div style="font-size:12.5px;color:var(--text-muted);">
-        Stock actuel : <strong id="modal-stock-current" style="color:var(--text);">—</strong>
+        {% trans "Stock actuel" %} : <strong id="modal-stock-current" style="color:var(--text);">—</strong>
       </div>
     </div>
     {# Corps modal #}
     <div style="padding:20px 22px;">
       <div class="da-field">
-        <label class="da-label">Type de mouvement</label>
+        <label class="da-label">{% trans "Type de mouvement" %}</label>
         <select id="modal-stock-type" class="da-input">
-          <option value="entree">Entrée — réapprovisionnement</option>
-          <option value="sortie">Sortie — retrait</option>
-          <option value="ajustement">Ajustement — valeur exacte</option>
+          <option value="entree">{% trans "Entrée — réapprovisionnement" %}</option>
+          <option value="sortie">{% trans "Sortie — retrait" %}</option>
+          <option value="ajustement">{% trans "Ajustement — valeur exacte" %}</option>
         </select>
       </div>
       <div class="da-field">
-        <label class="da-label">Quantité</label>
+        <label class="da-label">{% trans "Quantité" %}</label>
         <input type="number" id="modal-stock-qty"
                min="1" value="10" class="da-input" />
       </div>
       <div class="da-field" style="margin-bottom:0;">
-        <label class="da-label">Note <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
+        <label class="da-label">{% trans "Note" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(optionnel)" %}</span></label>
         <input type="text" id="modal-stock-note"
-               placeholder="Ex: Livraison fournisseur…"
+               placeholder="{% trans "Ex: Livraison fournisseur…" %}"
                class="da-input" />
       </div>
     </div>
     {# Pied modal #}
     <div style="padding:0 22px 20px;display:flex;gap:10px;">
-      <button class="btn btn-secondary" style="flex:1;" onclick="closeStockModal()">Annuler</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="closeStockModal()">{% trans "Annuler" %}</button>
       <button class="btn btn-primary"   style="flex:1;" onclick="submitStock()">
         {# Icône Lucide : Check #}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -2764,7 +2764,7 @@ html, body {
              stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
-        Valider
+        {% trans "Valider" %}
       </button>
     </div>
   </div>
@@ -2819,8 +2819,8 @@ html, body {
 {# ── En-tête section ── #}
 <div class="da-section-header" id="sec-users-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Utilisateurs</h1>
-    <p class="da-section-subtitle">Gestion des comptes clients et vendeurs</p>
+    <h1 class="da-section-title">{% trans "Utilisateurs" %}</h1>
+    <p class="da-section-subtitle">{% trans "Gestion des comptes clients et vendeurs" %}</p>
   </div>
   <div style="position:relative;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -2829,7 +2829,7 @@ html, body {
          style="position:absolute;left:10px;top:50%;transform:translateY(-50%);">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    <input type="text" id="users-search" placeholder="Nom, email…"
+    <input type="text" id="users-search" placeholder="{% trans "Nom, email…" %}"
            oninput="debounce(()=>loadUsers(1),350)()"
            style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
                   border:1.5px solid var(--border);font-size:12.5px;
@@ -2840,18 +2840,18 @@ html, body {
 {# Filtres rôles #}
 <div id="sec-users-filters" style="display:none;margin-bottom:14px;">
   <div class="filter-btns">
-    <button class="filter-btn active" onclick="filtreUsers('',this)">Tous</button>
-    <button class="filter-btn" onclick="filtreUsers('vendeur',this)">Vendeurs</button>
-    <button class="filter-btn" onclick="filtreUsers('admin',this)">Admins</button>
-    <button class="filter-btn" onclick="filtreUsers('actif',this)">Actifs</button>
-    <button class="filter-btn" onclick="filtreUsers('inactif',this)">Inactifs</button>
+    <button class="filter-btn active" onclick="filtreUsers('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('vendeur',this)">{% trans "Vendeurs" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('admin',this)">{% trans "Admins" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('actif',this)">{% trans "Actifs" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('inactif',this)">{% trans "Inactifs" %}</button>
   </div>
 </div>
 
 <div class="da-card" id="sec-users-card" style="display:none;">
   <div class="da-card-head">
     <div style="display:flex;align-items:center;gap:10px;">
-      <h3>Tous les comptes</h3>
+      <h3>{% trans "Tous les comptes" %}</h3>
       <span style="font-size:11px;font-weight:600;color:var(--text-muted);
                    background:var(--surface-2);border:1px solid var(--border);
                    padding:2px 9px;border-radius:99px;" id="users-count"></span>
@@ -2860,17 +2860,17 @@ html, body {
   <table class="da-table">
     <thead>
       <tr>
-        <th>Utilisateur</th>
-        <th class="hide-mobile">Email</th>
-        <th class="hide-mobile">Inscription</th>
-        <th>Rôle</th>
-        <th>Email vérifié</th>
-        <th>Statut</th>
-        <th style="text-align:right;">Action</th>
+        <th>{% trans "Utilisateur" %}</th>
+        <th class="hide-mobile">{% trans "Email" %}</th>
+        <th class="hide-mobile">{% trans "Inscription" %}</th>
+        <th>{% trans "Rôle" %}</th>
+        <th>{% trans "Email vérifié" %}</th>
+        <th>{% trans "Statut" %}</th>
+        <th style="text-align:right;">{% trans "Action" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-users">
-      <tr><td colspan="7" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="7" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
   <div id="pag-users" class="da-pagination" style="display:none;"></div>
@@ -2884,24 +2884,24 @@ html, body {
 
 <div class="da-section-header" id="sec-avis-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Avis clients</h1>
-    <p class="da-section-subtitle">Modération des avis produits</p>
+    <h1 class="da-section-title">{% trans "Avis clients" %}</h1>
+    <p class="da-section-subtitle">{% trans "Modération des avis produits" %}</p>
   </div>
 </div>
 
 <div id="sec-avis-filters" style="display:none;margin-bottom:14px;">
   <div class="filter-btns">
-    <button class="filter-btn active" onclick="filtreAvis('',this)">Tous</button>
-    <button class="filter-btn" onclick="filtreAvis('en_attente',this)">En attente</button>
-    <button class="filter-btn" onclick="filtreAvis('valide',this)">Validés</button>
-    <button class="filter-btn" onclick="filtreAvis('invalide',this)">Invalidés</button>
+    <button class="filter-btn active" onclick="filtreAvis('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('en_attente',this)">{% trans "En attente" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('valide',this)">{% trans "Validés" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('invalide',this)">{% trans "Invalidés" %}</button>
   </div>
 </div>
 
 <div class="da-card" id="sec-avis-card" style="display:none;">
   <div class="da-card-head">
     <div style="display:flex;align-items:center;gap:10px;">
-      <h3>Tous les avis</h3>
+      <h3>{% trans "Tous les avis" %}</h3>
       <span style="font-size:11px;font-weight:600;color:var(--text-muted);
                    background:var(--surface-2);border:1px solid var(--border);
                    padding:2px 9px;border-radius:99px;" id="avis-count"></span>
@@ -2910,16 +2910,16 @@ html, body {
   <table class="da-table">
     <thead>
       <tr>
-        <th>Produit</th>
-        <th>Client</th>
-        <th>Note</th>
-        <th class="hide-mobile">Commentaire</th>
-        <th>Statut</th>
-        <th style="text-align:right;">Actions</th>
+        <th>{% trans "Produit" %}</th>
+        <th>{% trans "Client" %}</th>
+        <th>{% trans "Note" %}</th>
+        <th class="hide-mobile">{% trans "Commentaire" %}</th>
+        <th>{% trans "Statut" %}</th>
+        <th style="text-align:right;">{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-avis">
-      <tr><td colspan="6" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="6" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
   <div id="pag-avis" class="da-pagination" style="display:none;"></div>
@@ -2933,15 +2933,15 @@ html, body {
 
 <div class="da-section-header" id="sec-stocks-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Gestion des stocks</h1>
-    <p class="da-section-subtitle">Niveaux de stock et réapprovisionnements</p>
+    <h1 class="da-section-title">{% trans "Gestion des stocks" %}</h1>
+    <p class="da-section-subtitle">{% trans "Niveaux de stock et réapprovisionnements" %}</p>
   </div>
   <button class="btn btn-primary" onclick="navTo('ajouter-produit')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
-    Nouveau produit
+    {% trans "Nouveau produit" %}
   </button>
 </div>
 
@@ -2961,7 +2961,7 @@ html, body {
       </svg>
     </div>
     <div class="kpi-value loading" id="kpi-stock-total">—</div>
-    <div class="kpi-label">Produits total</div>
+    <div class="kpi-label">{% trans "Produits total" %}</div>
   </div>
 
   <div class="kpi-card">
@@ -2974,7 +2974,7 @@ html, body {
       </svg>
     </div>
     <div class="kpi-value loading" id="kpi-stock-faible">—</div>
-    <div class="kpi-label">Stock faible</div>
+    <div class="kpi-label">{% trans "Stock faible" %}</div>
   </div>
 
   <div class="kpi-card">
@@ -2988,38 +2988,38 @@ html, body {
       </svg>
     </div>
     <div class="kpi-value loading" id="kpi-stock-zero">—</div>
-    <div class="kpi-label">Épuisés</div>
+    <div class="kpi-label">{% trans "Épuisés" %}</div>
   </div>
 </div>
 
 {# Filtres stock #}
 <div id="sec-stocks-filters" style="display:none;margin-bottom:14px;">
   <div class="filter-btns">
-    <button class="filter-btn active" onclick="filtreStock('',this)">Tous</button>
-    <button class="filter-btn" onclick="filtreStock('faible',this)">Stock faible</button>
-    <button class="filter-btn" onclick="filtreStock('epuise',this)">Épuisés</button>
-    <button class="filter-btn" onclick="filtreStock('ok',this)">Stock OK</button>
+    <button class="filter-btn active" onclick="filtreStock('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreStock('faible',this)">{% trans "Stock faible" %}</button>
+    <button class="filter-btn" onclick="filtreStock('epuise',this)">{% trans "Épuisés" %}</button>
+    <button class="filter-btn" onclick="filtreStock('ok',this)">{% trans "Stock OK" %}</button>
   </div>
 </div>
 
 <div class="da-card" id="sec-stocks-card" style="display:none;">
   <div class="da-card-head">
-    <h3 id="stocks-title">Tous les produits</h3>
-    <span style="font-size:11.5px;color:var(--text-muted);">Cliquer sur le stock pour ajuster</span>
+    <h3 id="stocks-title">{% trans "Tous les produits" %}</h3>
+    <span style="font-size:11.5px;color:var(--text-muted);">{% trans "Cliquer sur le stock pour ajuster" %}</span>
   </div>
   <table class="da-table">
     <thead>
       <tr>
-        <th>Produit</th>
-        <th class="hide-mobile">Catégorie</th>
-        <th>Stock</th>
-        <th class="hide-mobile">Seuil</th>
-        <th>Niveau</th>
-        <th style="text-align:right;">Action</th>
+        <th>{% trans "Produit" %}</th>
+        <th class="hide-mobile">{% trans "Catégorie" %}</th>
+        <th>{% trans "Stock" %}</th>
+        <th class="hide-mobile">{% trans "Seuil" %}</th>
+        <th>{% trans "Niveau" %}</th>
+        <th style="text-align:right;">{% trans "Action" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-stocks">
-      <tr><td colspan="6" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="6" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
   <div id="pag-stocks" class="da-pagination" style="display:none;"></div>
@@ -3033,37 +3033,37 @@ html, body {
 
 <div class="da-section-header" id="sec-categories-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Catégories</h1>
-    <p class="da-section-subtitle">Arborescence du catalogue</p>
+    <h1 class="da-section-title">{% trans "Catégories" %}</h1>
+    <p class="da-section-subtitle">{% trans "Arborescence du catalogue" %}</p>
   </div>
   <button class="btn btn-primary" onclick="navTo('ajouter-categorie')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
-    Ajouter une catégorie
+    {% trans "Ajouter une catégorie" %}
   </button>
 </div>
 
 <div class="da-card" id="sec-categories-card" style="display:none;">
-  <div class="da-card-head"><h3>Toutes les catégories</h3></div>
+  <div class="da-card-head"><h3>{% trans "Toutes les catégories" %}</h3></div>
   <div id="cat-list-body">
-    <div class="da-loading">Chargement…</div>
+    <div class="da-loading">{% trans DASH_I18N.chargement %}</div>
   </div>
 </div>
 
 {# ── Formulaire ajout / édition catégorie ── #}
 <div class="da-section-header" id="sec-ajout-cat-header" style="display:none;">
   <div>
-    <h1 class="da-section-title" id="cat-form-title">Nouvelle catégorie</h1>
-    <p class="da-section-subtitle" id="cat-form-sub">Remplissez le formulaire</p>
+    <h1 class="da-section-title" id="cat-form-title">{% trans "Nouvelle catégorie" %}</h1>
+    <p class="da-section-subtitle" id="cat-form-sub">{% trans "Remplissez le formulaire" %}</p>
   </div>
   <button class="btn btn-secondary" onclick="navTo('categories')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
     </svg>
-    Retour
+    {% trans "Retour" %}
   </button>
 </div>
 
@@ -3086,26 +3086,26 @@ html, body {
             <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
-          Informations
+          {% trans "Informations" %}
         </h3>
       </div>
       <div style="padding:20px;">
         <div class="da-field">
-          <label class="da-label">Nom <span style="color:var(--accent);font-size:10px;">*</span></label>
+          <label class="da-label">{% trans "Nom" %} <span style="color:var(--accent);font-size:10px;">*</span></label>
           <input type="text" name="nom" id="cat-nom"
-                 placeholder="Ex: Smartphones, PC portables…"
+                 placeholder="{% trans "Ex: Smartphones, PC portables…" %}"
                  class="da-input" required />
         </div>
         <div class="da-field">
-          <label class="da-label">Description <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
+          <label class="da-label">{% trans "Description" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(optionnel)" %}</span></label>
           <textarea name="description" id="cat-description" rows="3"
-                    placeholder="Description courte…"
+                    placeholder="{% trans "Description courte…" %}"
                     class="da-input" style="resize:vertical;min-height:70px;"></textarea>
         </div>
         <div class="da-field" style="margin-bottom:0;">
-          <label class="da-label">Catégorie parente <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(vide = racine)</span></label>
+          <label class="da-label">{% trans "Catégorie parente" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(vide = racine)" %}</span></label>
           <select name="parent_id" id="cat-parent" class="da-input">
-            <option value="">— Aucun parent —</option>
+            <option value="">{% trans "— Aucun parent —" %}</option>
           </select>
         </div>
       </div>
@@ -3123,7 +3123,7 @@ html, body {
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21 15 16 10 5 21"/>
           </svg>
-          Image <span style="font-weight:400;color:var(--text-muted);font-size:12px;">(optionnel)</span>
+          {% trans "Image" %} <span style="font-weight:400;color:var(--text-muted);font-size:12px;">{% trans "(optionnel)" %}</span>
         </h3>
       </div>
       <div style="padding:20px;">
@@ -3143,9 +3143,9 @@ html, body {
             <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
           </svg>
           <p style="font-size:13px;color:var(--text-2);">
-            <strong style="color:var(--accent);">Cliquez</strong> ou glissez une image ici
+            {% blocktrans %}<strong style="color:var(--accent);">Cliquez</strong> ou glissez une image ici{% endblocktrans %}
           </p>
-          <p style="font-size:11.5px;color:var(--text-muted);">JPG, PNG, WebP — recommandé 400×400px</p>
+          <p style="font-size:11.5px;color:var(--text-muted);">{% trans "JPG, PNG, WebP — recommandé 400×400px" %}</p>
           <img id="cat-img-preview" style="display:none;width:80px;height:80px;
                border-radius:var(--r-md);object-fit:cover;margin:10px auto 0;" />
         </div>
@@ -3166,17 +3166,17 @@ html, body {
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
           </svg>
-          Supprimer
+          {% trans "Supprimer" %}
         </button>
         <div style="display:flex;gap:10px;margin-left:auto;">
-          <button type="button" class="btn btn-secondary" onclick="navTo('categories')">Annuler</button>
+          <button type="button" class="btn btn-secondary" onclick="navTo('categories')">{% trans "Annuler" %}</button>
           <button type="submit" id="cat-btn-submit" class="btn btn-primary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="2.5"
                  stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            Créer la catégorie
+            {% trans "Créer la catégorie" %}
           </button>
         </div>
       </div>
@@ -3192,25 +3192,25 @@ html, body {
 
 <div class="da-section-header" id="sec-paniers-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Paniers actifs</h1>
-    <p class="da-section-subtitle">Paniers non finalisés en cours</p>
+    <h1 class="da-section-title">{% trans "Paniers actifs" %}</h1>
+    <p class="da-section-subtitle">{% trans "Paniers non finalisés en cours" %}</p>
   </div>
 </div>
 
 <div class="da-card" id="sec-paniers-card" style="display:none;">
-  <div class="da-card-head"><h3>Paniers en cours</h3></div>
+  <div class="da-card-head"><h3>{% trans "Paniers en cours" %}</h3></div>
   <table class="da-table">
     <thead>
       <tr>
-        <th>Utilisateur</th>
-        <th class="hide-mobile">Email</th>
-        <th>Articles</th>
-        <th>Montant estimé</th>
-        <th class="hide-mobile">Dernière activité</th>
+        <th>{% trans "Utilisateur" %}</th>
+        <th class="hide-mobile">{% trans "Email" %}</th>
+        <th>{% trans "Articles" %}</th>
+        <th>{% trans "Montant estimé" %}</th>
+        <th class="hide-mobile">{% trans "Dernière activité" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-paniers">
-      <tr><td colspan="5" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="5" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
 </div>
@@ -3223,24 +3223,24 @@ html, body {
 
 <div class="da-section-header" id="sec-messages-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Conversations</h1>
-    <p class="da-section-subtitle">Messages entre utilisateurs</p>
+    <h1 class="da-section-title">{% trans "Conversations" %}</h1>
+    <p class="da-section-subtitle">{% trans "Messages entre utilisateurs" %}</p>
   </div>
 </div>
 
 <div class="da-card" id="sec-messages-card" style="display:none;">
-  <div class="da-card-head"><h3>Toutes les conversations</h3></div>
+  <div class="da-card-head"><h3>{% trans "Toutes les conversations" %}</h3></div>
   <table class="da-table">
     <thead>
       <tr>
-        <th>Participants</th>
-        <th class="hide-mobile">Dernier message</th>
-        <th>Non lus</th>
-        <th class="hide-mobile">Date</th>
+        <th>{% trans "Participants" %}</th>
+        <th class="hide-mobile">{% trans "Dernier message" %}</th>
+        <th>{% trans "Non lus" %}</th>
+        <th class="hide-mobile">{% trans "Date" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-messages">
-      <tr><td colspan="4" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="4" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
 </div>
@@ -3253,25 +3253,25 @@ html, body {
 
 <div class="da-section-header" id="sec-notifications-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Notifications</h1>
-    <p class="da-section-subtitle">Historique des notifications système</p>
+    <h1 class="da-section-title">{% trans "Notifications" %}</h1>
+    <p class="da-section-subtitle">{% trans "Historique des notifications système" %}</p>
   </div>
 </div>
 
 <div class="da-card" id="sec-notifications-card" style="display:none;">
-  <div class="da-card-head"><h3>Notifications récentes</h3></div>
+  <div class="da-card-head"><h3>{% trans "Notifications récentes" %}</h3></div>
   <table class="da-table">
     <thead>
       <tr>
-        <th>Type</th>
-        <th>Destinataire</th>
-        <th>Titre</th>
-        <th class="hide-mobile">Date</th>
-        <th>Lu</th>
+        <th>{% trans "Type" %}</th>
+        <th>{% trans "Destinataire" %}</th>
+        <th>{% trans "Titre" %}</th>
+        <th class="hide-mobile">{% trans "Date" %}</th>
+        <th>{% trans "Lu" %}</th>
       </tr>
     </thead>
     <tbody id="tbl-notifs">
-      <tr><td colspan="5" class="da-loading">Chargement…</td></tr>
+      <tr><td colspan="5" class="da-loading">{% trans DASH_I18N.chargement %}</td></tr>
     </tbody>
   </table>
   <div id="pag-notifs" class="da-pagination" style="display:none;"></div>
@@ -3285,18 +3285,18 @@ html, body {
 
 <div class="da-section-header" id="sec-audit-header" style="display:none;">
   <div>
-    <h1 class="da-section-title">Journal d'audit</h1>
-    <p class="da-section-subtitle">Traçabilité de toutes les actions système</p>
+    <h1 class="da-section-title">{% trans "Journal d'audit" %}</h1>
+    <p class="da-section-subtitle">{% trans "Traçabilité de toutes les actions système" %}</p>
   </div>
 </div>
 
 <div class="da-card" id="sec-audit-card" style="display:none;">
   <div class="da-card-head">
-    <h3>Activité système</h3>
+    <h3>{% trans "Activité système" %}</h3>
     <span style="font-size:11.5px;color:var(--text-muted);" id="audit-last-update"></span>
   </div>
   <div id="tbl-audit">
-    <div class="da-loading">Chargement…</div>
+    <div class="da-loading">{% trans DASH_I18N.chargement %}</div>
   </div>
   <div id="pag-audit" class="da-pagination" style="display:none;"></div>
 </div>
@@ -3343,7 +3343,7 @@ html, body {
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
         </div>
-        <span style="font-size:14px;font-weight:700;color:var(--text);">Nouvelle catégorie</span>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">{% trans "Nouvelle catégorie" %}</span>
       </div>
       <button onclick="closeModalCat()"
               style="width:28px;height:28px;border:none;background:var(--surface-2);
@@ -3369,21 +3369,21 @@ html, body {
            font-family:var(--font-body);align-items:center;gap:8px;"></div>
 
       <div class="da-field">
-        <label class="da-label">Nom <span style="color:var(--accent);font-size:9px;">*</span></label>
-        <input type="text" id="mcat-nom" placeholder="Ex: Smartphones, PC Portables…"
+        <label class="da-label">{% trans "Nom" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
+        <input type="text" id="mcat-nom" placeholder="{% trans "Ex: Smartphones, PC Portables…" %}"
                class="da-input" required />
       </div>
 
       <div class="da-field">
-        <label class="da-label">Description <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(optionnel)</span></label>
-        <textarea id="mcat-desc" rows="2" placeholder="Description courte…"
+        <label class="da-label">{% trans "Description" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(optionnel)" %}</span></label>
+        <textarea id="mcat-desc" rows="2" placeholder="{% trans "Description courte…" %}"
                   class="da-input" style="resize:none;min-height:58px;"></textarea>
       </div>
 
       <div class="da-field" style="margin-bottom:0;">
-        <label class="da-label">Catégorie parente <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">(vide = racine)</span></label>
+        <label class="da-label">{% trans "Catégorie parente" %} <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">{% trans "(vide = racine)" %}</span></label>
         <select id="mcat-parent" class="da-input">
-          <option value="">— Aucun parent —</option>
+          <option value="">{% trans "— Aucun parent —" %}</option>
         </select>
       </div>
 
@@ -3392,14 +3392,14 @@ html, body {
     {# Pied de modale #}
     <div style="padding:12px 18px;border-top:1px solid var(--border);
                 display:flex;align-items:center;justify-content:flex-end;gap:8px;">
-      <button type="button" onclick="closeModalCat()" class="btn btn-secondary">Annuler</button>
+      <button type="button" onclick="closeModalCat()" class="btn btn-secondary">{% trans "Annuler" %}</button>
       <button type="button" onclick="submitModalCat()" id="mcat-btn-submit" class="btn btn-primary">
         {# Lucide — Check #}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
-        Créer la catégorie
+        {% trans "Créer la catégorie" %}
       </button>
     </div>
 
@@ -3417,6 +3417,72 @@ html, body {
 
 
 {% block extra_scripts %}
+{# ── Variables i18n pour le JavaScript ── #}
+<script>
+var DASH_I18N = {
+  chargement:           "{% trans DASH_I18N.chargement %}",
+  aucunResultat:        "{% trans "Aucun résultat pour" %}",
+  erreurChargement:     "{% trans DASH_I18N.erreurChargement %}",
+  erreurRecherche:      "{% trans "Erreur de recherche" %}",
+  donneesNonDisponibles:"{% trans "Données non disponibles" %}",
+  recherche:            "{% trans "Recherche…" %}",
+  produits:             "{% trans "Produits" %}",
+  commandes:            "{% trans "Commandes" %}",
+  aucunProduit:         "{% trans "Aucun produit trouvé" %}",
+  aucunProduitCourt:    "{% trans "Aucun produit" %}",
+  aucuneCommande:       "{% trans "Aucune commande trouvée" %}",
+  aucuneCommandeRecente:"{% trans "Aucune commande récente" %}",
+  aucunUtilisateur:     "{% trans "Aucun utilisateur trouvé" %}",
+  aucunAvis:            "{% trans "Aucun avis trouvé" %}",
+  aucunPanier:          "{% trans "Aucun panier actif" %}",
+  aucuneConversation:   "{% trans "Aucune conversation" %}",
+  aucuneNotification:   "{% trans "Aucune notification" %}",
+  aucuneActivite:       "{% trans "Aucune activité enregistrée" %}",
+  aucuneActiviteRecente:"{% trans "Aucune activité récente" %}",
+  aucuneCategorie:      "{% trans "Aucune catégorie" %}",
+  nonLu:                "{% trans "Non lu" %}",
+  misAJour:             "{% trans "Mis à jour" %}",
+  principal:            "{% trans "Principal" %}",
+  valider:              "{% trans "Valider" %}",
+  invalider:            "{% trans "Invalider" %}",
+  valide:               "{% trans "Validé" %}",
+  invalide:             "{% trans "Invalidé" %}",
+  enAttente:            "{% trans "En attente" %}",
+  admin:                "{% trans "Admin" %}",
+  vendeur:              "{% trans "Vendeur" %}",
+  client:               "{% trans "Client" %}",
+  actif:                "{% trans "Actif" %}",
+  inactif:              "{% trans "Inactif" %}",
+  modifier:             "{% trans "Modifier →" %}",
+  nouveauProduit:       "{% trans "Nouveau produit" %}",
+  creerCategorie:       "{% trans "Créer la catégorie" %}",
+  enregistrer:          "{% trans "Enregistrer" %}",
+  creation:             "{% trans "Création…" %}",
+  nomCategorieObligatoire: "{% trans "Le nom de la catégorie est obligatoire." %}",
+  erreurCreation:       "{% trans "Erreur lors de la création. Vérifiez les données." %}",
+  aucunParent:          "{% trans "— Aucun parent —" %}",
+  irréversible:         "{% trans "irréversible" %}",
+  client_label:         "{% trans "Client :" %}",
+  statut_label:         "{% trans "Statut :" %}",
+  date_label:           "{% trans "Date :" %}",
+  paiement_label:       "{% trans "Paiement :" %}",
+  adresse_label:        "{% trans "Adresse :" %}",
+  produit_label:        "{% trans "Produit" %}",
+  qte_label:            "{% trans "Qté" %}",
+  pu_label:             "{% trans "P.U." %}",
+  total_label:          "{% trans "Total" %}",
+  fcfa:                 "{% trans "FCFA" %}",
+  stock_label:          "{% trans "stock:" %}",
+  stock_faible:         "{% trans "Stock faible" %}",
+  stock_ok:             "{% trans "Stock OK" %}",
+  tous_produits:        "{% trans "Tous les produits" %}",
+  modifier:             "{% trans "Modifier" %}",
+  modifier_produit:     "{% trans "Modifier le produit" %}",
+  modifier_categorie:   "{% trans "Modifier la cat\u00e9gorie" %}",
+  enregistrement:       "{% trans "Enregistrement\u2026" %}",
+  aucunResultat:        "{% trans "Aucun r\u00e9sultat pour" %}",
+};
+</script>
 {% comment %} ════════════════════════════════════════════════════════════════
    SCRIPTS — Section A : Navigation SPA + Sidebar toggle
    ───────────────────────────────────────────────────────
@@ -3645,7 +3711,7 @@ html, body {
       var data = await API.get('/api/notifications/?page=1&page_size=8');
       var items = data.results || data;
       if (!items.length) {
-        list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Aucune notification</div>';
+        list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">'+ DASH_I18N.aucuneNotification +'</div>';
         return;
       }
       list.innerHTML = items.map(function(n) {
@@ -3660,7 +3726,7 @@ html, body {
           + '</div></div>';
       }).join('');
     } catch(e) {
-      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Erreur de chargement</div>';
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">'+ DASH_I18N.erreurChargement +'</div>';
     }
   };
 
@@ -3695,7 +3761,7 @@ html, body {
             return '<div onclick="window._navAndClear(\'produits\')" style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;" onmouseover="this.style.background=\'var(--surface-2)\'" onmouseout="this.style.background=\'\'">'
               + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
               + '<div><div style="font-size:13px;color:var(--text);">' + escHtml(p.nom) + '</div>'
-              + '<div style="font-size:11px;color:var(--text-muted);">' + (p.prix_actuel || p.prix || '') + ' FCFA · stock: ' + (p.stock || 0) + '</div></div>'
+              + '<div style="font-size:11px;color:var(--text-muted);">' + (p.prix_actuel || p.prix || '') + ' ' + DASH_I18N.fcfa + ' · ' + DASH_I18N.stock_label + ' ' + (p.stock || 0) + '</div></div>'
               + '</div>';
           }).join('');
         }
@@ -3712,12 +3778,12 @@ html, body {
         }
 
         if (!prods.length && !cmds.length) {
-          html = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Aucun résultat pour « ' + escHtml(q) + ' »</div>';
+          html = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">'+ DASH_I18N.aucunResultat +' « ' + escHtml(q) + ' »</div>';
         }
 
         el.innerHTML = html;
       } catch(err) {
-        el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">Erreur de recherche</div>';
+        el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:12.5px;">'+ DASH_I18N.erreurRecherche +'</div>';
       }
     }, 300);
   };
@@ -3797,8 +3863,8 @@ html, body {
    */
   window.renderStatutProduit = function(s) {
     var map = {
-      actif:   ['st-pub',   'Actif'],
-      inactif: ['st-draft', 'Inactif'],
+      actif:   ['st-pub',   DASH_I18N.actif],
+      inactif: ['st-draft', DASH_I18N.inactif],
       epuise:  ['st-out',   'Épuisé'],
       archive: ['st-draft', 'Archivé'],
     };
@@ -3984,7 +4050,7 @@ html, body {
     if (!tbody) return;
 
     if (!commandes.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">Aucune commande récente</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">'+ DASH_I18N.aucuneCommandeRecente +'</td></tr>';
       return;
     }
 
@@ -4048,7 +4114,7 @@ html, body {
     if (!el) return;
 
     if (!items.length) {
-      el.innerHTML = '<div class="da-loading">Aucune activité récente</div>';
+      el.innerHTML = '<div class="da-loading">'+ DASH_I18N.aucuneActiviteRecente +'</div>';
       return;
     }
 
@@ -4096,7 +4162,7 @@ html, body {
       renderPagination('pag-produits', data, page, 'window.loadProduits');
     } catch(e) {
       var tbody = document.getElementById('tbl-produits');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Erreur de chargement</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">'+ DASH_I18N.erreurChargement +'</td></tr>';
     }
   };
 
@@ -4106,7 +4172,7 @@ html, body {
     if (!tbody) return;
 
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun produit trouvé</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunProduit +'</td></tr>';
       return;
     }
 
@@ -4156,7 +4222,7 @@ html, body {
     if (!grid) return;
 
     if (!items.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);">Aucun produit</div>';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunProduitCourt +'</div>';
       return;
     }
 
@@ -4245,7 +4311,7 @@ html, body {
       renderPagination('pag-commandes', data, page, 'window.loadCommandes');
     } catch(e) {
       var tbody = document.getElementById('tbl-commandes');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">Erreur de chargement</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">'+ DASH_I18N.erreurChargement +'</td></tr>';
     }
   };
 
@@ -4254,7 +4320,7 @@ html, body {
     if (!tbody) return;
 
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune commande trouvée</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucuneCommande +'</td></tr>';
       return;
     }
 
@@ -4420,7 +4486,7 @@ html, body {
       if (chkVedette) chkVedette.checked = p.en_vedette || false;
 
       // Mettre à jour le titre
-      document.getElementById('ap-title').textContent    = 'Modifier le produit';
+      document.getElementById('ap-title').textContent    = DASH_I18N.modifier_produit;
       document.getElementById('ap-subtitle').textContent = 'Modification de : ' + p.nom;
 
       // Afficher le bouton supprimer
@@ -4439,7 +4505,7 @@ html, body {
     var idEl = document.getElementById('ap-produit-id');
     if (idEl) idEl.value = '';
     var titleEl = document.getElementById('ap-title');
-    if (titleEl) titleEl.textContent = 'Nouveau produit';
+    if (titleEl) titleEl.textContent = DASH_I18N.nouveauProduit;
     var subEl = document.getElementById('ap-subtitle');
     if (subEl) subEl.textContent = 'Remplissez le formulaire pour publier';
     var btnDel = document.getElementById('ap-btn-del');
@@ -4565,7 +4631,7 @@ html, body {
           + 'overflow:hidden;border:1.5px solid ' + (i === 0 ? 'var(--brand-main)' : 'var(--border)') + ';';
         div.innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;"/>'
           + (i === 0 ? '<span style="position:absolute;top:4px;left:4px;background:var(--brand-main);'
-          + 'color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;">Principal</span>' : '');
+          + 'color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;">'+ DASH_I18N.principal +'</span>' : '');
         grid.appendChild(div);
       };
       reader.readAsDataURL(file);
@@ -4803,7 +4869,7 @@ html, body {
       renderPagination('pag-users', data, page, 'window.loadUsers');
     } catch(e) {
       var tbody = document.getElementById('tbl-users');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">Erreur de chargement</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--red);">'+ DASH_I18N.erreurChargement +'</td></tr>';
     }
   };
 
@@ -4812,7 +4878,7 @@ html, body {
     if (!tbody) return;
 
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun utilisateur trouvé</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunUtilisateur +'</td></tr>';
       return;
     }
 
@@ -4917,7 +4983,7 @@ html, body {
       renderPagination('pag-avis', data, page, 'window.loadAvis');
     } catch(e) {
       var tbody = document.getElementById('tbl-avis');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Erreur de chargement</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">'+ DASH_I18N.erreurChargement +'</td></tr>';
     }
   };
 
@@ -4926,7 +4992,7 @@ html, body {
     if (!tbody) return;
 
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun avis trouvé</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunAvis +'</td></tr>';
       return;
     }
 
@@ -4950,13 +5016,13 @@ html, body {
         ? '<button onclick="moderAvis(' + a.id + ',true,this)" '
         + 'style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #A7F3D0;'
         + 'background:var(--green-light);color:#065F46;font-size:11px;font-weight:600;'
-        + 'cursor:pointer;font-family:var(--font-body);">Valider</button>'
+        + 'cursor:pointer;font-family:var(--font-body);">'+ DASH_I18N.valider +'</button>'
         : '';
       var btnInvalider = a.statut !== 'invalide'
         ? '<button onclick="moderAvis(' + a.id + ',false,this)" '
         + 'style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid #FECACA;'
         + 'background:var(--red-light);color:#991B1B;font-size:11px;font-weight:600;'
-        + 'cursor:pointer;font-family:var(--font-body);">Invalider</button>'
+        + 'cursor:pointer;font-family:var(--font-body);">'+ DASH_I18N.invalider +'</button>'
         : '';
       var btnSupp = '<button onclick="supprimerAvis(' + a.id + ',this)" '
         + 'style="padding:4px 9px;border-radius:var(--r-sm);border:1.5px solid var(--border);'
@@ -5022,9 +5088,9 @@ html, body {
     document.querySelectorAll('#sec-stocks-filters .filter-btn').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     var titleEl = document.getElementById('stocks-title');
-    if (titleEl) titleEl.textContent = filtre === 'faible' ? 'Stock faible'
+    if (titleEl) titleEl.textContent = filtre === 'faible' ? DASH_I18N.stock_faible
       : filtre === 'epuise' ? 'Produits épuisés'
-      : filtre === 'ok' ? 'Stock OK' : 'Tous les produits';
+      : filtre === 'ok' ? DASH_I18N.stock_ok : DASH_I18N.tous_produits;
     loadStocks(1);
   };
 
@@ -5063,7 +5129,7 @@ html, body {
       renderPagination('pag-stocks', data, page, 'window.loadStocks');
     } catch(e) {
       var tbody = document.getElementById('tbl-stocks');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">Erreur de chargement</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red);">'+ DASH_I18N.erreurChargement +'</td></tr>';
     }
   };
 
@@ -5077,7 +5143,7 @@ html, body {
     if (!tbody) return;
 
     if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun produit trouvé</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunProduit +'</td></tr>';
       return;
     }
 
@@ -5124,7 +5190,7 @@ html, body {
       populateCatParentSelect(items);
     } catch(e) {
       var el = document.getElementById('cat-list-body');
-      if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">Erreur de chargement</div>';
+      if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);">'+ DASH_I18N.erreurChargement +'</div>';
     }
   };
 
@@ -5133,7 +5199,7 @@ html, body {
     if (!el) return;
 
     if (!items.length) {
-      el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune catégorie</div>';
+      el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">'+ DASH_I18N.aucuneCategorie +'</div>';
       return;
     }
 
@@ -5168,7 +5234,7 @@ html, body {
       + '<button onclick="editerCategorie(' + cat.id + ')" '
       + 'style="padding:4px 10px;border-radius:var(--r-sm);border:1.5px solid var(--border);'
       + 'background:var(--surface);font-size:11.5px;font-weight:600;cursor:pointer;color:var(--text-2);font-family:var(--font-body);">'
-      + 'Modifier</button>'
+      + DASH_I18N.modifier + '</button>'
       + '</div>';
   }
 
@@ -5176,7 +5242,7 @@ html, body {
     var sel = document.getElementById('cat-parent');
     if (!sel) return;
     var parents = items.filter(function(c) { return !c.parent; });
-    sel.innerHTML = '<option value="">— Aucun parent —</option>'
+    sel.innerHTML = '<option value="">' + DASH_I18N.aucunParent + '</option>'
       + parents.map(function(p) {
           return '<option value="' + p.id + '">' + escHtml(p.nom) + '</option>';
         }).join('');
@@ -5195,13 +5261,13 @@ html, body {
         var selEl = document.getElementById('cat-parent');
         if (selEl) selEl.value = cat.parent;
       }
-      document.getElementById('cat-form-title').textContent = 'Modifier la catégorie';
+      document.getElementById('cat-form-title').textContent = DASH_I18N.modifier_categorie;
       document.getElementById('cat-form-sub').textContent   = 'Modification : ' + cat.nom;
-      document.getElementById('cat-btn-submit').textContent = 'Enregistrer';
+      document.getElementById('cat-btn-submit').textContent = DASH_I18N.enregistrer;
       var btnDel = document.getElementById('cat-btn-delete');
       if (btnDel) btnDel.style.display = '';
     } catch(e) {
-      if (window.showToast) showToast('Erreur de chargement', 'error');
+      if (window.showToast) showToast(DASH_I18N.erreurChargement, 'error');
     }
   };
 
@@ -5214,7 +5280,7 @@ html, body {
     document.getElementById('cat-form-title').textContent = 'Nouvelle catégorie';
     document.getElementById('cat-form-sub').textContent   = 'Remplissez le formulaire';
     var submitEl = document.getElementById('cat-btn-submit');
-    if (submitEl) submitEl.textContent = 'Créer la catégorie';
+    if (submitEl) submitEl.textContent = DASH_I18N.creerCategorie;
     var btnDel = document.getElementById('cat-btn-delete');
     if (btnDel) btnDel.style.display = 'none';
     var preview = document.getElementById('cat-img-preview');
@@ -5264,7 +5330,7 @@ html, body {
       var catId  = document.getElementById('cat-id').value;
       var flash  = document.getElementById('cat-flash');
       var btn    = document.getElementById('cat-btn-submit');
-      if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+      if (btn) { btn.disabled = true; btn.textContent = DASH_I18N.enregistrement; }
 
       var fd     = new FormData(form);
       var url    = catId ? '/api/categories/' + catId + '/' : '/api/categories/';
@@ -5286,7 +5352,7 @@ html, body {
       } catch(err) {
         if (flash) { flash.textContent = 'Erreur réseau'; flash.style.display = 'block'; }
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = catId ? 'Enregistrer' : 'Créer la catégorie'; }
+        if (btn) { btn.disabled = false; btn.textContent = catId ? DASH_I18N.enregistrer : DASH_I18N.creerCategorie; }
       }
     });
   });
@@ -5302,7 +5368,7 @@ html, body {
       if (!tbody) return;
 
       if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">Aucun panier actif</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucunPanier +'</td></tr>';
         return;
       }
 
@@ -5318,7 +5384,7 @@ html, body {
       }).join('');
     } catch(e) {
       var tbody2 = document.getElementById('tbl-paniers');
-      if (tbody2) tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">Données non disponibles</td></tr>';
+      if (tbody2) tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">'+ DASH_I18N.donneesNonDisponibles +'</td></tr>';
     }
   };
 
@@ -5333,7 +5399,7 @@ html, body {
       if (!tbody) return;
 
       if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune conversation</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucuneConversation +'</td></tr>';
         return;
       }
 
@@ -5350,7 +5416,7 @@ html, body {
       }).join('');
     } catch(e) {
       var tbody2 = document.getElementById('tbl-messages');
-      if (tbody2) tbody2.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">Données non disponibles</td></tr>';
+      if (tbody2) tbody2.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">'+ DASH_I18N.donneesNonDisponibles +'</td></tr>';
     }
   };
 
@@ -5366,7 +5432,7 @@ html, body {
       if (!tbody) return;
 
       if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune notification</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">'+ DASH_I18N.aucuneNotification +'</td></tr>';
         return;
       }
 
@@ -5406,10 +5472,10 @@ html, body {
 
       /* Mettre à jour l'heure du dernier rafraîchissement */
       var lastEl = document.getElementById('audit-last-update');
-      if (lastEl) lastEl.textContent = 'Mis à jour : ' + new Date().toLocaleTimeString('fr-FR');
+      if (lastEl) lastEl.textContent = '{% trans "Mis à jour" %} : ' + new Date().toLocaleTimeString('fr-FR');
 
       if (!items.length) {
-        el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Aucune activité enregistrée</div>';
+        el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">'+ DASH_I18N.aucuneActivite +'</div>';
         return;
       }
 
@@ -5438,7 +5504,7 @@ html, body {
       renderPagination('pag-audit', data, page, 'window.loadAudit');
     } catch(e) {
       var el2 = document.getElementById('tbl-audit');
-      if (el2) el2.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">Données non disponibles</div>';
+      if (el2) el2.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">'+ DASH_I18N.donneesNonDisponibles +'</div>';
     }
   };
 
@@ -5465,7 +5531,7 @@ window.openModalCat = async function() {
     var data = await API.get('/api/categories/');
     var cats = data.results || data;
     var sel = document.getElementById('mcat-parent');
-    sel.innerHTML = '<option value="">— Aucun parent —</option>';
+    sel.innerHTML = '<option value="">' + DASH_I18N.aucunParent + '</option>';
     cats.forEach(function(c) {
       sel.innerHTML += '<option value="' + c.id + '">' + c.nom + '</option>';
     });
@@ -5490,13 +5556,13 @@ window.submitModalCat = async function() {
     fl.style.background = 'var(--red-light)';
     fl.style.color = '#991b1b';
     fl.style.border = '1px solid #fca5a5';
-    fl.textContent = 'Le nom de la catégorie est obligatoire.';
+    fl.textContent = DASH_I18N.nomCategorieObligatoire;
     return;
   }
 
   var btn = document.getElementById('mcat-btn-submit');
   btn.disabled = true;
-  btn.textContent = 'Création…';
+  btn.textContent = DASH_I18N.creation;
 
   var payload = { nom: nom };
   var desc    = document.getElementById('mcat-desc').value.trim();
@@ -5522,10 +5588,10 @@ window.submitModalCat = async function() {
     fl.style.background = 'var(--red-light)';
     fl.style.color = '#991b1b';
     fl.style.border = '1px solid #fca5a5';
-    fl.textContent = 'Erreur lors de la création. Vérifiez les données.';
+    fl.textContent = DASH_I18N.erreurCreation;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Créer la catégorie';
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ' + DASH_I18N.creerCategorie;
   }
 };
 </script>
