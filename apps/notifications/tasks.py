@@ -1,16 +1,27 @@
 """
-Tâches de notifications (exécutées de façon synchrone — sans Celery ni Redis).
+Tâches asynchrones Celery pour les notifications.
+
+Chaque fonction est décorée avec @shared_task — Celery l'exécute
+en arrière-plan sans bloquer la requête HTTP de l'utilisateur.
 
 Tâches déclenchées par des événements (via signals orders/signals.py) :
   - send_order_confirmation_email : email confirmation commande (CONFIRMEE)
   - send_status_update_email      : email mise à jour statut livraison
-  - send_review_reminder          : rappel avis après livraison
+  - send_review_reminder          : rappel avis après livraison (3j après)
 
-Tâches planifiées (à appeler via un management command ou un cron Render) :
+Tâches planifiées (à appeler via un management command ou un cron) :
   - alert_low_stock   : alerte admin stock faible
   - cleanup_old_carts : nettoyage paniers inactifs > 30j
+
+Comment appeler une tâche Celery depuis le code :
+  # Exécution asynchrone (recommandé) — Celery s'en charge en arrière-plan
+  send_order_confirmation_email.delay(commande_id)
+
+  # Exécution synchrone (pour les tests uniquement)
+  send_order_confirmation_email(commande_id)
 """
 import logging
+from celery import shared_task
 from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -18,11 +29,14 @@ from django.utils.translation import gettext as _
 logger = logging.getLogger(__name__)
 
 
-# ── Utilitaire : diffuser une notification WebSocket ──────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# UTILITAIRE — Diffuser une notification WebSocket
+# ═══════════════════════════════════════════════════════════════
 
 def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien=''):
     """
-    Crée une Notification en DB et la diffuse via WebSocket (InMemoryChannelLayer).
+    Crée une Notification en DB et la diffuse via WebSocket (Redis Channel Layer).
+    Appelé par toutes les tâches après envoi d'email.
     """
     from apps.notifications.models import Notification
 
@@ -65,9 +79,15 @@ def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien='
     return notif
 
 
-# ── Utilitaire : créer et envoyer un email loggué ─────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# UTILITAIRE — Créer et envoyer un email loggué
+# ═══════════════════════════════════════════════════════════════
 
 def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=None):
+    """
+    Envoie un email et enregistre le résultat dans EmailAsynchrone.
+    Gère les erreurs sans faire planter la tâche Celery.
+    """
     from apps.notifications.models import EmailAsynchrone
     from django.core.mail import EmailMultiAlternatives
     from django.template.loader import render_to_string
@@ -108,9 +128,19 @@ def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=
 
 # ═══════════════════════════════════════════════════════════════
 # TÂCHE 1 — Email de confirmation de commande
+# Déclenchée par : orders/signals.py après transition CONFIRMEE
+# Appel          : send_order_confirmation_email.delay(commande_id)
 # ═══════════════════════════════════════════════════════════════
 
-def send_order_confirmation_email(commande_id):
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_order_confirmation_email(self, commande_id):
+    """
+    Envoie un email de confirmation au client après validation de sa commande.
+
+    bind=True          → permet d'accéder à self pour les retries
+    max_retries=3      → réessaie 3 fois en cas d'échec
+    default_retry_delay→ attend 60 secondes entre chaque retry
+    """
     from apps.orders.models import Commande
 
     try:
@@ -126,8 +156,8 @@ def send_order_confirmation_email(commande_id):
               "Merci pour votre confiance !\n"
               "L'équipe HooYia Market") % {
                 'username': client.username,
-                'ref': commande.reference_courte,
-                'montant': commande.montant_total,
+                'ref'     : commande.reference_courte,
+                'montant' : commande.montant_total,
             }
         )
 
@@ -135,16 +165,20 @@ def send_order_confirmation_email(commande_id):
             client, sujet, corps,
             html_template='notifications/emails/order_confirm.html',
             html_context={
-                'client_username' : client.username,
-                'reference'       : commande.reference_courte,
-                'date'            : commande.date_creation.strftime('%d/%m/%Y'),
-                'montant_total'   : commande.montant_total,
-                'lignes'          : [
-                    {'nom': l.produit_nom, 'quantite': l.quantite, 'total': l.prix_unitaire * l.quantite}
+                'client_username': client.username,
+                'reference'      : commande.reference_courte,
+                'date'           : commande.date_creation.strftime('%d/%m/%Y'),
+                'montant_total'  : commande.montant_total,
+                'lignes'         : [
+                    {
+                        'nom'     : l.produit_nom,
+                        'quantite': l.quantite,
+                        'total'   : l.prix_unitaire * l.quantite
+                    }
                     for l in commande.lignes.all()
                 ],
-                'lien_commande'   : f"/commandes/{commande.id}/",
-                'lien_chat'       : "/chat/",
+                'lien_commande': f"/commandes/{commande.id}/",
+                'lien_chat'    : "/chat/",
             }
         )
 
@@ -158,22 +192,45 @@ def send_order_confirmation_email(commande_id):
 
     except Commande.DoesNotExist:
         logger.error(f"send_order_confirmation_email : commande #{commande_id} introuvable")
+
     except Exception as exc:
         logger.error(f"send_order_confirmation_email erreur : {exc}")
+        # Retry automatique après 60s (max 3 fois)
+        raise self.retry(exc=exc)
 
 
 # ═══════════════════════════════════════════════════════════════
 # TÂCHE 2 — Email de mise à jour de statut
+# Déclenchée par : orders/signals.py à chaque changement de statut
+# Appel          : send_status_update_email.delay(commande_id)
 # ═══════════════════════════════════════════════════════════════
 
-def send_status_update_email(commande_id):
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_status_update_email(self, commande_id):
+    """
+    Informe le client de chaque changement de statut de sa commande.
+    """
     from apps.orders.models import Commande
 
     MESSAGES_STATUT = {
-        Commande.EN_PREPARATION : (_("En préparation 📦"), _("Votre commande est en cours de préparation.")),
-        Commande.EXPEDIEE       : (_("Commande expédiée 🚚"), _("Votre commande est en route !")),
-        Commande.LIVREE         : (_("Commande livrée ✓"), _("Votre commande a bien été livrée.")),
-        Commande.ANNULEE        : (_("Commande annulée"), _("Votre commande a été annulée.")),
+        Commande.EN_PREPARATION: (_("En préparation 📦"), _("Votre commande est en cours de préparation.")),
+        Commande.EXPEDIEE      : (_("Commande expédiée 🚚"), _("Votre commande est en route !")),
+        Commande.LIVREE        : (_("Commande livrée ✓"), _("Votre commande a bien été livrée.")),
+        Commande.ANNULEE       : (_("Commande annulée"), _("Votre commande a été annulée.")),
+    }
+
+    LABELS_STATUT = {
+        Commande.EN_PREPARATION: _("En préparation 📦"),
+        Commande.EXPEDIEE      : _("Expédiée 🚚"),
+        Commande.LIVREE        : _("Livrée ✅"),
+        Commande.ANNULEE       : _("Annulée ❌"),
+    }
+
+    ICONES_STATUT = {
+        Commande.EN_PREPARATION: "📦",
+        Commande.EXPEDIEE      : "🚚",
+        Commande.LIVREE        : "✅",
+        Commande.ANNULEE       : "❌",
     }
 
     try:
@@ -186,24 +243,34 @@ def send_status_update_email(commande_id):
         )
 
         sujet = _("[HooYia Market] Commande #%(ref)s — %(titre)s") % {
-            'ref': commande.reference_courte, 'titre': titre_statut
+            'ref'  : commande.reference_courte,
+            'titre': titre_statut,
         }
         corps = (
             _("Bonjour %(username)s,\n\n%(msg)s\nRéférence : #%(ref)s\n\nL'équipe HooYia Market") % {
                 'username': client.username,
-                'msg': msg_statut,
-                'ref': commande.reference_courte,
+                'msg'     : msg_statut,
+                'ref'     : commande.reference_courte,
             }
         )
 
-        LABELS_STATUT = {
-            Commande.EN_PREPARATION: _("En préparation 📦"),
-            Commande.EXPEDIEE: _("Expédiée 🚚"),
-            Commande.LIVREE: _("Livrée ✅"),
-            Commande.ANNULEE: _("Annulée ❌"),
-        }
-        ICONES_STATUT = {Commande.EN_PREPARATION: "📦", Commande.EXPEDIEE: "🚚", Commande.LIVREE: "✅", Commande.ANNULEE: "❌"}
-        _envoyer_email(client, sujet, corps, html_template="notifications/emails/status_update.html", html_context={"client_username": client.username, "reference": commande.reference_courte, "date": commande.date_creation.strftime("%d/%m/%Y"), "montant_total": commande.montant_total, "statut": commande.statut, "titre_statut": titre_statut, "label_statut": LABELS_STATUT.get(commande.statut, commande.statut), "icone": ICONES_STATUT.get(commande.statut, "📋"), "message_intro": msg_statut, "lien_commande": f"/commandes/{commande.id}/", "lien_chat": "/chat/"})
+        _envoyer_email(
+            client, sujet, corps,
+            html_template='notifications/emails/status_update.html',
+            html_context={
+                'client_username': client.username,
+                'reference'      : commande.reference_courte,
+                'date'           : commande.date_creation.strftime('%d/%m/%Y'),
+                'montant_total'  : commande.montant_total,
+                'statut'         : commande.statut,
+                'titre_statut'   : titre_statut,
+                'label_statut'   : LABELS_STATUT.get(commande.statut, commande.statut),
+                'icone'          : ICONES_STATUT.get(commande.statut, "📋"),
+                'message_intro'  : msg_statut,
+                'lien_commande'  : f"/commandes/{commande.id}/",
+                'lien_chat'      : "/chat/",
+            }
+        )
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
@@ -215,15 +282,27 @@ def send_status_update_email(commande_id):
 
     except Commande.DoesNotExist:
         logger.error(f"send_status_update_email : commande #{commande_id} introuvable")
+
     except Exception as exc:
         logger.error(f"send_status_update_email erreur : {exc}")
+        raise self.retry(exc=exc)
 
 
 # ═══════════════════════════════════════════════════════════════
-# TÂCHE 3 — Rappel laisser un avis
+# TÂCHE 3 — Rappel laisser un avis (3 jours après livraison)
+# Déclenchée par : orders/signals.py après transition LIVREE
+# Appel          : send_review_reminder.apply_async(
+#                      args=[commande_id],
+#                      countdown=259200  ← 3 jours en secondes
+#                  )
 # ═══════════════════════════════════════════════════════════════
 
-def send_review_reminder(commande_id):
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_review_reminder(self, commande_id):
+    """
+    Envoie un rappel au client 3 jours après la livraison
+    pour l'inviter à laisser un avis sur ses produits.
+    """
     from apps.orders.models import Commande
 
     try:
@@ -232,7 +311,7 @@ def send_review_reminder(commande_id):
         ).get(pk=commande_id)
         client = commande.client
 
-        noms_produits = [l.produit_nom for l in commande.lignes.all()]
+        noms_produits  = [l.produit_nom for l in commande.lignes.all()]
         liste_produits = "\n".join(f"  - {nom}" for nom in noms_produits[:5])
 
         sujet = _("[HooYia Market] Votre avis nous intéresse !")
@@ -244,7 +323,7 @@ def send_review_reminder(commande_id):
               "Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n\n"
               "L'équipe HooYia Market") % {
                 'username': client.username,
-                'ref': commande.reference_courte,
+                'ref'     : commande.reference_courte,
                 'produits': liste_produits,
             }
         )
@@ -261,16 +340,23 @@ def send_review_reminder(commande_id):
 
     except Commande.DoesNotExist:
         logger.error(f"send_review_reminder : commande #{commande_id} introuvable")
+
     except Exception as exc:
         logger.error(f"send_review_reminder erreur : {exc}")
+        raise self.retry(exc=exc)
 
 
 # ═══════════════════════════════════════════════════════════════
-# TÂCHE 4 — Alerte stock faible
-# À appeler via : python manage.py alert_low_stock
+# TÂCHE 4 — Alerte stock faible (admin uniquement)
+# Appel : alert_low_stock.delay()
 # ═══════════════════════════════════════════════════════════════
 
+@shared_task
 def alert_low_stock():
+    """
+    Notifie tous les admins des produits dont le stock
+    est sous le seuil d'alerte.
+    """
     from apps.products.models import Produit
     from apps.users.models import CustomUser
 
@@ -309,11 +395,16 @@ def alert_low_stock():
 
 
 # ═══════════════════════════════════════════════════════════════
-# TÂCHE 5 — Nettoyage paniers inactifs
-# À appeler via : python manage.py cleanup_old_carts
+# TÂCHE 5 — Nettoyage paniers inactifs > 30 jours
+# Appel : cleanup_old_carts.delay()
 # ═══════════════════════════════════════════════════════════════
 
+@shared_task
 def cleanup_old_carts():
+    """
+    Supprime les articles des paniers inactifs depuis plus de 30 jours.
+    Le panier lui-même est conservé (réutilisé à la prochaine commande).
+    """
     from datetime import timedelta
     from apps.cart.models import Panier, PanierItem
 
