@@ -36,8 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'daphne',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
 
     # API REST
     'rest_framework',
@@ -152,8 +150,6 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 
 # ═══════════════════════════════════════════════
-
-# ═══════════════════════════════════════════════
 # CACHE — En mémoire (pas de Redis)
 # ═══════════════════════════════════════════════
 
@@ -171,17 +167,21 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # ═══════════════════════════════════════════════
 # DJANGO CHANNELS — WebSockets (Chat + Notifications)
-# InMemoryChannelLayer : fonctionne sans Redis
-# Limitation : ne supporte pas multi-process (ok sur Render free tier)
+# Utilise Redis comme Channel Layer pour supporter
+# le multi-process en production
 # ═══════════════════════════════════════════════
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [config('REDIS_URL', default='redis://redis:6379/0')],
+        },
     }
 }
 
 
+# ═══════════════════════════════════════════════
 # DJANGO REST FRAMEWORK
 # ═══════════════════════════════════════════════
 
@@ -239,17 +239,17 @@ CSRF_TRUSTED_ORIGINS = config(
 
 
 # ═══════════════════════════════════════════════
-# EMAILS — Console en local (affiche dans le terminal)
-# Pour utiliser SMTP réel : définir EMAIL_BACKEND dans .env
+# EMAILS — SMTP (envoi réel dans les boîtes mails)
+# Backend configuré depuis .env
 # ═══════════════════════════════════════════════
 
-EMAIL_BACKEND   = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST      = config('EMAIL_HOST',      default='smtp.gmail.com')
-EMAIL_PORT      = config('EMAIL_PORT',      default=587, cast=int)
-EMAIL_USE_TLS   = config('EMAIL_USE_TLS',   default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_BACKEND       = config('EMAIL_BACKEND',       default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST          = config('EMAIL_HOST',          default='smtp.gmail.com')
+EMAIL_PORT          = config('EMAIL_PORT',          default=587, cast=int)
+EMAIL_USE_TLS       = config('EMAIL_USE_TLS',       default=True, cast=bool)
+EMAIL_HOST_USER     = config('EMAIL_HOST_USER',     default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL', default=f'HooYia Market <{config("EMAIL_HOST_USER", default="")}>')
+DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL',  default=f'HooYia Market <{config("EMAIL_HOST_USER", default="")}>')
 
 
 # ═══════════════════════════════════════════════
@@ -266,16 +266,7 @@ MEDIA_URL = '/media/'
 # Les images uploadées (photos produits) sont stockées ici
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ═══════════════════════════════════════════════
-# CLOUDINARY — Stockage des images (production)
-# ═══════════════════════════════════════════════
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
-    'API_KEY':    config('CLOUDINARY_API_KEY',    default=''),
-    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
-}
-if config('CLOUDINARY_CLOUD_NAME', default=''):
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
 # ═══════════════════════════════════════════════
@@ -330,6 +321,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/compte/connexion/'
 
+
 # ═══════════════════════════════════════════════
 # AVIS CLIENTS
 # ═══════════════════════════════════════════════
@@ -337,13 +329,44 @@ LOGIN_URL = '/compte/connexion/'
 # En production (DEBUG=False), mettre True pour exiger une commande LIVREE.
 # En développement, False permet de tester les avis sans avoir passé commande.
 AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
+
+
 # ═══════════════════════════════════════════════════════════
 # GOOGLE OAUTH2
 # Créez vos credentials sur : https://console.cloud.google.com
 # Ajoutez dans votre .env : GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET
 # URI de redirection à configurer dans Google Console :
-#   https://hooyia-market-wpsp.onrender.com/compte/google/callback/
+#   http://localhost:8000/compte/google/callback/  (dev)
+#   https://tondomaine.com/compte/google/callback/ (prod)
 # ═══════════════════════════════════════════════════════════
+
 GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
-GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='https://hooyia-market-wpsp.onrender.com/compte/google/callback/')
+GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:8000/compte/google/callback/')
+
+
+# ═══════════════════════════════════════════════
+# CELERY — Tâches asynchrones
+# Redis reçoit, stocke et retourne les résultats des tâches
+# ═══════════════════════════════════════════════
+
+# URL du broker — Redis reçoit et stocke les tâches en attente
+CELERY_BROKER_URL = config('REDIS_URL', default='redis://redis:6379/0')
+
+# URL du backend — Redis stocke les résultats des tâches exécutées
+CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://redis:6379/0')
+
+# Format de sérialisation des tâches (JSON = lisible et sécurisé)
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+
+# Fuseau horaire cohérent avec Django
+CELERY_TIMEZONE = TIME_ZONE
+
+# Évite que les tâches restent bloquées indéfiniment
+CELERY_TASK_SOFT_TIME_LIMIT = 300  # Avertissement après 5 minutes
+CELERY_TASK_TIME_LIMIT = 360       # Arrêt forcé après 6 minutes
+
+# Reconnexion automatique si Redis redémarre au démarrage
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

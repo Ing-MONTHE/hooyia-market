@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Environnements
+.env
+.env.dev
+.env.prod
+.env.example
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Node
+node_modules/
+
+# Médias locaux
+media/
+mediafiles/
+
+# Docker
+Dockerfile
+docker-compose*.yml
