@@ -9,6 +9,9 @@ venv/
 
 # Fichier sensible
 .env
+.env.dev
+.env.prod
+.env.example
 
 # Python
 __pycache__/

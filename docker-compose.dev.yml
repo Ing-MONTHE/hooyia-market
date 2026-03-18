@@ -1,0 +1,103 @@
+# ==============================================================
+# HOOYIA MARKET — Docker Compose Développement
+# ==============================================================
+# Commandes utiles :
+#   Démarrer    : docker-compose -f docker-compose.dev.yml up
+#   Arrière-plan: docker-compose -f docker-compose.dev.yml up -d
+#   Arrêter     : docker-compose -f docker-compose.dev.yml down
+#   Logs        : docker-compose -f docker-compose.dev.yml logs -f
+# ==============================================================
+
+services:
+
+  # ════════════════════════════════════════════════════════════
+  # BASE DE DONNÉES — PostgreSQL
+  # ════════════════════════════════════════════════════════════
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # ════════════════════════════════════════════════════════════
+  # REDIS — Broker Celery + Django Channels
+  # ════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # ════════════════════════════════════════════════════════════
+  # APPLICATION — Django via Daphne (HTTP + WebSocket)
+  # ════════════════════════════════════════════════════════════
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    volumes:
+      - .:/app
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+
+  # ════════════════════════════════════════════════════════════
+  # CELERY — Worker pour les tâches asynchrones
+  # (envoi d'emails, rappels d'avis, notifications...)
+  # ════════════════════════════════════════════════════════════
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    command: celery -A config worker --loglevel=info
+
+  # ════════════════════════════════════════════════════════════
+  # NGINX — Reverse proxy
+  # ════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    depends_on:
+      - web
+
+# ── Volumes persistants ───────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  staticfiles:
+  mediafiles:
