@@ -1,0 +1,174 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_stocks.html
+   Section "Stocks" — Gestion des niveaux de stock.
+
+   CONTENU :
+     - 3 KPI cards : total produits, stock faible, ruptures
+     - Filtres par état (tous, faible, rupture)
+     - Recherche par nom de produit
+     - Tableau avec barre visuelle de stock + bouton ajustement
+       (ouvre _modal_stock.html via openStockModal())
+
+   DONNÉES :
+     loadStocks(page) -> GET /api/produits/?ordering=stock
+     KPIs : kpi-stock-total, kpi-stock-faible, kpi-stock-rupture
+{% endcomment %}
+{% load i18n %}
+
+{# ── En-tête de section ── #}
+<div class="da-section-header" id="sec-stocks-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Gestion des stocks" %}</h1>
+    <p class="da-section-subtitle">{% trans "Niveaux de stock et réapprovisionnements" %}</p>
+  </div>
+  {# CTA : ajouter un produit #}
+  <button class="btn btn-primary" onclick="navTo('ajouter-produit')">
+    {# Lucide : Plus #}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5"  y1="12" x2="19" y2="12"/>
+    </svg>
+    {% trans "Nouveau produit" %}
+  </button>
+</div>
+
+<!-- KPI GRID — 3 métriques de stock, valeurs chargées par loadStocks() -->
+<div id="sec-stocks-kpis"
+     class="da-stats-grid"
+     style="display:none;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+
+  {# KPI 1 : Total produits — bleu #}
+  <div class="kpi-card">
+    <div class="kpi-accent-bar" style="background:var(--brand-main);"></div>
+    <div class="kpi-icon" style="background:var(--brand-light);">
+      {# Lucide : Package #}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="var(--brand-main)" stroke-width="1.75"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+    </div>
+    <div class="kpi-value loading" id="kpi-stock-total">—</div>
+    <div class="kpi-label">{% trans "Produits total" %}</div>
+    <div class="kpi-trend muted" id="kpi-stock-total-trend"></div>
+  </div>
+
+  {# KPI 2 : Stock faible — jaune #}
+  <div class="kpi-card">
+    <div class="kpi-accent-bar" style="background:var(--yellow);"></div>
+    <div class="kpi-icon" style="background:var(--yellow-light);">
+      {# Lucide : AlertTriangle #}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="var(--yellow)" stroke-width="1.75"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <div class="kpi-value loading" id="kpi-stock-faible">—</div>
+    <div class="kpi-label">{% trans "Stock faible" %}</div>
+    <div class="kpi-trend warn" id="kpi-stock-faible-trend"></div>
+  </div>
+
+  {# KPI 3 : Rupture de stock — rouge #}
+  <div class="kpi-card">
+    <div class="kpi-accent-bar" style="background:var(--red);"></div>
+    <div class="kpi-icon" style="background:var(--red-light);">
+      {# Lucide : XCircle #}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="var(--red)" stroke-width="1.75"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9"  y1="9" x2="15" y2="15"/>
+      </svg>
+    </div>
+    <div class="kpi-value loading" id="kpi-stock-rupture">—</div>
+    <div class="kpi-label">{% trans "En rupture" %}</div>
+    <div class="kpi-trend" style="color:var(--red);" id="kpi-stock-rupture-trend"></div>
+  </div>
+
+</div>
+
+{# Filtres + recherche #}
+<div id="sec-stocks-filters"
+     style="display:none;margin-bottom:14px;
+            display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+
+  {# Filtres par état #}
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="filtreStocks('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreStocks('faible',this)">
+      {# Lucide : AlertTriangle inline #}
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round"
+           style="display:inline;vertical-align:-1px;margin-right:4px;">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      {% trans "Stock faible" %}
+    </button>
+    <button class="filter-btn" onclick="filtreStocks('rupture',this)">
+      {% trans "En rupture" %}
+    </button>
+  </div>
+
+  {# Recherche par produit #}
+  <div style="position:relative;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="var(--text-muted)" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round"
+         style="position:absolute;left:10px;top:50%;transform:translateY(-50%);">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="stocks-search"
+           placeholder="{% trans "Rechercher un produit…" %}"
+           oninput="debounce(()=>loadStocks(1),350)()"
+           style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
+                  border:1.5px solid var(--border);font-size:12.5px;
+                  font-family:var(--font-body);color:var(--text);
+                  width:220px;outline:none;background:var(--surface);" />
+  </div>
+
+</div>
+
+{# Tableau des stocks #}
+<div class="da-card" id="sec-stocks-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "État des stocks" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="stocks-count"></span>
+    </div>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Produit" %}</th>
+          <th class="hide-mobile">{% trans "Catégorie" %}</th>
+          <th>{% trans "Stock" %}</th>
+          <th>{% trans "Niveau" %}</th>
+          {# Colonne seuil — masquée sur mobile #}
+          <th class="hide-mobile">{% trans "Seuil alerte" %}</th>
+          <th>{% trans "État" %}</th>
+          <th style="text-align:right;">{% trans "Action" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-stocks">
+        <tr><td colspan="7" class="da-loading">{% trans "Chargement des stocks…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-stocks" class="da-pagination" style="display:none;"></div>
+</div>

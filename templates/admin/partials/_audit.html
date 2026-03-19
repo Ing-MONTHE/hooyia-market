@@ -1,0 +1,47 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_audit.html
+   Section "Journal d'audit" — Traçabilité de toutes les actions.
+
+   CONTENU :
+     - Feed chronologique des actions système
+     - Couleur par type d'action (CREATE, UPDATE, DELETE, LOGIN)
+     - Utilisateur, action, ressource, IP, date relative
+     - Pagination
+
+   DONNÉES :
+     loadAudit(page) -> GET /api/audit/
+{% endcomment %}
+{% load i18n %}
+
+{# En-tête #}
+<div class="da-section-header" id="sec-audit-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Journal d'audit" %}</h1>
+    <p class="da-section-subtitle">{% trans "Traçabilité de toutes les actions système" %}</p>
+  </div>
+</div>
+
+{# Carte audit #}
+<div class="da-card" id="sec-audit-card" style="display:none;">
+  <div class="da-card-head">
+    <h3>
+      {# Lucide : Activity #}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="var(--brand-main)" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           style="display:inline;vertical-align:-2px;margin-right:6px;">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      {% trans "Activité système" %}
+    </h3>
+    {# Heure du dernier rafraîchissement — mise à jour par loadAudit() #}
+    <span style="font-size:11.5px;color:var(--text-muted);" id="audit-last-update"></span>
+  </div>
+
+  {# Feed d'activité — rempli par loadAudit() #}
+  <div id="tbl-audit">
+    <div class="da-loading">{% trans "Chargement du journal…" %}</div>
+  </div>
+
+  <div id="pag-audit" class="da-pagination" style="display:none;"></div>
+</div>

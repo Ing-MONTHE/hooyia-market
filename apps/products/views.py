@@ -570,7 +570,7 @@ def admin_dashboard(request):
         'paniers_count': Panier.objects.filter(items__isnull=False).distinct().count(),
         'categories': Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories'),
     }
-    return render(request, 'admin_dashboard.html', context)
+    return render(request, 'admin/admin_dashboard.html', context)
 
 # ── Autocomplete recherche ──
 from django.http import JsonResponse

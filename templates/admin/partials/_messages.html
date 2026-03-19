@@ -1,0 +1,62 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_messages.html
+   Section "Messages" — Liste des conversations chat (lecture seule).
+
+   CONTENU :
+     - Tableau des conversations entre acheteurs et vendeurs
+     - Nombre de messages, dernier message, participants
+     - Lecture seule — l'admin observe mais n'intervient pas
+
+   DONNÉES :
+     loadMessages() -> GET /api/chat/conversations/
+{% endcomment %}
+{% load i18n %}
+
+{# En-tête #}
+<div class="da-section-header" id="sec-messages-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Messages" %}</h1>
+    <p class="da-section-subtitle">{% trans "Conversations entre acheteurs et vendeurs" %}</p>
+  </div>
+</div>
+
+{# Tableau conversations #}
+<div class="da-card" id="sec-messages-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "Toutes les conversations" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="messages-count"></span>
+    </div>
+    {# Légende lecture seule #}
+    <span style="display:flex;align-items:center;gap:5px;
+                 font-size:11.5px;color:var(--text-muted);">
+      {# Lucide : Lock #}
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+      {% trans "Lecture seule" %}
+    </span>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Participant 1" %}</th>
+          <th>{% trans "Participant 2" %}</th>
+          <th>{% trans "Messages" %}</th>
+          <th class="hide-mobile">{% trans "Dernier message" %}</th>
+          <th class="hide-mobile">{% trans "Date" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-messages">
+        <tr><td colspan="5" class="da-loading">{% trans "Chargement des conversations…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-messages" class="da-pagination" style="display:none;"></div>
+</div>

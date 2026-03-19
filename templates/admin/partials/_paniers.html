@@ -1,0 +1,62 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_paniers.html
+   Section "Paniers" — Vue des paniers actifs (lecture seule).
+
+   CONTENU :
+     - Tableau des paniers non vides avec détail par utilisateur
+     - Montant total, nombre d'articles, date de dernière modif
+     - Lecture seule — aucune action destructive disponible
+
+   DONNÉES :
+     loadPaniers() -> GET /api/panier/ (liste admin)
+{% endcomment %}
+{% load i18n %}
+
+{# En-tête #}
+<div class="da-section-header" id="sec-paniers-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Paniers actifs" %}</h1>
+    <p class="da-section-subtitle">{% trans "Paniers en cours — lecture seule" %}</p>
+  </div>
+</div>
+
+{# Tableau paniers #}
+<div class="da-card" id="sec-paniers-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "Paniers non vides" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="paniers-count"></span>
+    </div>
+    {# Légende lecture seule #}
+    <span style="display:flex;align-items:center;gap:5px;
+                 font-size:11.5px;color:var(--text-muted);">
+      {# Lucide : Lock #}
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+      {% trans "Lecture seule" %}
+    </span>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Client" %}</th>
+          <th>{% trans "Articles" %}</th>
+          <th>{% trans "Total estimé" %}</th>
+          <th class="hide-mobile">{% trans "Dernière modif." %}</th>
+          <th style="text-align:right;">{% trans "Détail" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-paniers">
+        <tr><td colspan="5" class="da-loading">{% trans "Chargement des paniers…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-paniers" class="da-pagination" style="display:none;"></div>
+</div>

@@ -1,0 +1,380 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_overview.html
+   Section "Tableau de bord" — Vue d'ensemble.
+
+   CONTENU :
+     - KPI Grid (4 cartes : produits, commandes, utilisateurs, avis)
+     - Commandes récentes (5 dernières)
+     - Actions rapides
+     - Alertes de stock faible
+     - Activité récente (audit)
+     - Vue système (conversations, notifications, paniers)
+
+   DONNÉES :
+     Tout est chargé dynamiquement via loadOverview()
+     qui appelle GET /api/stats/overview/
+
+   INCLUS DANS : admin_base.html via block dashboard_content
+{% endcomment %}
+{% load i18n %}
+
+<div id="sec-overview" class="da-section shown">
+
+  {# ── En-tête de section ── #}
+  <div class="da-section-header">
+    <div>
+      <h1 class="da-section-title">{% trans "Tableau de bord" %}</h1>
+      {# Date courante — mise à jour par JS (updateDateDisplay) #}
+      <p class="da-section-subtitle" id="da-date-now">{% trans "Chargement de la date…" %}</p>
+    </div>
+    <div class="da-section-actions">
+      {# Actualiser #}
+      <button class="btn btn-secondary" onclick="window.location.reload()">
+        {# Lucide : RefreshCw #}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+        </svg>
+        {% trans "Actualiser" %}
+      </button>
+      {# CTA principal : ajouter un produit #}
+      <button class="btn btn-primary" onclick="navTo('ajouter-produit')">
+        {# Lucide : Plus #}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5"  y1="12" x2="19" y2="12"/>
+        </svg>
+        {% trans "Ajouter un produit" %}
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI GRID — 4 cartes de statistiques, valeurs chargées par loadOverview() -->
+  <div class="kpi-grid">
+
+    {# KPI 1 : Produits actifs — orange #}
+    <div class="kpi-card">
+      <div class="kpi-accent-bar" style="background:var(--accent);"></div>
+      <div class="kpi-icon" style="background:var(--accent-light);">
+        {# Lucide : Package #}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="var(--accent)" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <div class="kpi-value loading" id="kpi-produits">—</div>
+      <div class="kpi-label">{% trans "Produits actifs" %}</div>
+      <div class="kpi-trend info" id="kpi-produits-trend"></div>
+    </div>
+
+    {# KPI 2 : Commandes totales — bleu #}
+    <div class="kpi-card">
+      <div class="kpi-accent-bar" style="background:var(--brand-main);"></div>
+      <div class="kpi-icon" style="background:var(--brand-light);">
+        {# Lucide : ShoppingCart #}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="var(--brand-main)" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+        </svg>
+      </div>
+      <div class="kpi-value loading" id="kpi-commandes">—</div>
+      <div class="kpi-label">{% trans "Commandes totales" %}</div>
+      <div class="kpi-trend" id="kpi-commandes-trend"></div>
+    </div>
+
+    {# KPI 3 : Utilisateurs inscrits — vert #}
+    <div class="kpi-card">
+      <div class="kpi-accent-bar" style="background:var(--green);"></div>
+      <div class="kpi-icon" style="background:var(--green-light);">
+        {# Lucide : Users #}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="var(--green)" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+          <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <div class="kpi-value loading" id="kpi-users">—</div>
+      <div class="kpi-label">{% trans "Utilisateurs inscrits" %}</div>
+      <div class="kpi-trend up" id="kpi-users-trend"></div>
+    </div>
+
+    {# KPI 4 : Avis clients — jaune #}
+    <div class="kpi-card">
+      <div class="kpi-accent-bar" style="background:var(--yellow);"></div>
+      <div class="kpi-icon" style="background:var(--yellow-light);">
+        {# Lucide : Star #}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="var(--yellow)" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="kpi-value loading" id="kpi-avis">—</div>
+      <div class="kpi-label">{% trans "Avis clients" %}</div>
+      <div class="kpi-trend" id="kpi-avis-trend"></div>
+    </div>
+
+  </div>{# fin .kpi-grid #}
+
+  <!-- ROW 1 : Commandes récentes + Actions rapides -->
+  <div class="da-row da-row-3-1" id="ov-row-main">
+
+    {# ── Commandes récentes ── #}
+    <div class="da-card">
+      <div class="da-card-head">
+        <h3>
+          {# Lucide : ShoppingCart #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="var(--brand-main)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:-2px;margin-right:6px;">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+          </svg>
+          {% trans "Commandes récentes" %}
+        </h3>
+        <button class="da-card-action" onclick="navTo('commandes')">
+          {% trans "Voir tout" %}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+      {# Tableau des 5 dernières commandes — rempli par loadOverview() → renderOvCommandes() #}
+      <div class="da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th>{% trans "Référence" %}</th>
+              <th>{% trans "Client" %}</th>
+              <th>{% trans "Montant" %}</th>
+              <th class="hide-mobile">{% trans "Date" %}</th>
+              <th>{% trans "Statut" %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ov-commandes">
+            <tr><td colspan="6" class="da-loading">{% trans "Chargement des commandes…" %}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# ── Actions rapides ── #}
+    <div class="da-card">
+      <div class="da-card-head">
+        <h3>
+          {# Lucide : Zap #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="var(--accent)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:-2px;margin-right:6px;">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          {% trans "Actions rapides" %}
+        </h3>
+      </div>
+      <div class="qa-list">
+
+        {# Action 1 : Ajouter un produit — orange (CTA principal) #}
+        <button class="qa orange" onclick="navTo('ajouter-produit')">
+          <span class="qa-ic">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="white" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </span>
+          {% trans "Ajouter un produit" %}
+        </button>
+
+        {# Action 2 : Commandes en attente — bleu avec badge #}
+        <button class="qa blue" onclick="navTo('commandes')">
+          <span class="qa-ic">
+            {# Lucide : Clock #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--brand-main)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </span>
+          {% trans "Commandes en attente" %}
+          <span id="qa-badge-attente"
+                style="display:none;margin-left:auto;
+                       background:var(--yellow);color:white;
+                       font-size:9.5px;font-weight:700;
+                       padding:1px 7px;border-radius:99px;
+                       font-family:var(--font-display);">0</span>
+        </button>
+
+        {# Action 3 : Avis à modérer — bleu avec badge #}
+        <button class="qa blue" onclick="navTo('avis')">
+          <span class="qa-ic">
+            {# Lucide : Star #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--brand-main)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </span>
+          {% trans "Avis à modérer" %}
+          <span id="qa-badge-avis"
+                style="display:none;margin-left:auto;
+                       background:var(--blue);color:white;
+                       font-size:9.5px;font-weight:700;
+                       padding:1px 7px;border-radius:99px;
+                       font-family:var(--font-display);">0</span>
+        </button>
+
+        {# Action 4 : Vérifier les stocks — vert #}
+        <button class="qa green" onclick="navTo('stocks')">
+          <span class="qa-ic">
+            {# Lucide : AlertTriangle #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="#065F46" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </span>
+          {% trans "Vérifier les stocks" %}
+        </button>
+
+        {# Action 5 : Gérer les comptes — bleu #}
+        <button class="qa blue" onclick="navTo('utilisateurs')">
+          <span class="qa-ic">
+            {# Lucide : Users #}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--brand-main)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+              <path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+          </span>
+          {% trans "Gérer les comptes" %}
+        </button>
+
+      </div>
+    </div>
+
+  </div>{# fin #ov-row-main #}
+
+  <!-- ROW 2 : Alertes stock + Activité récente -->
+  <div class="da-row da-row-2" id="ov-row-secondary">
+
+    {# ── Alertes stock faible ── #}
+    <div class="da-card">
+      <div class="da-card-head">
+        <h3>
+          {# Lucide : AlertTriangle #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="var(--yellow)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:-2px;margin-right:6px;">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          {% trans "Alertes stock" %}
+        </h3>
+        <button class="da-card-action" onclick="navTo('stocks')">
+          {% trans "Gérer" %}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+      {# Rempli par loadOverview() → renderOvStocks() #}
+      <div id="ov-stocks">
+        <div class="da-loading">{% trans "Chargement…" %}</div>
+      </div>
+    </div>
+
+    {# ── Activité récente ── #}
+    <div class="da-card">
+      <div class="da-card-head">
+        <h3>
+          {# Lucide : Activity #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="var(--brand-main)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="display:inline;vertical-align:-2px;margin-right:6px;">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          {% trans "Activité récente" %}
+        </h3>
+        <button class="da-card-action" onclick="navTo('audit')">
+          {% trans "Tout voir" %}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+      {# Feed d'activité — rempli par loadOverview() → renderOvActivity() #}
+      <div id="ov-activity">
+        <div class="da-loading">{% trans "Chargement…" %}</div>
+      </div>
+    </div>
+
+  </div>{# fin #ov-row-secondary #}
+
+  <!-- VUE SYSTÈME — 3 métriques rapides -->
+  <div class="da-card">
+    <div class="da-card-head">
+      <h3>
+        {# Lucide : Server #}
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="var(--brand-main)" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             style="display:inline;vertical-align:-2px;margin-right:6px;">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+          <line x1="6" y1="6" x2="6.01" y2="6"/>
+          <line x1="6" y1="18" x2="6.01" y2="18"/>
+        </svg>
+        {% trans "Vue système" %}
+      </h3>
+    </div>
+    <div class="da-mini">
+      <div class="da-mini-cell">
+        <div class="da-mini-val" id="ms-convs">—</div>
+        <div class="da-mini-lbl">{% trans "Conversations chat" %}</div>
+      </div>
+      <div class="da-mini-cell">
+        <div class="da-mini-val" id="ms-notifs">—</div>
+        <div class="da-mini-lbl">{% trans "Notifications envoyées" %}</div>
+      </div>
+      <div class="da-mini-cell">
+        <div class="da-mini-val" id="ms-paniers">—</div>
+        <div class="da-mini-lbl">{% trans "Paniers non vides" %}</div>
+      </div>
+    </div>
+  </div>
+
+</div>{# fin #sec-overview #}

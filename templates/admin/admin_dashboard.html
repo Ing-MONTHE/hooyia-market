@@ -1,0 +1,77 @@
+{% extends 'admin/admin_base.html' %}
+{% load static i18n %}
+
+%{% comment %}
+   HooYia Market — templates/admin/admin_dashboard.html
+
+   Page principale du dashboard d'administration.
+   Étend admin_base.html et inclut tous les partials de sections.
+
+   UTILISATION :
+     Cette page remplace l'ancien admin_dashboard.html monolithique.
+     Pointer la vue Django vers ce template :
+
+       # apps/products/views.py (ou apps/users/views.py)
+       def admin_dashboard(request):
+           ...
+           return render(request, 'admin/admin_dashboard.html', context)
+
+   STRUCTURE DU RENDU FINAL :
+     admin_base.html
+       └── block dashboard_content
+             ├── _overview.html        → #sec-overview (visible par défaut)
+             ├── _produits.html        → #sec-produits-* + #sec-ajouter-produit-*
+             ├── _commandes.html       → #sec-commandes-*
+             ├── _utilisateurs.html    → #sec-users-*
+             ├── _avis.html            → #sec-avis-*
+             ├── _stocks.html          → #sec-stocks-*
+             ├── _categories.html      → #sec-categories-* + #sec-ajout-cat-*
+             ├── _paniers.html         → #sec-paniers-*
+             ├── _messages.html        → #sec-messages-*
+             ├── _notifications.html   → #sec-notifications-*
+             └── _audit.html           → #sec-audit-*
+
+   MODALES (incluses dans admin_base.html) :
+     _modal_stock.html      → openStockModal()
+     _modal_categorie.html  → openModalCat()
+
+   CONTEXTE DJANGO ATTENDU :
+     {{ user }}         → CustomUser connecté (admin)
+     {{ categories }}   → QuerySet Categorie (pour le select du formulaire produit){% endcomment %}
+
+{% block dashboard_content %}
+
+  {# ── 1. Vue d'ensemble — section affichée par défaut ── #}
+  {% include 'admin/partials/_overview.html' %}
+
+  {# ── 2. Produits (liste + formulaire ajout/édition) ── #}
+  {% include 'admin/partials/_produits.html' %}
+
+  {# ── 3. Commandes ── #}
+  {% include 'admin/partials/_commandes.html' %}
+
+  {# ── 4. Utilisateurs ── #}
+  {% include 'admin/partials/_utilisateurs.html' %}
+
+  {# ── 5. Avis clients ── #}
+  {% include 'admin/partials/_avis.html' %}
+
+  {# ── 6. Stocks ── #}
+  {% include 'admin/partials/_stocks.html' %}
+
+  {# ── 7. Catégories (liste + formulaire ajout/édition) ── #}
+  {% include 'admin/partials/_categories.html' %}
+
+  {# ── 8. Paniers actifs ── #}
+  {% include 'admin/partials/_paniers.html' %}
+
+  {# ── 9. Messages / Conversations ── #}
+  {% include 'admin/partials/_messages.html' %}
+
+  {# ── 10. Notifications ── #}
+  {% include 'admin/partials/_notifications.html' %}
+
+  {# ── 11. Journal d'audit ── #}
+  {% include 'admin/partials/_audit.html' %}
+
+{% endblock %}

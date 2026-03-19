@@ -446,8 +446,6 @@
   @media (min-width: 1024px) { .pcard-sm { flex: 0 0 220px; min-width: 220px; } }
 </style>
 
-{% if produits_vedette %}
-
 <section class="section-vedette" style="padding:2rem 0 4rem 0;background:#F4F7FC;">
   <div class="container">
 
@@ -478,6 +476,22 @@
 
     {% comment %} Carousel horizontal {% endcomment %}
     <div class="vedette-carousel-wrap">
+      {% if not produits_vedette %}
+      <div style="text-align:center;padding:3rem 1rem;background:#ffffff;border-radius:1rem;border:1px dashed #CBD5E0;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+             style="margin:0 auto .75rem;display:block;">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0;">
+          {% trans "Aucun produit en vedette pour le moment." %}
+          {% if est_admin or est_vendeur %}
+          <a href="{% url 'products:ajouter_produit' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
+          {% endif %}
+        </p>
+      </div>
+      {% else %}
       <div class="vedette-carousel" id="vedette-carousel">
         {% for produit in produits_vedette %}
         <a href="{% url 'products:detail' produit.slug %}" class="pcard-sm">
@@ -538,6 +552,7 @@
         </a>
         {% endfor %}
       </div>
+      {% endif %}
     </div>
 
     <div style="text-align:center;margin-top:2.5rem;">
@@ -569,7 +584,6 @@
     });
   })();
 </script>
-{% endif %}
 
 
 {% comment %} ════════════════════════════════════════════════════
@@ -577,7 +591,6 @@
    8 derniers produits actifs, ordonnés par date_creation desc.
    Fond blanc pour alterner avec le fond gris de la section précédente.
 ════════════════════════════════════════════════════ {% endcomment %}
-{% if nouveaux_arrivages %}
 <section class="section-arrivages" style="padding:4rem 0;background:#ffffff;">
   <div class="container">
 
@@ -608,6 +621,22 @@
 
     {% comment %} Carousel horizontal {% endcomment %}
     <div class="vedette-carousel-wrap">
+      {% if not nouveaux_arrivages %}
+      <div style="text-align:center;padding:3rem 1rem;background:#F4F7FC;border-radius:1rem;border:1px dashed #CBD5E0;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+             style="margin:0 auto .75rem;display:block;">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 1.99 1.61h9.72a2 2 0 0 0 1.99-1.61L23 6H6"/>
+        </svg>
+        <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0;">
+          {% trans "Aucun produit disponible pour le moment." %}
+          {% if est_admin or est_vendeur %}
+          <a href="{% url 'products:ajouter_produit' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
+          {% endif %}
+        </p>
+      </div>
+      {% else %}
       <div class="vedette-carousel" id="arrivages-carousel">
         {% for produit in nouveaux_arrivages %}
         <a href="{% url 'products:detail' produit.slug %}" class="pcard-sm">
@@ -673,6 +702,7 @@
         </a>
         {% endfor %}
       </div>
+      {% endif %}
     </div>
 
     <div style="text-align:center;margin-top:2.5rem;">
@@ -704,7 +734,6 @@
     });
   })();
 </script>
-{% endif %}
 
 
 {% comment %} ════════════════════════════════════════════════════
