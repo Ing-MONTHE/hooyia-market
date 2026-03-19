@@ -48,19 +48,23 @@ WORKDIR /app
 # Copie tout le code source dans le conteneur
 COPY . .
 
+# Copie le script de démarrage et le rend exécutable
+# (AVANT de basculer sur l'utilisateur django — nécessite les droits root)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Donne les droits sur le dossier à l'utilisateur django
 RUN chown -R django:django /app
 
 # Bascule sur l'utilisateur non-root
 USER django
 
-# Crée le dossier pour les fichiers statiques collectés par Django
-# (images, CSS, JS servis par Nginx en production)
+# Crée les dossiers pour les fichiers statiques et médias
 RUN mkdir -p /app/staticfiles && \
     mkdir -p /app/mediafiles
 
 # Port sur lequel Daphne écoute à l'intérieur du conteneur
 EXPOSE 8000
 
-# Commande de démarrage — lance Daphne (gère HTTP + WebSocket)
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+# Lance le script de démarrage (migrations + collectstatic + daphne)
+ENTRYPOINT ["/entrypoint.sh"]
