@@ -19,30 +19,37 @@ from .models import Produit, Categorie, ImageProduit, MouvementStock
 class CategorieSerializer(serializers.ModelSerializer):
     """
     Sérialise une catégorie avec ses sous-catégories.
-    La récursivité permet de retourner tout l'arbre en une seule requête.
+    Lecture : arbre complet avec sous-catégories imbriquées.
+    Écriture : POST/PATCH acceptés (sous_categories et nb_produits en read_only).
     """
 
-    # Sous-catégories imbriquées (récursif)
+    # Lecture seule — calculés, non envoyés au POST
     sous_categories = serializers.SerializerMethodField()
     nombre_produits = serializers.SerializerMethodField()
+    nb_produits     = serializers.SerializerMethodField()
+    parent_nom      = serializers.SerializerMethodField()
 
     class Meta:
         model  = Categorie
         fields = [
             'id', 'nom', 'slug', 'description',
-            'image', 'parent', 'sous_categories',
-            'nombre_produits', 'est_active'
+            'image', 'parent', 'parent_nom', 'sous_categories',
+            'nombre_produits', 'nb_produits', 'est_active'
         ]
+        read_only_fields = ['id', 'slug', 'sous_categories', 'nombre_produits', 'nb_produits', 'parent_nom']
 
     def get_sous_categories(self, obj):
-        """Retourne les sous-catégories de cette catégorie"""
-        sous_cats = obj.sous_categories.filter(est_active=True)
-        # Sérialisation récursive
+        sous_cats = obj.sous_categories.all()
         return CategorieSerializer(sous_cats, many=True, context=self.context).data
 
     def get_nombre_produits(self, obj):
-        """Compte les produits actifs dans cette catégorie"""
         return obj.produits.filter(statut='actif').count()
+
+    def get_nb_produits(self, obj):
+        return obj.produits.filter(statut='actif').count()
+
+    def get_parent_nom(self, obj):
+        return obj.parent.nom if obj.parent else None
 
 
 # ═══════════════════════════════════════════════════════════════

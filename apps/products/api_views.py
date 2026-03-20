@@ -48,26 +48,49 @@ class AdminPagination(PageNumberPagination):
 # GET /api/produits/categories/
 # ═══════════════════════════════════════════════════════════════
 
-class CategorieViewSet(viewsets.ReadOnlyModelViewSet):
+class CategorieViewSet(viewsets.ModelViewSet):
     """
-    Lecture seule — tout le monde peut voir les catégories.
-    Retourne uniquement les catégories racines avec
-    leurs sous-catégories imbriquées.
+    GET  (list/retrieve) : lecture publique, catégories actives avec sous-catégories.
+    POST / PATCH / DELETE : réservé aux admins (is_admin ou is_staff).
     """
-    serializer_class   = CategorieSerializer
-    permission_classes = [permissions.AllowAny]
+    serializer_class = CategorieSerializer
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
 
     def get_queryset(self):
-        # Cache 1h — les catégories changent rarement
-        cache_key = 'categories_api'
-        queryset  = cache.get(cache_key)
-        if not queryset:
-            queryset = Categorie.objects.filter(
-                parent=None,
-                est_active=True
-            ).prefetch_related('sous_categories')
-            cache.set(cache_key, queryset, 3600)
-        return queryset
+        # Pour list : retourne toutes les catégories (actives et inactives pour l'admin)
+        # Pour retrieve/update/delete : toutes les catégories
+        if self.action == 'list':
+            # Cache 5min
+            cache_key = 'categories_api_all'
+            queryset  = cache.get(cache_key)
+            if not queryset:
+                queryset = Categorie.objects.all().prefetch_related('sous_categories')
+                cache.set(cache_key, queryset, 300)
+            return queryset
+        return Categorie.objects.all().prefetch_related('sous_categories')
+
+    def perform_create(self, serializer):
+        # Invalide le cache à la création
+        from django.core.cache import cache as _cache
+        _cache.delete('categories_api_all')
+        _cache.delete('categories_api')
+        serializer.save()
+
+    def perform_update(self, serializer):
+        from django.core.cache import cache as _cache
+        _cache.delete('categories_api_all')
+        _cache.delete('categories_api')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        from django.core.cache import cache as _cache
+        _cache.delete('categories_api_all')
+        _cache.delete('categories_api')
+        instance.delete()
 
 
 # ═══════════════════════════════════════════════════════════════

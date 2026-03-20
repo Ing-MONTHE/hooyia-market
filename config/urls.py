@@ -17,8 +17,8 @@ urlpatterns = [
     # ── API REST (pas de préfixe langue) ────────────────────
     path('api/auth/',  include('apps.users.api_urls')),
     path('api/produits/',      include('apps.products.api_urls')),
-    path('api/categories/',    CategorieViewSet.as_view({'get': 'list'})),
-    path('api/categories/<int:pk>/', CategorieViewSet.as_view({'get': 'retrieve'})),
+    path('api/categories/',    CategorieViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/categories/<int:pk>/', CategorieViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'put': 'update', 'delete': 'destroy'})),
     path('api/panier/',        include('apps.cart.api_urls')),
     path('api/commandes/',     include('apps.orders.api_urls')),
     path('api/avis/',          include('apps.reviews.api_urls')),

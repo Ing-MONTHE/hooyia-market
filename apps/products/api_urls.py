@@ -11,8 +11,8 @@ produit_router.register(r'', api_views.ProduitViewSet, basename='produit')
 
 urlpatterns = [
     # Route directe pour categories (évite le conflit de router)
-    path('categories/', api_views.CategorieViewSet.as_view({'get': 'list'}), name='categorie-list'),
-    path('categories/<int:pk>/', api_views.CategorieViewSet.as_view({'get': 'retrieve'}), name='categorie-detail'),
+    path('categories/', api_views.CategorieViewSet.as_view({'get': 'list', 'post': 'create'}), name='categorie-list'),
+    path('categories/<int:pk>/', api_views.CategorieViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'put': 'update', 'delete': 'destroy'}), name='categorie-detail'),
     # Routes produits
     path('', include(produit_router.urls)),
 ]

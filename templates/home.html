@@ -487,7 +487,7 @@
         <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0;">
           {% trans "Aucun produit en vedette pour le moment." %}
           {% if est_admin or est_vendeur %}
-          <a href="{% url 'products:ajouter_produit' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
+          <a href="{% url 'products:ajouter' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
           {% endif %}
         </p>
       </div>
@@ -632,7 +632,7 @@
         <p style="font-family:'Poppins',sans-serif;font-size:.875rem;color:#8898AA;margin:0;">
           {% trans "Aucun produit disponible pour le moment." %}
           {% if est_admin or est_vendeur %}
-          <a href="{% url 'products:ajouter_produit' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
+          <a href="{% url 'products:ajouter' %}" style="color:#1E3A8A;text-decoration:underline;">{% trans "Ajouter un produit" %}</a>
           {% endif %}
         </p>
       </div>

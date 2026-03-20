@@ -1,21 +1,6 @@
 {% comment %}
    HooYia Market — templates/admin/partials/_categories.html
    Section "Catégories" — Gestion de l'arborescence MPTT.
-
-   CONTENU :
-     - Tableau des catégories avec hiérarchie parent/enfant
-     - Formulaire d'ajout / édition d'une catégorie
-       - Nom, description, image, catégorie parente
-     - Bouton de suppression (avec confirmation)
-
-   DONNÉES :
-     loadCategories()  -> GET /api/categories/
-     submitCatForm()   -> POST/PATCH /api/categories/
-     deleteCategorie() -> DELETE /api/categories/<id>/
-
-   SOUS-SECTION :
-     "ajouter-categorie" — formulaire séparé, accessible via
-     navTo('ajouter-categorie') ou bouton "Nouvelle catégorie"
 {% endcomment %}
 {% load i18n %}
 
@@ -29,7 +14,6 @@
   </div>
   <div class="da-section-actions">
     <button class="btn btn-primary" onclick="navTo('ajouter-categorie')">
-      {# Lucide : Plus #}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round">
@@ -41,17 +25,67 @@
   </div>
 </div>
 
-{# Tableau catégories #}
+{# Carte principale avec tableau / cartes + pagination #}
 <div class="da-card" id="sec-categories-card" style="display:none;">
-  <div class="da-card-head">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <h3>{% trans "Toutes les catégories" %}</h3>
-      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
-                   background:var(--surface-2);border:1px solid var(--border);
-                   padding:2px 9px;border-radius:99px;" id="cat-count"></span>
+
+  {# ── Barre : recherche + compteur + toggle vue ── #}
+  <div style="padding:14px 18px;border-bottom:1px solid var(--border);
+              display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+
+    {# Recherche #}
+    <div style="position:relative;width:340px;flex-shrink:0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="#8898AA" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="cat-search"
+             placeholder="{% trans "Rechercher une catégorie…" %}"
+             oninput="filterCategoriesLocal(this.value)"
+             class="da-input"
+             style="padding-left:36px;" />
     </div>
+
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      {# Compteur total #}
+      <span style="font-size:11.5px;font-weight:700;color:var(--text-2);
+                   background:var(--brand-light);border:1.5px solid #B8CDFA;
+                   padding:3px 12px;border-radius:99px;" id="cat-count"></span>
+
+      {# Toggle vue : tableau / cartes #}
+      <div style="display:flex;gap:6px;">
+        <button id="vt-cat-table" class="vt-btn active"
+                onclick="setCatView('table')"
+                title="{% trans "Vue tableau" %}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6"  x2="21" y2="6"/>  <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/> <line x1="3" y1="6"  x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/> <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </button>
+        <button id="vt-cat-card" class="vt-btn"
+                onclick="setCatView('card')"
+                title="{% trans "Vue cartes" %}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3"  y="3"  width="7" height="7"/>
+            <rect x="14" y="3"  width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3"  y="14" width="7" height="7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
   </div>
-  <div class="da-table-wrap">
+
+  {# ── Vue tableau ── #}
+  <div class="da-table-wrap" id="view-cat-table">
     <table class="da-table">
       <thead>
         <tr>
@@ -68,8 +102,16 @@
       </tbody>
     </table>
   </div>
-</div>
 
+  {# ── Vue cartes ── #}
+  <div id="view-cat-cards"
+       style="display:none;
+              grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+              gap:14px;padding:16px;">
+    {# Cartes injectées par JS #}
+  </div>
+
+</div>{# fin #sec-categories-card #}
 
 <!-- SOUS-SECTION : FORMULAIRE AJOUT / ÉDITION CATÉGORIE -->
 
@@ -100,181 +142,256 @@
 
 {# Formulaire catégorie #}
 <div id="cat-form-wrapper" style="display:none;">
-  <div style="max-width:640px;">
-    <form id="cat-form">
-      {% csrf_token %}
-      {# ID catégorie en édition (vide = création) #}
-      <input type="hidden" id="cat-id" value="" />
+  <form id="cat-form">
+    {% csrf_token %}
+    <input type="hidden" id="cat-id" value="" />
 
-      <div class="da-card">
-        <div class="da-card-head">
-          <h3>
-            {# Lucide : Tag #}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="var(--brand-main)" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round"
-                 style="display:inline;vertical-align:-2px;margin-right:6px;">
-              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
-              <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-            {% trans "Informations de la catégorie" %}
-          </h3>
+    {# Grille 2 colonnes : même structure que le formulaire produit #}
+    <div style="display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start;">
+
+      <!-- COLONNE GAUCHE -->
+      <div>
+
+        {# ── Bloc Informations #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--brand-main)" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   style="display:inline;vertical-align:-2px;margin-right:6px;">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              {% trans "Informations de la catégorie" %}
+            </h3>
+          </div>
+          <div style="padding:16px;">
+
+            {# Nom #}
+            <div class="da-field">
+              <label class="da-label">
+                {% trans "Nom" %}
+                <span style="color:var(--accent);font-size:9px;">*</span>
+              </label>
+              <input type="text" id="cat-nom"
+                     placeholder="{% trans "Ex: Électronique, Smartphones…" %}"
+                     class="da-input" required />
+            </div>
+
+            {# Description #}
+            <div class="da-field" style="margin-bottom:0;">
+              <label class="da-label">
+                {% trans "Description" %}
+                <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">
+                  {% trans "(optionnel)" %}
+                </span>
+              </label>
+              <textarea id="cat-desc" rows="4"
+                        placeholder="{% trans "Description détaillée de la catégorie…" %}"
+                        class="da-input" style="resize:vertical;min-height:100px;"></textarea>
+            </div>
+
+          </div>
         </div>
-        <div style="padding:20px;">
 
-          {# Nom (obligatoire) #}
-          <div class="da-field">
-            <label class="da-label">
-              {% trans "Nom" %}
-              <span style="color:var(--accent);font-size:9px;">*</span>
-            </label>
-            <input type="text" id="cat-nom"
-                   placeholder="{% trans "Ex: Électronique, Smartphones…" %}"
-                   class="da-input" required />
-          </div>
-
-          {# Description #}
-          <div class="da-field">
-            <label class="da-label">
-              {% trans "Description" %}
-              <span style="color:var(--text-muted);font-size:10px;
-                           text-transform:none;font-weight:400;">
+        {# ── Bloc Image #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--brand-main)" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   style="display:inline;vertical-align:-2px;margin-right:6px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              {% trans "Image de la catégorie" %}
+              <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;margin-left:6px;">
                 {% trans "(optionnel)" %}
               </span>
-            </label>
-            <textarea id="cat-desc" rows="3"
-                      placeholder="{% trans "Description courte de la catégorie…" %}"
-                      class="da-input" style="resize:vertical;min-height:70px;"></textarea>
+            </h3>
           </div>
-
-          {# Catégorie parente #}
-          <div class="da-field">
-            <label class="da-label">
-              {% trans "Catégorie parente" %}
-              <span style="color:var(--text-muted);font-size:10px;
-                           text-transform:none;font-weight:400;">
-                {% trans "(vide = catégorie racine)" %}
-              </span>
-            </label>
-            <select id="cat-parent" class="da-input">
-              <option value="">{% trans "— Aucun parent (racine) —" %}</option>
-              {# Options chargées dynamiquement par resetCatForm() / editCategorie() #}
-            </select>
+          <div style="padding:16px;">
+            {# Zone upload style drag & drop #}
+            <div style="border:2px dashed var(--border);border-radius:var(--r-md);
+                        padding:28px;text-align:center;cursor:pointer;
+                        background:var(--surface-2);transition:border-color 150ms,background 150ms;"
+                 onclick="document.getElementById('cat-image-input').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--brand-main)';this.style.background='var(--brand-light)';"
+                 ondragleave="this.style.borderColor='';this.style.background='var(--surface-2)';"
+                 ondrop="(function(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f){var i=document.getElementById('cat-image-input');var dt=new DataTransfer();dt.items.add(f);i.files=dt.files;previewCatImage(i);}})(event)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--text-muted)" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   style="margin:0 auto 8px;display:block;">
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
+              </svg>
+              <p style="font-size:12.5px;color:var(--text-2);margin:0 0 3px 0;">
+                <strong style="color:var(--accent);">{% trans "Cliquez" %}</strong>
+                {% trans "ou glissez votre image" %}
+              </p>
+              <p style="font-size:11px;color:var(--text-muted);margin:0;">
+                PNG, JPG, WEBP — max 2 Mo
+              </p>
+            </div>
+            <input type="file" id="cat-image-input" name="image"
+                   accept="image/*" style="display:none;"
+                   onchange="previewCatImage(this)" />
           </div>
+        </div>
 
-          {# Image de la catégorie #}
-          <div class="da-field">
-            <label class="da-label">
-              {% trans "Image" %}
-              <span style="color:var(--text-muted);font-size:10px;
-                           text-transform:none;font-weight:400;">
-                {% trans "(optionnel)" %}
-              </span>
-            </label>
+        {# ── Boutons #}
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary" id="cat-btn-submit">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {% trans "Créer la catégorie" %}
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="navTo('categories')">
+            {% trans "Annuler" %}
+          </button>
+          <button type="button" class="btn btn-danger" id="cat-btn-supprimer"
+                  style="display:none;" onclick="deleteCategorie()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+            {% trans "Supprimer" %}
+          </button>
+        </div>
 
-            {# Zone d'upload avec aperçu #}
-            <div style="display:flex;align-items:center;gap:14px;">
+      </div>{# fin colonne gauche #}
 
-              {# Aperçu image #}
-              <div style="width:72px;height:72px;border-radius:var(--r-md);
-                          border:1.5px solid var(--border);background:var(--surface-2);
-                          overflow:hidden;flex-shrink:0;display:flex;
-                          align-items:center;justify-content:center;">
-                <img id="cat-img-preview"
-                     src="" alt=""
-                     style="display:none;width:100%;height:100%;object-fit:cover;" />
-                {# Lucide : Image (placeholder) #}
-                <svg id="cat-img-placeholder-icon"
-                     width="22" height="22" viewBox="0 0 24 24" fill="none"
+      <!-- COLONNE DROITE (sidebar) -->
+      <div>
+
+        {# ── Bloc Options #}
+        <div class="da-card" style="margin-bottom:14px;">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--text-2)" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   style="display:inline;vertical-align:-2px;margin-right:6px;">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.07 4.93L17.66 6.34M12 2v2M4.93 4.93l1.41 1.41M2 12h2m.93 7.07 1.41-1.41M12 20v2m7.07-2.93-1.41-1.41M22 12h-2"/>
+              </svg>
+              {% trans "Options" %}
+            </h3>
+          </div>
+          <div style="padding:16px;">
+
+            {# Catégorie parente #}
+            <div class="da-field">
+              <label class="da-label">
+                {% trans "Catégorie parente" %}
+              </label>
+              <p style="font-size:11px;color:var(--text-muted);margin:0 0 6px 0;">
+                {% trans "Vide = catégorie racine" %}
+              </p>
+              <select id="cat-parent" class="da-input">
+                <option value="">{% trans "— Aucun parent (racine) —" %}</option>
+              </select>
+            </div>
+
+            {# Statut #}
+            <div class="da-field" style="margin-bottom:0;">
+              <label class="da-label">{% trans "Statut" %}</label>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
+                              font-size:13px;color:var(--text-2);padding:8px 10px;
+                              border:1.5px solid var(--border);border-radius:var(--r-sm);
+                              transition:border-color 150ms;"
+                       id="cat-label-actif">
+                  <input type="radio" name="cat-statut" id="cat-actif"
+                         value="true" checked
+                         style="accent-color:var(--brand-main);"
+                         onchange="document.getElementById('cat-label-actif').style.borderColor='var(--brand-main)';document.getElementById('cat-label-inactif').style.borderColor='var(--border)';" />
+                  <span class="st st-active">{% trans "Actif" %}</span>
+                  <span style="font-size:11px;color:var(--text-muted);margin-left:auto;">{% trans "Visible" %}</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
+                              font-size:13px;color:var(--text-2);padding:8px 10px;
+                              border:1.5px solid var(--border);border-radius:var(--r-sm);
+                              transition:border-color 150ms;"
+                       id="cat-label-inactif">
+                  <input type="radio" name="cat-statut" id="cat-inactif"
+                         value="false"
+                         style="accent-color:var(--brand-main);"
+                         onchange="document.getElementById('cat-label-inactif').style.borderColor='var(--brand-main)';document.getElementById('cat-label-actif').style.borderColor='var(--border)';" />
+                  <span class="st st-off">{% trans "Inactif" %}</span>
+                  <span style="font-size:11px;color:var(--text-muted);margin-left:auto;">{% trans "Masqué" %}</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {# ── Aperçu image #}
+        <div class="da-card">
+          <div class="da-card-head">
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--text-2)" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   style="display:inline;vertical-align:-2px;margin-right:6px;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {% trans "Aperçu" %}
+            </h3>
+          </div>
+          <div style="padding:12px;">
+            <div style="width:100%;aspect-ratio:4/3;border-radius:var(--r-sm);
+                        border:1px solid var(--border);background:var(--surface-2);
+                        overflow:hidden;display:flex;align-items:center;justify-content:center;
+                        position:relative;">
+              <img id="cat-img-preview"
+                   src="" alt=""
+                   style="display:none;width:100%;height:100%;object-fit:cover;" />
+              <div id="cat-img-placeholder-icon"
+                   style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
                      stroke="var(--text-muted)" stroke-width="1.5"
                      stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
+                <span style="font-size:11px;color:var(--text-muted);">{% trans "Aucune image" %}</span>
               </div>
-
-              {# Bouton choisir fichier #}
-              <div>
-                <button type="button"
-                        onclick="document.getElementById('cat-image-input').click()"
-                        class="btn btn-secondary btn-sm">
-                  {# Lucide : Upload #}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="16 16 12 12 8 16"/>
-                    <line x1="12" y1="12" x2="12" y2="21"/>
-                    <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
-                  </svg>
-                  {% trans "Choisir une image" %}
-                </button>
-                <input type="file" id="cat-image-input" name="image"
-                       accept="image/*" style="display:none;"
-                       onchange="previewCatImage(this)" />
-                <p style="font-size:11px;color:var(--text-muted);margin-top:5px;">
-                  PNG, JPG, WEBP — max 2 Mo
-                </p>
-              </div>
-
             </div>
+            {# Bouton supprimer image (visible après sélection) #}
+            <button type="button" id="cat-img-remove"
+                    style="display:none;margin-top:8px;width:100%;font-size:12px;
+                           color:var(--accent);background:transparent;border:1px solid var(--accent);
+                           border-radius:var(--r-sm);padding:5px;cursor:pointer;font-family:var(--font-body);"
+                    onclick="(function(){
+                      document.getElementById('cat-img-preview').style.display='none';
+                      document.getElementById('cat-img-preview').src='';
+                      document.getElementById('cat-img-placeholder-icon').style.display='flex';
+                      document.getElementById('cat-image-input').value='';
+                      document.getElementById('cat-img-remove').style.display='none';
+                    })()">
+              {% trans "Retirer l'image" %}
+            </button>
           </div>
-
-          {# Statut actif/inactif #}
-          <div class="da-field" style="margin-bottom:0;">
-            <label class="da-label">{% trans "Statut" %}</label>
-            <div style="display:flex;align-items:center;gap:12px;margin-top:2px;">
-              <label style="display:flex;align-items:center;gap:7px;cursor:pointer;
-                            font-size:13px;color:var(--text-2);">
-                <input type="radio" name="cat-statut" id="cat-actif"
-                       value="true" checked
-                       style="accent-color:var(--brand-main);" />
-                <span class="st st-active">{% trans "Actif" %}</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:7px;cursor:pointer;
-                            font-size:13px;color:var(--text-2);">
-                <input type="radio" name="cat-statut" id="cat-inactif"
-                       value="false"
-                       style="accent-color:var(--brand-main);" />
-                <span class="st st-off">{% trans "Inactif" %}</span>
-              </label>
-            </div>
-          </div>
-
         </div>
-      </div>
 
-      {# ── Boutons ── #}
-      <div style="display:flex;gap:10px;margin-top:14px;align-items:center;">
-        <button type="submit" class="btn btn-primary" id="cat-btn-submit">
-          {# Lucide : Check #}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5"
-               stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          {% trans "Créer la catégorie" %}
-        </button>
-        <button type="button" class="btn btn-secondary"
-                onclick="navTo('categories')">
-          {% trans "Annuler" %}
-        </button>
-        {# Bouton supprimer — visible uniquement en mode édition #}
-        <button type="button" class="btn btn-danger" id="cat-btn-supprimer"
-                style="display:none;" onclick="deleteCategorie()">
-          {# Lucide : Trash2 #}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-            <line x1="10" y1="11" x2="10" y2="17"/>
-            <line x1="14" y1="11" x2="14" y2="17"/>
-          </svg>
-          {% trans "Supprimer" %}
-        </button>
-      </div>
+      </div>{# fin colonne droite #}
 
-    </form>
-  </div>
+    </div>{# fin grille #}
+  </form>
 </div>

@@ -699,7 +699,7 @@
       renderOvCommandes(data.commandes_recentes || []);
 
       /* Alertes stock */
-      renderOvStocks(data.stocks_faibles || []);
+      renderOvStocks(data.stocks_faibles || [], data.produits_total || 0);
 
       /* Activité récente */
       renderOvActivity(data.activite_recente || []);
@@ -739,13 +739,17 @@
   }
 
   /* Rendu des alertes stock faible */
-  function renderOvStocks(stocks) {
+  function renderOvStocks(stocks, produitsTotal) {
     var el = document.getElementById('ov-stocks');
     if (!el) return;
     if (!stocks.length) {
-      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--green);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">'
-        + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
-        + 'Tous les stocks sont OK</div>';
+      if (!produitsTotal) {
+        el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Aucun produit enregistré</div>';
+      } else {
+        el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--green);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">'
+          + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+          + 'Tous les stocks sont OK</div>';
+      }
       return;
     }
     el.innerHTML = stocks.slice(0, 6).map(function (p) {
@@ -1317,6 +1321,7 @@
     try {
       var data  = await API.get('/api/categories/');
       var items = data.results || data;
+      _catAllItems = items;
       setText('cat-count', items.length + ' catégorie' + (items.length > 1 ? 's' : ''));
       renderCategoriesTable(items);
       populateCatParentSelect(items);
@@ -1366,6 +1371,68 @@
       + '<td style="text-align:right;"><button onclick="editerCategorie(' + cat.id + ')" class="btn btn-secondary btn-xs">Modifier</button></td>'
       + '</tr>';
   }
+
+  /* Toggle vue tableau / cartes catégories */
+  var _catView = 'table';
+  var _catAllItems = [];
+
+  window.setCatView = function (view) {
+    _catView = view;
+    var tableWrap = document.getElementById('view-cat-table');
+    var cardsWrap = document.getElementById('view-cat-cards');
+    var btnTable  = document.getElementById('vt-cat-table');
+    var btnCard   = document.getElementById('vt-cat-card');
+    if (view === 'table') {
+      if (tableWrap) tableWrap.style.display = '';
+      if (cardsWrap) { cardsWrap.style.display = 'none'; cardsWrap.style.gridTemplateColumns = ''; }
+      if (btnTable) btnTable.classList.add('active');
+      if (btnCard)  btnCard.classList.remove('active');
+    } else {
+      if (tableWrap) tableWrap.style.display = 'none';
+      if (cardsWrap) { cardsWrap.style.display = 'grid'; }
+      if (btnTable) btnTable.classList.remove('active');
+      if (btnCard)  btnCard.classList.add('active');
+      renderCatCards(_catAllItems);
+    }
+  };
+
+  function renderCatCards(items) {
+    var wrap = document.getElementById('view-cat-cards');
+    if (!wrap) return;
+    if (!items.length) {
+      wrap.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">Aucune catégorie</div>';
+      return;
+    }
+    wrap.innerHTML = items.map(function (cat) {
+      var img = cat.image
+        ? '<img src="' + cat.image + '" style="width:100%;height:100%;object-fit:cover;" />'
+        : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+      var badge = cat.est_active !== false
+        ? '<span class="st st-active">Actif</span>'
+        : '<span class="st st-off">Inactif</span>';
+      return '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow 150ms;" onclick="editerCategorie(' + cat.id + ')">'
+        + '<div style="height:100px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;">' + img + '</div>'
+        + '<div style="padding:10px 12px;">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(cat.nom) + '</div>'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + (cat.nb_produits || 0) + ' produit' + ((cat.nb_produits||0) > 1 ? 's' : '') + '</span>'
+        + badge
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  /* Filtre local (sans appel API) sur le tableau et les cartes */
+  window.filterCategoriesLocal = function (query) {
+    var q = query.toLowerCase().trim();
+    var filtered = q ? _catAllItems.filter(function (c) {
+      return c.nom.toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q);
+    }) : _catAllItems;
+    setText('cat-count', filtered.length + ' catégorie' + (filtered.length > 1 ? 's' : ''));
+    renderCategoriesTable(filtered);
+    if (_catView === 'card') renderCatCards(filtered);
+  };
 
   function populateCatParentSelect(items) {
     var sel = document.getElementById('cat-parent');
@@ -1453,8 +1520,10 @@
     reader.onload = function (ev) {
       var preview = document.getElementById('cat-img-preview');
       var icon    = document.getElementById('cat-img-placeholder-icon');
+      var removeBtn = document.getElementById('cat-img-remove');
       if (preview) { preview.src = ev.target.result; preview.style.display = 'block'; }
       if (icon)    icon.style.display = 'none';
+      if (removeBtn) removeBtn.style.display = 'block';
     };
     reader.readAsDataURL(input.files[0]);
   };
@@ -1667,6 +1736,28 @@
   function resetProduitForm() {
     var form = document.getElementById('ap-form');
     if (form) form.reset();
+    /* Charger les catégories dans le select */
+    (async function () {
+      try {
+        var data = await API.get('/api/categories/');
+        var cats = data.results || data;
+        var sel  = document.getElementById('ap-categorie');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— Choisir une catégorie —</option>';
+        cats.forEach(function (cat) {
+          var opt = document.createElement('option');
+          opt.value = cat.id;
+          opt.textContent = cat.nom;
+          sel.appendChild(opt);
+          (cat.sous_categories || []).forEach(function (sub) {
+            var subOpt = document.createElement('option');
+            subOpt.value = sub.id;
+            subOpt.textContent = '  ↳ ' + sub.nom;
+            sel.appendChild(subOpt);
+          });
+        });
+      } catch (e) { /* silencieux */ }
+    })();
     var els = {
       'ap-produit-id': '', 'ap-title': 'Nouveau produit',
       'ap-subtitle': 'Remplissez le formulaire pour publier'
@@ -1754,10 +1845,22 @@
         var btn   = document.getElementById('cat-btn-submit');
         if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
 
-        var fd     = new FormData(catForm);
-        /* Ajouter le statut (radio) */
-        var actifEl = document.getElementById('cat-actif');
+        /* Construire le payload manuellement (les inputs n'ont pas de name) */
+        var fd = new FormData();
+        var nomEl    = document.getElementById('cat-nom');
+        var descEl   = document.getElementById('cat-desc');
+        var parentEl = document.getElementById('cat-parent');
+        var actifEl  = document.getElementById('cat-actif');
+        var imgInput = document.getElementById('cat-image-input');
+        var csrfEl   = catForm.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfEl)   fd.append('csrfmiddlewaretoken', csrfEl.value);
+        if (nomEl)    fd.append('nom', nomEl.value.trim());
+        if (descEl)   fd.append('description', descEl.value.trim());
+        if (parentEl && parentEl.value) fd.append('parent', parentEl.value);
         fd.append('est_active', actifEl && actifEl.checked ? 'true' : 'false');
+        if (imgInput && imgInput.files && imgInput.files[0]) {
+          fd.append('image', imgInput.files[0]);
+        }
 
         var url    = catId ? '/api/categories/' + catId + '/' : '/api/categories/';
         var method = catId ? 'PATCH' : 'POST';
@@ -1765,8 +1868,37 @@
           var resp = await fetch(url, { method: method, headers: { 'X-CSRFToken': getCsrf() }, body: fd });
           var data = await resp.json();
           if (resp.ok) {
-            showToast(catId ? 'Catégorie modifiée' : 'Catégorie créée', 'success');
-            navTo('categories');
+            showToast(catId ? 'Catégorie modifiée' : 'Catégorie créée ✓', 'success');
+            /* Rester sur le formulaire et le réinitialiser pour une nouvelle saisie */
+            var nomEl2    = document.getElementById('cat-nom');
+            var descEl2   = document.getElementById('cat-desc');
+            var parentEl2 = document.getElementById('cat-parent');
+            var imgInp2   = document.getElementById('cat-image-input');
+            var prev2     = document.getElementById('cat-img-preview');
+            var icon2     = document.getElementById('cat-img-placeholder-icon');
+            var rmBtn2    = document.getElementById('cat-img-remove');
+            var idEl2     = document.getElementById('cat-id');
+            if (idEl2)    idEl2.value = '';
+            if (nomEl2)   nomEl2.value = '';
+            if (descEl2)  descEl2.value = '';
+            if (parentEl2) parentEl2.value = '';
+            if (imgInp2)  imgInp2.value = '';
+            if (prev2)    { prev2.src = ''; prev2.style.display = 'none'; }
+            if (icon2)    icon2.style.display = 'flex';
+            if (rmBtn2)   rmBtn2.style.display = 'none';
+            var actifEl2 = document.getElementById('cat-actif');
+            if (actifEl2) actifEl2.checked = true;
+            var titleEl2 = document.getElementById('cat-form-title');
+            if (titleEl2) titleEl2.textContent = 'Nouvelle catégorie';
+            if (flash) { flash.style.cssText = 'display:flex;background:var(--green-light);color:#065F46;border:1px solid #A7F3D0;padding:10px 14px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;'; flash.textContent = catId ? 'Catégorie modifiée !' : 'Catégorie créée ! Vous pouvez en ajouter une autre.'; }
+            if (nomEl2) nomEl2.focus();
+            /* Rafraîchir les données en arrière-plan sans changer de section */
+            API.get('/api/categories/').then(function(data){
+              var items = data.results || data;
+              _catAllItems = items;
+              renderCategoriesTable(items);
+              populateCatParentSelect(items);
+            }).catch(function(){});
           } else {
             var errs = Object.values(data).flat().join(' · ');
             if (flash) { flash.style.cssText = 'display:flex;background:var(--red-light);color:#991B1B;border:1px solid #FECACA;padding:10px 14px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;'; flash.textContent = 'Erreur : ' + errs; }
@@ -1812,12 +1944,47 @@
               flash.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> '
                 + (produitId ? 'Produit modifié avec succès !' : 'Produit publié avec succès !');
             }
-            showToast(produitId ? 'Produit modifié !' : 'Produit publié !', 'success');
-            setTimeout(function () {
-              resetProduitForm();
-              navTo('produits');
-              loadProduits(1);
-            }, 1500);
+            showToast(produitId ? 'Produit modifié !' : 'Produit publié ✓', 'success');
+            /* Rester sur le formulaire — réinitialiser sans changer la section */
+            if (flash) {
+              flash.style.cssText = 'display:flex;background:var(--green-light);color:#065F46;border:1px solid #A7F3D0;padding:12px 16px;border-radius:var(--r-md);font-size:13px;font-weight:600;align-items:center;gap:10px;';
+              flash.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> '
+                + (produitId ? 'Produit modifié ! Vous pouvez en modifier un autre.' : 'Produit publié ! Vous pouvez en ajouter un autre.');
+            }
+            /* Réinitialiser le formulaire sans changer de section ni toucher au hash */
+            var apF = document.getElementById('ap-form');
+            if (apF) apF.reset();
+            document.getElementById('ap-produit-id').value = '';
+            var titEl = document.getElementById('ap-title');
+            if (titEl) titEl.textContent = 'Nouveau produit';
+            var subEl = document.getElementById('ap-subtitle');
+            if (subEl) subEl.textContent = 'Remplissez le formulaire pour publier';
+            var supBtn = document.getElementById('ap-btn-supprimer');
+            if (supBtn) supBtn.style.display = 'none';
+            var prevGrid = document.getElementById('ap-preview-grid');
+            if (prevGrid) prevGrid.innerHTML = '';
+            var existDiv = document.getElementById('ap-existing-img');
+            if (existDiv) existDiv.style.display = 'none';
+            var pholder = document.getElementById('ap-img-placeholder');
+            if (pholder) pholder.style.display = '';
+            var track = document.getElementById('ap-vedette-track');
+            var knob  = document.getElementById('ap-vedette-knob');
+            if (track) track.classList.remove('on');
+            if (knob)  knob.style.transform = '';
+            /* Recharger les catégories dans le select */
+            (async function(){
+              try {
+                var d2 = await API.get('/api/categories/');
+                var c2 = d2.results || d2;
+                var s2 = document.getElementById('ap-categorie');
+                if (!s2) return;
+                s2.innerHTML = '<option value="">— Choisir une catégorie —</option>';
+                c2.forEach(function(cat){
+                  var o=document.createElement('option'); o.value=cat.id; o.textContent=cat.nom; s2.appendChild(o);
+                  (cat.sous_categories||[]).forEach(function(sub){ var so=document.createElement('option'); so.value=sub.id; so.textContent='  ↳ '+sub.nom; s2.appendChild(so); });
+                });
+              } catch(e){}
+            })();
           } else {
             var errs = Object.values(data).flat().join(' · ');
             if (flash) {
