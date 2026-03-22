@@ -1331,6 +1331,9 @@
     }
   };
 
+  /* État d'ouverture des dropdowns par parent ID */
+  var _catExpanded = {};
+
   function renderCategoriesTable(items) {
     var tbody = document.getElementById('tbl-categories');
     if (!tbody) return;
@@ -1338,19 +1341,25 @@
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">Aucune catégorie</td></tr>';
       return;
     }
-    /* Grouper : parents d'abord, puis enfants indentés */
-    var parents  = items.filter(function (c) { return !c.parent; });
+    var parents = items.filter(function (c) { return !c.parent; });
     var html = '';
     parents.forEach(function (p) {
-      html += renderCatRow(p, false);
-      items.filter(function (c) { return c.parent === p.id; }).forEach(function (c) {
-        html += renderCatRow(c, true);
-      });
+      var children = items.filter(function (c) { return c.parent === p.id; });
+      var isOpen   = !!_catExpanded[p.id];
+      html += renderCatRow(p, false, children.length, isOpen);
+      if (children.length && isOpen) {
+        children.forEach(function (c) { html += renderCatRow(c, true, 0, false); });
+      }
     });
     tbody.innerHTML = html;
   }
 
-  function renderCatRow(cat, isChild) {
+  window.toggleCatChildren = function (parentId) {
+    _catExpanded[parentId] = !_catExpanded[parentId];
+    renderCategoriesTable(_catAllItems);
+  };
+
+  function renderCatRow(cat, isChild, childCount, isOpen) {
     var img = cat.image
       ? '<img src="' + cat.image + '" style="width:32px;height:32px;border-radius:8px;object-fit:cover;border:1px solid var(--border);" />'
       : '<div style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">'
@@ -1358,10 +1367,41 @@
     var actifBadge = cat.est_active !== false
       ? '<span class="st st-active">Actif</span>'
       : '<span class="st st-off">Inactif</span>';
-    return '<tr' + (isChild ? ' style="background:var(--surface-2);"' : '') + '>'
-      + '<td><div style="display:flex;align-items:center;gap:10px;' + (isChild ? 'padding-left:20px;' : '') + '">'
+
+    /* Chevron toggle pour les parents ayant des enfants */
+    var chevron = '';
+    if (!isChild && childCount > 0) {
+      var rot = isOpen ? 'transform:rotate(90deg);' : '';
+      chevron = '<button onclick="toggleCatChildren(' + cat.id + ')" '
+        + 'style="background:none;border:none;cursor:pointer;padding:2px 4px;margin-right:4px;display:inline-flex;align-items:center;color:var(--text-muted);transition:transform 200ms;' + rot + '">'
+        + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+        + '<polyline points="9 18 15 12 9 6"/></svg></button>';
+    } else if (!isChild) {
+      chevron = '<span style="display:inline-block;width:20px;"></span>';
+    }
+
+    /* Badge nb sous-catégories sur la ligne parent */
+    var subBadge = (!isChild && childCount > 0)
+      ? '<span style="font-size:10px;font-weight:700;color:var(--brand-main);background:var(--brand-light);'
+        + 'border:1px solid #B8CDFA;padding:1px 7px;border-radius:99px;margin-left:6px;">'
+        + childCount + ' sous-cat.</span>'
+      : '';
+
+    var rowBg = isChild ? 'background:var(--surface-2);' : '';
+    var nameStyle = isChild
+      ? 'font-size:12.5px;font-weight:500;color:var(--text-2);'
+      : 'font-size:13px;font-weight:700;color:var(--text);';
+    var indent = isChild ? 'padding-left:36px;' : '';
+
+    return '<tr style="' + rowBg + '">'
+      + '<td><div style="display:flex;align-items:center;gap:8px;' + indent + '">'
+      + (isChild ? '<span style="color:var(--text-muted);font-size:13px;">↳</span>' : chevron)
       + img
-      + '<div><div style="font-size:13px;font-weight:' + (isChild ? '500' : '600') + ';color:var(--text);">' + (isChild ? '↳ ' : '') + escHtml(cat.nom) + '</div>'
+      + '<div>'
+      + '<div style="display:flex;align-items:center;gap:4px;">'
+      + '<span style="' + nameStyle + '">' + escHtml(cat.nom) + '</span>'
+      + subBadge
+      + '</div>'
       + (cat.description ? '<div style="font-size:11px;color:var(--text-muted);">' + escHtml(cat.description.slice(0, 50)) + '</div>' : '')
       + '</div></div></td>'
       + '<td class="hide-mobile" style="font-size:12.5px;color:var(--text-muted);">' + (isChild ? escHtml(cat.parent_nom || '—') : '—') + '</td>'
@@ -1403,24 +1443,68 @@
       wrap.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">Aucune catégorie</div>';
       return;
     }
-    wrap.innerHTML = items.map(function (cat) {
-      var img = cat.image
-        ? '<img src="' + cat.image + '" style="width:100%;height:100%;object-fit:cover;" />'
-        : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border-2)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
-      var badge = cat.est_active !== false
-        ? '<span class="st st-active">Actif</span>'
-        : '<span class="st st-off">Inactif</span>';
-      return '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow 150ms;" onclick="editerCategorie(' + cat.id + ')">'
-        + '<div style="height:100px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;">' + img + '</div>'
+    /* Grouper parents + enfants pour un affichage structuré */
+    var parents  = items.filter(function (c) { return !c.parent; });
+    var children = items.filter(function (c) { return  c.parent; });
+
+    var html = '';
+
+    parents.forEach(function (p) {
+      var kids = children.filter(function (c) { return c.parent === p.id; });
+      var img  = p.image
+        ? '<img src="' + p.image + '" style="width:100%;height:100%;object-fit:cover;" />'
+        : '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">'
+          + '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--brand-main)" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>'
+          + '</div>';
+      var actif = p.est_active !== false;
+
+      /* Carte parent */
+      html += '<div style="background:var(--surface);border:2px solid var(--brand-main);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow 150ms;box-shadow:0 2px 8px rgba(99,102,241,.08);" onclick="editerCategorie(' + p.id + ')">'
+        + '<div style="height:90px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;overflow:hidden;">' + img + '</div>'
         + '<div style="padding:10px 12px;">'
-        + '<div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(cat.nom) + '</div>'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">'
-        + '<span style="font-size:11px;color:var(--text-muted);">' + (cat.nb_produits || 0) + ' produit' + ((cat.nb_produits||0) > 1 ? 's' : '') + '</span>'
-        + badge
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">'
+        + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--brand-main);">Racine</span>'
+        + (actif ? '<span class="st st-active">Actif</span>' : '<span class="st st-off">Inactif</span>')
+        + '</div>'
+        + '<div style="font-size:13.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(p.nom) + '</div>'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;">'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + (p.nb_produits || 0) + ' produit' + ((p.nb_produits||0) > 1 ? 's' : '') + '</span>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + kids.length + ' sous-cat.</span>'
         + '</div>'
         + '</div>'
         + '</div>';
-    }).join('');
+
+      /* Cartes enfants, indentées visuellement */
+      kids.forEach(function (kid) {
+        var kidImg = kid.image
+          ? '<img src="' + kid.image + '" style="width:100%;height:100%;object-fit:cover;" />'
+          : '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">'
+            + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+            + '</div>';
+        var kidActif = kid.est_active !== false;
+        html += '<div style="background:var(--surface-2);border:1.5px solid var(--border);border-left:3px solid var(--brand-main);border-radius:var(--r-md);overflow:hidden;cursor:pointer;margin-left:12px;transition:box-shadow 150ms;" onclick="editerCategorie(' + kid.id + ')">'
+          + '<div style="height:70px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;">' + kidImg + '</div>'
+          + '<div style="padding:8px 10px;">'
+          + '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">'
+          + '<span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">↳ ' + escHtml(p.nom) + '</span>'
+          + '</div>'
+          + '<div style="font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escHtml(kid.nom) + '</div>'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">'
+          + '<span style="font-size:11px;color:var(--text-muted);">' + (kid.nb_produits || 0) + ' produit' + ((kid.nb_produits||0) > 1 ? 's' : '') + '</span>'
+          + (kidActif ? '<span class="st st-active">Actif</span>' : '<span class="st st-off">Inactif</span>')
+          + '</div>'
+          + '</div>'
+          + '</div>';
+      });
+    });
+
+    /* Orphelins (si filtre) */
+    children.filter(function(c){ return !parents.find(function(p){ return p.id===c.parent; }); }).forEach(function(kid){
+      html += '<div style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--r-md);overflow:hidden;cursor:pointer;" onclick="editerCategorie(' + kid.id + ')">'
+        + '<div style="padding:10px 12px;"><div style="font-size:12.5px;font-weight:700;">' + escHtml(kid.nom) + '</div></div></div>';
+    });
+
+    wrap.innerHTML = html;
   }
 
   /* Filtre local (sans appel API) sur le tableau et les cartes */
