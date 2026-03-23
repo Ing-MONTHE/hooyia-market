@@ -14,14 +14,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SÉCURITÉ
 # ═══════════════════════════════════════════════
 
-# Clé secrète lue depuis .env (jamais en dur dans le code)
 SECRET_KEY = config('SECRET_KEY')
-
-# True en local → affiche les erreurs détaillées
 DEBUG = config('DEBUG', default=True, cast=bool)
-
-# Hôtes autorisés à accéder au site
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0'] + config('ALLOWED_HOSTS', default='', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
+
+# URL de base du site — utilisée pour les liens dans les emails
+# Dev  : http://localhost:8000
+# Prod : https://tondomaine.com
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 
 # ═══════════════════════════════════════════════
@@ -68,33 +68,31 @@ INSTALLED_APPS = [
 
 # ═══════════════════════════════════════════════
 # MIDDLEWARE
-# Couches qui traitent chaque requête HTTP dans l'ordre
 # ═══════════════════════════════════════════════
 
 MIDDLEWARE = [
-    #'debug_toolbar.middleware.DebugToolbarMiddleware', # Barre debug (dev)
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Servir les fichiers statiques en prod
-    'corsheaders.middleware.CorsMiddleware',           # CORS pour les appels JS
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',       # i18n : détecte la langue de l'utilisateur
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.audit.middleware.AuditLogMiddleware',        # Log automatique des actions
+    'apps.audit.middleware.AuditLogMiddleware',
 ]
 
 
 # ═══════════════════════════════════════════════
-# URLS & WSGI / ASGI
+# URLS & ASGI
 # ═══════════════════════════════════════════════
 
 ROOT_URLCONF = 'config.urls'
-
-# ASGI = Daphne gère HTTP + WebSocket
 ASGI_APPLICATION = 'config.asgi.application'
+
 
 # ═══════════════════════════════════════════════
 # TEMPLATES (HTML)
@@ -103,8 +101,6 @@ ASGI_APPLICATION = 'config.asgi.application'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-
-        # Django cherche les templates dans ce dossier global
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -113,9 +109,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # Injecte le nombre d'articles du panier dans tous les templates
                 #'apps.cart.context_processors.cart_count',
-                # Injecte le nombre de notifications non lues
                 #'apps.notifications.context_processors.notif_count',
             ],
         },
@@ -127,7 +121,6 @@ TEMPLATES = [
 # BASE DE DONNÉES (PostgreSQL)
 # ═══════════════════════════════════════════════
 
-# Supporte DATABASE_URL (Render) ou config individuelle (local)
 import dj_database_url as _dj_db_url
 
 _db_url = config('DATABASE_URL', default='')
@@ -145,12 +138,11 @@ else:
         }
     }
 
-# Modèle utilisateur personnalisé (on le créera dans apps/users/)
 AUTH_USER_MODEL = 'users.CustomUser'
 
 
 # ═══════════════════════════════════════════════
-# CACHE — En mémoire (pas de Redis)
+# CACHE — En mémoire
 # ═══════════════════════════════════════════════
 
 CACHES = {
@@ -161,14 +153,11 @@ CACHES = {
     }
 }
 
-# Sessions stockées en base de données PostgreSQL
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # ═══════════════════════════════════════════════
-# DJANGO CHANNELS — WebSockets (Chat + Notifications)
-# Utilise Redis comme Channel Layer pour supporter
-# le multi-process en production
+# DJANGO CHANNELS — WebSockets via Redis
 # ═══════════════════════════════════════════════
 
 CHANNEL_LAYERS = {
@@ -186,61 +175,52 @@ CHANNEL_LAYERS = {
 # ═══════════════════════════════════════════════
 
 REST_FRAMEWORK = {
-    # Authentification JWT + Session Django (pour les pages HTML)
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
-    # Par défaut : lecture publique, écriture authentifiée
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
-    # Filtres activés sur tous les ViewSets
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    # Pagination : 12 produits par page
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
 }
 
-# Configuration des tokens JWT
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':  timedelta(minutes=60),  # Token valide 1h
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),       # Refresh valide 7 jours
-    'ROTATE_REFRESH_TOKENS':  True,                    # Nouveau refresh à chaque usage
-    'BLACKLIST_AFTER_ROTATION': True,                  # Invalide l'ancien refresh
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME':   timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS':    True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES':        ('Bearer',),
+    'USER_ID_FIELD':            'id',
+    'USER_ID_CLAIM':            'user_id',
 }
 
-# Dis a SimpleJWT d'utiliser l'email
 AUTHENTIFICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 
 # ═══════════════════════════════════════════════
-# CORS — Autorise JavaScript à appeler l'API
+# CORS & CSRF
 # ═══════════════════════════════════════════════
 
-# En local, on autorise toutes les origines (uniquement en développement)
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CSRF — Domaines de confiance (nécessaire sur Render / HTTPS)
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='https://hooyia-market-wpsp.onrender.com',
+    default='http://localhost:8000',
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
 
 
 # ═══════════════════════════════════════════════
-# EMAILS — SMTP (envoi réel dans les boîtes mails)
-# Backend configuré depuis .env
+# EMAILS — SMTP
 # ═══════════════════════════════════════════════
 
 EMAIL_BACKEND       = config('EMAIL_BACKEND',       default='django.core.mail.backends.smtp.EmailBackend')
@@ -250,6 +230,7 @@ EMAIL_USE_TLS       = config('EMAIL_USE_TLS',       default=True, cast=bool)
 EMAIL_HOST_USER     = config('EMAIL_HOST_USER',     default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL',  default=f'HooYia Market <{config("EMAIL_HOST_USER", default="")}>')
+ADMIN_EMAIL         = config('ADMIN_EMAIL', default=config('EMAIL_HOST_USER', default=''))  # Email qui reçoit les alertes remboursement
 
 
 # ═══════════════════════════════════════════════
@@ -257,15 +238,12 @@ DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL',  default=f'HooYia Market <{co
 # ═══════════════════════════════════════════════
 
 STATIC_URL = '/static/'
-# Django cherche les fichiers statiques dans ce dossier
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-# Les images uploadées (photos produits) sont stockées ici
 MEDIA_ROOT = BASE_DIR / 'media'
-
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
@@ -292,32 +270,20 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Langues disponibles sur le site
 LANGUAGES = [
     ('fr', _('Français')),
     ('en', _('English')),
 ]
 
-# Dossier des fichiers de traduction (.po / .mo)
-LOCALE_PATHS = [
-    BASE_DIR / 'locale',
-]
-
-
-# ═══════════════════════════════════════════════
-# DEBUG TOOLBAR (uniquement en développement)
-# ═══════════════════════════════════════════════
-
-INTERNAL_IPS = ['127.0.0.1']
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
 
 # ═══════════════════════════════════════════════
 # DIVERS
 # ═══════════════════════════════════════════════
 
+INTERNAL_IPS = ['127.0.0.1']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Redirige vers cette page après connexion
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/compte/connexion/'
 
@@ -326,19 +292,12 @@ LOGIN_URL = '/compte/connexion/'
 # AVIS CLIENTS
 # ═══════════════════════════════════════════════
 
-# En production (DEBUG=False), mettre True pour exiger une commande LIVREE.
-# En développement, False permet de tester les avis sans avoir passé commande.
 AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════
 # GOOGLE OAUTH2
-# Créez vos credentials sur : https://console.cloud.google.com
-# Ajoutez dans votre .env : GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET
-# URI de redirection à configurer dans Google Console :
-#   http://localhost:8000/compte/google/callback/  (dev)
-#   https://tondomaine.com/compte/google/callback/ (prod)
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════
 
 GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
@@ -346,27 +305,29 @@ GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:
 
 
 # ═══════════════════════════════════════════════
+# PAYUNIT — Paiements Mobile Money (OM & MTN MoMo)
+# ═══════════════════════════════════════════════
+# Dev  : PAYUNIT_APP_TOKEN=sand_xxx + PAYUNIT_MODE=test
+# Prod : PAYUNIT_APP_TOKEN=live_xxx + PAYUNIT_MODE=live
+# api_user et api_password sont identiques en dev et prod.
+
+PAYUNIT_API_USER     = config('PAYUNIT_API_USER',     default='')
+PAYUNIT_API_PASSWORD = config('PAYUNIT_API_PASSWORD', default='')
+PAYUNIT_APP_TOKEN    = config('PAYUNIT_APP_TOKEN',    default='')
+PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='test')
+
+
+# ═══════════════════════════════════════════════
 # CELERY — Tâches asynchrones
-# Redis reçoit, stocke et retourne les résultats des tâches
 # ═══════════════════════════════════════════════
 
-# URL du broker — Redis reçoit et stocke les tâches en attente
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://redis:6379/0')
-
-# URL du backend — Redis stocke les résultats des tâches exécutées
-CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://redis:6379/0')
-
-# Format de sérialisation des tâches (JSON = lisible et sécurisé)
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ['json']
-
-# Fuseau horaire cohérent avec Django
-CELERY_TIMEZONE = TIME_ZONE
-
-# Évite que les tâches restent bloquées indéfiniment
-CELERY_TASK_SOFT_TIME_LIMIT = 300  # Avertissement après 5 minutes
-CELERY_TASK_TIME_LIMIT = 360       # Arrêt forcé après 6 minutes
-
-# Reconnexion automatique si Redis redémarre au démarrage
+CELERY_BROKER_URL                         = config('REDIS_URL', default='redis://redis:6379/0')
+CELERY_RESULT_BACKEND                     = config('REDIS_URL', default='redis://redis:6379/0')
+CELERY_TASK_SERIALIZER                    = 'json'
+CELERY_RESULT_SERIALIZER                  = 'json'
+CELERY_ACCEPT_CONTENT                     = ['json']
+CELERY_TIMEZONE                           = TIME_ZONE
+CELERY_TASK_SOFT_TIME_LIMIT               = 300
+CELERY_TASK_TIME_LIMIT                    = 360
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cast=bool)  # True en dev pour exécuter sans worker

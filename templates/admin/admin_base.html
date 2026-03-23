@@ -1,0 +1,637 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{# admin_base.html — Layout principal du dashboard HooYia Market #}
+
+{% block title %}{% trans "Administration" %} — HooYia Market{% endblock %}
+
+{# Masquer navbar et footer du site — le dashboard a son propre header #}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+
+{# Init dark mode dashboard #}
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('hooyia-dash-theme');
+      document.documentElement.classList.remove('dark');
+      if(t === 'dark') document.documentElement.classList.add('dark');
+    } catch(e){}
+  })();
+</script>
+
+{# Google Fonts : Sora + Plus Jakarta Sans #}
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+{# ── Feuille de style du dashboard ── #}
+<link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}" />
+
+{% endblock %}
+
+
+{% block content %}
+<!-- LAYOUT PRINCIPAL -->
+<div class="da-layout">
+
+  <!-- TOPBAR -->
+  <header class="da-topbar">
+
+    {# ── Zone gauche : Burger + Logo ── #}
+    <div class="da-topbar-brand">
+
+      {# Bouton hamburger — mobile uniquement, toggle sidebar #}
+      <button class="da-burger" id="da-burger-btn"
+              onclick="toggleSidebar()"
+              aria-label="{% trans 'Ouvrir le menu' %}"
+              aria-expanded="false">
+        {# Lucide : Menu #}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      {# Logo HooYia Market — clic → retour overview #}
+      <a class="da-logo" href="#" onclick="navTo('overview'); return false;">
+        <div class="da-logo-icon">
+          {# Lucide : Home #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="white" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <span class="da-logo-text">HooYia <span>Market</span></span>
+        <span class="da-logo-badge">Admin</span>
+      </a>
+    </div>
+
+    {# ── Zone droite : actions topbar ── #}
+    <div class="da-topbar-right">
+
+      {# ── Barre de recherche globale (Ctrl+K) ── #}
+      <div id="global-search-wrap" style="position:relative;">
+        <div style="display:flex;align-items:center;gap:6px;
+                    background:var(--surface-2);
+                    border:1px solid rgba(0,0,0,.08);
+                    border-radius:8px;padding:0 12px;height:40px;
+                    transition:border-color 150ms;">
+          {# Lucide : Search #}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="var(--text-muted)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="global-search-input" type="text"
+                 placeholder="{% trans 'Rechercher…' %}"
+                 autocomplete="off"
+                 style="border:none;background:transparent;outline:none;
+                        font-size:13px;color:var(--text);width:180px;"
+                 oninput="onGlobalSearch(this.value)"
+                 onfocus="this.closest('div').style.borderColor='rgba(99,102,241,.4)'"
+                 onblur="setTimeout(function(){closeGlobalSearch();this.closest&&(document.querySelector('#global-search-wrap div').style.borderColor='rgba(0,0,0,.08)')},200)" />
+        </div>
+        {# Résultats de recherche (rempli par JS) #}
+        <div id="global-search-results"
+             style="display:none;position:absolute;top:calc(100% + 6px);
+                    left:0;right:0;background:var(--surface);
+                    border:1px solid var(--border);border-radius:10px;
+                    box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:600;
+                    overflow:hidden;max-height:360px;overflow-y:auto;"></div>
+      </div>
+
+      {# ── Sélecteur de langue ── #}
+      {% get_current_language as CURRENT_LANG %}
+      <div style="position:relative;" id="dash-lang-wrap">
+        <button onclick="document.getElementById('dash-lang-dd').style.display=document.getElementById('dash-lang-dd').style.display==='block'?'none':'block'"
+                class="da-topbar-btn" style="width:40px;height:40px;"
+                title="{% trans 'Changer de langue' %}">
+          {# Lucide : Globe #}
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+        </button>
+        <div id="dash-lang-dd"
+             style="display:none;position:absolute;top:calc(100% + 8px);right:0;
+                    background:var(--surface);border:1px solid var(--border);
+                    border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);
+                    z-index:600;overflow:hidden;min-width:130px;">
+          <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="fr">
+            <input type="hidden" name="next" id="dash-next-fr" value="/">
+            <button type="submit"
+                    style="width:100%;padding:10px 16px;background:none;border:none;
+                           cursor:pointer;display:flex;align-items:center;gap:10px;
+                           font-size:13px;color:var(--text);
+                           {% if CURRENT_LANG == 'fr' %}font-weight:700;{% endif %}">
+              🇫🇷 Français
+              {% if CURRENT_LANG == 'fr' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+            </button>
+          </form>
+          <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="en">
+            <input type="hidden" name="next" id="dash-next-en" value="/en/">
+            <button type="submit"
+                    style="width:100%;padding:10px 16px;background:none;border:none;
+                           cursor:pointer;display:flex;align-items:center;gap:10px;
+                           font-size:13px;color:var(--text);
+                           {% if CURRENT_LANG == 'en' %}font-weight:700;{% endif %}">
+              🇬🇧 English
+              {% if CURRENT_LANG == 'en' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+      <script>
+        (function() {
+          /* Mettre à jour les valeurs "next" selon l'URL courante */
+          var path = window.location.pathname.replace(/^\/en\//, '/');
+          var frEl = document.getElementById('dash-next-fr');
+          var enEl = document.getElementById('dash-next-en');
+          if (frEl) frEl.value = path;
+          if (enEl) enEl.value = '/en' + path;
+          /* Fermer le dropdown au clic extérieur */
+          document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('dash-lang-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+              document.getElementById('dash-lang-dd').style.display = 'none';
+            }
+          });
+        })();
+      </script>
+
+      {# ── Bouton Dark Mode ── #}
+      <button class="da-topbar-btn" id="dash-dark-btn"
+              title="{% trans 'Mode sombre' %}"
+              onclick="dashToggleDark()"
+              aria-label="{% trans 'Basculer le mode sombre' %}">
+        {# Lucide : Moon — visible en clair #}
+        <svg id="dash-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+        {# Lucide : Sun — visible en sombre #}
+        <svg id="dash-icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75"
+             stroke-linecap="round" stroke-linejoin="round"
+             style="display:none;">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1"  x2="12" y2="3"/>  <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22"   x2="5.64"  y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3"  y2="12"/>  <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78"  x2="5.64"  y2="18.36"/>
+          <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <script>
+        /* Toggle dark/light mode — clé séparée du site public */
+        function dashToggleDark() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('hooyia-dash-theme', isDark ? 'dark' : 'light'); } catch(e){}
+          document.getElementById('dash-icon-moon').style.display = isDark ? 'none'  : '';
+          document.getElementById('dash-icon-sun').style.display  = isDark ? ''      : 'none';
+        }
+        /* Initialiser les icônes selon l'état courant */
+        (function(){
+          var isDark = document.documentElement.classList.contains('dark');
+          document.getElementById('dash-icon-moon').style.display = isDark ? 'none' : '';
+          document.getElementById('dash-icon-sun').style.display  = isDark ? ''     : 'none';
+        })();
+      </script>
+
+      {# ── Bouton Notifications ── #}
+      <div style="position:relative;" id="notif-wrap">
+        <button class="da-topbar-btn" onclick="_toggleNotif(event)"
+                title="{% trans 'Notifications' %}" aria-label="{% trans 'Voir les notifications' %}">
+          {# Lucide : Bell #}
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          {# Badge orange — nombre de notifs non lues (rempli par JS) #}
+          <span id="topbar-notif-badge" class="da-notif-badge" style="display:none;">0</span>
+        </button>
+        {# Dropdown notifications (rempli dynamiquement par JS) #}
+        <div id="notif-dropdown"
+             style="display:none;position:absolute;top:calc(100% + 8px);right:0;
+                    width:340px;background:var(--surface);border:1px solid var(--border);
+                    border-radius:var(--r-lg);box-shadow:var(--sh-lg);
+                    z-index:200;overflow:hidden;max-height:420px;">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);
+                      display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;font-weight:700;color:var(--text);">{% trans "Notifications" %}</span>
+            <button onclick="navTo('notifications');_closeNotif();"
+                    style="font-size:11.5px;color:var(--brand-main);
+                           background:none;border:none;cursor:pointer;font-weight:600;">
+              {% trans "Tout voir" %}
+            </button>
+          </div>
+          <div id="notif-dropdown-list" style="overflow-y:auto;max-height:320px;">
+            <div class="da-loading">{% trans "Chargement…" %}</div>
+          </div>
+        </div>
+      </div>
+
+      {# ── Séparateur ── #}
+      <div class="da-topbar-sep"></div>
+
+      {# ── Menu profil Admin ── #}
+      <div class="da-profile-wrap">
+        <button class="da-profile-btn" aria-label="{% trans 'Menu profil' %}">
+          {# Avatar avec photo ou initiales #}
+          <div class="da-avatar">
+            {% if user.photo_profil %}
+              <img src="{{ user.photo_profil.url }}" alt="{{ user.get_full_name }}" />
+            {% else %}
+              {# Initiales : première lettre du prénom + du nom #}
+              {{ user.prenom|slice:":1"|upper }}{{ user.nom|slice:":1"|upper }}
+            {% endif %}
+          </div>
+          <div class="da-profile-info">
+            <span class="da-profile-name">{{ user.get_full_name|default:user.username }}</span>
+            <span class="da-profile-role">Administrateur</span>
+          </div>
+          {# Lucide : ChevronDown #}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="var(--text-muted)" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        {# Dropdown profil #}
+        <div class="da-profile-dropdown">
+          {# Lien vers profil #}
+          <a href="{% url 'users:profil' %}" class="da-dd-item">
+            {# Lucide : User #}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            {% trans "Mon profil" %}
+          </a>
+          {# Lien vers le site public #}
+          <a href="{% url 'products:accueil' %}" class="da-dd-item">
+            {# Lucide : ExternalLink #}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            {% trans "Voir le site" %}
+          </a>
+          <div class="da-dd-divider"></div>
+          {# Déconnexion #}
+          <a href="{% url 'users:deconnexion' %}" class="da-dd-item danger">
+            {# Lucide : LogOut #}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            {% trans "Déconnexion" %}
+          </a>
+        </div>
+      </div>
+
+    </div>{# fin .da-topbar-right #}
+  </header>{# fin .da-topbar #}
+
+  {# Overlay sombre derrière la sidebar sur mobile #}
+  <div class="da-sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- BODY : sidebar + contenu -->
+  <div class="da-body">
+
+    <!-- SIDEBAR -->
+    <aside class="da-sidebar" id="da-sidebar" role="navigation" aria-label="Navigation admin">
+
+      {# ── Indicateur statut du site ── #}
+      <div class="sb-status">
+        <div class="sb-status-dot"></div>
+        <span class="sb-status-text">{% trans "Site en ligne" %}</span>
+        {# Lucide : Wifi #}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="#34D399" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.55a11 11 0 0114.08 0"/>
+          <path d="M1.42 9a16 16 0 0121.16 0"/>
+          <path d="M8.53 16.11a6 6 0 016.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+      </div>
+
+      <hr class="sb-divider" />
+
+      {# ── SECTION : TABLEAU DE BORD ── #}
+      <div class="sb-section-label">{% trans "Principal" %}</div>
+
+      <button class="sb-item active" data-section="overview" onclick="navTo('overview')">
+        <span class="sb-icon">
+          {# Lucide : LayoutDashboard #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Tableau de bord" %}</span>
+      </button>
+
+      <hr class="sb-divider" />
+
+      {# ── SECTION : CATALOGUE ── #}
+      <div class="sb-section-label">{% trans "Catalogue" %}</div>
+
+      <button class="sb-item" data-section="produits" onclick="navTo('produits')">
+        <span class="sb-icon">
+          {# Lucide : Package #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Produits" %}</span>
+      </button>
+
+      <button class="sb-item" data-section="categories" onclick="navTo('categories')">
+        <span class="sb-icon">
+          {# Lucide : Tag #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Catégories" %}</span>
+      </button>
+
+      <button class="sb-item" data-section="stocks" onclick="navTo('stocks')">
+        <span class="sb-icon">
+          {# Lucide : BarChart2 #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Stocks" %}</span>
+      </button>
+
+      <hr class="sb-divider" />
+
+      {# ── SECTION : VENTES ── #}
+      <div class="sb-section-label">{% trans "Ventes" %}</div>
+
+      <button class="sb-item" data-section="commandes" onclick="navTo('commandes')">
+        <span class="sb-icon">
+          {# Lucide : ShoppingCart #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Commandes" %}</span>
+        {# Badge nombre de commandes en attente — mis à jour par JS #}
+        <span class="sb-badge" id="sb-badge-commandes">0</span>
+      </button>
+
+      <button class="sb-item" data-section="avis" onclick="navTo('avis')">
+        <span class="sb-icon">
+          {# Lucide : Star #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Avis clients" %}</span>
+        {# Badge avis à modérer #}
+        <span class="sb-badge blue" id="sb-badge-avis">0</span>
+      </button>
+
+      <button class="sb-item" data-section="paniers" onclick="navTo('paniers')">
+        <span class="sb-icon">
+          {# Lucide : ShoppingBag #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Paniers" %}</span>
+      </button>
+
+      <hr class="sb-divider" />
+
+      {# ── SECTION : UTILISATEURS ── #}
+      <div class="sb-section-label">{% trans "Utilisateurs" %}</div>
+
+      <button class="sb-item" data-section="utilisateurs" onclick="navTo('utilisateurs')">
+        <span class="sb-icon">
+          {# Lucide : Users #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Comptes" %}</span>
+      </button>
+
+      <button class="sb-item" data-section="messages" onclick="navTo('messages')">
+        <span class="sb-icon">
+          {# Lucide : MessageSquare #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Messages" %}</span>
+      </button>
+
+      <hr class="sb-divider" />
+
+      {# ── SECTION : SYSTÈME ── #}
+      <div class="sb-section-label">{% trans "Système" %}</div>
+
+      <button class="sb-item" data-section="notifications" onclick="navTo('notifications')">
+        <span class="sb-icon">
+          {# Lucide : Bell #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Notifications" %}</span>
+      </button>
+
+      <button class="sb-item" data-section="audit" onclick="navTo('audit')">
+        <span class="sb-icon">
+          {# Lucide : Activity #}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </span>
+        <span class="sb-label">{% trans "Journal d'audit" %}</span>
+      </button>
+
+      {# ── Footer sidebar : lien de retour au site ── #}
+      <div class="sb-footer">
+        <a href="{% url 'products:accueil' %}" class="sb-back-link">
+          {# Lucide : ArrowLeft #}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          {% trans "Retour au site" %}
+        </a>
+      </div>
+
+    </aside>{# fin .da-sidebar #}
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="da-main" id="da-main-content">
+
+      {# Les partials de sections sont inclus ici #}
+      {% block dashboard_content %}{% endblock %}
+
+      {# Modale ajustement stock (utilisée par _produits.html et _stocks.html) #}
+      {% include 'admin/partials/_modal_stock.html' %}
+
+      {# Modale ajout rapide de catégorie (utilisée par _produits.html et _categories.html) #}
+      {% include 'admin/partials/_modal_categorie.html' %}
+
+      {# Bloc pour modales additionnelles spécifiques aux pages enfants #}
+      {% block extra_modals %}{% endblock %}
+
+    </main>{# fin .da-main #}
+
+  </div>{# fin .da-body #}
+
+</div>{# fin .da-layout #}
+
+{% endblock %}{# fin block content #}
+
+
+{% block extra_scripts %}
+
+{# Variables i18n pour le JavaScript — Toutes les chaînes traduisibles utilisées dans admin_dashboard.js #}
+<script>
+var DASH_I18N = {
+  chargement:              "{% trans 'Chargement…' %}",
+  aucunResultat:           "{% trans 'Aucun résultat pour' %}",
+  erreurChargement:        "{% trans 'Erreur de chargement' %}",
+  erreurRecherche:         "{% trans 'Erreur de recherche' %}",
+  donneesNonDisponibles:   "{% trans 'Données non disponibles' %}",
+  recherche:               "{% trans 'Recherche…' %}",
+  produits:                "{% trans 'Produits' %}",
+  commandes:               "{% trans 'Commandes' %}",
+  aucunProduit:            "{% trans 'Aucun produit trouvé' %}",
+  aucunProduitCourt:       "{% trans 'Aucun produit' %}",
+  aucuneCommande:          "{% trans 'Aucune commande trouvée' %}",
+  aucuneCommandeRecente:   "{% trans 'Aucune commande récente' %}",
+  aucunUtilisateur:        "{% trans 'Aucun utilisateur trouvé' %}",
+  aucunAvis:               "{% trans 'Aucun avis trouvé' %}",
+  aucunPanier:             "{% trans 'Aucun panier actif' %}",
+  aucuneConversation:      "{% trans 'Aucune conversation' %}",
+  aucuneNotification:      "{% trans 'Aucune notification' %}",
+  aucuneActivite:          "{% trans 'Aucune activité enregistrée' %}",
+  aucuneActiviteRecente:   "{% trans 'Aucune activité récente' %}",
+  aucuneCategorie:         "{% trans 'Aucune catégorie' %}",
+  nonLu:                   "{% trans 'Non lu' %}",
+  misAJour:                "{% trans 'Mis à jour' %}",
+  principal:               "{% trans 'Principal' %}",
+  valider:                 "{% trans 'Valider' %}",
+  invalider:               "{% trans 'Invalider' %}",
+  valide:                  "{% trans 'Validé' %}",
+  invalide:                "{% trans 'Invalidé' %}",
+  enAttente:               "{% trans 'En attente' %}",
+  admin:                   "{% trans 'Admin' %}",
+  vendeur:                 "{% trans 'Vendeur' %}",
+  client:                  "{% trans 'Client' %}",
+  actif:                   "{% trans 'Actif' %}",
+  inactif:                 "{% trans 'Inactif' %}",
+  modifier:                "{% trans 'Modifier' %}",
+  modifierProduit:         "{% trans 'Modifier le produit' %}",
+  modifierCategorie:       "{% trans 'Modifier la catégorie' %}",
+  nouveauProduit:          "{% trans 'Nouveau produit' %}",
+  creerCategorie:          "{% trans 'Créer la catégorie' %}",
+  enregistrer:             "{% trans 'Enregistrer' %}",
+  enregistrement:          "{% trans 'Enregistrement…' %}",
+  creation:                "{% trans 'Création…' %}",
+  nomCategorieObligatoire: "{% trans 'Le nom de la catégorie est obligatoire.' %}",
+  erreurCreation:          "{% trans 'Erreur lors de la création. Vérifiez les données.' %}",
+  aucunParent:             "{% trans '— Aucun parent —' %}",
+  irreversible:            "{% trans 'irréversible' %}",
+  client_label:            "{% trans 'Client :' %}",
+  statut_label:            "{% trans 'Statut :' %}",
+  date_label:              "{% trans 'Date :' %}",
+  paiement_label:          "{% trans 'Paiement :' %}",
+  adresse_label:           "{% trans 'Adresse :' %}",
+  produit_label:           "{% trans 'Produit' %}",
+  qte_label:               "{% trans 'Qté' %}",
+  pu_label:                "{% trans 'P.U.' %}",
+  total_label:             "{% trans 'Total' %}",
+  fcfa:                    "{% trans 'FCFA' %}",
+  stock_label:             "{% trans 'stock :' %}",
+  stock_faible:            "{% trans 'Stock faible' %}",
+  stock_ok:                "{% trans 'Stock OK' %}",
+  tousProduits:            "{% trans 'Tous les produits' %}",
+};
+</script>
+
+{# ── Script principal du dashboard ── #}
+<script src="{% static 'js/admin_dashboard.js' %}"></script>
+
+{% endblock %}

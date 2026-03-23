@@ -44,9 +44,7 @@ class PaiementSerializer(serializers.ModelSerializer):
     Sérialise les informations de paiement d'une commande.
     """
 
-    # Libellé lisible du mode de paiement (ex: "Paiement à la livraison")
     mode_affiche   = serializers.CharField(source='get_mode_display',   read_only=True)
-    # Libellé lisible du statut (ex: "En attente")
     statut_affiche = serializers.CharField(source='get_statut_display', read_only=True)
 
     class Meta:
@@ -54,8 +52,9 @@ class PaiementSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'mode', 'mode_affiche',
             'statut', 'statut_affiche',
-            'montant', 'reference_externe',
-            'date_paiement',
+            'montant', 'telephone_paiement',
+            'reference_externe', 'authorization_url',
+            'date_creation', 'date_paiement',
         ]
         read_only_fields = fields
 
@@ -85,7 +84,8 @@ class CommandeListSerializer(serializers.ModelSerializer):
         return full if full else u.username
 
     # Lignes légères pour l'historique client (nom produit + qté uniquement)
-    lignes = LigneCommandeSerializer(many=True, read_only=True)
+    lignes   = LigneCommandeSerializer(many=True, read_only=True)
+    paiement = PaiementSerializer(read_only=True)
 
     class Meta:
         model  = Commande
@@ -95,8 +95,10 @@ class CommandeListSerializer(serializers.ModelSerializer):
             'montant_total',
             'client_nom',
             'lignes',
+            'paiement',
             'adresse_livraison_ville', 'adresse_livraison_pays',
             'date_creation',
+            'peut_etre_annulee',
         ]
         read_only_fields = fields
 
@@ -199,7 +201,14 @@ class CreerCommandeSerializer(serializers.Serializer):
     # ── Commun ──────────────────────────────────────────────
     mode_paiement = serializers.ChoiceField(
         choices=Paiement.ModePaiement.choices,
-        default=Paiement.ModePaiement.LIVRAISON,
+        default=Paiement.ModePaiement.MTN_MOMO,
+    )
+
+    # Numéro Mobile Money du payeur (obligatoire pour OM et MoMo)
+    telephone_paiement = serializers.CharField(
+        required=True,
+        max_length=20,
+        help_text="Numéro Mobile Money (ex: +237 6XX XXX XXX)"
     )
 
     note_client = serializers.CharField(

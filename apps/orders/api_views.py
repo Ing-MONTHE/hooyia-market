@@ -55,17 +55,33 @@ class CommandeListeAPIView(generics.ListAPIView):
         Filtre les commandes selon le rôle :
         - Admin → toutes les commandes
         - Client → uniquement ses propres commandes
+
+        Paramètres GET supportés :
+          ?statut=confirmee  → filtrer par statut FSM
+          ?search=xxx        → recherche par référence ou nom client
         """
-        user = self.request.user
+        user   = self.request.user
+        statut = self.request.query_params.get('statut', '')
+        search = self.request.query_params.get('search', '')
 
         if user.is_admin:
-            # Admin voit tout, avec les relations préchargées (évite N+1)
-            return Commande.objects.all().select_related('client').prefetch_related('lignes')
+            qs = Commande.objects.all().select_related('client').prefetch_related('lignes', 'paiement')
+        else:
+            qs = Commande.objects.filter(client=user).prefetch_related('lignes', 'paiement')
 
-        # Client → seulement ses commandes, triées par date décroissante
-        return Commande.objects.filter(
-            client=user
-        ).prefetch_related('lignes').order_by('-date_creation')
+        if statut:
+            qs = qs.filter(statut=statut)
+
+        if search:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(reference__icontains=search) |
+                Q(client__nom__icontains=search) |
+                Q(client__prenom__icontains=search) |
+                Q(client__username__icontains=search)
+            )
+
+        return qs.order_by('-date_creation')
 
 
 class CommandeCreerAPIView(APIView):
@@ -119,19 +135,29 @@ class CommandeCreerAPIView(APIView):
         # ── Création de la commande ──────────────────────────────────────────
         try:
             commande = OrderService.create_from_cart(
-                utilisateur   = request.user,
-                adresse       = adresse,
-                mode_paiement = data.get('mode_paiement', 'livraison'),
-                note_client   = data.get('note_client', ''),
+                utilisateur        = request.user,
+                adresse            = adresse,
+                mode_paiement      = data.get('mode_paiement'),
+                telephone_paiement = data.get('telephone_paiement', ''),
+                note_client        = data.get('note_client', ''),
             )
         except ValidationError as e:
             msg = e.message if hasattr(e, 'message') else str(e)
             return Response({'erreur': msg}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(
-            CommandeDetailSerializer(commande).data,
-            status=status.HTTP_201_CREATED
-        )
+        # ── Initialisation du paiement PayUnit ───────────────────────────────
+        try:
+            from .payment_service import PayUnitService, PayUnitError
+            result = PayUnitService.initialize(commande.paiement, request)
+            authorization_url = result['authorization_url']
+        except PayUnitError as e:
+            OrderService.annuler_commande(commande, request.user)
+            return Response({'erreur': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        return Response({
+            'commande':          CommandeDetailSerializer(commande).data,
+            'authorization_url': authorization_url,
+        }, status=status.HTTP_201_CREATED)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -264,3 +290,110 @@ class ExpedierCommandeAPIView(TransitionCommandeAPIView):
 class LivrerCommandeAPIView(TransitionCommandeAPIView):
     transition_method = 'livrer'
     message_succes    = _l('Commande livrée.')
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API — Webhook PayUnit
+# POST /api/commandes/webhook/payunit/
+# ═══════════════════════════════════════════════════════════════
+
+class PayUnitWebhookAPIView(APIView):
+    """
+    Reçoit les notifications asynchrones de PayUnit.
+
+    PayUnit appelle cette URL (notify_url) en arrière-plan dès que
+    le paiement est traité (succès ou échec).
+
+    Cette vue est publique — la sécurité est assurée par vérification
+    du transaction_id auprès de l'API PayUnit (double vérification).
+    """
+    permission_classes = []
+    authentication_classes = []
+
+    def post(self, request):
+        from .payment_service import PayUnitService, PayUnitError
+        from .models import Paiement
+        import json
+
+        # ── 1. Parser le payload PayUnit ─────────────────────
+        try:
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            return Response({'erreur': 'Payload invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # PayUnit envoie : { "transaction_id": "xxx", "status": "SUCCESS", ... }
+        transaction_id = (
+            payload.get('transaction_id') or
+            payload.get('transactionId') or
+            payload.get('transaction', {}).get('transaction_id', '')
+        )
+
+        if not transaction_id:
+            return Response({'erreur': 'transaction_id manquant.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ── 2. Retrouver le paiement en base ─────────────────
+        try:
+            paiement = Paiement.objects.select_related('commande').get(
+                reference_externe=transaction_id
+            )
+        except Paiement.DoesNotExist:
+            return Response({'message': 'Paiement inconnu — ignoré.'}, status=status.HTTP_200_OK)
+
+        # Idempotence — évite de traiter deux fois le même webhook
+        if paiement.statut == Paiement.StatutPaiement.REUSSI:
+            return Response({'message': 'Déjà traité.'}, status=status.HTTP_200_OK)
+
+        # ── 3. Double vérification auprès de l'API PayUnit ───
+        try:
+            result = PayUnitService.verify(transaction_id)
+            statut_payunit = result['status']
+        except PayUnitError:
+            return Response({'erreur': 'Vérification impossible.'}, status=status.HTTP_502_BAD_GATEWAY)
+
+        # ── 4. Agir selon le statut ───────────────────────────
+        if statut_payunit == 'SUCCESS':
+            PayUnitService.confirmer_paiement(paiement)
+            return Response({'message': 'Paiement confirmé.'}, status=status.HTTP_200_OK)
+
+        elif statut_payunit in ('FAILED', 'CANCELED'):
+            PayUnitService.echouer_paiement(paiement)
+            return Response({'message': 'Paiement échoué.'}, status=status.HTTP_200_OK)
+
+        return Response({'message': f'Statut {statut_payunit} — en attente.'}, status=status.HTTP_200_OK)
+
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API — Statut du paiement d'une commande
+# GET /api/commandes/<ref>/paiement-statut/
+# ═══════════════════════════════════════════════════════════════
+
+class PaiementStatutAPIView(APIView):
+    """
+    Retourne le statut actuel du paiement d'une commande.
+
+    Utilisé par le frontend pour poller le statut après redirection
+    depuis PayUnit (le client revient sur le site après avoir payé).
+
+    Le frontend appelle cet endpoint toutes les 3 secondes jusqu'à
+    obtenir 'reussi' ou 'echoue'.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, ref):
+        """GET /api/commandes/<ref>/paiement-statut/"""
+        import uuid
+        try:
+            uuid.UUID(str(ref))
+            commande = Commande.objects.get(reference=ref, client=request.user)
+        except (Commande.DoesNotExist, ValueError):
+            return Response({'erreur': 'Commande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            paiement = commande.paiement
+        except Exception:
+            return Response({'erreur': 'Paiement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'statut':           paiement.statut,
+            'statut_commande':  commande.statut,
+            'reference':        str(commande.reference),
+        })

@@ -1,0 +1,64 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_avis.html
+   Section "Avis clients" — Modération des avis produits.
+
+   CONTENU :
+     - Filtres : tous / en attente / validés / invalidés
+     - Tableau avec note (étoiles), commentaire, statut
+     - Actions : valider / invalider / supprimer
+
+   DONNÉES :
+     loadAvis(page)    -> GET /api/avis/
+     validerAvis(id)   -> PATCH /api/avis/<id>/
+     supprimerAvis(id) -> DELETE /api/avis/<id>/
+{% endcomment %}
+{% load i18n %}
+
+{# ── En-tête de section ── #}
+<div class="da-section-header" id="sec-avis-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Avis clients" %}</h1>
+    <p class="da-section-subtitle">{% trans "Modération des avis produits" %}</p>
+  </div>
+</div>
+
+{# Filtres par statut de modération #}
+<div id="sec-avis-filters" style="display:none;margin-bottom:14px;">
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="filtreAvis('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('en_attente',this)">{% trans "En attente" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('valide',this)">{% trans "Validés" %}</button>
+    <button class="filter-btn" onclick="filtreAvis('invalide',this)">{% trans "Invalidés" %}</button>
+  </div>
+</div>
+
+{# Tableau des avis #}
+<div class="da-card" id="sec-avis-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "Tous les avis" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="avis-count"></span>
+    </div>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Produit" %}</th>
+          <th>{% trans "Client" %}</th>
+          <th>{% trans "Note" %}</th>
+          <th class="hide-mobile">{% trans "Commentaire" %}</th>
+          <th class="hide-mobile">{% trans "Date" %}</th>
+          <th>{% trans "Statut" %}</th>
+          <th style="text-align:right;">{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-avis">
+        <tr><td colspan="7" class="da-loading">{% trans "Chargement des avis…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-avis" class="da-pagination" style="display:none;"></div>
+</div>

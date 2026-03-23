@@ -17,8 +17,8 @@ urlpatterns = [
     # ── API REST (pas de préfixe langue) ────────────────────
     path('api/auth/',  include('apps.users.api_urls')),
     path('api/produits/',      include('apps.products.api_urls')),
-    path('api/categories/',    CategorieViewSet.as_view({'get': 'list'})),
-    path('api/categories/<int:pk>/', CategorieViewSet.as_view({'get': 'retrieve'})),
+    path('api/categories/',    CategorieViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/categories/<int:pk>/', CategorieViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'put': 'update', 'delete': 'destroy'})),
     path('api/panier/',        include('apps.cart.api_urls')),
     path('api/commandes/',     include('apps.orders.api_urls')),
     path('api/avis/',          include('apps.reviews.api_urls')),
@@ -39,6 +39,7 @@ urlpatterns += i18n_patterns(
     path('compte/',    include('apps.users.urls')),
     path('panier/',   include('apps.cart.urls')),
     path('commandes/', include('apps.orders.urls')),
+    path('notifications/', include('apps.notifications.urls')),
     path('chat/',     include('apps.chat.urls')),
     prefix_default_language=False,  # /fr/ optionnel pour la langue par défaut
 )

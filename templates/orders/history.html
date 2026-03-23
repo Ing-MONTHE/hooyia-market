@@ -153,6 +153,28 @@
 
 {% block extra_scripts %}
 <script>
+var HISTORY_I18N = {
+  enAttente      : '{% trans "En attente" %}',
+  confirmee      : '{% trans "Confirmée" %}',
+  enPreparation  : '{% trans "En préparation" %}',
+  expediee       : '{% trans "Expédiée" %}',
+  livree         : '{% trans "Livrée" %}',
+  annulee        : '{% trans "Annulée" %}',
+  commande       : '{% trans "commande" %}',
+  commandes      : '{% trans "commandes" %}',
+  article        : '{% trans "article" %}',
+  articles       : '{% trans "articles" %}',
+  autre          : '{% trans "autre" %}',
+  autres         : '{% trans "autres" %}',
+  commandeLabel  : '{% trans "Commande" %}',
+  annulerTitre   : '{% trans "Annuler la commande" %}',
+  annulerBody    : "{% trans 'Cette action est irréversible. Confirmer l annulation ?' %}",
+  annulerConfirm : '{% trans "Oui, annuler" %}',
+  annulerConfirmNatif : "{% trans 'Confirmer l annulation de cette commande ?' %}",
+  commandeAnnulee: '{% trans "Commande annulée avec succès." %}',
+  erreurAnnulation: '{% trans "Erreur lors de l annulation. Réessayez." %}',
+};
+
 // ── Mapping statuts ───────────────────────────────────────────────────────────
 const STATUTS_LABELS = {
   en_attente    : HISTORY_I18N.enAttente,
@@ -274,7 +296,7 @@ function renderCommande(c) {
 
     <!-- Footer actions -->
     <div class="commande-card-footer">
-      <a href="/commandes/${c.id}/" class="btn btn-secondary text-xs py-1.5 flex items-center gap-1.5">
+      <a href="/commandes/${c.id}/detail/" class="btn btn-secondary text-xs py-1.5 flex items-center gap-1.5">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>

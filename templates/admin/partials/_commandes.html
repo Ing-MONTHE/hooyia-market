@@ -1,0 +1,78 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_commandes.html
+   Section "Commandes" — Tableau de toutes les commandes.
+
+   DONNÉES : loadCommandes(page) -> GET /api/commandes/
+   Filtrages : par statut (filter-btn) + recherche texte
+{% endcomment %}
+{% load i18n %}
+
+{# En-tête #}
+<div class="da-section-header" id="sec-commandes-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Commandes" %}</h1>
+    <p class="da-section-subtitle">{% trans "Suivi et gestion des commandes clients" %}</p>
+  </div>
+  {# Recherche inline #}
+  <div style="position:relative;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="var(--text-muted)" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round"
+         style="position:absolute;left:10px;top:50%;transform:translateY(-50%);">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="cmd-search"
+           placeholder="{% trans "Référence, client…" %}"
+           oninput="debounce(()=>loadCommandes(1),350)()"
+           style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
+                  border:1.5px solid var(--border);font-size:12.5px;
+                  font-family:var(--font-body);color:var(--text);
+                  width:200px;outline:none;background:var(--surface);" />
+  </div>
+</div>
+
+{# Filtres par statut #}
+<div id="sec-commandes-filters" style="display:none;margin-bottom:14px;">
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="filtreCommandes('',this)">{% trans "Toutes" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('en_attente',this)">{% trans "En attente" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('confirmee',this)">{% trans "Confirmées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('en_preparation',this)">{% trans "En préparation" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('expediee',this)">{% trans "Expédiées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('livree',this)">{% trans "Livrées" %}</button>
+    <button class="filter-btn" onclick="filtreCommandes('annulee',this)">{% trans "Annulées" %}</button>
+  </div>
+</div>
+
+{# Tableau commandes #}
+<div class="da-card" id="sec-commandes-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "Toutes les commandes" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="cmd-count"></span>
+    </div>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Référence" %}</th>
+          <th>{% trans "Client" %}</th>
+          <th class="hide-mobile">{% trans "Adresse" %}</th>
+          <th>{% trans "Montant" %}</th>
+          <th class="hide-mobile">{% trans "Date" %}</th>
+          <th>{% trans "Statut" %}</th>
+          <th>{% trans "Paiement" %}</th>
+          <th style="text-align:right;">{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-commandes">
+        <tr><td colspan="8" class="da-loading">{% trans "Chargement des commandes…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-commandes" class="da-pagination" style="display:none;"></div>
+</div>

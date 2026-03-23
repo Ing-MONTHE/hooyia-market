@@ -1,0 +1,135 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_modal_categorie.html
+   Modale d'ajout rapide d'une catégorie.
+   Déclenchée depuis le formulaire produit.
+
+   USAGE :
+     Ouvrir  : openModalCat()    — charge aussi les parents disponibles
+     Fermer  : closeModalCat()   — reset les champs
+     Valider : submitModalCat()  — POST /api/categories/ + maj select produit
+
+   Ces fonctions sont définies dans admin_dashboard.js.
+   INCLUS DANS : admin_base.html (disponible sur toutes les sections)
+{% endcomment %}
+{% load i18n %}
+
+<div id="modal-cat-quick"
+     style="display:none;position:fixed;inset:0;z-index:400;
+            background:rgba(0,0,0,.5);align-items:center;justify-content:center;
+            padding:1rem;backdrop-filter:blur(2px);"
+     onclick="if(event.target===this)closeModalCat()">
+
+  <div style="background:var(--surface);border-radius:var(--r-lg);
+               width:100%;max-width:460px;box-shadow:var(--sh-lg);
+               animation:modal-in .2s ease both;overflow:hidden;">
+
+    {# ── En-tête ── #}
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);
+                display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        {# Icône catégorie #}
+        <div style="width:30px;height:30px;border-radius:var(--r-sm);
+                    background:linear-gradient(135deg,var(--brand-main),var(--brand-deep));
+                    display:flex;align-items:center;justify-content:center;">
+          {# Lucide : Tag #}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="#fff" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:var(--text);">
+          {% trans "Nouvelle catégorie" %}
+        </span>
+      </div>
+      {# Bouton fermer #}
+      <button onclick="closeModalCat()"
+              style="width:28px;height:28px;border:none;background:var(--surface-2);
+                     border-radius:var(--r-sm);cursor:pointer;color:var(--text-muted);
+                     display:flex;align-items:center;justify-content:center;">
+        {# Lucide : X #}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6"  y2="18"/>
+          <line x1="6"  y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# ── Corps ── #}
+    <div style="padding:16px 18px;">
+
+      {# Flash interne — affiché en cas d'erreur/succès #}
+      <div id="modal-cat-flash"
+           style="display:none;margin-bottom:12px;padding:10px 14px;
+                  border-radius:var(--r-sm);font-size:12.5px;font-weight:600;
+                  font-family:var(--font-body);align-items:center;gap:8px;"></div>
+
+      {# Nom de la catégorie (obligatoire) #}
+      <div class="da-field">
+        <label class="da-label">
+          {% trans "Nom" %}
+          <span style="color:var(--accent);font-size:9px;">*</span>
+        </label>
+        <input type="text" id="mcat-nom"
+               placeholder="{% trans "Ex: Smartphones, PC Portables…" %}"
+               class="da-input" required />
+      </div>
+
+      {# Description (optionnelle) #}
+      <div class="da-field">
+        <label class="da-label">
+          {% trans "Description" %}
+          <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">
+            {% trans "(optionnel)" %}
+          </span>
+        </label>
+        <textarea id="mcat-desc" rows="2"
+                  placeholder="{% trans "Description courte…" %}"
+                  class="da-input" style="resize:none;min-height:58px;"></textarea>
+      </div>
+
+      {# Catégorie parente (optionnelle — vide = racine) #}
+      <div class="da-field" style="margin-bottom:0;">
+        <label class="da-label">
+          {% trans "Catégorie parente" %}
+          <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">
+            {% trans "(vide = racine)" %}
+          </span>
+        </label>
+        <select id="mcat-parent" class="da-input">
+          <option value="">{% trans "— Aucun parent —" %}</option>
+          {# Options chargées dynamiquement par openModalCat() via /api/categories/ #}
+        </select>
+      </div>
+
+    </div>
+
+    {# ── Pied ── #}
+    <div style="padding:12px 18px;border-top:1px solid var(--border);
+                display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+      <button type="button" onclick="closeModalCat()" class="btn btn-secondary">
+        {% trans "Annuler" %}
+      </button>
+      <button type="button" onclick="submitModalCat()" id="mcat-btn-submit" class="btn btn-primary">
+        {# Lucide : Check #}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        {% trans "Créer la catégorie" %}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @keyframes modal-in {
+    from { opacity:0; transform:scale(.96) translateY(8px); }
+    to   { opacity:1; transform:none; }
+  }
+</style>

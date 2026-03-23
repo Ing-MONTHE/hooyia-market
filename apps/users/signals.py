@@ -6,6 +6,12 @@ Django envoie un signal et notre fonction réagit automatiquement.
 Ici on écoute :
 - La création d'un utilisateur → on crée son token + on envoie l'email de vérification
 - La sauvegarde d'un utilisateur → on crée son panier automatiquement
+
+Règles d'envoi de l'email de vérification :
+  - Uniquement si le compte vient d'être créé (created=True)
+  - Uniquement si le compte est inactif (is_active=False)
+  - Uniquement si l'email n'est pas déjà vérifié (email_verifie=False)
+  → Exclut les comptes Google OAuth (créés avec is_active=True et email_verifie=True)
 """
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -23,17 +29,24 @@ from .models import CustomUser, TokenVerificationEmail
 @receiver(post_save, sender=CustomUser)
 def creer_token_verification(sender, instance, created, **kwargs):
     """
-    'created' = True uniquement lors de la toute première création.
-    On ne veut pas recréer un token à chaque modification du profil.
+    Envoie un email de vérification uniquement pour les inscriptions
+    classiques (email + mot de passe).
+
+    Les comptes Google OAuth sont exclus car :
+      - Google a déjà vérifié l'email
+      - email_verifie=True est défini dès la création
     """
-    if created:
+    if created and not instance.is_active and not instance.email_verifie:
+
         # Crée le token lié à cet utilisateur
         token = TokenVerificationEmail.objects.create(utilisateur=instance)
 
-        # Construit le lien de vérification
-        lien = f"https://hooyia-market-wpsp.onrender.com/compte/verifier-email/{token.token}/"
+        # Construit le lien de vérification avec le bon domaine
+        # SITE_URL = http://localhost:8000 en dev
+        # SITE_URL = https://tondomaine.com en prod
+        lien = f"{settings.SITE_URL}/compte/verifier-email/{token.token}/"
 
-        # Envoie l'email (en local : affiché dans le terminal)
+        # Envoie l'email de vérification
         send_mail(
             subject="🛒 HooYia Market — Activez votre compte",
             message=f"""
@@ -65,9 +78,12 @@ def creer_panier_utilisateur(sender, instance, created, **kwargs):
     """
     Dès qu'un utilisateur est créé, on lui crée un panier vide.
     Ainsi il n'y a jamais besoin de vérifier si le panier existe.
+
+    get_or_create évite une erreur si le panier existe déjà
+    (ex: création via l'admin Django).
     """
     if created:
         # Import ici pour éviter les imports circulaires
         # (users importe cart, cart importe users → boucle infinie)
         from apps.cart.models import Panier
-        Panier.objects.create(utilisateur=instance)
+        Panier.objects.get_or_create(utilisateur=instance)

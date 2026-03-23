@@ -1,0 +1,1261 @@
+/* ============================================================
+   HooYia Market — admin_dashboard.css
+   ============================================================
+   Feuille de style unique du dashboard d'administration.
+   Chargée via {% static 'css/admin_dashboard.css' %} dans admin_base.html.
+
+   SOMMAIRE :
+     1.  Variables CSS (design tokens)
+     2.  Dark mode
+     3.  Reset & base
+     4.  Layout général (topbar + sidebar + contenu)
+     5.  Topbar
+     6.  Sidebar
+     7.  Sections SPA
+     8.  Boutons
+     9.  Cartes (da-card)
+     10. KPI cards
+     11. Tableaux
+     12. Badges de statut
+     13. États de chargement
+     14. Layouts de grille
+     15. Pagination
+     16. Filtres
+     17. Inputs & formulaires
+     18. Barre de stock
+     19. Actions rapides
+     20. Mini stats
+     21. Activité / Feed
+     22. Toggle switch
+     23. Vue type boutons (table / cards)
+     24. Modales
+     25. Responsive
+   ============================================================ */
+
+
+/* ============================================================
+   1. VARIABLES CSS — Design Tokens
+   ============================================================
+   Modifier ici = se répercute sur tout le dashboard.
+   ============================================================ */
+:root {
+
+  /* ── Palette principale (charte HooYia Market) ── */
+  --brand-deep:   #0D1F5C;   /* Navy profond — sidebar, titres forts */
+  --brand-main:   #1E3A8A;   /* Navy main — liens actifs, éléments UI */
+  --brand-light:  #EFF4FF;   /* Navy très clair — hover, backgrounds légers */
+  --accent:       #F97316;   /* Orange CTA — 1 seul bouton primaire par vue */
+  --accent-dark:  #EA6000;   /* Orange foncé — hover du CTA */
+  --accent-light: #FFF3E8;   /* Orange très clair — badges, fonds info */
+
+  /* ── Fonds et surfaces ── */
+  --bg:           #F4F7FC;   /* Fond global — jamais blanc pur */
+  --surface:      #FFFFFF;   /* Cartes, panels, sidebar items actifs */
+  --surface-2:    #F8FAFF;   /* Surface secondaire — hover, zebra tables */
+
+  /* ── Bordures ── */
+  --border:       #E2E8F0;
+  --border-2:     #D1DAE8;
+
+  /* ── Textes ── */
+  --text:         #0F1923;   /* Principal */
+  --text-2:       #4A5568;   /* Secondaire */
+  --text-muted:   #8898AA;   /* Muet — placeholders, dates */
+
+  /* ── Couleurs sémantiques ── */
+  --green:        #10B981;
+  --green-light:  #ECFDF5;
+  --red:          #EF4444;
+  --red-light:    #FFF5F5;
+  --yellow:       #F59E0B;
+  --yellow-light: #FFFBEB;
+  --blue:         #3B82F6;
+  --blue-light:   #DBEAFE;
+  --purple:       #8B5CF6;
+  --purple-light: #EDE9FE;
+  --cyan:         #06B6D4;
+  --cyan-light:   #CFFAFE;
+
+  /* ── Dimensions ── */
+  --sidebar-w:    240px;     /* Largeur sidebar desktop */
+  --topbar-h:     60px;      /* Hauteur de la barre supérieure */
+
+  /* ── Ombres ── */
+  --sh-xs: 0 1px 3px rgba(13,31,92,0.06);
+  --sh-sm: 0 2px 8px rgba(13,31,92,0.08);
+  --sh-md: 0 4px 16px rgba(13,31,92,0.10);
+  --sh-lg: 0 8px 32px rgba(13,31,92,0.13);
+
+  /* ── Rayons ── */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  18px;
+
+  /* ── Typographies ── */
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+}
+
+
+/* ============================================================
+   2. DARK MODE
+   Toutes les surcharges de couleurs en mode sombre.
+   ============================================================ */
+html.dark {
+  --bg:           #0F1117;
+  --surface:      #1A1D27;
+  --surface-2:    #22263A;
+  --border:       #2E3350;
+  --border-2:     #3A4060;
+  --text:         #E8ECF4;
+  --text-2:       #9BA8C0;
+  --text-muted:   #5E6A88;
+  --brand-deep:   #C7D9FF;
+  --brand-main:   #93C5FD;
+  --brand-light:  #1a2240;
+  --green-light:  #052e1c;
+  --red-light:    #2d0d0d;
+  --yellow-light: #2d1f04;
+  --blue-light:   #0d1f42;
+  --purple-light: #1e1040;
+  --cyan-light:   #042830;
+  --accent-light: #2d1500;
+  --sh-xs: 0 1px 3px rgba(0,0,0,.4);
+  --sh-sm: 0 2px 8px rgba(0,0,0,.5);
+  --sh-md: 0 4px 16px rgba(0,0,0,.6);
+  --sh-lg: 0 8px 32px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+
+/* Composants dark */
+html.dark body { background: var(--bg) !important; color: var(--text) !important; }
+html.dark .da-topbar  { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-topbar-btn { color: var(--text-2) !important; }
+html.dark .da-topbar-btn:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .da-sidebar { background: #12151f !important; border-color: var(--border) !important; }
+html.dark .sb-item { color: var(--text-2) !important; }
+html.dark .sb-item:hover { background: rgba(255,255,255,.05) !important; color: var(--text) !important; }
+html.dark .sb-item.active { background: rgba(147,197,253,.12) !important; color: #93C5FD !important; }
+html.dark .sb-item.active svg { stroke: #93C5FD !important; }
+html.dark .sb-section-label { color: var(--text-muted) !important; }
+html.dark .sb-divider { border-color: var(--border) !important; }
+html.dark .da-logo-badge { background: rgba(249,115,22,.18) !important; color: #fb923c !important; }
+html.dark .da-online-badge { background: rgba(16,185,129,.15) !important; color: #34d399 !important; }
+html.dark .da-card { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: none !important; }
+html.dark .da-card-head { background: var(--surface) !important; border-bottom-color: var(--border) !important; }
+html.dark .da-card-head h3 { color: #C7D9FF !important; }
+html.dark .da-card-action { color: #93C5FD !important; }
+html.dark .da-card-action:hover { color: var(--accent) !important; }
+html.dark .kpi-card { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: none !important; }
+html.dark .kpi-value { color: #E8ECF4 !important; }
+html.dark .kpi-label { color: #7A8BA8 !important; }
+html.dark .da-section-title { color: #E8ECF4 !important; }
+html.dark .da-section-subtitle { color: var(--text-muted) !important; }
+html.dark .da-table { color: var(--text) !important; border-color: var(--border) !important; }
+html.dark .da-table th { background: var(--surface-2) !important; color: #7A8BA8 !important; border-color: var(--border) !important; }
+html.dark .da-table td { border-color: var(--border) !important; color: var(--text) !important; }
+html.dark .da-table tr:hover td { background: rgba(255,255,255,.03) !important; }
+html.dark .da-table .bold { color: var(--text) !important; }
+html.dark .da-loading { color: var(--text-muted) !important; background: var(--surface-2) !important; }
+html.dark input:not([type="range"]),
+html.dark textarea,
+html.dark select { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text) !important; }
+html.dark input::placeholder, html.dark textarea::placeholder { color: var(--text-muted) !important; }
+html.dark .qa:not(.orange) { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .qa:not(.orange):hover { background: #2a2f45 !important; color: var(--text) !important; }
+html.dark .qa.blue { background: rgba(147,197,253,.08) !important; border-color: rgba(147,197,253,.2) !important; }
+html.dark .qa.blue .qa-text { color: #93C5FD !important; }
+html.dark .qa.blue .qa-ic { background: rgba(147,197,253,.15) !important; color: #93C5FD !important; }
+html.dark .da-profile-dropdown { background: var(--surface) !important; border-color: var(--border) !important; box-shadow: 0 8px 24px rgba(0,0,0,.5) !important; }
+html.dark .da-dd-item { color: var(--text-2) !important; }
+html.dark .da-dd-item:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .da-dd-divider { border-color: var(--border) !important; }
+html.dark .da-profile-name { color: var(--text) !important; }
+html.dark .da-profile-role { color: var(--text-muted) !important; }
+html.dark .btn-secondary { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .btn-secondary:hover { border-color: #93C5FD !important; color: #93C5FD !important; }
+html.dark .btn-ghost { color: var(--text-2) !important; }
+html.dark .btn-ghost:hover { background: var(--surface-2) !important; color: var(--text) !important; }
+html.dark .filter-btn { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .filter-btn.active { background: rgba(147,197,253,.12) !important; border-color: #93C5FD !important; color: #93C5FD !important; }
+html.dark .pag-btn { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+html.dark .pag-btn.active { background: #2563EB !important; border-color: #2563EB !important; color: #fff !important; }
+html.dark .modal-overlay { background: rgba(0,0,0,.75) !important; }
+html.dark .modal-box { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .modal-title { color: var(--text) !important; }
+html.dark .da-notif-dropdown { background: var(--surface) !important; border-color: var(--border) !important; }
+html.dark .da-notif-item:hover { background: var(--surface-2) !important; }
+html.dark .da-notif-title { color: var(--text) !important; }
+html.dark .da-notif-msg { color: var(--text-2) !important; }
+
+/* Éléments générés dynamiquement par JS avec inline styles */
+html.dark [style*="background:#fff"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background:#FFF"],
+html.dark [style*="background:#FFFFFF"],
+html.dark [style*="background: white"],
+html.dark [style*="background:white"] { background: var(--surface) !important; }
+html.dark [style*="color:#0D1F5C"],
+html.dark [style*="color:#0F1923"],
+html.dark [style*="color:#1E3A8A"] { color: #C7D9FF !important; }
+html.dark [style*="color:#4A5568"] { color: var(--text-2) !important; }
+html.dark [style*="color:#8898AA"],
+html.dark [style*="color:#6B7280"] { color: var(--text-muted) !important; }
+html.dark [style*="border:1px solid #E2E8F0"],
+html.dark [style*="border-bottom:1px solid #E2E8F0"],
+html.dark [style*="border-color:#E2E8F0"] { border-color: var(--border) !important; }
+html.dark [style*="background:#F4F7FC"],
+html.dark [style*="background:#F8FAFF"],
+html.dark [style*="background:#F8FAFC"],
+html.dark [style*="background:#EFF6FF"] { background: var(--surface-2) !important; }
+
+
+/* ============================================================
+   3. RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ============================================================
+   4. LAYOUT GÉNÉRAL
+   Structure :
+     1. Topbar fixe (height: var(--topbar-h))
+     2. Sidebar fixe à gauche (width: var(--sidebar-w))
+     3. Contenu principal scrollable
+   ============================================================ */
+.da-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Zone sous le topbar : sidebar + contenu */
+.da-body {
+  display: flex;
+  flex: 1;
+  padding-top: var(--topbar-h);
+}
+
+/* Contenu principal — scrollable indépendamment de la sidebar */
+.da-main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px;
+  overflow-y: auto;
+  margin-left: var(--sidebar-w);
+}
+
+
+/* ============================================================
+   5. TOPBAR — Barre supérieure fixe
+   Structure : [☰ Logo]  ·········  [🔔] [🌐] [Avatar ▼]
+   ============================================================ */
+.da-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--sh-xs);
+  display: flex;
+  align-items: center;
+  padding: 0 20px 0 0;
+  z-index: 50;
+}
+
+/* Zone gauche — largeur = sidebar pour alignement parfait */
+.da-topbar-brand {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 0 20px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+}
+
+/* Bouton hamburger — visible uniquement sur mobile */
+.da-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: background 150ms, color 150ms;
+  flex-shrink: 0;
+}
+.da-burger:hover { background: var(--surface-2); color: var(--brand-deep); }
+
+/* Logo texte */
+.da-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+.da-logo-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--brand-deep), var(--brand-main));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(13,31,92,0.25);
+}
+.da-logo-text {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--brand-deep);
+  letter-spacing: -0.3px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.da-logo-text span { color: var(--accent); }
+
+/* Badge "Admin" à côté du logo */
+.da-logo-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  border: 1px solid rgba(249,115,22,0.2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* Zone droite de la topbar */
+.da-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* Bouton icône générique */
+.da-topbar-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.da-topbar-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--brand-deep);
+}
+
+/* Badge sur le bouton notifications */
+.da-topbar-btn .da-notif-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 16px; height: 16px;
+  background: var(--accent);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;
+  line-height: 1;
+  font-family: var(--font-display);
+}
+
+/* Séparateur vertical */
+.da-topbar-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+/* Bouton profil admin */
+.da-profile-wrap { position: relative; }
+.da-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px 5px 6px;
+  border-radius: var(--r-lg);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+  font-family: var(--font-body);
+}
+.da-profile-btn:hover { background: var(--surface-2); border-color: var(--border); }
+
+/* Avatar circulaire */
+.da-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #FB923C);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(249,115,22,0.30);
+}
+.da-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.da-profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+.da-profile-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-display);
+  white-space: nowrap;
+}
+.da-profile-role { font-size: 10.5px; color: var(--text-muted); font-weight: 500; }
+
+/* Dropdown profil */
+.da-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.97);
+  transition: opacity 150ms, transform 150ms, visibility 150ms;
+  z-index: 100;
+}
+.da-profile-wrap:hover .da-profile-dropdown,
+.da-profile-wrap:focus-within .da-profile-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.da-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: background 100ms, color 100ms;
+  cursor: pointer;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: var(--font-body);
+}
+.da-dd-item:hover { background: var(--surface-2); color: var(--text); }
+.da-dd-item.danger:hover { background: var(--red-light); color: #991b1b; }
+.da-dd-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+
+/* ============================================================
+   6. SIDEBAR — Navigation latérale
+   Fond navy. Items avec border-left colorée à l'état actif.
+   ============================================================ */
+.da-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--brand-deep);
+  min-height: calc(100vh - var(--topbar-h));
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 40;
+  transition: transform 300ms ease;
+}
+
+/* Scrollbar discrète */
+.da-sidebar::-webkit-scrollbar { width: 3px; }
+.da-sidebar::-webkit-scrollbar-track { background: transparent; }
+.da-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+/* Indicateur statut du site en haut */
+.sb-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 14px 12px;
+  padding: 9px 12px;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--r-md);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #34D399;
+  font-family: var(--font-body);
+}
+.sb-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: sb-pulse 2.5s ease-in-out infinite;
+}
+@keyframes sb-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+.sb-status-text { flex: 1; }
+
+/* Séparateur horizontal */
+.sb-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 6px 0;
+  border: none;
+}
+
+/* Label de groupe (CATALOGUE, VENTES, etc.) */
+.sb-section-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.22);
+  padding: 14px 16px 5px;
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+/* Item de navigation */
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.50);
+  border-left: 3px solid transparent;
+  background: transparent;
+  border-top: none; border-right: none; border-bottom: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: color 150ms, background 150ms, border-color 150ms;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sb-item:hover {
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.05);
+  border-left-color: rgba(255,255,255,0.15);
+}
+/* État actif — highlight orange à gauche */
+.sb-item.active {
+  color: #FFFFFF;
+  background: rgba(249,115,22,0.15);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* Icône et texte */
+.sb-icon {
+  width: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+.sb-label { flex: 1; }
+
+/* Badge numérique dans la sidebar (ex: "3" commandes) */
+.sb-badge {
+  display: none;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--accent);
+  color: white;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-radius: 99px;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+.sb-badge.blue { background: var(--brand-main); }
+
+/* Footer sidebar */
+.sb-footer {
+  margin-top: auto;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.sb-back-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  transition: color 150ms, background 150ms;
+  font-family: var(--font-body);
+}
+.sb-back-link:hover { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.05); }
+
+/* Overlay sombre derrière la sidebar sur mobile */
+.da-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 39;
+}
+body.da-sidebar-open .da-sidebar-overlay { display: block; }
+body.da-sidebar-open { overflow: hidden; }
+
+
+/* ============================================================
+   7. SECTIONS SPA — Affichage / masquage
+   Chaque section alterne .da-section / .da-section.shown
+   ============================================================ */
+.da-section { display: none; }
+.da-section.shown { display: block; }
+
+/* Animation d'entrée */
+@keyframes section-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.da-section.shown { animation: section-in 220ms ease both; }
+
+/* En-tête de section (titre + actions) */
+.da-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.da-section-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand-deep);
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+.da-section-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-family: var(--font-body);
+}
+.da-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   8. BOUTONS
+   .btn-primary   → Orange — CTA principal (1 seul par vue)
+   .btn-secondary → Bordure navy — actions secondaires
+   .btn-ghost     → Texte seul — annuler, retour
+   .btn-danger    → Rouge — actions destructives
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--r-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-decoration: none;
+  transition: background 150ms, box-shadow 150ms, transform 100ms, border-color 150ms;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.98); }
+
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:hover {
+  background: var(--accent-dark); border-color: var(--accent-dark);
+  box-shadow: 0 4px 14px rgba(249,115,22,0.38); transform: translateY(-1px);
+}
+
+.btn-secondary { background: var(--surface); color: var(--brand-main); border-color: var(--border); }
+.btn-secondary:hover { background: var(--brand-light); border-color: var(--brand-main); transform: translateY(-1px); }
+
+.btn-ghost { background: transparent; color: var(--text-2); border-color: transparent; padding-left: 10px; padding-right: 10px; }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+
+.btn-danger { background: var(--red-light); color: #991b1b; border-color: #FECACA; }
+.btn-danger:hover { background: #FEE2E2; border-color: var(--red); }
+
+.btn-sm  { padding: 6px 12px; font-size: 11.5px; }
+.btn-xs  { padding: 4px 10px; font-size: 11px; border-radius: var(--r-sm); }
+
+
+/* ============================================================
+   9. CARTES — .da-card
+   Conteneur de base. Structure : .da-card > .da-card-head + contenu
+   ============================================================ */
+.da-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-xs);
+  overflow: hidden;
+  transition: box-shadow 200ms;
+}
+.da-card:hover { box-shadow: var(--sh-sm); }
+
+.da-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #F1F5FD;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.da-card-head h3 {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  margin: 0;
+}
+
+/* Lien "Voir tout →" */
+.da-card-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-main);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  transition: color 150ms;
+  text-decoration: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.da-card-action:hover { color: var(--accent); }
+
+
+/* ============================================================
+   10. KPI CARDS — Cartes de statistiques
+   Grille de 4 cartes avec barre colorée en haut.
+   ============================================================ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-xs);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 200ms, transform 150ms;
+  animation: card-in 350ms ease both;
+}
+.kpi-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+
+/* Stagger d'animation */
+.kpi-card:nth-child(1) { animation-delay: 40ms; }
+.kpi-card:nth-child(2) { animation-delay: 80ms; }
+.kpi-card:nth-child(3) { animation-delay: 120ms; }
+.kpi-card:nth-child(4) { animation-delay: 160ms; }
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Barre colorée en haut */
+.kpi-accent-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+
+/* Icône */
+.kpi-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+/* Valeur */
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--brand-deep);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.kpi-value.loading {
+  font-size: 20px;
+  color: var(--text-muted);
+  animation: loading-pulse 1.2s ease-in-out infinite;
+}
+
+.kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 10px; }
+
+.kpi-trend { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; }
+.kpi-trend.up    { color: var(--green); }
+.kpi-trend.warn  { color: var(--yellow); }
+.kpi-trend.info  { color: var(--blue); }
+.kpi-trend.muted { color: var(--text-muted); }
+
+
+/* ============================================================
+   11. TABLEAUX
+   ============================================================ */
+.da-table { width: 100%; border-collapse: collapse; }
+.da-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+}
+.da-table-wrap .da-table { border: none; }
+.da-table th {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 18px;
+  text-align: left;
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+.da-table td {
+  padding: 13px 18px;
+  font-size: 13px;
+  color: var(--text-2);
+  border-top: 1px solid #F1F5FD;
+  vertical-align: middle;
+}
+.da-table tr:hover td { background: var(--surface-2); }
+.da-table .bold { font-weight: 600; color: var(--text); }
+.da-table .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 11.5px; color: #64748b; }
+
+
+/* ============================================================
+   12. BADGES DE STATUT
+   Pastille colorée + texte. Classes .st-*
+   ============================================================ */
+.st {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-family: var(--font-body);
+}
+.st::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+/* Commandes */
+.st-wait    { background: var(--yellow-light); color: #92400E; } .st-wait::before    { background: var(--yellow); }
+.st-conf    { background: var(--blue-light);   color: #1E40AF; } .st-conf::before    { background: var(--blue); }
+.st-prep    { background: var(--purple-light); color: #5B21B6; } .st-prep::before    { background: var(--purple); }
+.st-ship    { background: var(--cyan-light);   color: #164E63; } .st-ship::before    { background: var(--cyan); }
+.st-done    { background: var(--green-light);  color: #14532D; } .st-done::before    { background: var(--green); }
+.st-cancel  { background: var(--red-light);    color: #7F1D1D; } .st-cancel::before  { background: var(--red); }
+
+/* Utilisateurs */
+.st-active  { background: var(--green-light);  color: #14532D; } .st-active::before  { background: var(--green); }
+.st-off     { background: #F1F5F9;             color: #475569; } .st-off::before     { background: #94A3B8; }
+
+/* Avis */
+.st-valid   { background: var(--green-light);  color: #14532D; } .st-valid::before   { background: var(--green); }
+.st-pend    { background: var(--yellow-light); color: #92400E; } .st-pend::before    { background: var(--yellow); }
+
+/* Produits */
+.st-pub     { background: var(--green-light);  color: #14532D; } .st-pub::before     { background: var(--green); }
+.st-draft   { background: #F1F5F9;             color: #475569; } .st-draft::before   { background: #94A3B8; }
+.st-low     { background: var(--yellow-light); color: #92400E; } .st-low::before     { background: var(--yellow); }
+.st-out     { background: var(--red-light);    color: #7F1D1D; } .st-out::before     { background: var(--red); }
+
+
+/* ============================================================
+   13. ÉTATS DE CHARGEMENT
+   ============================================================ */
+@keyframes loading-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.da-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  animation: loading-pulse 1.2s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   14. LAYOUTS DE GRILLE
+   ============================================================ */
+.da-row      { display: grid; gap: 16px; margin-bottom: 16px; }
+.da-row-2    { grid-template-columns: 1fr 1fr; }
+.da-row-3-1  { grid-template-columns: 2.5fr 1fr; }
+.da-row-1-2  { grid-template-columns: 1fr 2fr; }
+.da-stats-grid { display: grid; gap: 16px; margin-bottom: 20px; }
+
+
+/* ============================================================
+   15. PAGINATION
+   ============================================================ */
+.da-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pag-info { font-size: 12px; color: var(--text-muted); }
+.pag-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+.pag-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 150ms;
+}
+.pag-btn:hover:not(:disabled) { border-color: var(--brand-main); color: var(--brand-main); }
+.pag-btn.active { background: var(--brand-main); border-color: var(--brand-main); color: white; }
+.pag-btn:disabled { opacity: 0.35; cursor: default; }
+
+
+/* ============================================================
+   16. FILTRES PAR STATUT
+   ============================================================ */
+.filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 150ms;
+  font-family: var(--font-body);
+}
+.filter-btn:hover { border-color: var(--brand-main); color: var(--brand-main); }
+.filter-btn.active { border-color: var(--brand-main); background: var(--brand-main); color: white; }
+
+
+/* ============================================================
+   17. INPUTS & FORMULAIRES
+   ============================================================ */
+.da-input {
+  width: 100%;
+  padding: 9px 13px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  font-family: var(--font-body);
+  transition: border-color 150ms, box-shadow 150ms;
+  outline: none;
+}
+.da-input:focus {
+  border-color: var(--brand-main);
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
+}
+.da-input::placeholder { color: var(--text-muted); }
+.da-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.da-field { margin-bottom: 16px; }
+
+
+/* ============================================================
+   18. BARRE DE STOCK
+   ============================================================ */
+.stock-bar-bg {
+  flex: 1;
+  height: 5px;
+  background: #F1F5F9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.stock-bar { height: 100%; border-radius: 99px; transition: width 400ms ease; }
+.stock-bar.ok  { background: var(--green); }
+.stock-bar.low { background: var(--yellow); }
+.stock-bar.out { background: var(--red); }
+
+
+/* ============================================================
+   19. ACTIONS RAPIDES — .qa
+   ============================================================ */
+.qa-list { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.qa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  transition: all 150ms;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.qa-ic {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qa.orange { background: var(--accent); color: white; border-color: var(--accent); }
+.qa.orange:hover { background: var(--accent-dark); box-shadow: 0 3px 12px rgba(249,115,22,0.35); transform: translateY(-1px); }
+.qa.orange .qa-ic { background: rgba(255,255,255,0.2); }
+
+.qa.blue { background: var(--brand-light); color: var(--brand-main); border-color: #DCE7FD; }
+.qa.blue:hover { background: #DCE7FD; transform: translateY(-1px); }
+.qa.blue .qa-ic { background: #DCE7FD; color: var(--brand-main); }
+
+.qa.green { background: var(--green-light); color: #065F46; border-color: #A7F3D0; }
+.qa.green:hover { background: #D1FAE5; transform: translateY(-1px); }
+.qa.green .qa-ic { background: #A7F3D0; }
+
+.qa.red { background: var(--red-light); color: #991B1B; border-color: #FECACA; }
+.qa.red:hover { background: #FEE2E2; transform: translateY(-1px); }
+.qa.red .qa-ic { background: #FECACA; }
+
+
+/* ============================================================
+   20. MINI STATS — Ligne de 3 chiffres clés
+   ============================================================ */
+.da-mini { display: grid; grid-template-columns: repeat(3, 1fr); }
+.da-mini-cell {
+  padding: 18px;
+  text-align: center;
+  border-right: 1px solid #F1F5FD;
+  transition: background 150ms;
+}
+.da-mini-cell:last-child { border-right: none; }
+.da-mini-cell:hover { background: var(--surface-2); }
+.da-mini-val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--brand-deep);
+}
+.da-mini-lbl { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+
+/* ============================================================
+   21. ACTIVITÉ / FEED — Journal d'activité
+   ============================================================ */
+.af-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid #F1F5FD;
+  transition: background 100ms;
+}
+.af-item:hover { background: var(--surface-2); }
+.af-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.af-text { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+.af-time { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; }
+
+
+/* ============================================================
+   22. TOGGLE SWITCH — Bascule on/off
+   ============================================================ */
+.toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 40px; height: 22px;
+  border-radius: 99px;
+  background: #CBD5E0;
+  cursor: pointer;
+  transition: background 200ms;
+  flex-shrink: 0;
+}
+.toggle-track.on { background: var(--brand-main); }
+.toggle-knob {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 200ms;
+}
+.toggle-track.on .toggle-knob { transform: translateX(18px); }
+
+
+/* ============================================================
+   23. TOGGLE VUE — Boutons table / cartes
+   ============================================================ */
+.vt-btn {
+  width: 30px; height: 30px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 150ms;
+}
+.vt-btn.active { background: var(--brand-main); border-color: var(--brand-main); color: white; }
+.vt-btn:hover:not(.active) { border-color: var(--brand-main); color: var(--brand-main); }
+
+
+/* ============================================================
+   24. MODALES
+   ============================================================ */
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(.96) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   25. RESPONSIVE
+   < 1024px : sidebar slide, burger visible
+   < 768px  : grilles réduites, tableaux scrollables
+   < 480px  : 1 colonne
+   ============================================================ */
+@media (max-width: 1023px) {
+  .da-sidebar { transform: translateX(-100%); }
+  .da-sidebar-open .da-sidebar { transform: translateX(0); }
+  .da-burger { display: flex; }
+  .da-main { margin-left: 0; }
+  .da-topbar-brand { width: auto; border-right: none; }
+}
+
+@media (max-width: 767px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .da-row-2, .da-row-3-1, .da-row-1-2 { grid-template-columns: 1fr; }
+  .da-main { padding: 20px 16px; }
+  .da-section-header { margin-bottom: 16px; }
+  .da-table { font-size: 12px; }
+  .da-table th, .da-table td { padding: 10px 12px; }
+  .da-table .hide-mobile { display: none; }
+  .ap-form-grid { grid-template-columns: 1fr !important; }
+  .ap-price-grid { grid-template-columns: 1fr !important; }
+  .ap-img-grid   { grid-template-columns: repeat(3, 1fr) !important; }
+  .da-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .da-profile-info { display: none; }
+  .da-topbar-sep { display: none; }
+  #global-search-wrap input { width: 120px !important; }
+  .da-section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .da-section-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+}
+
+@media (max-width: 479px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .da-section-title { font-size: 18px; }
+  .da-main { padding: 16px 12px; }
+  #global-search-wrap { display: none; }
+  .ap-img-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .da-stats-grid { grid-template-columns: 1fr !important; }
+  .kpi-card { padding: 14px; }
+}

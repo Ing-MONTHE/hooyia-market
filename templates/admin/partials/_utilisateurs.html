@@ -1,0 +1,75 @@
+{% comment %}
+   HooYia Market — templates/admin/partials/_utilisateurs.html
+   Section "Utilisateurs" — Gestion des comptes.
+
+   DONNÉES : loadUsers(page) -> GET /api/auth/utilisateurs/
+   Actions : toggle actif/inactif (toggleUser)
+{% endcomment %}
+{% load i18n %}
+
+{# En-tête #}
+<div class="da-section-header" id="sec-users-header" style="display:none;">
+  <div>
+    <h1 class="da-section-title">{% trans "Utilisateurs" %}</h1>
+    <p class="da-section-subtitle">{% trans "Gestion des comptes clients et vendeurs" %}</p>
+  </div>
+  {# Recherche #}
+  <div style="position:relative;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="var(--text-muted)" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round"
+         style="position:absolute;left:10px;top:50%;transform:translateY(-50%);">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="users-search"
+           placeholder="{% trans "Nom, email…" %}"
+           oninput="debounce(()=>loadUsers(1),350)()"
+           style="padding:7px 12px 7px 34px;border-radius:var(--r-sm);
+                  border:1.5px solid var(--border);font-size:12.5px;
+                  font-family:var(--font-body);color:var(--text);
+                  width:200px;outline:none;background:var(--surface);" />
+  </div>
+</div>
+
+{# Filtres rôles #}
+<div id="sec-users-filters" style="display:none;margin-bottom:14px;">
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="filtreUsers('',this)">{% trans "Tous" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('vendeur',this)">{% trans "Vendeurs" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('admin',this)">{% trans "Admins" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('actif',this)">{% trans "Actifs" %}</button>
+    <button class="filter-btn" onclick="filtreUsers('inactif',this)">{% trans "Inactifs" %}</button>
+  </div>
+</div>
+
+{# Tableau #}
+<div class="da-card" id="sec-users-card" style="display:none;">
+  <div class="da-card-head">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h3>{% trans "Tous les comptes" %}</h3>
+      <span style="font-size:11px;font-weight:600;color:var(--text-muted);
+                   background:var(--surface-2);border:1px solid var(--border);
+                   padding:2px 9px;border-radius:99px;" id="users-count"></span>
+    </div>
+  </div>
+  <div class="da-table-wrap">
+    <table class="da-table">
+      <thead>
+        <tr>
+          <th>{% trans "Utilisateur" %}</th>
+          <th class="hide-mobile">{% trans "Email" %}</th>
+          <th class="hide-mobile">{% trans "Inscription" %}</th>
+          <th>{% trans "Rôle" %}</th>
+          <th>{% trans "Email vérifié" %}</th>
+          <th>{% trans "Statut" %}</th>
+          <th style="text-align:right;">{% trans "Action" %}</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-users">
+        <tr><td colspan="7" class="da-loading">{% trans "Chargement…" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="pag-users" class="da-pagination" style="display:none;"></div>
+</div>

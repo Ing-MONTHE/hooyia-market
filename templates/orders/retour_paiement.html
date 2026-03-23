@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans 'Vérification du paiement' %} — HooYia Market{% endblock %}
+
+{% block content %}
+<style>
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .spinner { animation: spin 1s linear infinite; }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+  .progress-track { height:3px; background:var(--border); border-radius:999px; overflow:hidden; }
+  .progress-fill  { height:100%; border-radius:999px; background:var(--brand-500); width:0%; transition:width 0.5s ease; }
+</style>
+
+<div style="min-height:60vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+  <div class="card" style="width:100%; max-width:420px; padding:32px; text-align:center;">
+
+    {# Icône #}
+    <div id="status-icon" style="width:56px;height:56px;border-radius:50%;background:var(--brand-50);border:2px solid var(--brand-200);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <svg class="spinner" width="28" height="28" viewBox="0 0 24 24" fill="none"
+           stroke="var(--brand-500)" stroke-width="2.5" stroke-linecap="round">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+    </div>
+
+    {# Titre #}
+    <h1 id="status-titre" class="text-lg font-bold text-ink" style="margin-bottom:8px;">
+      {% trans "Vérification du paiement…" %}
+    </h1>
+    <p id="status-message" class="text-sm text-text-secondary" style="margin-bottom:20px;">
+      {% trans "Confirmation Mobile Money en cours. Merci de patienter." %}
+    </p>
+
+    {# Barre de progression #}
+    <div class="progress-track" id="progress-track" style="margin-bottom:20px;">
+      <div class="progress-fill" id="progress-bar"></div>
+    </div>
+
+    {# Infos #}
+    <div style="background:var(--surface-2);border-radius:10px;padding:12px 16px;text-align:left;font-size:0.82rem;display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;">
+        <span class="text-text-muted">{% trans "Commande" %}</span>
+        <span class="font-semibold text-ink">#{{ commande.reference_courte }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span class="text-text-muted">{% trans "Montant" %}</span>
+        <span class="font-semibold text-ink">{{ commande.montant_total|floatformat:0 }} FCFA</span>
+      </div>
+    </div>
+
+    {# Bloc erreur (caché) #}
+    <div id="bloc-erreur" class="hidden" style="margin-top:16px;display:none;flex-direction:column;gap:8px;">
+      <a href="{% url 'orders:checkout' %}" class="btn btn-primary w-full">{% trans "Réessayer" %}</a>
+      <a href="{% url 'orders:historique' %}" class="btn btn-ghost w-full text-sm">{% trans "Mes commandes" %}</a>
+    </div>
+
+    {# Bloc timeout (caché) #}
+    <div id="bloc-timeout" style="display:none;margin-top:12px;">
+      <p class="text-xs text-text-muted">
+        {% trans "Traitement plus long que prévu." %}
+        <a href="{% url 'orders:historique' %}" class="text-brand-500 underline ml-1">{% trans "Vérifier mes commandes" %}</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const REF_COMMANDE  = '{{ ref }}';
+const COMMANDE_PK   = {{ commande.pk }};
+const POLL_INTERVAL = 3000;
+const MAX_TIMEOUT   = 90000;
+
+let pollTimer = null, tempsEcoule = 0;
+
+const progressBar = document.getElementById('progress-bar');
+const progressInterval = setInterval(() => {
+  tempsEcoule += 1000;
+  progressBar.style.width = Math.min((tempsEcoule / MAX_TIMEOUT) * 85, 85) + '%';
+}, 1000);
+
+function afficherSucces() {
+  clearInterval(progressInterval); clearInterval(pollTimer);
+  progressBar.style.width = '100%'; progressBar.style.background = '#22c55e';
+  document.getElementById('status-icon').style.cssText = 'width:56px;height:56px;border-radius:50%;background:#f0fdf4;border:2px solid #bbf7d0;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;';
+  document.getElementById('status-icon').innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+  document.getElementById('status-titre').textContent = '{% trans "Paiement confirmé !" %}';
+  document.getElementById('status-message').textContent = '{% trans "Redirection vers votre commande…" %}';
+  setTimeout(() => { window.location.href = `/commandes/${COMMANDE_PK}/detail/`; }, 1500);
+}
+
+function afficherEchec() {
+  clearInterval(progressInterval); clearInterval(pollTimer);
+  progressBar.style.width = '100%'; progressBar.style.background = '#ef4444';
+  document.getElementById('status-icon').style.cssText = 'width:56px;height:56px;border-radius:50%;background:#fef2f2;border:2px solid #fecaca;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;';
+  document.getElementById('status-icon').innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>`;
+  document.getElementById('status-titre').textContent = '{% trans "Paiement échoué" %}';
+  document.getElementById('status-message').textContent = "{% trans 'Le paiement n a pas abouti. Vérifiez votre solde et réessayez.' %}";
+  document.getElementById('progress-track').style.display = 'none';
+  document.getElementById('bloc-erreur').style.display = 'flex';
+}
+
+function afficherTimeout() {
+  clearInterval(progressInterval); clearInterval(pollTimer);
+  document.getElementById('status-titre').textContent = '{% trans "Traitement en cours…" %}';
+  document.getElementById('status-message').textContent = '{% trans "Votre paiement sera mis à jour automatiquement." %}';
+  document.getElementById('bloc-timeout').style.display = 'block';
+}
+
+async function pollStatut() {
+  try {
+    const data = await API.get(`/api/commandes/${REF_COMMANDE}/paiement-statut/`);
+    if (data.statut === 'reussi')      { clearInterval(pollTimer); afficherSucces(); }
+    else if (data.statut === 'echoue') { afficherEchec(); }
+  } catch(e) { console.warn('Polling:', e); }
+}
+
+pollStatut();
+pollTimer = setInterval(pollStatut, POLL_INTERVAL);
+setTimeout(() => { clearInterval(pollTimer); afficherTimeout(); }, MAX_TIMEOUT);
+</script>
+{% endblock %}

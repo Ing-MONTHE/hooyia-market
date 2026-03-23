@@ -46,7 +46,7 @@ class OrderService:
 
     @staticmethod
     @transaction.atomic
-    def create_from_cart(utilisateur, adresse, mode_paiement='livraison', note_client=''):
+    def create_from_cart(utilisateur, adresse, mode_paiement, telephone_paiement='', note_client=''):
         """
         Crée une commande complète depuis le panier de l'utilisateur.
 
@@ -133,20 +133,25 @@ class OrderService:
 
         # ── Étape 6 : Crée le Paiement ───────────────────────
         Paiement.objects.create(
-            commande = commande,
-            mode     = mode_paiement,
-            montant  = commande.montant_total,
-            # Statut en attente → sera mis à jour quand le paiement est confirmé
+            commande           = commande,
+            mode               = mode_paiement,
+            montant            = commande.montant_total,
+            telephone_paiement = telephone_paiement,
+            # statut EN_ATTENTE par défaut → sera mis à REUSSI par le webhook PayUnit
         )
 
-        # ── Étape 7 : Vide le panier ─────────────────────────
-        panier.vider()
+        # ── Étape 7 : NE PAS vider le panier ici ─────────────
+        # Le panier est conservé jusqu'à confirmation du paiement.
+        # Si le paiement échoue, le client peut réessayer sans
+        # avoir à resélectionner ses produits.
+        # Le panier sera vidé par PayUnitService.confirmer_paiement()
+        # une fois le webhook PayUnit reçu et le paiement validé.
 
-        # ── Étape 8 : Confirme la commande ───────────────────
-        # La transition FSM confirmer() déclenche le signal post_save
-        # → orders/signals.py → Celery → email de confirmation
-        commande.confirmer()
-        commande.save()
+        # ── Étape 8 : NE PAS confirmer ici ───────────────────
+        # Avec Mobile Money, la confirmation se fait après le paiement.
+        # Le webhook PayUnit appellera commande.confirmer() une fois
+        # le paiement validé par l'opérateur (OM ou MTN MoMo).
+        # La commande reste en EN_ATTENTE jusqu'à ce moment.
 
         return commande
 
@@ -184,5 +189,37 @@ class OrderService:
         # La transition FSM annuler() gère la remise en stock automatiquement
         commande.annuler()
         commande.save()
+
+        # ── Gestion du paiement selon son statut ─────────────────────────────
+        remboursement_requis = False
+        try:
+            paiement = commande.paiement
+
+            if paiement.statut == Paiement.StatutPaiement.EN_ATTENTE:
+                # Pas encore payé → simple échec, pas de remboursement
+                paiement.statut = Paiement.StatutPaiement.ECHOUE
+                paiement.save(update_fields=['statut'])
+
+            elif paiement.statut == Paiement.StatutPaiement.REUSSI:
+                # Déjà payé → remboursement manuel requis
+                paiement.statut = Paiement.StatutPaiement.REMBOURSE_EN_ATTENTE
+                paiement.save(update_fields=['statut'])
+                remboursement_requis = True
+
+        except Exception:
+            pass  # Pas de paiement associé
+
+        # ── Notifications email si remboursement requis ───────────────────────
+        if remboursement_requis:
+            try:
+                from apps.orders.tasks import notifier_remboursement
+                notifier_remboursement.delay(commande.pk, utilisateur.pk)
+            except Exception:
+                # Celery indisponible → envoyer en synchrone
+                try:
+                    from apps.orders.tasks import _envoyer_emails_remboursement
+                    _envoyer_emails_remboursement(commande.pk, utilisateur.pk)
+                except Exception:
+                    pass
 
         return commande

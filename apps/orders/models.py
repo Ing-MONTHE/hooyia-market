@@ -178,20 +178,12 @@ class Commande(models.Model):
     def livrer(self):
         """
         Marque la commande comme livrée.
-        Met le paiement à 'reussi' (paiement à la livraison = payé à réception).
-        Déclenche le signal → rappel laisser un avis (3j après) via Celery.
+        Le paiement Mobile Money est déjà REUSSI à ce stade
+        (confirmé par PayUnit avant traitement de la commande).
+        Déclenche le signal → rappel laisser un avis via Celery.
         """
         from django.utils import timezone
         self.date_livraison = timezone.now()
-        # Paiement à la livraison : marquer comme réussi dès que livré
-        try:
-            paiement = self.paiement
-            if paiement.statut != Paiement.StatutPaiement.REUSSI:
-                paiement.statut = Paiement.StatutPaiement.REUSSI
-                paiement.date_paiement = timezone.now()
-                paiement.save(update_fields=['statut', 'date_paiement'])
-        except Exception:
-            pass  # Pas de paiement associé — ne pas bloquer la transition
 
     @transition(
         field=statut,
@@ -279,23 +271,28 @@ class LigneCommande(models.Model):
 
 class Paiement(models.Model):
     """
-    Le paiement d'une commande.
-    Enregistre le mode de paiement, le statut et la référence externe.
-    Pour l'instant : paiement à la livraison uniquement.
-    Prévu pour intégration Mobile Money (Orange Money, MTN MoMo) en Phase 6.
+    Le paiement d'une commande via Mobile Money (Orange Money ou MTN MoMo).
+
+    Cycle de vie :
+      1. Créé avec statut EN_ATTENTE lors de la création de la commande
+      2. PayUnit initialise le paiement → payment_url générée
+      3. Client paie sur son téléphone (USSD/app)
+      4. PayUnit appelle le webhook → statut passe à REUSSI ou ECHOUE
+      5. Si REUSSI → commande.confirmer() est appelé automatiquement
+
+    Livraison : toujours GRATUITE (frais_livraison = 0, non stocké ici).
     """
 
     class ModePaiement(models.TextChoices):
-        LIVRAISON    = 'livraison',    _('Paiement à la livraison')
         ORANGE_MONEY = 'orange_money', _('Orange Money')
-        MTN_MOMO     = 'mtn_momo',    _('MTN Mobile Money')
-        CARTE        = 'carte',        _('Carte bancaire')
+        MTN_MOMO     = 'mtn_momo',     _('MTN Mobile Money')
 
     class StatutPaiement(models.TextChoices):
-        EN_ATTENTE = 'en_attente', _('En attente')
-        REUSSI     = 'reussi',     _('Réussi')
-        ECHOUE     = 'echoue',     _('Échoué')
-        REMBOURSE  = 'rembourse',  _('Remboursé')
+        EN_ATTENTE          = 'en_attente',          _('En attente')
+        REUSSI              = 'reussi',              _('Réussi')
+        ECHOUE              = 'echoue',              _('Échoué')
+        REMBOURSE_EN_ATTENTE = 'rembourse_en_attente', _('Remboursement en attente')
+        REMBOURSE           = 'rembourse',           _('Remboursé')
 
     commande = models.OneToOneField(
         Commande,
@@ -307,12 +304,11 @@ class Paiement(models.Model):
     mode = models.CharField(
         max_length=20,
         choices=ModePaiement.choices,
-        default=ModePaiement.LIVRAISON,
         verbose_name=_("Mode de paiement")
     )
 
     statut = models.CharField(
-        max_length=15,
+        max_length=20,
         choices=StatutPaiement.choices,
         default=StatutPaiement.EN_ATTENTE,
         verbose_name=_("Statut du paiement")
@@ -325,15 +321,36 @@ class Paiement(models.Model):
         verbose_name=_("Montant (FCFA)")
     )
 
-    reference_externe = models.CharField(
-        max_length=100,
+    # Numéro Mobile Money du payeur (ex: +237 6XX XXX XXX)
+    telephone_paiement = models.CharField(
+        max_length=20,
         blank=True,
-        verbose_name=_("Référence externe (transaction)")
+        verbose_name=_("Numéro Mobile Money")
+    )
+
+    # Référence de la transaction chez PayUnit
+    reference_externe = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name=_("Référence PayUnit")
+    )
+
+    # URL de paiement PayUnit vers laquelle rediriger le client
+    authorization_url = models.URLField(
+        max_length=500,
+        blank=True,
+        verbose_name=_("URL de paiement PayUnit")
+    )
+
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date de création")
     )
 
     date_paiement = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date du paiement")
+        null=True,
+        blank=True,
+        verbose_name=_("Date du paiement confirmé")
     )
 
     class Meta:
