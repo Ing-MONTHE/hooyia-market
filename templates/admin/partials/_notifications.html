@@ -54,16 +54,16 @@
 
 {% comment %}
    SECTION FORMULAIRE ENVOI — affichée par navTo('envoyer-notification')
-   Même logique que la section ajouter-produit{% endcomment %}
+{% endcomment %}
 
-{# En-tête formulaire avec bouton retour #}
+{# ── En-tête formulaire avec bouton retour ── #}
 <div class="da-section-header" id="sec-envoyer-notification-header" style="display:none;">
   <div style="display:flex;align-items:center;gap:12px;">
     <button class="btn btn-secondary" onclick="navTo('notifications')"
             style="display:inline-flex;align-items:center;gap:6px;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m12 19-7-7 7-7"/><line x1="19" x2="5" y1="12" y2="12"/>
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
       </svg>
       {% trans "Retour" %}
     </button>
@@ -74,90 +74,164 @@
   </div>
 </div>
 
-{# Formulaire #}
-<div class="da-card" id="sec-envoyer-notification-form" style="display:none;">
-  <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;">
+{# ── Flash message ── #}
+<div id="notif-flash-bar"
+     style="display:none;margin-bottom:14px;padding:12px 16px;
+            border-radius:var(--r-md);font-size:13px;font-weight:600;
+            font-family:var(--font-body);align-items:center;gap:10px;"></div>
 
-    {# Destinataire #}
+{# ── Formulaire — grille 2 colonnes (contenu + panneau latéral) ── #}
+<div id="sec-envoyer-notification-form" style="display:none;">
+  <div style="display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start;">
+
+    <!-- COLONNE GAUCHE -->
     <div>
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        {% trans "Destinataire" %} *
-      </label>
-      <select id="notif-destinataire" onchange="toggleUserSearch(this.value)"
-              style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);">
-        <option value="tous">{% trans "Tous les utilisateurs" %}</option>
-        <option value="clients">{% trans "Clients uniquement" %}</option>
-        <option value="specifique">{% trans "Utilisateur spécifique…" %}</option>
-      </select>
-    </div>
 
-    {# Type #}
+      {# ── Bloc Destinataire & Contenu ── #}
+      <div class="da-card" style="margin-bottom:14px;">
+        <div class="da-card-head">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--brand-main)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 style="display:inline;vertical-align:-2px;margin-right:6px;">
+              <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+            </svg>
+            {% trans "Contenu de la notification" %}
+          </h3>
+        </div>
+        <div style="padding:16px;">
+
+          {# Destinataire #}
+          <div class="da-field">
+            <label class="da-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              {% trans "Destinataire" %} <span style="color:var(--accent);font-size:9px;">*</span>
+            </label>
+            <select id="notif-destinataire" onchange="toggleUserSearch(this.value)" class="da-input">
+              <option value="tous">{% trans "Tous les utilisateurs" %}</option>
+              <option value="clients">{% trans "Clients uniquement" %}</option>
+              <option value="specifique">{% trans "Utilisateur spécifique…" %}</option>
+            </select>
+          </div>
+
+          {# Recherche utilisateur spécifique #}
+          <div id="bloc-user-search" style="display:none;" class="da-field">
+            <label class="da-label">{% trans "Rechercher un utilisateur" %}</label>
+            <input type="text" id="notif-user-search"
+                   placeholder="{% trans 'Nom, email ou username…' %}"
+                   oninput="rechercherUser(this.value)"
+                   class="da-input" />
+            <div id="notif-user-results"
+                 style="margin-top:4px;border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;"></div>
+            <input type="hidden" id="notif-user-id" value="" />
+            <p id="notif-user-selected"
+               style="font-size:12px;color:var(--brand-main);margin-top:4px;font-weight:600;display:none;"></p>
+          </div>
+
+          {# Titre #}
+          <div class="da-field">
+            <label class="da-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
+              {% trans "Titre" %} <span style="color:var(--accent);font-size:9px;">*</span>
+            </label>
+            <input type="text" id="notif-titre"
+                   placeholder="{% trans 'Ex : Nouvelle promotion disponible !' %}"
+                   class="da-input" />
+          </div>
+
+          {# Message #}
+          <div class="da-field" style="margin-bottom:0;">
+            <label class="da-label">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {% trans "Message" %} <span style="color:var(--accent);font-size:9px;">*</span>
+            </label>
+            <textarea id="notif-message" rows="5"
+                      placeholder="{% trans 'Contenu de la notification visible par les utilisateurs…' %}"
+                      class="da-input" style="resize:vertical;min-height:100px;"></textarea>
+          </div>
+
+        </div>
+      </div>{# fin bloc contenu #}
+
+      {# ── Bouton d'envoi ── #}
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="envoyerNotification()" id="btn-envoyer-notif" class="btn btn-primary"
+                style="display:inline-flex;align-items:center;gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+          </svg>
+          {% trans "Envoyer la notification" %}
+        </button>
+        <span id="notif-flash" style="font-size:12px;font-weight:600;display:none;"></span>
+      </div>
+
+    </div>{# fin colonne gauche #}
+
+    <!-- COLONNE DROITE (panneau latéral) -->
     <div>
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.29-7.29a1 1 0 0 0 0-1.41L12 2Z"/><path d="M7 7h.01"/></svg>
-        {% trans "Type" %} *
-      </label>
-      <select id="notif-type"
-              style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);">
-        <option value="systeme">🔔 {% trans "Système" %}</option>
-        <option value="commande">📦 {% trans "Commande" %}</option>
-        <option value="avis">⭐ {% trans "Avis" %}</option>
-        <option value="stock">⚠️ {% trans "Stock" %}</option>
-      </select>
-    </div>
 
-    {# Recherche utilisateur spécifique #}
-    <div id="bloc-user-search" style="display:none;grid-column:1/-1;">
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">{% trans "Rechercher un utilisateur" %}</label>
-      <input type="text" id="notif-user-search" placeholder="{% trans 'Nom, email ou username…' %}"
-             oninput="rechercherUser(this.value)"
-             style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);box-sizing:border-box;" />
-      <div id="notif-user-results" style="margin-top:4px;border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;"></div>
-      <input type="hidden" id="notif-user-id" value="" />
-      <p id="notif-user-selected" style="font-size:12px;color:var(--brand-main);margin-top:4px;font-weight:600;display:none;"></p>
-    </div>
+      {# ── Bloc Type ── #}
+      <div class="da-card" style="margin-bottom:14px;">
+        <div class="da-card-head">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--text-2)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 style="display:inline;vertical-align:-2px;margin-right:6px;">
+              <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.29-7.29a1 1 0 0 0 0-1.41L12 2Z"/>
+              <path d="M7 7h.01"/>
+            </svg>
+            {% trans "Type" %}
+          </h3>
+        </div>
+        <div style="padding:16px;">
+          <div class="da-field" style="margin-bottom:0;">
+            <label class="da-label">{% trans "Catégorie" %} <span style="color:var(--accent);font-size:9px;">*</span></label>
+            <select id="notif-type" class="da-input">
+              <option value="systeme">🔔 {% trans "Système" %}</option>
+              <option value="commande">📦 {% trans "Commande" %}</option>
+              <option value="avis">⭐ {% trans "Avis" %}</option>
+              <option value="stock">⚠️ {% trans "Stock" %}</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-    {# Titre #}
-    <div style="grid-column:1/-1;">
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
-        {% trans "Titre" %} *
-      </label>
-      <input type="text" id="notif-titre" placeholder="{% trans 'Ex : Nouvelle promotion disponible !' %}"
-             style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);box-sizing:border-box;" />
-    </div>
+      {# ── Bloc Lien optionnel ── #}
+      <div class="da-card">
+        <div class="da-card-head">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="var(--text-2)" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 style="display:inline;vertical-align:-2px;margin-right:6px;">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            {% trans "Lien" %}
+          </h3>
+        </div>
+        <div style="padding:16px;">
+          <div class="da-field" style="margin-bottom:0;">
+            <label class="da-label">
+              {% trans "URL cible" %}
+              <span style="color:var(--text-muted);font-size:10px;text-transform:none;font-weight:400;">
+                {% trans "(optionnel)" %}
+              </span>
+            </label>
+            <input type="text" id="notif-lien"
+                   placeholder="{% trans 'Ex : /commandes/ ou /produits/slug/' %}"
+                   class="da-input" />
+            <p style="font-size:11px;color:var(--text-muted);margin-top:5px;margin-bottom:0;">
+              {% trans "Laissez vide pour une notification sans lien." %}
+            </p>
+          </div>
+        </div>
+      </div>
 
-    {# Message #}
-    <div style="grid-column:1/-1;">
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        {% trans "Message" %} *
-      </label>
-      <textarea id="notif-message" rows="4"
-                placeholder="{% trans 'Contenu de la notification visible par les utilisateurs…' %}"
-                style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);resize:vertical;box-sizing:border-box;"></textarea>
-    </div>
-
-    {# Lien optionnel #}
-    <div style="grid-column:1/-1;">
-      <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        {% trans "Lien (optionnel)" %}
-      </label>
-      <input type="text" id="notif-lien" placeholder="{% trans 'Ex : /commandes/ ou /produits/slug/' %}"
-             style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;background:var(--surface);color:var(--text);font-family:var(--font-body);box-sizing:border-box;" />
-    </div>
-
-    {# Actions #}
-    <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;padding-top:4px;">
-      <button onclick="envoyerNotification()" id="btn-envoyer-notif"
-              style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;background:var(--brand-main);color:white;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-        {% trans "Envoyer la notification" %}
-      </button>
-      <span id="notif-flash" style="font-size:12px;font-weight:600;display:none;"></span>
-    </div>
+    </div>{# fin colonne droite #}
 
   </div>
 </div>
