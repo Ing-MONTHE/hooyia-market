@@ -86,9 +86,9 @@ def detail_commande(request, pk):
 @login_required
 def retour_paiement(request):
     """
-    Page de retour après paiement NotchPay.
+    Page de retour après paiement PayUnit.
 
-    NotchPay redirige le client ici après qu'il a payé (succès ou échec).
+    PayUnit redirige le client ici après qu'il a payé (succès ou échec).
     URL : /commandes/paiement/retour/?ref=<uuid_commande>
 
     On affiche un écran d'attente pendant que le webhook traite le paiement
@@ -119,13 +119,13 @@ def retour_paiement(request):
 @login_required
 def mock_paiement(request):
     """
-    Page de simulation de paiement NotchPay (dev local uniquement).
+    Page de simulation de paiement PayUnit (dev local uniquement).
     Accessible via /commandes/paiement/mock/?ref=<uuid>&trx=<ref_mock>
-    Permet de simuler un paiement réussi ou échoué sans NotchPay.
+    Permet de simuler un paiement réussi ou échoué sans clés PayUnit réelles.
     """
     from django.utils import timezone
     from .models import Paiement
-    from .payment_service import NotchPayService
+    from .payment_service import PayUnitService
 
     ref = request.GET.get('ref', '')
     trx = request.GET.get('trx', '')
@@ -141,7 +141,7 @@ def mock_paiement(request):
     if action == 'success':
         try:
             paiement = commande.paiement
-            NotchPayService.confirmer_paiement(paiement)
+            PayUnitService.confirmer_paiement(paiement)
         except Exception:
             pass
         return redirect('orders:confirmation', pk=commande.pk)
@@ -149,10 +149,10 @@ def mock_paiement(request):
     elif action == 'fail':
         try:
             paiement = commande.paiement
-            NotchPayService.echouer_paiement(paiement)
+            PayUnitService.echouer_paiement(paiement)
         except Exception:
             pass
-        return redirect('orders:retour_paiement' + f'?ref={ref}')
+        return redirect(f'/commandes/paiement/retour/?ref={ref}')
 
     context = {
         'commande': commande,

@@ -66,8 +66,23 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         user = self.request.user
 
-        # Admin : accès complet (validés + non validés de tous les utilisateurs)
+        # Admin : accès complet avec filtres optionnels
         if user.is_authenticated and user.is_staff:
+            statut = self.request.query_params.get('statut', '')
+            search = self.request.query_params.get('search', '')
+            if statut == 'en_attente':
+                qs = qs.filter(is_validated=False)
+            elif statut == 'valide':
+                qs = qs.filter(is_validated=True)
+            elif statut == 'invalide':
+                qs = qs.filter(is_validated=False)
+            if search:
+                from django.db.models import Q as DQ
+                qs = qs.filter(
+                    DQ(produit__nom__icontains=search) |
+                    DQ(utilisateur__nom__icontains=search) |
+                    DQ(utilisateur__prenom__icontains=search)
+                )
             return qs
 
         # Utilisateur connecté : avis validés + ses propres avis non validés

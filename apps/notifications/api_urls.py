@@ -15,6 +15,10 @@ urlpatterns = [
          api_views.NotificationListeAPIView.as_view(),
          name='notifications-liste'),
 
+    path('admin/',
+         api_views.NotificationAdminListeAPIView.as_view(),
+         name='notifications-admin-liste'),
+
     path('<int:pk>/lire/',
          api_views.MarquerLuAPIView.as_view(),
          name='notifications-lire'),
@@ -22,4 +26,8 @@ urlpatterns = [
     path('tout_lire/',
          api_views.ToutLireAPIView.as_view(),
          name='notifications-tout-lire'),
+
+    path('envoyer/',
+         api_views.EnvoyerNotificationAdminAPIView.as_view(),
+         name='notifications-envoyer'),
 ]

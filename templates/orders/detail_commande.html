@@ -285,6 +285,7 @@ var DETAIL_I18N = {
   annulee        : '{% trans "Annulée" %}',
   paiementReussi : '{% trans "Paiement confirmé" %}',
   paiementEchoue : '{% trans "Paiement échoué" %}',
+  paiementAnnule : '{% trans "Annulé" %}',
   enAttentePaie  : '{% trans "En attente de confirmation" %}',
   aucunArticle   : '{% trans "Aucun article." %}',
   commentairePh  : '{% trans "Votre commentaire (optionnel)..." %}',
@@ -427,10 +428,11 @@ function afficher(c) {
   // Paiement
   const p = c.paiement;
   if (p) {
-    const statutColor = p.statut === 'reussi' ? '#16a34a' : p.statut === 'echoue' ? '#dc2626' : '#92400e';
+    const statutColor = p.statut === 'reussi' ? '#16a34a' :
+                        p.statut === 'echoue' ? '#dc2626' : '#92400e';
     const statutLabel = p.statut === 'reussi' ? DETAIL_I18N.paiementReussi :
                         p.statut === 'echoue' ? DETAIL_I18N.paiementEchoue :
-                        DETAIL_I18N.enAttentePaie;
+                        (c.statut === 'annulee' ? DETAIL_I18N.paiementEchoue : DETAIL_I18N.enAttentePaie);
     document.getElementById('paiement-info').innerHTML = `
       <div class="info-row">
         <span class="info-label">{% trans "Mode" %}</span>

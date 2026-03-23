@@ -55,17 +55,33 @@ class CommandeListeAPIView(generics.ListAPIView):
         Filtre les commandes selon le rôle :
         - Admin → toutes les commandes
         - Client → uniquement ses propres commandes
+
+        Paramètres GET supportés :
+          ?statut=confirmee  → filtrer par statut FSM
+          ?search=xxx        → recherche par référence ou nom client
         """
-        user = self.request.user
+        user   = self.request.user
+        statut = self.request.query_params.get('statut', '')
+        search = self.request.query_params.get('search', '')
 
         if user.is_admin:
-            # Admin voit tout, avec les relations préchargées (évite N+1)
-            return Commande.objects.all().select_related('client').prefetch_related('lignes')
+            qs = Commande.objects.all().select_related('client').prefetch_related('lignes', 'paiement')
+        else:
+            qs = Commande.objects.filter(client=user).prefetch_related('lignes', 'paiement')
 
-        # Client → seulement ses commandes, triées par date décroissante
-        return Commande.objects.filter(
-            client=user
-        ).prefetch_related('lignes').order_by('-date_creation')
+        if statut:
+            qs = qs.filter(statut=statut)
+
+        if search:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(reference__icontains=search) |
+                Q(client__nom__icontains=search) |
+                Q(client__prenom__icontains=search) |
+                Q(client__username__icontains=search)
+            )
+
+        return qs.order_by('-date_creation')
 
 
 class CommandeCreerAPIView(APIView):
@@ -129,12 +145,12 @@ class CommandeCreerAPIView(APIView):
             msg = e.message if hasattr(e, 'message') else str(e)
             return Response({'erreur': msg}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ── Initialisation du paiement NotchPay ──────────────────────────────
+        # ── Initialisation du paiement PayUnit ───────────────────────────────
         try:
-            from .payment_service import NotchPayService, NotchPayError
-            result = NotchPayService.initialize(commande.paiement, request)
+            from .payment_service import PayUnitService, PayUnitError
+            result = PayUnitService.initialize(commande.paiement, request)
             authorization_url = result['authorization_url']
-        except NotchPayError as e:
+        except PayUnitError as e:
             OrderService.annuler_commande(commande, request.user)
             return Response({'erreur': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
@@ -276,81 +292,73 @@ class LivrerCommandeAPIView(TransitionCommandeAPIView):
     message_succes    = _l('Commande livrée.')
 
 # ═══════════════════════════════════════════════════════════════
-# VUE API — Webhook NotchPay
-# POST /api/commandes/webhook/notchpay/
+# VUE API — Webhook PayUnit
+# POST /api/commandes/webhook/payunit/
 # ═══════════════════════════════════════════════════════════════
 
-class NotchPayWebhookAPIView(APIView):
+class PayUnitWebhookAPIView(APIView):
     """
-    Reçoit les notifications asynchrones de NotchPay.
+    Reçoit les notifications asynchrones de PayUnit.
 
-    NotchPay appelle cette URL en arrière-plan dès que le paiement
-    est traité (succès ou échec). On vérifie la signature, on vérifie
-    le statut, puis on confirme ou on échoue la commande.
+    PayUnit appelle cette URL (notify_url) en arrière-plan dès que
+    le paiement est traité (succès ou échec).
 
-    Cette vue est publique (pas d'authentification JWT) car c'est
-    NotchPay qui l'appelle, pas le client. La sécurité est assurée
-    par la vérification HMAC de la signature.
+    Cette vue est publique — la sécurité est assurée par vérification
+    du transaction_id auprès de l'API PayUnit (double vérification).
     """
-    permission_classes = []  # Public — sécurisé par signature HMAC
+    permission_classes = []
     authentication_classes = []
 
     def post(self, request):
-        from .payment_service import NotchPayService, NotchPayError
+        from .payment_service import PayUnitService, PayUnitError
         from .models import Paiement
         import json
 
-        # ── 1. Vérifier la signature NotchPay ────────────────
-        signature = request.headers.get('x-notch-signature', '')
-        if not NotchPayService.verify_webhook_signature(request.body, signature):
-            return Response({'erreur': 'Signature invalide.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # ── 2. Parser le payload ──────────────────────────────
+        # ── 1. Parser le payload PayUnit ─────────────────────
         try:
             payload = json.loads(request.body)
         except json.JSONDecodeError:
             return Response({'erreur': 'Payload invalide.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # NotchPay envoie : { "event": "payment.complete", "data": { "transaction": {...} } }
-        event       = payload.get('event', '')
-        transaction = payload.get('data', {}).get('transaction', {})
-        reference   = transaction.get('reference', '')  # ex: trx.abc123
+        # PayUnit envoie : { "transaction_id": "xxx", "status": "SUCCESS", ... }
+        transaction_id = (
+            payload.get('transaction_id') or
+            payload.get('transactionId') or
+            payload.get('transaction', {}).get('transaction_id', '')
+        )
 
-        if not reference:
-            return Response({'erreur': 'Référence manquante.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not transaction_id:
+            return Response({'erreur': 'transaction_id manquant.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ── 3. Retrouver le paiement en base ─────────────────
+        # ── 2. Retrouver le paiement en base ─────────────────
         try:
             paiement = Paiement.objects.select_related('commande').get(
-                reference_externe=reference
+                reference_externe=transaction_id
             )
         except Paiement.DoesNotExist:
-            # Référence inconnue — on répond 200 pour éviter les retries NotchPay
             return Response({'message': 'Paiement inconnu — ignoré.'}, status=status.HTTP_200_OK)
 
-        # Éviter de traiter deux fois le même webhook
+        # Idempotence — évite de traiter deux fois le même webhook
         if paiement.statut == Paiement.StatutPaiement.REUSSI:
             return Response({'message': 'Déjà traité.'}, status=status.HTTP_200_OK)
 
-        # ── 4. Vérifier le statut auprès de l'API NotchPay ───
-        # Double vérification : on ne fait pas confiance uniquement au webhook
+        # ── 3. Double vérification auprès de l'API PayUnit ───
         try:
-            result = NotchPayService.verify(reference)
-            statut_notchpay = result['status']
-        except NotchPayError:
+            result = PayUnitService.verify(transaction_id)
+            statut_payunit = result['status']
+        except PayUnitError:
             return Response({'erreur': 'Vérification impossible.'}, status=status.HTTP_502_BAD_GATEWAY)
 
-        # ── 5. Agir selon le statut ───────────────────────────
-        if statut_notchpay == 'complete':
-            NotchPayService.confirmer_paiement(paiement)
+        # ── 4. Agir selon le statut ───────────────────────────
+        if statut_payunit == 'SUCCESS':
+            PayUnitService.confirmer_paiement(paiement)
             return Response({'message': 'Paiement confirmé.'}, status=status.HTTP_200_OK)
 
-        elif statut_notchpay in ('failed', 'canceled'):
-            NotchPayService.echouer_paiement(paiement)
+        elif statut_payunit in ('FAILED', 'CANCELED'):
+            PayUnitService.echouer_paiement(paiement)
             return Response({'message': 'Paiement échoué.'}, status=status.HTTP_200_OK)
 
-        # Statut 'pending' → on attend le prochain webhook
-        return Response({'message': f'Statut {statut_notchpay} — en attente.'}, status=status.HTTP_200_OK)
+        return Response({'message': f'Statut {statut_payunit} — en attente.'}, status=status.HTTP_200_OK)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -363,7 +371,7 @@ class PaiementStatutAPIView(APIView):
     Retourne le statut actuel du paiement d'une commande.
 
     Utilisé par le frontend pour poller le statut après redirection
-    depuis NotchPay (le client revient sur le site après avoir payé).
+    depuis PayUnit (le client revient sur le site après avoir payé).
 
     Le frontend appelle cet endpoint toutes les 3 secondes jusqu'à
     obtenir 'reussi' ou 'echoue'.

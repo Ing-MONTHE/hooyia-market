@@ -39,6 +39,7 @@ urlpatterns += i18n_patterns(
     path('compte/',    include('apps.users.urls')),
     path('panier/',   include('apps.cart.urls')),
     path('commandes/', include('apps.orders.urls')),
+    path('notifications/', include('apps.notifications.urls')),
     path('chat/',     include('apps.chat.urls')),
     prefix_default_language=False,  # /fr/ optionnel pour la langue par défaut
 )

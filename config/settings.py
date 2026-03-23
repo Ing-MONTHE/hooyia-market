@@ -230,6 +230,7 @@ EMAIL_USE_TLS       = config('EMAIL_USE_TLS',       default=True, cast=bool)
 EMAIL_HOST_USER     = config('EMAIL_HOST_USER',     default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL  = config('DEFAULT_FROM_EMAIL',  default=f'HooYia Market <{config("EMAIL_HOST_USER", default="")}>')
+ADMIN_EMAIL         = config('ADMIN_EMAIL', default=config('EMAIL_HOST_USER', default=''))  # Email qui reçoit les alertes remboursement
 
 
 # ═══════════════════════════════════════════════
@@ -304,15 +305,16 @@ GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:
 
 
 # ═══════════════════════════════════════════════
-# NOTCHPAY — Paiements Mobile Money (OM & MTN MoMo)
+# PAYUNIT — Paiements Mobile Money (OM & MTN MoMo)
 # ═══════════════════════════════════════════════
-# Dev  : clé sandbox préfixée sb.pk. (mode='sandbox')
-# Prod : clé live préfixée b.pk.     (mode='live')
-# Changer uniquement NOTCHPAY_PUBLIC_KEY dans .env pour basculer
+# Dev  : PAYUNIT_APP_TOKEN=sand_xxx + PAYUNIT_MODE=test
+# Prod : PAYUNIT_APP_TOKEN=live_xxx + PAYUNIT_MODE=live
+# api_user et api_password sont identiques en dev et prod.
 
-NOTCHPAY_PUBLIC_KEY = config('NOTCHPAY_PUBLIC_KEY', default='sb.pk.test_key_dev')
-NOTCHPAY_HASH_KEY   = config('NOTCHPAY_HASH_KEY',   default='')
-NOTCHPAY_API_URL    = 'https://api.notchpay.co'
+PAYUNIT_API_USER     = config('PAYUNIT_API_USER',     default='')
+PAYUNIT_API_PASSWORD = config('PAYUNIT_API_PASSWORD', default='')
+PAYUNIT_APP_TOKEN    = config('PAYUNIT_APP_TOKEN',    default='')
+PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='test')
 
 
 # ═══════════════════════════════════════════════
@@ -328,3 +330,4 @@ CELERY_TIMEZONE                           = TIME_ZONE
 CELERY_TASK_SOFT_TIME_LIMIT               = 300
 CELERY_TASK_TIME_LIMIT                    = 360
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cast=bool)  # True en dev pour exécuter sans worker

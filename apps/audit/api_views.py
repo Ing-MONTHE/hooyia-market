@@ -31,7 +31,13 @@ class AuditLogListView(APIView):
     Retourne la liste paginée des logs d'audit.
     Accessible aux admins et staff uniquement.
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def check_permissions(self, request):
+        super().check_permissions(request)
+        if not (request.user.is_staff or getattr(request.user, 'is_admin', False)):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied()
 
     def get(self, request):
         qs = AuditLog.objects.select_related('utilisateur').order_by('-date')

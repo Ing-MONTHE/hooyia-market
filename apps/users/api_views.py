@@ -184,7 +184,30 @@ class ListeUtilisateursAdminAPIView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         from apps.users.models import CustomUser
-        users = CustomUser.objects.all().order_by('-date_inscription')
+        from django.db.models import Q
+        qs = CustomUser.objects.all().order_by('-date_inscription')
+
+        # ── Filtres optionnels ────────────────────────────────
+        role   = request.query_params.get('role', '')
+        search = request.query_params.get('search', '')
+
+        if role == 'admin':
+            qs = qs.filter(is_staff=True)
+        elif role == 'vendeur':
+            qs = qs.filter(is_vendeur=True, is_staff=False)
+        elif role == 'actif':
+            qs = qs.filter(is_active=True)
+        elif role == 'inactif':
+            qs = qs.filter(is_active=False)
+
+        if search:
+            qs = qs.filter(
+                Q(nom__icontains=search) |
+                Q(prenom__icontains=search) |
+                Q(username__icontains=search) |
+                Q(email__icontains=search)
+            )
+
         data = [{
             'id': u.id,
             'nom': u.nom,
@@ -196,7 +219,7 @@ class ListeUtilisateursAdminAPIView(generics.ListAPIView):
             'is_staff': u.is_staff,
             'email_verifie': u.email_verifie,
             'date_inscription': u.date_inscription.isoformat() if u.date_inscription else None,
-        } for u in users]
+        } for u in qs]
         return Response(data)
 
 

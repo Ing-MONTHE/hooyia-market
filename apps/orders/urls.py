@@ -7,7 +7,7 @@ urlpatterns = [
     # Checkout
     path('',                    views.checkout,        name='checkout'),
     path('passer/',             views.checkout,        name='passer_commande'),
-    # Retour après paiement NotchPay (polling JS)
+    # Retour après paiement PayUnit (polling JS)
     path('paiement/retour/',   views.retour_paiement, name='retour_paiement'),
     path('paiement/mock/',     views.mock_paiement,   name='mock_paiement'),    # Dev local uniquement
     # Confirmation

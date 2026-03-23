@@ -1,71 +1,55 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% comment %}
-   HooYia Market — orders/mock_paiement.html
-   Page de simulation NotchPay — DEV LOCAL UNIQUEMENT.
-   Permet de simuler un paiement réussi ou échoué sans clés API réelles.
-   Cette page ne s'affiche que si NOTCHPAY_PUBLIC_KEY commence par "sb.pk.test".
-{% endcomment %}
-
 {% block title %}[DEV] Simulation paiement — HooYia Market{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto px-4 py-16 text-center">
-  <div class="card p-8 space-y-6">
+<div style="min-height:60vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+  <div class="card" style="width:100%; max-width:400px; padding:28px;">
 
     {# Bandeau DEV #}
-    <div style="background:#1e3a8a;color:white;border-radius:8px;padding:8px 16px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;">
+    <div style="background:#1e3a8a;color:white;border-radius:8px;padding:6px 14px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-align:center;margin-bottom:20px;">
       MODE SIMULATION — DEV LOCAL
     </div>
 
-    {# Icône NotchPay simulé #}
-    <div style="width:72px;height:72px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect width="20" height="14" x="2" y="5" rx="2"/>
-        <line x1="2" x2="22" y1="10" y2="10"/>
+    {# Icône #}
+    <div style="width:52px;height:52px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
       </svg>
     </div>
 
-    <div>
-      <h1 class="text-xl font-bold text-ink">Simulation NotchPay</h1>
-      <p class="text-sm text-text-secondary mt-1">
-        Simule une confirmation Mobile Money pour tester le flux complet.
-      </p>
-    </div>
+    <h1 class="text-lg font-bold text-ink text-center" style="margin-bottom:4px;">Simulation PayUnit</h1>
+    <p class="text-sm text-text-secondary text-center" style="margin-bottom:20px;">Simule une confirmation Mobile Money.</p>
 
     {# Infos commande #}
-    <div class="bg-surface-2 rounded-xl p-4 text-left space-y-2">
-      <div class="flex justify-between text-sm">
+    <div style="background:var(--surface-2);border-radius:10px;padding:12px 16px;font-size:0.82rem;display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;">
         <span class="text-text-muted">Commande</span>
         <span class="font-semibold text-ink">#{{ commande.reference_courte }}</span>
       </div>
-      <div class="flex justify-between text-sm">
+      <div style="display:flex;justify-content:space-between;">
         <span class="text-text-muted">Montant</span>
         <span class="font-semibold text-ink">{{ commande.montant_total|floatformat:0 }} FCFA</span>
       </div>
-      <div class="flex justify-between text-sm">
+      <div style="display:flex;justify-content:space-between;">
         <span class="text-text-muted">Mode</span>
         <span class="font-semibold text-ink">{{ commande.paiement.get_mode_display }}</span>
       </div>
-      <div class="flex justify-between text-sm">
+      <div style="display:flex;justify-content:space-between;">
         <span class="text-text-muted">Réf. mock</span>
         <span class="font-mono text-xs text-text-muted">{{ trx }}</span>
       </div>
     </div>
 
-    {# Boutons simuler succès / échec #}
-    <div class="space-y-3">
-
+    {# Boutons #}
+    <div style="display:flex;flex-direction:column;gap:10px;">
       <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="action" value="success" />
-        <button type="submit" class="btn btn-primary w-full" style="background:#16a34a;border-color:#16a34a;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
+        <button type="submit" class="btn w-full" style="background:#16a34a;border-color:#16a34a;color:white;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
           Simuler paiement RÉUSSI
         </button>
@@ -74,22 +58,17 @@
       <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="action" value="fail" />
-        <button type="submit" class="btn btn-secondary w-full" style="border-color:#dc2626;color:#dc2626;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" x2="9" y1="9" y2="15"/>
-            <line x1="9" x2="15" y1="9" y2="15"/>
+        <button type="submit" class="btn btn-secondary w-full" style="border-color:#fca5a5;color:#dc2626;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>
           </svg>
           Simuler paiement ÉCHOUÉ
         </button>
       </form>
-
     </div>
 
-    <p class="text-xs text-text-muted">
-      Cette page n'apparaît qu'en développement local.<br>
-      En production avec de vraies clés NotchPay, elle est inaccessible.
+    <p class="text-xs text-text-muted text-center" style="margin-top:16px;">
+      Page inaccessible en production avec de vraies clés PayUnit.
     </p>
 
   </div>

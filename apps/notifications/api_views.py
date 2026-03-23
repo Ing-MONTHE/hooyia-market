@@ -122,3 +122,115 @@ class ToutLireAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API ADMIN — Toutes les notifications (admin dashboard)
+# GET /api/notifications/admin/
+# ═══════════════════════════════════════════════════════════════
+
+class NotificationAdminListeAPIView(generics.ListAPIView):
+    """
+    GET : liste de toutes les notifications (admin uniquement).
+    Utilisé par le dashboard admin pour la section Notifications.
+    """
+    serializer_class   = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not (user.is_staff or getattr(user, 'is_admin', False)):
+            return Notification.objects.none()
+
+        qs = Notification.objects.select_related('utilisateur').order_by('-date_creation')
+
+        # Filtre optionnel par type
+        type_notif = self.request.query_params.get('type', '')
+        if type_notif:
+            qs = qs.filter(type_notif=type_notif)
+
+        # Filtre par statut de lecture
+        is_read = self.request.query_params.get('is_read', '')
+        if is_read:
+            qs = qs.filter(is_read=is_read.lower() == 'true')
+
+        return qs
+
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API ADMIN — Envoyer une notification manuelle
+# POST /api/notifications/envoyer/
+# ═══════════════════════════════════════════════════════════════
+
+class EnvoyerNotificationAdminAPIView(APIView):
+    """
+    POST : envoie une notification manuelle depuis le dashboard admin.
+
+    Body JSON :
+      {
+        "destinataire": "tous" | "client" | <user_id>,
+        "type_notif"  : "commande" | "avis" | "stock" | "systeme",
+        "titre"       : "Titre de la notification",
+        "message"     : "Corps du message",
+        "lien"        : "/url/optionnel/"   (optionnel)
+      }
+
+    Réponse :
+      { "envoye": <nb>, "message": "..." }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if not (user.is_staff or getattr(user, 'is_admin', False)):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied()
+
+        from apps.users.models import CustomUser
+        from apps.notifications.tasks import _diffuser_notification_ws
+
+        destinataire = request.data.get('destinataire', 'tous')
+        type_notif   = request.data.get('type_notif',   'systeme')
+        titre        = request.data.get('titre',        '').strip()
+        message      = request.data.get('message',      '').strip()
+        lien         = request.data.get('lien',         '').strip()
+
+        if not titre or not message:
+            return Response(
+                {'erreur': 'Le titre et le message sont obligatoires.'},
+                status=400
+            )
+
+        # ── Déterminer les destinataires ──────────────────────
+        if destinataire == 'tous':
+            users = CustomUser.objects.filter(is_active=True)
+        elif destinataire == 'clients':
+            users = CustomUser.objects.filter(
+                is_active=True, is_staff=False
+            ).exclude(is_admin=True)
+        elif destinataire == 'admins':
+            users = CustomUser.objects.filter(is_active=True, is_staff=True)
+        else:
+            # ID utilisateur spécifique
+            try:
+                users = CustomUser.objects.filter(pk=int(destinataire), is_active=True)
+            except (ValueError, TypeError):
+                return Response({'erreur': 'Destinataire invalide.'}, status=400)
+
+        nb = 0
+        for u in users:
+            try:
+                _diffuser_notification_ws(
+                    utilisateur_id=u.id,
+                    titre=titre,
+                    message=message,
+                    type_notif=type_notif,
+                    lien=lien,
+                )
+                nb += 1
+            except Exception:
+                pass
+
+        return Response({
+            'envoye':  nb,
+            'message': f'{nb} notification(s) envoyée(s) avec succès.'
+        })

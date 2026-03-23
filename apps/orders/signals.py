@@ -5,7 +5,7 @@ Signals pour l'app orders.
 les notifications (emails, rappels).
 
 Note : la confirmation de commande est désormais déclenchée par le webhook
-NotchPay (apps/orders/api_views.py) après confirmation du paiement Mobile Money.
+PayUnit (apps/orders/api_views.py) après confirmation du paiement Mobile Money.
 """
 from django.db.models.signals import post_save
 from django.dispatch import receiver

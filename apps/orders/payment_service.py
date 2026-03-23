@@ -1,32 +1,32 @@
 """
-NotchPayService — Service d'intégration NotchPay Mobile Money
+PayUnitService — Service d'intégration PayUnit Mobile Money
 
 Responsabilités :
-  1. initialize()  → crée un paiement chez NotchPay, retourne l'authorization_url
-  2. verify()      → vérifie le statut d'un paiement (polling ou après webhook)
-  3. verify_webhook_signature() → valide qu'un webhook vient bien de NotchPay
+  1. initialize()          → initialise un paiement, retourne la payment_url
+  2. verify()              → vérifie le statut d'un paiement via l'API
+  3. confirmer_paiement()  → marque REUSSI + confirme la commande FSM
+  4. echouer_paiement()    → marque ECHOUE
 
 Flux complet :
   Client checkout
-    → OrderService.create_from_cart()        # commande créée, statut EN_ATTENTE
-    → NotchPayService.initialize()           # appel API NotchPay
-    → retourne authorization_url
-    → client redirigé vers NotchPay
-    → client paie sur son téléphone (USSD)
-    → NotchPay appelle POST /api/commandes/webhook/notchpay/
-    → NotchPayService.verify_webhook_signature()  # sécurité
-    → paiement.statut = REUSSI
-    → commande.confirmer()                   # email envoyé
+    → OrderService.create_from_cart()     # commande créée, statut EN_ATTENTE
+    → PayUnitService.initialize()         # appel API PayUnit
+    → retourne payment_url
+    → client redirigé vers page PayUnit   # choisit OM ou MTN + paie via USSD
+    → PayUnit redirige vers return_url    # /commandes/paiement/retour/
+    → JS polle /api/commandes/<ref>/paiement-statut/ toutes les 3s
+    → PayUnit appelle notify_url (webhook) en arrière-plan
+    → paiement.statut = REUSSI → commande.confirmer()
 
-Mode sandbox (dev) :
-  NOTCHPAY_PUBLIC_KEY=sb.pk.xxx → appels réels à l'API sandbox NotchPay
-  Aucun vrai argent n'est débité.
+Authentification PayUnit (HTTP Basic Auth) :
+  Authorization: Basic Base64(api_user:api_password)
+  x-api-key:     application_token (sandbox ou live selon PAYUNIT_MODE)
 
-Mode live (prod) :
-  NOTCHPAY_PUBLIC_KEY=b.pk.xxx → appels réels, vrais paiements.
+Environnements :
+  .env.dev  → PAYUNIT_MODE=test  + PAYUNIT_APP_TOKEN=sand_xxx
+  .env.prod → PAYUNIT_MODE=live  + PAYUNIT_APP_TOKEN=live_xxx
 """
-import hashlib
-import hmac
+import base64
 import logging
 import requests
 
@@ -37,294 +37,252 @@ from .models import Paiement
 
 logger = logging.getLogger(__name__)
 
-# URL de base de l'API NotchPay (définie dans settings.py)
-NOTCHPAY_API_URL = getattr(settings, 'NOTCHPAY_API_URL', 'https://api.notchpay.co')
+PAYUNIT_BASE_URL = 'https://gateway.payunit.net'
 
 
-class NotchPayError(Exception):
-    """
-    Exception levée quand l'API NotchPay retourne une erreur.
-    Contient le message d'erreur de NotchPay pour affichage au client.
-    """
+class PayUnitError(Exception):
+    """Exception levée quand l'API PayUnit retourne une erreur."""
     pass
 
 
-class NotchPayService:
+class PayUnitService:
     """
-    Interface Python vers l'API REST NotchPay.
-
-    Toutes les méthodes sont statiques : pas besoin d'instancier la classe.
-
-    Usage :
-      result = NotchPayService.initialize(paiement, request)
-      # result = {'authorization_url': 'https://pay.notchpay.co/...', 'reference': 'trx.xxx'}
+    Interface Python vers l'API REST PayUnit.
+    Toutes les méthodes sont statiques.
     """
-
-    # ── Canal NotchPay par mode de paiement ──────────────────
-    # Ces codes sont définis par NotchPay dans leur documentation
-    CANAUX = {
-        'orange_money': 'cm.orange',   # Orange Money Cameroun
-        'mtn_momo':     'cm.mtn',      # MTN MoMo Cameroun
-    }
 
     @staticmethod
     def _headers():
         """
-        Construit les headers HTTP pour chaque appel API NotchPay.
-        La clé publique sert d'authentification (Bearer token).
+        Headers HTTP pour chaque appel API PayUnit.
+        PayUnit utilise HTTP Basic Auth + x-api-key.
         """
+        api_user     = getattr(settings, 'PAYUNIT_API_USER', '')
+        api_password = getattr(settings, 'PAYUNIT_API_PASSWORD', '')
+        app_token    = getattr(settings, 'PAYUNIT_APP_TOKEN', '')
+        mode         = getattr(settings, 'PAYUNIT_MODE', 'test')
+
+        credentials = base64.b64encode(
+            f'{api_user}:{api_password}'.encode('utf-8')
+        ).decode('utf-8')
+
         return {
-            'Authorization': settings.NOTCHPAY_PUBLIC_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            'Authorization': f'Basic {credentials}',
+            'x-api-key':     app_token,
+            'mode':          mode,
+            'Content-Type':  'application/json',
         }
+
+    @staticmethod
+    def _is_mock():
+        """Détecte le mode mock (dev sans vraies clés)."""
+        app_token = getattr(settings, 'PAYUNIT_APP_TOKEN', '')
+        return (
+            getattr(settings, 'PAYUNIT_MOCK', False)
+            or not app_token
+            or app_token == 'your_sandbox_token_here'
+        )
 
     @staticmethod
     def initialize(paiement, request):
         """
-        Initialise un paiement chez NotchPay.
-
-        Envoie les détails de la commande à l'API NotchPay qui retourne
-        une authorization_url vers laquelle rediriger le client.
+        Initialise un paiement chez PayUnit.
 
         Args:
             paiement : instance Paiement (liée à une Commande)
-            request  : HttpRequest Django (pour construire les URLs de callback)
+            request  : HttpRequest Django
 
         Returns:
             dict : {
-                'authorization_url': str,  ← URL vers laquelle rediriger le client
-                'reference': str,          ← référence NotchPay (ex: trx.abc123)
+                'payment_url':       str,  ← URL vers laquelle rediriger le client
+                'authorization_url': str,  ← alias (compatibilité)
+                'transaction_id':    str,  ← ID de transaction PayUnit
             }
 
         Raises:
-            NotchPayError : si l'API retourne une erreur
+            PayUnitError : si l'API retourne une erreur
         """
         commande = paiement.commande
         client   = commande.client
 
-        # ── URL de callback : où NotchPay redirige après paiement ──
-        # Le client arrive ici après avoir payé (succès ou échec)
-        callback_url = request.build_absolute_uri(
-            f'/commandes/paiement/retour/?ref={commande.reference}'
-        )
-
-        # ── URL webhook : où NotchPay envoie la confirmation async ──
-        # Appelé en arrière-plan par NotchPay dès que le paiement est traité
-        webhook_url = request.build_absolute_uri(
-            '/api/commandes/webhook/notchpay/'
-        )
-
-        # ── Canal de paiement (cm.orange ou cm.mtn) ──────────────
-        canal = NotchPayService.CANAUX.get(paiement.mode, '')
-
-        # ── Corps de la requête NotchPay ──────────────────────────
-        payload = {
-            'amount':      int(paiement.montant),   # NotchPay attend un entier pour XAF
-            'currency':    'XAF',
-            'description': f'Commande HooYia #{commande.reference_courte}',
-            'reference':   str(commande.reference), # Notre référence interne (UUID)
-            'callback':    callback_url,
-            'webhook':     webhook_url,
-            'customer': {
-                'name':  f'{client.prenom} {client.nom}'.strip() or client.username,
-                'email': client.email,
-                'phone': paiement.telephone_paiement,
-            },
-            # Force le canal Mobile Money (évite que le client choisisse autre chose)
-            'locked_channel': canal,
-        }
-
-        logger.info(
-            f"NotchPay initialize — Commande #{commande.reference_courte} "
-            f"| Montant: {paiement.montant} XAF | Canal: {canal}"
-        )
-
-        # ── Mode MOCK (dev local sans vraies clés NotchPay) ──────────────────
-        # Activé si la clé commence par "sb.pk.test" ou si NOTCHPAY_MOCK=True.
-        # Redirige vers une page locale qui simule la confirmation du paiement.
-        cle = getattr(settings, 'NOTCHPAY_PUBLIC_KEY', '')
-        is_mock = (
-            getattr(settings, 'NOTCHPAY_MOCK', False)
-            or cle.startswith('sb.pk.test')
-            or not cle
-        )
-
-        if is_mock:
+        # ── Mode MOCK (dev local) ─────────────────────────────────────────────
+        if PayUnitService._is_mock():
             import uuid as _uuid
-            ref_mock = f'trx.mock.{str(_uuid.uuid4())[:8]}'
+            ref_mock = f'pu_mock_{str(_uuid.uuid4())[:8]}'
             mock_url = request.build_absolute_uri(
                 f'/commandes/paiement/mock/?ref={commande.reference}&trx={ref_mock}'
             )
             paiement.reference_externe = ref_mock
             paiement.authorization_url = mock_url
             paiement.save(update_fields=['reference_externe', 'authorization_url'])
-            logger.warning(f"NotchPay MOCK actif — Commande #{commande.reference_courte} | Ref: {ref_mock}")
-            return {'authorization_url': mock_url, 'reference': ref_mock}
+            logger.warning(
+                f"PayUnit MOCK actif — Commande #{commande.reference_courte} "
+                f"| Ref: {ref_mock}"
+            )
+            return {
+                'payment_url':       mock_url,
+                'authorization_url': mock_url,
+                'transaction_id':    ref_mock,
+            }
 
-        # ── Appel API NotchPay (sandbox réel ou production) ──────────────────
+        # ── URLs de retour ────────────────────────────────────────────────────
+        return_url = request.build_absolute_uri(
+            f'/commandes/paiement/retour/?ref={commande.reference}'
+        )
+        notify_url = request.build_absolute_uri(
+            '/api/commandes/webhook/payunit/'
+        )
+
+        # ── Corps de la requête ───────────────────────────────────────────────
+        payload = {
+            'total_amount': int(paiement.montant),
+            'currency':     'XAF',
+            'return_url':   return_url,
+            'notify_url':   notify_url,
+            'purchaseRef':  str(commande.reference),
+            'description':  f'Commande HooYia #{commande.reference_courte}',
+            'name':         f'{client.prenom} {client.nom}'.strip() or client.username,
+            'email':        client.email,
+            'phone':        paiement.telephone_paiement,
+        }
+
+        logger.info(
+            f"PayUnit initialize — Commande #{commande.reference_courte} "
+            f"| Montant: {paiement.montant} XAF"
+        )
+
+        # ── Appel API ─────────────────────────────────────────────────────────
         try:
             response = requests.post(
-                f'{NOTCHPAY_API_URL}/payments',
+                f'{PAYUNIT_BASE_URL}/api/gateway/checkout/initialize',
                 json=payload,
-                headers=NotchPayService._headers(),
-                timeout=15,  # 15 secondes max
+                headers=PayUnitService._headers(),
+                timeout=15,
             )
             data = response.json()
         except requests.Timeout:
-            logger.error("NotchPay initialize — Timeout")
-            raise NotchPayError("Le service de paiement est temporairement indisponible. Réessaie dans quelques instants.")
+            logger.error("PayUnit initialize — Timeout")
+            raise PayUnitError(
+                "Le service de paiement est temporairement indisponible. "
+                "Réessaie dans quelques instants."
+            )
         except requests.RequestException as e:
-            logger.error(f"NotchPay initialize — Erreur réseau : {e}")
-            raise NotchPayError("Impossible de contacter le service de paiement.")
+            logger.error(f"PayUnit initialize — Erreur réseau : {e}")
+            raise PayUnitError("Impossible de contacter le service de paiement.")
 
-        # ── Gestion des erreurs API ───────────────────────────────
+        # ── Gestion des erreurs ───────────────────────────────────────────────
         if response.status_code not in (200, 201):
-            message = data.get('message', 'Erreur inconnue NotchPay')
-            logger.error(f"NotchPay initialize — Erreur {response.status_code} : {message}")
-            raise NotchPayError(f"Erreur paiement : {message}")
+            message = data.get('message', data.get('error', 'Erreur PayUnit inconnue'))
+            logger.error(f"PayUnit initialize — Erreur {response.status_code} : {message}")
+            raise PayUnitError(f"Erreur paiement : {message}")
 
-        # ── Extraction des données utiles ─────────────────────────
-        transaction     = data.get('transaction', {})
-        authorization_url = data.get('authorization_url', '')
-        reference_notchpay = transaction.get('reference', '')
+        # ── Extraction ────────────────────────────────────────────────────────
+        # PayUnit retourne :
+        # { "status": "SUCCESS", "message": "...",
+        #   "data": { "payment_url": "...", "transaction_id": "..." } }
+        result_data    = data.get('data', data)
+        payment_url    = result_data.get('payment_url', '')
+        transaction_id = result_data.get('transaction_id', str(commande.reference))
 
-        if not authorization_url:
-            raise NotchPayError("NotchPay n'a pas retourné d'URL de paiement.")
+        if not payment_url:
+            logger.error(f"PayUnit initialize — Pas d'URL dans la réponse : {data}")
+            raise PayUnitError("PayUnit n'a pas retourné d'URL de paiement.")
 
-        # ── Sauvegarde en base ────────────────────────────────────
-        # On stocke la référence et l'URL pour le suivi et le webhook
-        paiement.reference_externe = reference_notchpay
-        paiement.authorization_url = authorization_url
+        # ── Sauvegarde ───────────────────────────────────────────────────────
+        paiement.reference_externe = transaction_id
+        paiement.authorization_url = payment_url
         paiement.save(update_fields=['reference_externe', 'authorization_url'])
 
         logger.info(
-            f"NotchPay initialize — OK | Référence: {reference_notchpay} "
-            f"| URL: {authorization_url}"
+            f"PayUnit initialize — OK | Transaction: {transaction_id} "
+            f"| URL: {payment_url}"
         )
 
         return {
-            'authorization_url': authorization_url,
-            'reference':         reference_notchpay,
+            'payment_url':       payment_url,
+            'authorization_url': payment_url,
+            'transaction_id':    transaction_id,
         }
 
     @staticmethod
-    def verify(reference_notchpay):
+    def verify(transaction_id):
         """
-        Vérifie le statut d'un paiement auprès de l'API NotchPay.
-
-        Utilisé :
-          - Dans le webhook pour confirmer avant de valider la commande
-          - En polling depuis le frontend si besoin
+        Vérifie le statut d'un paiement auprès de l'API PayUnit.
 
         Args:
-            reference_notchpay : str — référence de transaction NotchPay (ex: trx.abc123)
+            transaction_id : str — identifiant de transaction PayUnit
 
         Returns:
             dict : {
-                'status': str,    ← 'complete', 'failed', 'pending', 'canceled'
-                'amount': int,
-                'reference': str,
+                'status':         str,  ← 'SUCCESS', 'FAILED', 'PENDING'
+                'amount':         int,
+                'transaction_id': str,
             }
 
         Raises:
-            NotchPayError : si l'API retourne une erreur
+            PayUnitError : si l'API retourne une erreur
         """
         try:
             response = requests.get(
-                f'{NOTCHPAY_API_URL}/payments/{reference_notchpay}',
-                headers=NotchPayService._headers(),
+                f'{PAYUNIT_BASE_URL}/api/gateway/checkout/status/{transaction_id}',
+                headers=PayUnitService._headers(),
                 timeout=10,
             )
             data = response.json()
         except requests.RequestException as e:
-            logger.error(f"NotchPay verify — Erreur réseau : {e}")
-            raise NotchPayError("Impossible de vérifier le paiement.")
+            logger.error(f"PayUnit verify — Erreur réseau : {e}")
+            raise PayUnitError("Impossible de vérifier le paiement.")
 
         if response.status_code != 200:
-            raise NotchPayError(data.get('message', 'Erreur vérification NotchPay'))
+            raise PayUnitError(data.get('message', 'Erreur vérification PayUnit'))
 
-        transaction = data.get('transaction', {})
+        result_data = data.get('data', data)
         return {
-            'status':    transaction.get('status', 'pending'),
-            'amount':    transaction.get('amount', 0),
-            'reference': transaction.get('reference', ''),
+            'status':         result_data.get('status', 'PENDING'),
+            'amount':         result_data.get('amount', 0),
+            'transaction_id': result_data.get('transaction_id', transaction_id),
         }
-
-    @staticmethod
-    def verify_webhook_signature(payload_bytes, signature_header):
-        """
-        Vérifie que le webhook vient bien de NotchPay (et non d'un attaquant).
-
-        NotchPay signe chaque webhook avec NOTCHPAY_HASH_KEY via HMAC-SHA256.
-        On recalcule la signature et on compare.
-
-        Args:
-            payload_bytes    : bytes — corps brut de la requête HTTP
-            signature_header : str   — valeur du header 'x-notch-signature'
-
-        Returns:
-            bool : True si la signature est valide, False sinon
-        """
-        hash_key = getattr(settings, 'NOTCHPAY_HASH_KEY', '')
-
-        if not hash_key:
-            # En dev sans clé de hachage configurée, on accepte (à ne pas faire en prod)
-            logger.warning("NOTCHPAY_HASH_KEY non configuré — vérification webhook désactivée")
-            return True
-
-        # Calcul HMAC-SHA256
-        expected = hmac.new(
-            hash_key.encode('utf-8'),
-            payload_bytes,
-            hashlib.sha256
-        ).hexdigest()
-
-        # Comparaison sécurisée (résistante aux timing attacks)
-        return hmac.compare_digest(expected, signature_header or '')
 
     @staticmethod
     def confirmer_paiement(paiement):
         """
-        Marque le paiement comme réussi et confirme la commande.
-
-        Appelé par la vue webhook après vérification de la signature
-        et du statut NotchPay.
-
-        Args:
-            paiement : instance Paiement à confirmer
+        Marque le paiement REUSSI et confirme la commande via FSM.
+        Appelé par le webhook après notification PayUnit.
         """
         commande = paiement.commande
 
-        # Mettre le paiement à REUSSI
-        paiement.statut       = Paiement.StatutPaiement.REUSSI
+        paiement.statut        = Paiement.StatutPaiement.REUSSI
         paiement.date_paiement = timezone.now()
         paiement.save(update_fields=['statut', 'date_paiement'])
 
-        # Confirmer la commande via FSM → déclenche signal → email Celery
         commande.confirmer()
         commande.save()
 
+        # ── Vider le panier maintenant que le paiement est confirmé ──
+        # On vide seulement ici pour permettre une nouvelle tentative
+        # si le paiement avait échoué avant d'arriver à ce point.
+        try:
+            panier = commande.client.panier
+            if not panier.est_vide:
+                panier.vider()
+        except Exception:
+            pass  # Panier déjà vide ou inexistant
+
         logger.info(
-            f"Paiement confirmé — Commande #{commande.reference_courte} "
-            f"| Ref NotchPay: {paiement.reference_externe}"
+            f"PayUnit — Paiement confirmé | Commande #{commande.reference_courte} "
+            f"| Transaction: {paiement.reference_externe}"
         )
 
     @staticmethod
     def echouer_paiement(paiement):
         """
-        Marque le paiement comme échoué.
-
-        Appelé par le webhook si NotchPay signale un échec (refus, timeout, annulation).
+        Marque le paiement ECHOUE.
         La commande reste EN_ATTENTE — le client peut retenter.
-
-        Args:
-            paiement : instance Paiement à marquer comme échoué
         """
         paiement.statut = Paiement.StatutPaiement.ECHOUE
         paiement.save(update_fields=['statut'])
 
         logger.warning(
-            f"Paiement échoué — Commande #{paiement.commande.reference_courte} "
-            f"| Ref NotchPay: {paiement.reference_externe}"
+            f"PayUnit — Paiement échoué | Commande #{paiement.commande.reference_courte} "
+            f"| Transaction: {paiement.reference_externe}"
         )

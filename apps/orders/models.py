@@ -179,7 +179,7 @@ class Commande(models.Model):
         """
         Marque la commande comme livrée.
         Le paiement Mobile Money est déjà REUSSI à ce stade
-        (confirmé par NotchPay avant traitement de la commande).
+        (confirmé par PayUnit avant traitement de la commande).
         Déclenche le signal → rappel laisser un avis via Celery.
         """
         from django.utils import timezone
@@ -275,9 +275,9 @@ class Paiement(models.Model):
 
     Cycle de vie :
       1. Créé avec statut EN_ATTENTE lors de la création de la commande
-      2. NotchPay initialise le paiement → authorization_url générée
+      2. PayUnit initialise le paiement → payment_url générée
       3. Client paie sur son téléphone (USSD/app)
-      4. NotchPay appelle le webhook → statut passe à REUSSI ou ECHOUE
+      4. PayUnit appelle le webhook → statut passe à REUSSI ou ECHOUE
       5. Si REUSSI → commande.confirmer() est appelé automatiquement
 
     Livraison : toujours GRATUITE (frais_livraison = 0, non stocké ici).
@@ -288,10 +288,11 @@ class Paiement(models.Model):
         MTN_MOMO     = 'mtn_momo',     _('MTN Mobile Money')
 
     class StatutPaiement(models.TextChoices):
-        EN_ATTENTE = 'en_attente', _('En attente')
-        REUSSI     = 'reussi',     _('Réussi')
-        ECHOUE     = 'echoue',     _('Échoué')
-        REMBOURSE  = 'rembourse',  _('Remboursé')
+        EN_ATTENTE          = 'en_attente',          _('En attente')
+        REUSSI              = 'reussi',              _('Réussi')
+        ECHOUE              = 'echoue',              _('Échoué')
+        REMBOURSE_EN_ATTENTE = 'rembourse_en_attente', _('Remboursement en attente')
+        REMBOURSE           = 'rembourse',           _('Remboursé')
 
     commande = models.OneToOneField(
         Commande,
@@ -307,7 +308,7 @@ class Paiement(models.Model):
     )
 
     statut = models.CharField(
-        max_length=15,
+        max_length=20,
         choices=StatutPaiement.choices,
         default=StatutPaiement.EN_ATTENTE,
         verbose_name=_("Statut du paiement")
@@ -327,18 +328,18 @@ class Paiement(models.Model):
         verbose_name=_("Numéro Mobile Money")
     )
 
-    # Référence de la transaction chez NotchPay (ex: trx.abc123)
+    # Référence de la transaction chez PayUnit
     reference_externe = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name=_("Référence NotchPay")
+        verbose_name=_("Référence PayUnit")
     )
 
-    # URL de paiement NotchPay vers laquelle rediriger le client
+    # URL de paiement PayUnit vers laquelle rediriger le client
     authorization_url = models.URLField(
         max_length=500,
         blank=True,
-        verbose_name=_("URL de paiement NotchPay")
+        verbose_name=_("URL de paiement PayUnit")
     )
 
     date_creation = models.DateTimeField(

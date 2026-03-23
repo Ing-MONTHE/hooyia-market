@@ -190,8 +190,12 @@
     ['sec-messages-header', 'sec-messages-card'],
     { 'sec-messages-header': 'flex' });
 
+  window.registerSection('envoyer-notification',
+    ['sec-envoyer-notification-header', 'sec-envoyer-notification-form'],
+    { 'sec-envoyer-notification-header': 'flex' });
+
   window.registerSection('notifications',
-    ['sec-notifications-header', 'sec-notifications-card'],
+    ['sec-notifications-header', 'sec-notifications-card', 'sec-notifications-history'],
     { 'sec-notifications-header': 'flex' });
 
   window.registerSection('audit',
@@ -289,6 +293,23 @@
       expediee:       ['st-ship',   'Expédiée'],
       livree:         ['st-done',   'Livrée'],
       annulee:        ['st-cancel', 'Annulée']
+    };
+    var d = map[s] || ['st-off', s];
+    return '<span class="st ' + d[0] + '">' + d[1] + '</span>';
+  };
+
+  /**
+   * renderStatutPaiement(statut) — Badge HTML coloré selon le statut du paiement
+   */
+  window.renderStatutPaiement = function (p) {
+    if (!p) return '<span class="st st-off">—</span>';
+    var s = p.statut || '';
+    var map = {
+      en_attente:           ['st-wait',   'En attente'],
+      reussi:               ['st-done',   'Payé ✓'],
+      echoue:               ['st-cancel', 'Échoué'],
+      rembourse_en_attente: ['st-ship',   'Remb. en attente'],
+      rembourse:            ['st-conf',   'Remboursé'],
     };
     var d = map[s] || ['st-off', s];
     return '<span class="st ' + d[0] + '">' + d[1] + '</span>';
@@ -958,6 +979,7 @@
         + '<td style="font-weight:700;color:var(--brand-main);">' + fmtPrice(c.montant_total) + '</td>'
         + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(c.date_creation) + '</td>'
         + '<td>' + renderStatut(c.statut) + '</td>'
+        + '<td>' + renderStatutPaiement(c.paiement) + '</td>'
         + '<td style="text-align:right;"><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap;">' + actions + '</div></td>'
         + '</tr>';
     }).join('');
@@ -999,41 +1021,162 @@
   };
 
   /* Voir le détail d'une commande */
+  window.closeCmdModal = function() {
+    var m = document.getElementById('cmd-detail-modal');
+    if (m) m.remove();
+  };
+
   window.voirDetailCommande = async function (id) {
+    // Supprimer modal existant
+    var existing = document.getElementById('cmd-detail-modal');
+    if (existing) existing.remove();
+
+    // Créer overlay + modal
+    var overlay = document.createElement('div');
+    overlay.id = 'cmd-detail-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML = '<div style="background:var(--surface);border-radius:16px;width:100%;max-width:620px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:modal-in 200ms ease both;">'
+      + '<div id="cmd-modal-inner" style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px;">Chargement…</div>'
+      + '</div>';
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+
     try {
       var c = await API.get('/api/commandes/' + id + '/');
-      var lignes = (c.lignes || []).map(function (l) {
-        return '<tr style="border-top:1px solid var(--border);">'
-          + '<td style="padding:8px;">' + escHtml(l.produit_nom || '—') + '</td>'
-          + '<td style="padding:8px;text-align:center;">' + l.quantite + '</td>'
-          + '<td style="padding:8px;text-align:right;">' + fmtPrice(l.prix_unitaire) + '</td>'
-          + '<td style="padding:8px;text-align:right;font-weight:700;">' + fmtPrice(l.quantite * l.prix_unitaire) + '</td>'
-          + '</tr>';
-      }).join('');
+      var p = c.paiement || {};
 
-      var body = '<div style="font-size:13px;font-family:var(--font-body);">'
-        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:16px;">'
-        + '<div><span style="color:var(--text-muted);">Client :</span> <strong>' + escHtml(c.client_nom || '—') + '</strong></div>'
-        + '<div><span style="color:var(--text-muted);">Statut :</span> ' + renderStatut(c.statut) + '</div>'
-        + '<div><span style="color:var(--text-muted);">Date :</span> ' + fmtDate(c.date_creation) + '</div>'
-        + '<div><span style="color:var(--text-muted);">Paiement :</span> ' + escHtml(c.mode_paiement || '—') + '</div>'
-        + '<div style="grid-column:1/-1;"><span style="color:var(--text-muted);">Adresse :</span> ' + escHtml((c.adresse_livraison_ville || '') + ' — ' + (c.adresse_livraison_adresse || '—')) + '</div>'
+      // ── Statut paiement ───────────────────────────────────────────────────
+      var pStatutMap = {
+        en_attente:           ['#92400e','#fffbeb', 'En attente'],
+        reussi:               ['#065f46','#f0fdf4', 'Payé ✓'],
+        echoue:               ['#991b1b','#fef2f2', 'Échoué'],
+        rembourse_en_attente: ['#c2410c','#fff7ed', 'Remboursement en attente'],
+        rembourse:            ['#1d4ed8','#eff6ff', 'Remboursé'],
+      };
+      var pSt = pStatutMap[p.statut] || ['#6b7280','#f9fafb', p.statut || '—'];
+      var paiementBadge = p.statut
+        ? '<span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:'+pSt[1]+';color:'+pSt[0]+';">'+pSt[2]+'</span>'
+        : '<span style="color:var(--text-muted);">—</span>';
+
+      // ── Timeline statuts ──────────────────────────────────────────────────
+      var etapes = ['en_attente','confirmee','en_preparation','expediee','livree'];
+      var etapesLabels = {'en_attente':'En attente','confirmee':'Confirmée','en_preparation':'En préparation','expediee':'Expédiée','livree':'Livrée'};
+      var idx = etapes.indexOf(c.statut);
+      var timelineHTML = '';
+      if (c.statut === 'annulee') {
+        timelineHTML = '<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#fef2f2;border-radius:8px;">'
+          + '<span style="color:#dc2626;font-weight:600;font-size:13px;">✕ Commande annulée</span></div>';
+      } else {
+        timelineHTML = '<div style="display:flex;align-items:center;gap:0;">';
+        etapes.forEach(function(e, i) {
+          var done   = i < idx;
+          var active = i === idx;
+          var dotBg  = done ? 'var(--brand-main)' : active ? '#f97316' : 'var(--surface-2)';
+          var dotBrd = done ? 'var(--brand-main)' : active ? '#f97316' : 'var(--border)';
+          var txtCol = (done||active) ? (done?'var(--brand-main)':'#f97316') : 'var(--text-muted)';
+          var line   = i < etapes.length-1 ? '<div style="flex:1;height:2px;background:'+(done?'var(--brand-main)':'var(--border)')+'></div>' : '';
+          timelineHTML += '<div style="display:flex;flex-direction:column;align-items:center;flex:1;">'
+            + '<div style="width:24px;height:24px;border-radius:50%;background:'+dotBg+';border:2px solid '+dotBrd+';display:flex;align-items:center;justify-content:center;z-index:1;">'
+            + (done ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' : '')
+            + '</div>'
+            + '<span style="font-size:9px;font-weight:600;color:'+txtCol+';margin-top:4px;text-align:center;line-height:1.2;max-width:52px;">'+etapesLabels[e]+'</span>'
+            + '</div>'
+            + (i < etapes.length-1 ? '<div style="flex:1;height:2px;margin-bottom:18px;background:'+(done?'var(--brand-main)':'var(--border)')+'"></div>' : '');
+        });
+        timelineHTML += '</div>';
+      }
+
+      // ── Lignes articles ───────────────────────────────────────────────────
+      var lignesHTML = (c.lignes || []).map(function(l) {
+        return '<tr style="border-top:1px solid var(--border);">'
+          + '<td style="padding:10px 8px;font-size:13px;color:var(--text);">' + escHtml(l.produit_nom||'—') + '</td>'
+          + '<td style="padding:10px 8px;text-align:center;font-size:13px;color:var(--text-muted);">×'+l.quantite+'</td>'
+          + '<td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--text-muted);">'+fmtPrice(l.prix_unitaire)+'</td>'
+          + '<td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:700;color:var(--text);">'+fmtPrice(l.quantite*parseFloat(l.prix_unitaire||0))+'</td>'
+          + '</tr>';
+      }).join('') || '<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text-muted);">Aucun article</td></tr>';
+
+      // ── HTML final du modal ───────────────────────────────────────────────
+      document.getElementById('cmd-modal-inner').style.cssText = 'overflow-y:auto;';
+      document.getElementById('cmd-modal-inner').innerHTML =
+        // En-tête
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;">'
+        + '<div>'
+        + '<p style="font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;">Détail commande</p>'
+        + '<h2 style="font-size:18px;font-weight:800;color:var(--text);margin:0;">#'+escHtml(c.reference_courte||String(id))+'</h2>'
         + '</div>'
+        + '<button onclick="closeCmdModal()" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface-2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+        + '</button>'
+        + '</div>'
+
+        // Timeline
+        + '<div style="padding:16px 24px 0;">' + timelineHTML + '</div>'
+
+        // Grille infos
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 24px;">'
+
+        // Bloc client
+        + '<div style="background:var(--surface-2);border-radius:10px;padding:14px;">'
+        + '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Client</p>'
+        + '<p style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">'+escHtml(c.client_nom||'—')+'</p>'
+        + '<p style="font-size:12px;color:var(--text-muted);">'+fmtDate(c.date_creation)+'</p>'
+        + '</div>'
+
+        // Bloc adresse
+        + '<div style="background:var(--surface-2);border-radius:10px;padding:14px;">'
+        + '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Livraison</p>'
+        + '<p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;">'+escHtml(c.adresse_livraison_nom||'—')+'</p>'
+        + '<p style="font-size:12px;color:var(--text-muted);">'+escHtml(c.adresse_livraison_adresse||'')+'</p>'
+        + '<p style="font-size:12px;color:var(--text-muted);">'+escHtml((c.adresse_livraison_ville||'')+(c.adresse_livraison_region?', '+c.adresse_livraison_region:''))+'</p>'
+        + '</div>'
+
+        // Bloc paiement
+        + '<div style="background:var(--surface-2);border-radius:10px;padding:14px;">'
+        + '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Paiement</p>'
+        + '<p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">'+escHtml(p.mode_affiche||c.mode_paiement||'—')+'</p>'
+        + paiementBadge
+        + (p.telephone_paiement ? '<p style="font-size:12px;color:var(--text-muted);margin-top:4px;">'+escHtml(p.telephone_paiement)+'</p>' : '')
+        + '</div>'
+
+        // Bloc montant
+        + '<div style="background:var(--surface-2);border-radius:10px;padding:14px;">'
+        + '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Montant</p>'
+        + '<p style="font-size:22px;font-weight:800;color:var(--brand-main);">'+fmtPrice(c.montant_total)+'</p>'
+        + '<p style="font-size:12px;color:var(--text-muted);">Livraison gratuite</p>'
+        + '</div>'
+
+        + '</div>'
+
+        // Articles
+        + '<div style="padding:0 24px 24px;">'
+        + '<p style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Articles commandés</p>'
+        + '<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">'
         + '<table style="width:100%;border-collapse:collapse;">'
         + '<thead><tr style="background:var(--surface-2);">'
-        + '<th style="padding:8px;text-align:left;font-size:11px;color:var(--text-muted);">Produit</th>'
-        + '<th style="padding:8px;text-align:center;font-size:11px;color:var(--text-muted);">Qté</th>'
-        + '<th style="padding:8px;text-align:right;font-size:11px;color:var(--text-muted);">P.U.</th>'
-        + '<th style="padding:8px;text-align:right;font-size:11px;color:var(--text-muted);">Total</th>'
+        + '<th style="padding:9px 8px;text-align:left;font-size:11px;color:var(--text-muted);font-weight:600;">Produit</th>'
+        + '<th style="padding:9px 8px;text-align:center;font-size:11px;color:var(--text-muted);font-weight:600;">Qté</th>'
+        + '<th style="padding:9px 8px;text-align:right;font-size:11px;color:var(--text-muted);font-weight:600;">P.U.</th>'
+        + '<th style="padding:9px 8px;text-align:right;font-size:11px;color:var(--text-muted);font-weight:600;">Total</th>'
         + '</tr></thead>'
-        + '<tbody>' + (lignes || '<tr><td colspan="4" style="padding:12px;text-align:center;color:var(--text-muted);">—</td></tr>') + '</tbody>'
-        + '<tfoot><tr><td colspan="3" style="padding:8px;text-align:right;font-weight:700;">Total</td>'
-        + '<td style="padding:8px;text-align:right;font-weight:800;color:var(--brand-main);">' + fmtPrice(c.montant_total) + '</td></tr></tfoot>'
-        + '</table></div>';
+        + '<tbody>'+lignesHTML+'</tbody>'
+        + '<tfoot><tr style="background:var(--surface-2);border-top:2px solid var(--border);">'
+        + '<td colspan="3" style="padding:10px 8px;text-align:right;font-size:13px;font-weight:700;color:var(--text);">Total</td>'
+        + '<td style="padding:10px 8px;text-align:right;font-size:14px;font-weight:800;color:var(--brand-main);">'+fmtPrice(c.montant_total)+'</td>'
+        + '</tr></tfoot>'
+        + '</table></div>'
 
-      await showConfirm({ title: 'Commande #' + escHtml(c.reference_courte || id), body: body, confirmText: 'Fermer', hideCancelBtn: true, type: 'info' });
+        // Note client
+        + (c.note_client ? '<div style="margin-top:12px;padding:12px;background:var(--surface-2);border-radius:8px;border-left:3px solid var(--brand-main);">'
+        + '<p style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">NOTE CLIENT</p>'
+        + '<p style="font-size:13px;color:var(--text);font-style:italic;">'+escHtml(c.note_client)+'</p></div>' : '')
+
+        // Bouton fermer
+        + '<button onclick="closeCmdModal()" style="margin-top:16px;width:100%;padding:11px;border-radius:10px;background:var(--brand-main);color:white;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);">Fermer</button>'
+        + '</div>';
+
     } catch (e) {
-      showToast('Impossible de charger le détail', 'error');
+      document.getElementById('cmd-modal-inner').innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">Impossible de charger le détail.</div>';
     }
   };
 
@@ -1058,10 +1201,7 @@
     usersPage = page;
     var search = (document.getElementById('users-search') || {}).value || '';
     var url    = '/api/auth/utilisateurs/?page=' + page;
-    if (usersFilter === 'vendeur') url += '&is_vendeur=true';
-    if (usersFilter === 'admin')   url += '&is_admin=true';
-    if (usersFilter === 'actif')   url += '&is_active=true';
-    if (usersFilter === 'inactif') url += '&is_active=false';
+    if (usersFilter) url += '&role=' + usersFilter;
     if (search) url += '&search=' + encodeURIComponent(search);
     try {
       var data  = await API.get(url);
@@ -1687,10 +1827,121 @@
      GET /api/notifications/
      ============================================================ */
 
+  /* ============================================================
+     FORMULAIRE ENVOI NOTIFICATION
+  ============================================================ */
+
+
+  /* Affiche/masque la recherche utilisateur spécifique */
+  window.toggleUserSearch = function(val) {
+    var bloc = document.getElementById('bloc-user-search');
+    if (bloc) bloc.style.display = val === 'specifique' ? 'block' : 'none';
+    if (val !== 'specifique') {
+      document.getElementById('notif-user-id').value = '';
+      var sel = document.getElementById('notif-user-selected');
+      if (sel) sel.style.display = 'none';
+    }
+  };
+
+  /* Recherche un utilisateur par nom/email */
+  var userSearchTimer = null;
+  window.rechercherUser = function(q) {
+    clearTimeout(userSearchTimer);
+    var results = document.getElementById('notif-user-results');
+    if (!q || q.length < 2) { if (results) results.style.display = 'none'; return; }
+    userSearchTimer = setTimeout(async function() {
+      try {
+        var data = await API.get('/api/auth/utilisateurs/?search=' + encodeURIComponent(q));
+        var items = data.results || data;
+        if (!items.length) { results.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--text-muted);">Aucun résultat</div>'; results.style.display = 'block'; return; }
+        results.innerHTML = items.slice(0,5).map(function(u) {
+          var nom = ((u.prenom || '') + ' ' + (u.nom || '')).trim() || u.username;
+          var nomSafe = nom.replace(/"/g, '').replace(/'/g, '');
+          return '<div onclick="selectionnerUser(' + u.id + ', this)" data-nom="' + nomSafe + '" '
+            + 'style="padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--surface);">'
+            + '<strong>' + nom + '</strong> <span style="color:var(--text-muted);font-size:11px;">&#8212; ' + u.email + '</span>'
+            + '</div>';
+        }).join('');
+        results.style.display = 'block';
+      } catch(e) {}
+    }, 300);
+  };
+
+  window.selectionnerUser = function(id, el) {
+    var nom = el ? (el.getAttribute('data-nom') || '') : '';
+    document.getElementById('notif-user-id').value = id;
+    var sel = document.getElementById('notif-user-selected');
+    sel.textContent = '✓ ' + nom;
+    sel.style.display = 'block';
+    document.getElementById('notif-user-results').style.display = 'none';
+    document.getElementById('notif-user-search').value = nom;
+  };
+
+  /* Envoyer la notification */
+  window.envoyerNotification = async function() {
+    var dest    = document.getElementById('notif-destinataire').value;
+    var type    = document.getElementById('notif-type').value;
+    var titre   = (document.getElementById('notif-titre').value || '').trim();
+    var message = (document.getElementById('notif-message').value || '').trim();
+    var lien    = (document.getElementById('notif-lien').value || '').trim();
+    var flash   = document.getElementById('notif-flash');
+    var btn     = document.getElementById('btn-envoyer-notif');
+
+    if (!titre || !message) {
+      flash.textContent = 'Le titre et le message sont obligatoires.';
+      flash.style.color = 'var(--red)';
+      flash.style.display = 'inline';
+      return;
+    }
+
+    // Si destinataire spécifique, utiliser l'ID
+    var destVal = dest;
+    if (dest === 'specifique') {
+      destVal = document.getElementById('notif-user-id').value;
+      if (!destVal) {
+        flash.textContent = 'Sélectionnez un utilisateur.';
+        flash.style.color = 'var(--red)';
+        flash.style.display = 'inline';
+        return;
+      }
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Envoi…';
+    flash.style.display = 'none';
+
+    try {
+      var data = await API.post('/api/notifications/envoyer/', {
+        destinataire: destVal,
+        type_notif:   type,
+        titre:        titre,
+        message:      message,
+        lien:         lien,
+      });
+      flash.textContent = data.message || (data.envoye + ' notification(s) envoyée(s).');
+      flash.style.color = 'var(--green)';
+      flash.style.display = 'inline';
+      // Réinitialiser le formulaire
+      document.getElementById('notif-titre').value   = '';
+      document.getElementById('notif-message').value = '';
+      document.getElementById('notif-lien').value    = '';
+      // Retour à la liste et rechargement
+      navTo('notifications');
+      loadNotifs(1);
+    } catch(e) {
+      flash.textContent = (e && e.message) ? e.message : "Erreur lors de l'envoi.";
+      flash.style.color = 'var(--red)';
+      flash.style.display = 'inline';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Envoyer la notification';
+    }
+  };
+
   window.loadNotifs = async function (page) {
     page = page || 1;
     try {
-      var data  = await API.get('/api/notifications/?page=' + page);
+      var data  = await API.get('/api/notifications/admin/?page=' + page);
       var items = data.results || data;
       var tbody = document.getElementById('tbl-notifs');
       if (!tbody) return;

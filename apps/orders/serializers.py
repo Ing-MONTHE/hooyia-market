@@ -84,7 +84,8 @@ class CommandeListSerializer(serializers.ModelSerializer):
         return full if full else u.username
 
     # Lignes légères pour l'historique client (nom produit + qté uniquement)
-    lignes = LigneCommandeSerializer(many=True, read_only=True)
+    lignes   = LigneCommandeSerializer(many=True, read_only=True)
+    paiement = PaiementSerializer(read_only=True)
 
     class Meta:
         model  = Commande
@@ -94,8 +95,10 @@ class CommandeListSerializer(serializers.ModelSerializer):
             'montant_total',
             'client_nom',
             'lignes',
+            'paiement',
             'adresse_livraison_ville', 'adresse_livraison_pays',
             'date_creation',
+            'peut_etre_annulee',
         ]
         read_only_fields = fields
 

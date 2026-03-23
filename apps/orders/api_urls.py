@@ -12,14 +12,14 @@ urlpatterns = [
     path('',        api_views.CommandeListeAPIView.as_view(),  name='api_commandes'),
     path('creer/',  api_views.CommandeCreerAPIView.as_view(),  name='api_commande_creer'),
 
-    # ── Webhook NotchPay (public — appelé par NotchPay) ───────
-    path('webhook/notchpay/', api_views.NotchPayWebhookAPIView.as_view(), name='api_webhook_notchpay'),
+    # ── Webhook PayUnit (public — appelé par PayUnit) ────────
+    path('webhook/payunit/', api_views.PayUnitWebhookAPIView.as_view(), name='api_webhook_payunit'),
 
     # ── Détail et actions sur une commande ────────────────────
     path('<int:pk>/',          api_views.CommandeDetailAPIView.as_view(),  name='api_commande_detail'),
     path('<int:pk>/annuler/',  api_views.AnnulerCommandeAPIView.as_view(), name='api_commande_annuler'),
 
-    # ── Statut paiement (polling frontend après retour NotchPay) ──
+    # ── Statut paiement (polling frontend après retour PayUnit) ──
     path('<str:ref>/paiement-statut/', api_views.PaiementStatutAPIView.as_view(), name='api_paiement_statut'),
 
     # ── Transitions FSM réservées aux admins ──────────────────
