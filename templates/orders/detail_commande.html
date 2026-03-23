@@ -1,0 +1,576 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — orders/detail_commande.html
+   Page de détail d'une commande (accessible depuis l'historique)
+
+   STRUCTURE :
+     [ En-tête ]          ← breadcrumb + titre + badge statut + actions
+     [ Grille 2 colonnes ]
+       Colonne gauche (2/3) :
+         ├── Timeline FSM      ← progression visuelle des statuts
+         ├── Articles          ← lignes commande avec sous-totaux
+         └── Note client       ← si renseignée
+       Colonne droite (1/3) :
+         ├── Récap financier   ← sous-total + livraison + total
+         ├── Adresse livraison
+         └── Paiement          ← mode + statut + téléphone Mobile Money
+
+   TIMELINE FSM : En attente → Confirmée → En préparation → Expédiée → Livrée
+   ACTIONS      : Annuler (si annulable) + Retour historique
+
+   ICÔNES Lucide : ArrowLeft, Package, MapPin, CreditCard, Clock,
+                   CheckCircle, Truck, XCircle, ShoppingBag, FileText
+{% endcomment %}
+
+{% block title %}{% trans "Commande" %} #{{ commande.reference_courte }} — HooYia Market{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Timeline statuts ── */
+  .timeline { display: flex; align-items: flex-start; gap: 0; position: relative; }
+  .timeline-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .timeline-step:not(:last-child)::after {
+    content: ''; position: absolute;
+    top: 16px; left: 50%; width: 100%; height: 2px;
+    background: var(--border); z-index: 0;
+    transition: background 0.3s;
+  }
+  .timeline-step.done:not(:last-child)::after  { background: var(--brand-500); }
+  .timeline-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface); z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; flex-shrink: 0;
+  }
+  .timeline-step.done  .timeline-dot { background: var(--brand-500); border-color: var(--brand-500); }
+  .timeline-step.active .timeline-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(249,115,22,0.15); }
+  .timeline-step.annule .timeline-dot { background: #fef2f2; border-color: #fca5a5; }
+  .timeline-label {
+    font-size: 0.65rem; font-weight: 600; text-align: center;
+    color: var(--text-muted); margin-top: 8px; line-height: 1.3;
+    max-width: 64px;
+  }
+  .timeline-step.done .timeline-label   { color: var(--brand-500); }
+  .timeline-step.active .timeline-label { color: var(--accent); }
+
+  /* ── Badge statut ── */
+  .statut-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 0.8rem; font-weight: 600;
+  }
+
+  /* ── Ligne article ── */
+  .ligne-article { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+  .ligne-article + .ligne-article { border-top: 1px solid var(--border); }
+  .ligne-img {
+    width: 52px; height: 52px; border-radius: 8px;
+    object-fit: cover; background: var(--surface-2);
+    flex-shrink: 0; border: 1px solid var(--border);
+  }
+  .ligne-img-placeholder {
+    width: 52px; height: 52px; border-radius: 8px;
+    background: var(--surface-2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); border: 1px solid var(--border);
+  }
+
+  /* ── Bloc info (adresse, paiement) ── */
+  .info-row { display: flex; gap: 8px; padding: 6px 0; font-size: 0.82rem; }
+  .info-row + .info-row { border-top: 1px solid var(--border); }
+  .info-label { color: var(--text-muted); min-width: 90px; flex-shrink: 0; }
+  .info-value { color: var(--text-primary); font-weight: 500; }
+
+  /* ── Skeleton ── */
+  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+  .skeleton {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 400px 100%; animation: shimmer 1.4s infinite;
+  }
+
+  /* ── Étoiles avis ── */
+  .star-btn { background: none; border: none; cursor: pointer; padding: 2px; transition: transform 0.15s; }
+  .star-btn:hover { transform: scale(1.2); }
+</style>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  {# ── Breadcrumb + En-tête ── #}
+  <div class="mb-6">
+    <a href="{% url 'orders:historique' %}"
+       class="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-brand-500 mb-4 transition-colors">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7"/><line x1="19" x2="5" y1="12" y2="12"/>
+      </svg>
+      {% trans "Mes commandes" %}
+    </a>
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-brand-600">
+          {% trans "Commande" %} <span id="ref-titre">#{{ commande.reference_courte }}</span>
+        </h1>
+        <p class="text-sm text-text-secondary mt-1" id="date-commande">—</p>
+      </div>
+      <span id="statut-badge-header" class="statut-badge skeleton" style="width:100px;height:28px;"></span>
+    </div>
+  </div>
+
+  {# ── Skeleton ── #}
+  <div id="skeleton" class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-4">
+      <div class="card p-6 space-y-3">
+        <div class="skeleton h-4 w-1/3 rounded"></div>
+        <div class="flex gap-4">
+          {% for i in "12345" %}<div class="flex-1 space-y-2"><div class="skeleton h-8 w-8 rounded-full mx-auto"></div><div class="skeleton h-3 w-12 rounded mx-auto"></div></div>{% endfor %}
+        </div>
+      </div>
+      <div class="card p-6 space-y-3">
+        {% for i in "123" %}<div class="flex gap-3"><div class="skeleton w-12 h-12 rounded-lg flex-shrink-0"></div><div class="flex-1 space-y-2"><div class="skeleton h-3 w-2/3 rounded"></div><div class="skeleton h-3 w-1/3 rounded"></div></div></div>{% endfor %}
+      </div>
+    </div>
+    <div class="space-y-4">
+      <div class="card p-5 space-y-3">{% for i in "1234" %}<div class="skeleton h-4 w-full rounded"></div>{% endfor %}</div>
+      <div class="card p-5 space-y-3">{% for i in "123" %}<div class="skeleton h-4 w-full rounded"></div>{% endfor %}</div>
+    </div>
+  </div>
+
+  {# ── Contenu réel ── #}
+  <div id="commande-detail" class="hidden grid lg:grid-cols-3 gap-6">
+
+    {# ── Colonne gauche ── #}
+    <div class="lg:col-span-2 space-y-5">
+
+      {# Timeline statuts #}
+      <div class="card p-5">
+        <h2 class="font-semibold text-ink text-sm mb-5 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          {% trans "Suivi de commande" %}
+        </h2>
+        <div class="timeline" id="timeline"></div>
+        <p class="text-xs text-text-muted text-center mt-4" id="statut-description"></p>
+      </div>
+
+      {# Articles commandés #}
+      <div class="card p-5">
+        <h2 class="font-semibold text-ink text-sm mb-4 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+            <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          {% trans "Articles commandés" %}
+        </h2>
+        <div id="lignes-commande"></div>
+      </div>
+
+      {# Note client (si renseignée) #}
+      <div class="card p-5 hidden" id="bloc-note">
+        <h2 class="font-semibold text-ink text-sm mb-2 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          {% trans "Note de livraison" %}
+        </h2>
+        <p id="note-client" class="text-sm text-text-secondary italic"></p>
+      </div>
+
+      {# Section avis (si livree) #}
+      <div class="card p-5 hidden" id="section-avis">
+        <h2 class="font-semibold text-ink text-sm mb-3 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          {% trans "Laisser un avis" %}
+        </h2>
+        <p class="text-xs text-text-muted mb-3">{% trans "Votre commande a été livrée. Partagez votre expérience !" %}</p>
+        <div id="avis-produits"></div>
+      </div>
+
+      {# Bouton annuler #}
+      <div id="bloc-annuler" class="hidden">
+        <button onclick="annulerCommande()" id="btn-annuler"
+                class="btn w-full"
+                style="border-color:#fca5a5;color:#dc2626;background:white;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>
+          </svg>
+          {% trans "Annuler cette commande" %}
+        </button>
+      </div>
+
+    </div>
+
+    {# ── Colonne droite ── #}
+    <div class="space-y-5">
+
+      {# Récap financier #}
+      <div class="card p-5">
+        <h2 class="font-semibold text-ink text-sm mb-4 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <line x1="12" x2="12" y1="1" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          {% trans "Récapitulatif" %}
+        </h2>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between text-text-secondary">
+            <span>{% trans "Sous-total" %}</span>
+            <span id="sous-total" class="font-medium text-ink">—</span>
+          </div>
+          <div class="flex justify-between text-text-secondary">
+            <span>{% trans "Livraison" %}</span>
+            <span class="text-green-600 font-semibold">{% trans "Gratuite" %}</span>
+          </div>
+          <div class="h-px bg-border my-2"></div>
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-ink">{% trans "Total" %}</span>
+            <span id="total-commande" class="font-bold text-accent text-lg">—</span>
+          </div>
+        </div>
+      </div>
+
+      {# Adresse de livraison #}
+      <div class="card p-5">
+        <h2 class="font-semibold text-ink text-sm mb-4 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {% trans "Adresse de livraison" %}
+        </h2>
+        <div id="adresse-livraison" class="space-y-1 text-sm text-text-secondary"></div>
+      </div>
+
+      {# Paiement #}
+      <div class="card p-5">
+        <h2 class="font-semibold text-ink text-sm mb-4 flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <rect width="22" height="16" x="1" y="4" rx="2" ry="2"/>
+            <line x1="1" x2="23" y1="10" y2="10"/>
+          </svg>
+          {% trans "Paiement" %}
+        </h2>
+        <div id="paiement-info" class="space-y-0"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var DETAIL_I18N = {
+  enAttente      : '{% trans "En attente" %}',
+  confirmee      : '{% trans "Confirmée" %}',
+  enPreparation  : '{% trans "En préparation" %}',
+  expediee       : '{% trans "Expédiée" %}',
+  livree         : '{% trans "Livrée" %}',
+  annulee        : '{% trans "Annulée" %}',
+  paiementReussi : '{% trans "Paiement confirmé" %}',
+  paiementEchoue : '{% trans "Paiement échoué" %}',
+  enAttentePaie  : '{% trans "En attente de confirmation" %}',
+  aucunArticle   : '{% trans "Aucun article." %}',
+  commentairePh  : '{% trans "Votre commentaire (optionnel)..." %}',
+  envoyerAvis    : '{% trans "Envoyer mon avis" %}',
+  noteRequise    : '{% trans "Veuillez sélectionner une note." %}',
+  envoiEnCours   : '{% trans "Envoi..." %}',
+  avisEnvoye     : '{% trans "Avis envoyé — Merci !" %}',
+  erreurEnvoi    : "{% trans 'Erreur lors de l envoi.' %}",
+  erreurCharge   : '{% trans "Impossible de charger la commande." %}',
+  annulerConfirm : '{% trans "Confirmer l annulation de cette commande ?" %}',
+  annuleeOk      : '{% trans "Commande annulée." %}',
+  erreurAnnul    : '{% trans "Impossible d annuler cette commande." %}',
+};
+
+const COMMANDE_ID = {{ commande.id }};
+
+// ── Statuts ──────────────────────────────────────────────────────────────────
+const STATUTS_LABELS = {
+  en_attente    : DETAIL_I18N.enAttente,
+  confirmee     : DETAIL_I18N.confirmee,
+  en_preparation: DETAIL_I18N.enPreparation,
+  expediee      : DETAIL_I18N.expediee,
+  livree        : DETAIL_I18N.livree,
+  annulee       : DETAIL_I18N.annulee,
+};
+const STATUTS_BADGE = {
+  en_attente    : 'background:#fffbeb;color:#92400e;',
+  confirmee     : 'background:#eff6ff;color:#1d4ed8;',
+  en_preparation: 'background:#f5f3ff;color:#6d28d9;',
+  expediee      : 'background:#fff7ed;color:#c2410c;',
+  livree        : 'background:#f0fdf4;color:#166534;',
+  annulee       : 'background:#fef2f2;color:#991b1b;',
+};
+const STATUTS_DESC = {
+  en_attente    : '{% trans "Votre commande est en attente de confirmation de paiement." %}',
+  confirmee     : '{% trans "Votre commande est confirmée et sera bientôt préparée." %}',
+  en_preparation: '{% trans "Votre commande est en cours de préparation." %}',
+  expediee      : '{% trans "Votre commande a été expédiée et est en route." %}',
+  livree        : '{% trans "Votre commande a été livrée. Merci pour votre achat !" %}',
+  annulee       : '{% trans "Cette commande a été annulée." %}',
+};
+
+// Étapes de la timeline (pas annulée)
+const ETAPES = [
+  { key: 'en_attente',     label: DETAIL_I18N.enAttente,      icon: 'clock' },
+  { key: 'confirmee',      label: DETAIL_I18N.confirmee,      icon: 'check' },
+  { key: 'en_preparation', label: DETAIL_I18N.enPreparation,  icon: 'box' },
+  { key: 'expediee',       label: DETAIL_I18N.expediee,       icon: 'truck' },
+  { key: 'livree',         label: DETAIL_I18N.livree,         icon: 'check-circle' },
+];
+
+// ── Icônes SVG inline par type ────────────────────────────────────────────────
+function svgIcon(type, color='white', size=14) {
+  const paths = {
+    clock        : '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    check        : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    box          : '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
+    truck        : '<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+    'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+    x            : '<circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>',
+  };
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${paths[type]||''}</svg>`;
+}
+
+// ── Formatage ─────────────────────────────────────────────────────────────────
+function formatFCFA(n) { return parseInt(n||0).toLocaleString('fr-FR') + ' FCFA'; }
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+// ── Chargement ────────────────────────────────────────────────────────────────
+async function loadCommande() {
+  try {
+    const c = await API.get(`/api/commandes/${COMMANDE_ID}/`);
+    afficher(c);
+  } catch(e) {
+    document.getElementById('skeleton').innerHTML =
+      `<div class="card p-8 text-center text-sm" style="color:var(--error)">${DETAIL_I18N.erreurCharge}</div>`;
+  }
+}
+
+// ── Affichage principal ───────────────────────────────────────────────────────
+function afficher(c) {
+  document.getElementById('skeleton').classList.add('hidden');
+  document.getElementById('commande-detail').classList.remove('hidden');
+
+  // En-tête
+  const refCourte = c.reference_courte || (c.reference||'').slice(0,8).toUpperCase() || c.id;
+  document.getElementById('ref-titre').textContent = '#' + refCourte;
+  document.getElementById('date-commande').textContent = formatDate(c.date_creation);
+
+  const badgeEl = document.getElementById('statut-badge-header');
+  badgeEl.textContent = STATUTS_LABELS[c.statut] || c.statut;
+  badgeEl.setAttribute('style', (STATUTS_BADGE[c.statut] || '') + 'display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:999px;font-size:0.8rem;font-weight:600;');
+
+  // Timeline
+  renderTimeline(c.statut);
+  document.getElementById('statut-description').textContent = STATUTS_DESC[c.statut] || '';
+
+  // Articles
+  const lignes = c.lignes || [];
+  document.getElementById('lignes-commande').innerHTML = lignes.length
+    ? lignes.map(l => {
+        const imgHTML = l.image_principale
+          ? `<img src="${l.image_principale}" alt="${l.produit_nom}" class="ligne-img" />`
+          : `<div class="ligne-img-placeholder">${svgIcon('box','var(--text-muted)',20)}</div>`;
+        return `
+        <div class="ligne-article">
+          ${imgHTML}
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-sm text-ink line-clamp-2">${l.produit_nom}</p>
+            <p class="text-xs text-text-muted mt-0.5">${formatFCFA(l.prix_unitaire)} / unité</p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="font-semibold text-sm text-ink">${formatFCFA(parseFloat(l.prix_unitaire) * l.quantite)}</p>
+            <p class="text-xs text-text-muted">×${l.quantite}</p>
+          </div>
+        </div>`;
+      }).join('')
+    : `<p class="text-sm text-text-muted">${DETAIL_I18N.aucunArticle}</p>`;
+
+  // Note client
+  if (c.note_client) {
+    document.getElementById('bloc-note').classList.remove('hidden');
+    document.getElementById('note-client').textContent = c.note_client;
+  }
+
+  // Récap financier
+  document.getElementById('sous-total').textContent = formatFCFA(c.montant_total);
+  document.getElementById('total-commande').textContent = formatFCFA(c.montant_total);
+
+  // Adresse de livraison
+  document.getElementById('adresse-livraison').innerHTML = `
+    <p class="font-semibold text-ink">${c.adresse_livraison_nom || '—'}</p>
+    <p>${c.adresse_livraison_adresse || ''}</p>
+    <p>${c.adresse_livraison_ville || ''}${c.adresse_livraison_region ? ', ' + c.adresse_livraison_region : ''}</p>
+    <p>${c.adresse_livraison_pays || ''}</p>
+    ${c.adresse_livraison_telephone ? `<p class="mt-1 text-text-muted">${c.adresse_livraison_telephone}</p>` : ''}`;
+
+  // Paiement
+  const p = c.paiement;
+  if (p) {
+    const statutColor = p.statut === 'reussi' ? '#16a34a' : p.statut === 'echoue' ? '#dc2626' : '#92400e';
+    const statutLabel = p.statut === 'reussi' ? DETAIL_I18N.paiementReussi :
+                        p.statut === 'echoue' ? DETAIL_I18N.paiementEchoue :
+                        DETAIL_I18N.enAttentePaie;
+    document.getElementById('paiement-info').innerHTML = `
+      <div class="info-row">
+        <span class="info-label">{% trans "Mode" %}</span>
+        <span class="info-value">${p.mode_affiche || p.mode}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">{% trans "Statut" %}</span>
+        <span class="info-value" style="color:${statutColor}">${statutLabel}</span>
+      </div>
+      ${p.telephone_paiement ? `
+      <div class="info-row">
+        <span class="info-label">{% trans "Numéro" %}</span>
+        <span class="info-value">${p.telephone_paiement}</span>
+      </div>` : ''}
+      <div class="info-row">
+        <span class="info-label">{% trans "Montant" %}</span>
+        <span class="info-value">${formatFCFA(p.montant)}</span>
+      </div>`;
+  }
+
+  // Bouton annuler
+  if (c.peut_etre_annulee) {
+    document.getElementById('bloc-annuler').classList.remove('hidden');
+  }
+
+  // Section avis si livree
+  if (c.statut === 'livree' && lignes.length) {
+    document.getElementById('section-avis').classList.remove('hidden');
+    renderAvis(lignes);
+  }
+}
+
+// ── Timeline ──────────────────────────────────────────────────────────────────
+function renderTimeline(statut) {
+  const el = document.getElementById('timeline');
+  if (statut === 'annulee') {
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#fef2f2;border:2px solid #fca5a5;display:flex;align-items:center;justify-content:center;">
+          ${svgIcon('x','#dc2626',16)}
+        </div>
+        <span style="font-size:0.875rem;font-weight:600;color:#dc2626;">${DETAIL_I18N.annulee}</span>
+      </div>`;
+    return;
+  }
+
+  const ordre = ['en_attente','confirmee','en_preparation','expediee','livree'];
+  const idx   = ordre.indexOf(statut);
+
+  el.innerHTML = ETAPES.map((e, i) => {
+    const done   = i < idx;
+    const active = i === idx;
+    const cls    = done ? 'done' : active ? 'active' : '';
+    const dot_bg = done ? 'var(--brand-500)' : active ? 'var(--accent)' : 'var(--surface)';
+    const dot_brd= done ? 'var(--brand-500)' : active ? 'var(--accent)' : 'var(--border)';
+    const ic_col = (done || active) ? 'white' : 'var(--text-muted)';
+    return `
+      <div class="timeline-step ${cls}">
+        <div class="timeline-dot" style="background:${dot_bg};border-color:${dot_brd};">
+          ${svgIcon(e.icon, ic_col, 13)}
+        </div>
+        <span class="timeline-label">${e.label}</span>
+      </div>`;
+  }).join('');
+}
+
+// ── Avis ──────────────────────────────────────────────────────────────────────
+const notesSelectionnees = {};
+
+function renderAvis(lignes) {
+  document.getElementById('avis-produits').innerHTML = lignes.map(l => `
+    <div class="avis-produit-item border-b border-border pb-4 mb-4 last:border-0 last:pb-0 last:mb-0" id="avis-item-${l.produit}">
+      <p class="font-medium text-sm text-ink mb-2">${l.produit_nom}</p>
+      <div class="flex gap-1 mb-2" id="stars-${l.produit}">
+        ${[1,2,3,4,5].map(n => `
+          <button type="button" class="star-btn" onclick="noterEtoile(${l.produit},${n})"
+                  onmouseenter="hoverEtoiles(${l.produit},${n})" onmouseleave="resetHover(${l.produit})">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </button>`).join('')}
+      </div>
+      <textarea id="comment-${l.produit}" rows="2" placeholder="${DETAIL_I18N.commentairePh}"
+                class="input-field text-sm resize-none"></textarea>
+      <button onclick="soumettreAvis(${l.produit})" id="btn-avis-${l.produit}"
+              class="btn btn-secondary mt-2 text-xs">${DETAIL_I18N.envoyerAvis}</button>
+    </div>`).join('');
+}
+
+function noterEtoile(pid, note) {
+  notesSelectionnees[pid] = note;
+  document.querySelectorAll(`#stars-${pid} .star-btn svg`).forEach((svg, i) => {
+    svg.setAttribute('fill', i < note ? '#f59e0b' : 'none');
+    svg.setAttribute('stroke', i < note ? '#f59e0b' : '#d1d5db');
+  });
+}
+function hoverEtoiles(pid, note) {
+  document.querySelectorAll(`#stars-${pid} .star-btn svg`).forEach((svg, i) => {
+    if (i < note) svg.setAttribute('fill', '#fcd34d');
+  });
+}
+function resetHover(pid) { noterEtoile(pid, notesSelectionnees[pid] || 0); }
+
+async function soumettreAvis(pid) {
+  const note = notesSelectionnees[pid];
+  if (!note) { window.toast && window.toast(DETAIL_I18N.noteRequise, 'error'); return; }
+  const commentaire = document.getElementById(`comment-${pid}`)?.value.trim() || '';
+  const btn = document.getElementById(`btn-avis-${pid}`);
+  btn.disabled = true; btn.textContent = DETAIL_I18N.envoiEnCours;
+  try {
+    await API.post('/api/avis/', { produit: pid, note, commentaire }, { silentError: true });
+    document.getElementById(`avis-item-${pid}`).innerHTML =
+      `<div class="flex items-center gap-2 py-2 text-sm font-medium" style="color:#16a34a;">
+        ${svgIcon('check','#16a34a',16)} ${DETAIL_I18N.avisEnvoye}
+      </div>`;
+  } catch(e) {
+    btn.disabled = false; btn.textContent = DETAIL_I18N.envoyerAvis;
+    window.toast && window.toast((e&&e.message)||DETAIL_I18N.erreurEnvoi, 'error');
+  }
+}
+
+// ── Annulation ────────────────────────────────────────────────────────────────
+async function annulerCommande() {
+  const ok = await (window.showConfirm
+    ? window.showConfirm('{% trans "Annuler la commande" %}', DETAIL_I18N.annulerConfirm, '{% trans "Oui, annuler" %}')
+    : Promise.resolve(confirm(DETAIL_I18N.annulerConfirm)));
+  if (!ok) return;
+  const btn = document.getElementById('btn-annuler');
+  btn.disabled = true;
+  try {
+    await API.post(`/api/commandes/${COMMANDE_ID}/annuler/`, {});
+    window.toast && window.toast(DETAIL_I18N.annuleeOk, 'success');
+    setTimeout(() => loadCommande(), 800);
+  } catch(e) {
+    btn.disabled = false;
+    window.toast && window.toast((e&&e.message)||DETAIL_I18N.erreurAnnul, 'error');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadCommande();
+</script>
+{% endblock %}

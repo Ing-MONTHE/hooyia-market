@@ -46,7 +46,7 @@ class OrderService:
 
     @staticmethod
     @transaction.atomic
-    def create_from_cart(utilisateur, adresse, mode_paiement='livraison', note_client=''):
+    def create_from_cart(utilisateur, adresse, mode_paiement, telephone_paiement='', note_client=''):
         """
         Crée une commande complète depuis le panier de l'utilisateur.
 
@@ -133,20 +133,21 @@ class OrderService:
 
         # ── Étape 6 : Crée le Paiement ───────────────────────
         Paiement.objects.create(
-            commande = commande,
-            mode     = mode_paiement,
-            montant  = commande.montant_total,
-            # Statut en attente → sera mis à jour quand le paiement est confirmé
+            commande           = commande,
+            mode               = mode_paiement,
+            montant            = commande.montant_total,
+            telephone_paiement = telephone_paiement,
+            # statut EN_ATTENTE par défaut → sera mis à REUSSI par le webhook NotchPay
         )
 
         # ── Étape 7 : Vide le panier ─────────────────────────
         panier.vider()
 
-        # ── Étape 8 : Confirme la commande ───────────────────
-        # La transition FSM confirmer() déclenche le signal post_save
-        # → orders/signals.py → Celery → email de confirmation
-        commande.confirmer()
-        commande.save()
+        # ── Étape 8 : NE PAS confirmer ici ───────────────────
+        # Avec Mobile Money, la confirmation se fait après le paiement.
+        # Le webhook NotchPay appellera commande.confirmer() une fois
+        # le paiement validé par l'opérateur (OM ou MTN MoMo).
+        # La commande reste en EN_ATTENTE jusqu'à ce moment.
 
         return commande
 

@@ -303,19 +303,21 @@ var CONFIRM_I18N = {
   expediee:           '{% trans "Expédiée" %}',
   livree:             '{% trans "Livrée" %}',
   annulee:            '{% trans "Annulée" %}',
-  paiementLivraison:  '{% trans "Paiement à la livraison" %}',
-  enAttentePaiement:  '{% trans "En attente" %}',
+  orangeMoney:        '{% trans "Orange Money" %}',
+  mtnMomo:            '{% trans "MTN Mobile Money" %}',
+  enAttentePaiement:  '{% trans "En attente de confirmation" %}',
+  paiementReussi:     '{% trans "Paiement confirmé ✓" %}',
+  paiementEchoue:     '{% trans "Paiement échoué" %}',
   aucunArticle:       '{% trans "Aucun article." %}',
   commentairePlaceh:  '{% trans "Votre commentaire (optionnel)…" %}',
   envoyerAvis:        '{% trans "Envoyer mon avis" %}',
   selectionnerNote:   '{% trans "Veuillez sélectionner une note (étoiles)." %}',
   envoiEnCours:       '{% trans "Envoi…" %}',
   avisEnvoye:         '{% trans "Avis envoyé — Merci !" %}',
-  erreurEnvoi:        '{% trans "Erreur lors de l'envoi. Réessayez." %}',
+  erreurEnvoi:        "{% trans 'Erreur lors de l envoi. Réessayez.' %}",
   erreurChargement:   '{% trans "Impossible de charger la commande." %}',
 };
-</script>
-<script>
+
 const COMMANDE_ID = {{ commande.id }};
 
 // ── Mapping statuts FSM ───────────────────────────────────────────────────────
@@ -384,10 +386,20 @@ function afficherCommande(c) {
 
   // Mode de paiement
   const p = c.paiement;
-  document.getElementById('paiement-info').innerHTML = p
-    ? `<p class="font-semibold text-ink">${p.mode_affiche || p.mode}</p>
-       <p class="${p.statut === 'reussi' ? 'text-green-600 font-medium' : ''}">${p.statut_affiche || p.statut}</p>`
-    : `<p class="font-semibold text-ink">${CONFIRM_I18N.paiementLivraison}</p><p>${CONFIRM_I18N.enAttentePaiement}</p>`;
+  if (p) {
+    const statutColor = p.statut === 'reussi' ? 'text-green-600 font-semibold' :
+                        p.statut === 'echoue'  ? 'text-red-500 font-medium' : 'text-text-muted';
+    const statutLabel = p.statut === 'reussi' ? CONFIRM_I18N.paiementReussi :
+                        p.statut === 'echoue'  ? CONFIRM_I18N.paiementEchoue :
+                        CONFIRM_I18N.enAttentePaiement;
+    document.getElementById('paiement-info').innerHTML =
+      `<p class="font-semibold text-ink">${p.mode_affiche || p.mode}</p>
+       <p class="${statutColor}">${statutLabel}</p>
+       ${p.telephone_paiement ? `<p class="text-xs text-text-muted mt-1">${p.telephone_paiement}</p>` : ''}`;
+  } else {
+    document.getElementById('paiement-info').innerHTML =
+      `<p class="text-text-muted text-sm">${CONFIRM_I18N.enAttentePaiement}</p>`;
+  }
 
   // Lignes commande
   const lignes = c.lignes || [];

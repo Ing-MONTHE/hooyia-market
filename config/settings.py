@@ -304,6 +304,18 @@ GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:
 
 
 # ═══════════════════════════════════════════════
+# NOTCHPAY — Paiements Mobile Money (OM & MTN MoMo)
+# ═══════════════════════════════════════════════
+# Dev  : clé sandbox préfixée sb.pk. (mode='sandbox')
+# Prod : clé live préfixée b.pk.     (mode='live')
+# Changer uniquement NOTCHPAY_PUBLIC_KEY dans .env pour basculer
+
+NOTCHPAY_PUBLIC_KEY = config('NOTCHPAY_PUBLIC_KEY', default='sb.pk.test_key_dev')
+NOTCHPAY_HASH_KEY   = config('NOTCHPAY_HASH_KEY',   default='')
+NOTCHPAY_API_URL    = 'https://api.notchpay.co'
+
+
+# ═══════════════════════════════════════════════
 # CELERY — Tâches asynchrones
 # ═══════════════════════════════════════════════
 

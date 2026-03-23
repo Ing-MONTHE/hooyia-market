@@ -70,6 +70,99 @@ def confirmation(request, pk):
 # ═══════════════════════════════════════════════════════════════
 
 @login_required
+def detail_commande(request, pk):
+    """
+    Page de détail d'une commande.
+    Accessible depuis l'historique via "Voir le détail".
+    """
+    commande = get_object_or_404(Commande, pk=pk, client=request.user)
+    context = {
+        'commande': commande,
+        'titre': _('Commande #%(ref)s — HooYia Market') % {'ref': commande.reference_courte},
+    }
+    return render(request, 'orders/detail_commande.html', context)
+
+
+@login_required
+def retour_paiement(request):
+    """
+    Page de retour après paiement NotchPay.
+
+    NotchPay redirige le client ici après qu'il a payé (succès ou échec).
+    URL : /commandes/paiement/retour/?ref=<uuid_commande>
+
+    On affiche un écran d'attente pendant que le webhook traite le paiement
+    en arrière-plan. Le JS polle /api/commandes/<ref>/paiement-statut/
+    toutes les 3 secondes jusqu'à obtenir 'reussi' ou 'echoue'.
+
+    Une fois confirmé, on redirige vers la page de confirmation.
+    """
+    ref = request.GET.get('ref', '')
+    if not ref:
+        return redirect('products:accueil')
+
+    try:
+        import uuid
+        uuid.UUID(ref)
+        commande = get_object_or_404(Commande, reference=ref, client=request.user)
+    except (ValueError, Exception):
+        return redirect('products:accueil')
+
+    context = {
+        'commande':        commande,
+        'ref':             ref,
+        'titre':           _('Vérification du paiement — HooYia Market'),
+    }
+    return render(request, 'orders/retour_paiement.html', context)
+
+
+@login_required
+def mock_paiement(request):
+    """
+    Page de simulation de paiement NotchPay (dev local uniquement).
+    Accessible via /commandes/paiement/mock/?ref=<uuid>&trx=<ref_mock>
+    Permet de simuler un paiement réussi ou échoué sans NotchPay.
+    """
+    from django.utils import timezone
+    from .models import Paiement
+    from .payment_service import NotchPayService
+
+    ref = request.GET.get('ref', '')
+    trx = request.GET.get('trx', '')
+    action = request.POST.get('action', '')  # 'success' ou 'fail'
+
+    try:
+        import uuid
+        uuid.UUID(str(ref))
+        commande = get_object_or_404(Commande, reference=ref, client=request.user)
+    except (ValueError, Exception):
+        return redirect('products:accueil')
+
+    if action == 'success':
+        try:
+            paiement = commande.paiement
+            NotchPayService.confirmer_paiement(paiement)
+        except Exception:
+            pass
+        return redirect('orders:confirmation', pk=commande.pk)
+
+    elif action == 'fail':
+        try:
+            paiement = commande.paiement
+            NotchPayService.echouer_paiement(paiement)
+        except Exception:
+            pass
+        return redirect('orders:retour_paiement' + f'?ref={ref}')
+
+    context = {
+        'commande': commande,
+        'ref':      ref,
+        'trx':      trx,
+    }
+    return render(request, 'orders/mock_paiement.html', context)
+
+
+@login_required
 def historique(request):
     """
     Page d'historique des commandes de l'utilisateur.

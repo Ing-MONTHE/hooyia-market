@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% comment %} ═══════════════════════════════════════════════════════════════
+   HooYia Market — orders/retour_paiement.html
+
+   Page intermédiaire affichée après retour de NotchPay.
+   Le client revient ici pendant que le webhook traite le paiement.
+
+   Flux :
+     1. Client paie sur NotchPay → redirigé ici
+     2. JS polle /api/commandes/<ref>/paiement-statut/ toutes les 3s
+     3. Si statut = 'reussi'  → redirect vers /commandes/<pk>/  (confirmation)
+     4. Si statut = 'echoue'  → affiche erreur + bouton réessayer
+     5. Timeout 90s sans réponse → message d'attente + lien support
+{% endcomment %}
+
+{% block title %}{% trans 'Vérification du paiement' %} — HooYia Market{% endblock %}
+
+{% block content %}
+
+<style>
+  /* Spinner de chargement */
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spinner { animation: spin 1.2s linear infinite; }
+
+  /* Cercles pulsants d'attente */
+  @keyframes pulse-ring {
+    0%   { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+  .pulse-ring {
+    position: absolute; inset: -12px;
+    border-radius: 50%;
+    border: 3px solid var(--brand-300);
+    animation: pulse-ring 1.8s ease-out infinite;
+  }
+  .pulse-ring-2 { animation-delay: 0.6s; }
+
+  /* Icône centrale */
+  .status-icon-wrap {
+    position: relative;
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .status-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .status-icon.waiting  { background: var(--brand-50); border: 2px solid var(--brand-200); }
+  .status-icon.success  { background: #f0fdf4; border: 2px solid #bbf7d0; }
+  .status-icon.error    { background: #fef2f2; border: 2px solid #fecaca; }
+
+  /* Barre de progression */
+  .progress-bar-track {
+    width: 100%; height: 6px;
+    background: var(--surface-2); border-radius: 999px;
+    overflow: hidden; margin-top: 20px;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px;
+    background: var(--brand-500);
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+</style>
+
+<div class="max-w-md mx-auto px-4 py-16 text-center">
+  <div class="card p-8 space-y-4">
+
+    {# ── Icône de statut (changée par JS) ── #}
+    <div class="status-icon-wrap" id="status-icon-wrap">
+      <div class="pulse-ring" id="pulse1"></div>
+      <div class="pulse-ring pulse-ring-2" id="pulse2"></div>
+      <div class="status-icon waiting" id="status-icon">
+        <svg class="spinner text-brand-500" width="36" height="36" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" id="icon-spinner">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+      </div>
+    </div>
+
+    {# ── Titre et message (mis à jour par JS) ── #}
+    <div>
+      <h1 class="text-xl font-bold text-ink" id="status-titre">
+        {% trans "Vérification du paiement…" %}
+      </h1>
+      <p class="text-sm text-text-secondary mt-2" id="status-message">
+        {% trans "Nous confirmons votre paiement Mobile Money. Merci de patienter." %}
+      </p>
+    </div>
+
+    {# ── Barre de progression (disparaît après résolution) ── #}
+    <div class="progress-bar-track" id="progress-track">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+
+    {# ── Infos commande ── #}
+    <div class="bg-surface-2 rounded-xl p-4 text-left space-y-1">
+      <div class="flex justify-between text-sm">
+        <span class="text-text-muted">{% trans "Commande" %}</span>
+        <span class="font-semibold text-ink">#{{ commande.reference_courte }}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-text-muted">{% trans "Montant" %}</span>
+        <span class="font-semibold text-ink">
+          {{ commande.montant_total|floatformat:0 }} FCFA
+        </span>
+      </div>
+    </div>
+
+    {# ── Bouton réessayer (caché initialement, affiché si échec) ── #}
+    <div id="bloc-erreur" class="hidden space-y-3">
+      <a href="{% url 'orders:checkout' %}" class="btn btn-primary w-full">
+        {% trans "Réessayer le paiement" %}
+      </a>
+      <a href="{% url 'products:accueil' %}" class="btn btn-ghost w-full text-sm">
+        {% trans "Retour à l'accueil" %}
+      </a>
+    </div>
+
+    {# ── Message de timeout (caché initialement) ── #}
+    <div id="bloc-timeout" class="hidden">
+      <p class="text-xs text-text-muted">
+        {% trans "Le paiement prend plus de temps que prévu." %}
+        <a href="{% url 'orders:historique' %}" class="text-brand-500 underline ml-1">
+          {% trans "Vérifier mes commandes" %}
+        </a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// JAVASCRIPT — retour_paiement.html
+//
+// Polle /api/commandes/<ref>/paiement-statut/ toutes les 3 secondes.
+// Redirige vers la confirmation si paiement réussi.
+// Affiche une erreur si paiement échoué.
+// Abandonne après 90 secondes (timeout).
+// ════════════════════════════════════════════════════════════════════════════
+
+const REF_COMMANDE  = '{{ ref }}';
+const COMMANDE_PK   = {{ commande.pk }};
+const POLL_INTERVAL = 3000;   // 3 secondes entre chaque vérification
+const MAX_TIMEOUT   = 90000;  // 90 secondes avant d'abandonner
+
+let pollTimer      = null;
+let timeoutTimer   = null;
+let tempsEcoule    = 0;
+
+// ── Barre de progression ────────────────────────────────────────────────────
+// Avance toutes les secondes jusqu'à 85% (jamais 100% tant qu'on n'est pas sûr)
+const progressBar = document.getElementById('progress-bar');
+const progressInterval = setInterval(() => {
+  tempsEcoule += 1000;
+  const pct = Math.min((tempsEcoule / MAX_TIMEOUT) * 85, 85);
+  progressBar.style.width = pct + '%';
+}, 1000);
+
+// ── Affichage succès ────────────────────────────────────────────────────────
+function afficherSucces() {
+  clearInterval(progressInterval);
+  clearTimeout(timeoutTimer);
+
+  // Barre à 100%
+  progressBar.style.width = '100%';
+  progressBar.style.background = '#22c55e';
+
+  // Icône verte
+  document.getElementById('pulse1').style.display = 'none';
+  document.getElementById('pulse2').style.display = 'none';
+  const iconWrap = document.getElementById('status-icon');
+  iconWrap.className = 'status-icon success';
+  iconWrap.innerHTML = `
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-green-700"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>`;
+
+  document.getElementById('status-titre').innerHTML = '<span class="badge badge-success" style="font-size:0.95rem;padding:5px 16px;">{% trans "Paiement confirmé !" %}</span>';
+  document.getElementById('status-message').textContent = '{% trans "Votre commande est confirmée. Redirection…" %}';
+
+  // Redirection vers la page de confirmation après 1.5s
+  setTimeout(() => {
+    window.location.href = `/commandes/${COMMANDE_PK}/`;
+  }, 1500);
+}
+
+// ── Affichage échec ─────────────────────────────────────────────────────────
+function afficherEchec() {
+  clearInterval(progressInterval);
+  clearTimeout(timeoutTimer);
+  clearInterval(pollTimer);
+
+  progressBar.style.width    = '100%';
+  progressBar.style.background = '#ef4444';
+
+  document.getElementById('pulse1').style.display = 'none';
+  document.getElementById('pulse2').style.display = 'none';
+  const iconWrap = document.getElementById('status-icon');
+  iconWrap.className = 'status-icon error';
+  iconWrap.innerHTML = `
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-red-600"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="15" x2="9" y1="9" y2="15"/>
+      <line x1="9" x2="15" y1="9" y2="15"/>
+    </svg>`;
+
+  document.getElementById('status-titre').innerHTML = '<span class="badge badge-error" style="font-size:0.95rem;padding:5px 16px;">{% trans "Paiement échoué" %}</span>';
+  document.getElementById('status-message').textContent = '{% trans "Le paiement n\'a pas abouti. Vérifiez votre solde et réessayez." %}';
+  document.getElementById('progress-track').style.display = 'none';
+  document.getElementById('bloc-erreur').classList.remove('hidden');
+}
+
+// ── Affichage timeout ───────────────────────────────────────────────────────
+function afficherTimeout() {
+  clearInterval(progressInterval);
+  clearInterval(pollTimer);
+
+  document.getElementById('status-titre').textContent   = '{% trans "Vérification en cours…" %}';
+  document.getElementById('status-message').textContent = '{% trans "Le traitement prend plus de temps que prévu. Votre paiement sera mis à jour automatiquement." %}';
+  document.getElementById('bloc-timeout').classList.remove('hidden');
+}
+
+// ── Polling du statut ───────────────────────────────────────────────────────
+async function pollStatut() {
+  try {
+    const data = await API.get(`/api/commandes/${REF_COMMANDE}/paiement-statut/`);
+
+    if (data.statut === 'reussi') {
+      clearInterval(pollTimer);
+      afficherSucces();
+
+    } else if (data.statut === 'echoue') {
+      afficherEchec();
+    }
+    // statut 'en_attente' → on continue à poller
+
+  } catch (e) {
+    // Erreur réseau temporaire → on continue à poller
+    console.warn('Polling erreur temporaire :', e);
+  }
+}
+
+// ── Lancement ───────────────────────────────────────────────────────────────
+// Premier appel immédiat puis toutes les 3 secondes
+pollStatut();
+pollTimer = setInterval(pollStatut, POLL_INTERVAL);
+
+// Timeout global après 90 secondes
+timeoutTimer = setTimeout(() => {
+  clearInterval(pollTimer);
+  afficherTimeout();
+}, MAX_TIMEOUT);
+</script>
+{% endblock %}

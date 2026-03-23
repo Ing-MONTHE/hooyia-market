@@ -119,19 +119,29 @@ class CommandeCreerAPIView(APIView):
         # ── Création de la commande ──────────────────────────────────────────
         try:
             commande = OrderService.create_from_cart(
-                utilisateur   = request.user,
-                adresse       = adresse,
-                mode_paiement = data.get('mode_paiement', 'livraison'),
-                note_client   = data.get('note_client', ''),
+                utilisateur        = request.user,
+                adresse            = adresse,
+                mode_paiement      = data.get('mode_paiement'),
+                telephone_paiement = data.get('telephone_paiement', ''),
+                note_client        = data.get('note_client', ''),
             )
         except ValidationError as e:
             msg = e.message if hasattr(e, 'message') else str(e)
             return Response({'erreur': msg}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(
-            CommandeDetailSerializer(commande).data,
-            status=status.HTTP_201_CREATED
-        )
+        # ── Initialisation du paiement NotchPay ──────────────────────────────
+        try:
+            from .payment_service import NotchPayService, NotchPayError
+            result = NotchPayService.initialize(commande.paiement, request)
+            authorization_url = result['authorization_url']
+        except NotchPayError as e:
+            OrderService.annuler_commande(commande, request.user)
+            return Response({'erreur': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        return Response({
+            'commande':          CommandeDetailSerializer(commande).data,
+            'authorization_url': authorization_url,
+        }, status=status.HTTP_201_CREATED)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -264,3 +274,118 @@ class ExpedierCommandeAPIView(TransitionCommandeAPIView):
 class LivrerCommandeAPIView(TransitionCommandeAPIView):
     transition_method = 'livrer'
     message_succes    = _l('Commande livrée.')
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API — Webhook NotchPay
+# POST /api/commandes/webhook/notchpay/
+# ═══════════════════════════════════════════════════════════════
+
+class NotchPayWebhookAPIView(APIView):
+    """
+    Reçoit les notifications asynchrones de NotchPay.
+
+    NotchPay appelle cette URL en arrière-plan dès que le paiement
+    est traité (succès ou échec). On vérifie la signature, on vérifie
+    le statut, puis on confirme ou on échoue la commande.
+
+    Cette vue est publique (pas d'authentification JWT) car c'est
+    NotchPay qui l'appelle, pas le client. La sécurité est assurée
+    par la vérification HMAC de la signature.
+    """
+    permission_classes = []  # Public — sécurisé par signature HMAC
+    authentication_classes = []
+
+    def post(self, request):
+        from .payment_service import NotchPayService, NotchPayError
+        from .models import Paiement
+        import json
+
+        # ── 1. Vérifier la signature NotchPay ────────────────
+        signature = request.headers.get('x-notch-signature', '')
+        if not NotchPayService.verify_webhook_signature(request.body, signature):
+            return Response({'erreur': 'Signature invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ── 2. Parser le payload ──────────────────────────────
+        try:
+            payload = json.loads(request.body)
+        except json.JSONDecodeError:
+            return Response({'erreur': 'Payload invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # NotchPay envoie : { "event": "payment.complete", "data": { "transaction": {...} } }
+        event       = payload.get('event', '')
+        transaction = payload.get('data', {}).get('transaction', {})
+        reference   = transaction.get('reference', '')  # ex: trx.abc123
+
+        if not reference:
+            return Response({'erreur': 'Référence manquante.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ── 3. Retrouver le paiement en base ─────────────────
+        try:
+            paiement = Paiement.objects.select_related('commande').get(
+                reference_externe=reference
+            )
+        except Paiement.DoesNotExist:
+            # Référence inconnue — on répond 200 pour éviter les retries NotchPay
+            return Response({'message': 'Paiement inconnu — ignoré.'}, status=status.HTTP_200_OK)
+
+        # Éviter de traiter deux fois le même webhook
+        if paiement.statut == Paiement.StatutPaiement.REUSSI:
+            return Response({'message': 'Déjà traité.'}, status=status.HTTP_200_OK)
+
+        # ── 4. Vérifier le statut auprès de l'API NotchPay ───
+        # Double vérification : on ne fait pas confiance uniquement au webhook
+        try:
+            result = NotchPayService.verify(reference)
+            statut_notchpay = result['status']
+        except NotchPayError:
+            return Response({'erreur': 'Vérification impossible.'}, status=status.HTTP_502_BAD_GATEWAY)
+
+        # ── 5. Agir selon le statut ───────────────────────────
+        if statut_notchpay == 'complete':
+            NotchPayService.confirmer_paiement(paiement)
+            return Response({'message': 'Paiement confirmé.'}, status=status.HTTP_200_OK)
+
+        elif statut_notchpay in ('failed', 'canceled'):
+            NotchPayService.echouer_paiement(paiement)
+            return Response({'message': 'Paiement échoué.'}, status=status.HTTP_200_OK)
+
+        # Statut 'pending' → on attend le prochain webhook
+        return Response({'message': f'Statut {statut_notchpay} — en attente.'}, status=status.HTTP_200_OK)
+
+
+# ═══════════════════════════════════════════════════════════════
+# VUE API — Statut du paiement d'une commande
+# GET /api/commandes/<ref>/paiement-statut/
+# ═══════════════════════════════════════════════════════════════
+
+class PaiementStatutAPIView(APIView):
+    """
+    Retourne le statut actuel du paiement d'une commande.
+
+    Utilisé par le frontend pour poller le statut après redirection
+    depuis NotchPay (le client revient sur le site après avoir payé).
+
+    Le frontend appelle cet endpoint toutes les 3 secondes jusqu'à
+    obtenir 'reussi' ou 'echoue'.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, ref):
+        """GET /api/commandes/<ref>/paiement-statut/"""
+        import uuid
+        try:
+            uuid.UUID(str(ref))
+            commande = Commande.objects.get(reference=ref, client=request.user)
+        except (Commande.DoesNotExist, ValueError):
+            return Response({'erreur': 'Commande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            paiement = commande.paiement
+        except Exception:
+            return Response({'erreur': 'Paiement introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'statut':           paiement.statut,
+            'statut_commande':  commande.statut,
+            'reference':        str(commande.reference),
+        })
