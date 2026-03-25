@@ -2,197 +2,547 @@
 {% load static i18n %}
 
 {% block title %}{% trans 'Messages' %} — HooYia Market{% endblock %}
+{% block meta_description %}{% trans 'Vos conversations HooYia Market' %}{% endblock %}
 
-{% block extra_head %}
+{% block content %}
 <style>
-  .chat-layout {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    height: calc(100vh - 64px);
-    overflow: hidden;
-    background: var(--bg);
-  }
-  .chat-sidebar {
-    display: flex; flex-direction: column;
-    border-right: 1px solid var(--border);
-    background: var(--surface); overflow: hidden;
-  }
-  .sidebar-header {
-    padding: 1.25rem 1.25rem 1rem;
-    border-bottom: 1px solid var(--border); flex-shrink: 0;
-  }
-  .sidebar-search { position: relative; margin-top: .875rem; }
-  .sidebar-search input {
-    width: 100%; padding: .5rem .875rem .5rem 2.375rem;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: .625rem; font-family: 'Poppins',sans-serif;
-    font-size: .8125rem; color: var(--text-primary);
-    transition: border-color .2s; outline: none;
-  }
-  .sidebar-search input:focus { border-color: var(--brand-500); }
-  .sidebar-search input::placeholder { color: var(--text-muted); }
-  .sidebar-search .search-icon {
-    position: absolute; left: .75rem; top: 50%;
-    transform: translateY(-50%); color: var(--text-muted); pointer-events: none;
-  }
-  .new-chat-section {
-    padding: .875rem 1.25rem;
-    border-bottom: 1px solid var(--border); flex-shrink: 0;
-  }
-  .section-label {
-    font-size: .6875rem; font-weight: 700; letter-spacing: .07em;
-    text-transform: uppercase; color: var(--text-muted); margin-bottom: .625rem;
-  }
-  .support-card {
-    display: flex; align-items: center; gap: .875rem;
-    padding: .75rem 1rem; background: var(--bg);
-    border: 1px solid var(--border); border-radius: .875rem;
-    cursor: pointer; transition: border-color .2s, box-shadow .2s, background .2s;
-    text-decoration: none; width: 100%;
-  }
-  .support-card:hover {
-    border-color: var(--brand-500); background: var(--brand-50);
-    box-shadow: 0 2px 12px rgba(30,58,138,.08);
-  }
-  .support-avatar {
-    width: 42px; height: 42px; border-radius: 12px;
-    background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; color: #fff;
-  }
-  .support-info { flex: 1; min-width: 0; text-align: left; }
-  .support-name { font-size: .8125rem; font-weight: 700; color: var(--text-primary); margin-bottom: .125rem; }
-  .support-sub  { font-size: .6875rem; color: var(--text-muted); line-height: 1.4; }
-  .support-online {
-    display: flex; align-items: center; gap: .3rem;
-    font-size: .6875rem; color: #10b981; font-weight: 600; flex-shrink: 0;
-  }
-  .online-dot {
-    width: 7px; height: 7px; background: #10b981;
-    border-radius: 50%; animation: pulse-dot 2s infinite;
-  }
-  @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:.4} }
+  /* ════════════════════════════════════════════════════════════
+     CHAT LISTE — Redesign basé sur la charte notifications
+     Layout : page centrée + hero gradient + filtres + liste
+  ════════════════════════════════════════════════════════════ */
 
-  .convs-section-label {
-    padding: .75rem 1.25rem .25rem;
-    font-size: .6875rem; font-weight: 700; letter-spacing: .07em;
-    text-transform: uppercase; color: var(--text-muted);
-    display: flex; align-items: center; justify-content: space-between;
+  /* ── PAGE WRAPPER ─────────────────────────────────────────── */
+  .chat-page {
+    min-height: 70vh;
+    background: var(--surface-2);
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  .chat-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO HEADER (identique notifications) ──────────────── */
+  .chat-hero {
+    background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-500) 60%, #2563eb 100%);
+    border-radius: 20px;
+    padding: 2rem 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    color: white;
+  }
+
+  /* Cercles décoratifs en arrière-plan */
+  .chat-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .chat-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 30%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
+
+  /* Ligne du haut du hero : icône + titre + badge compteur */
+  .chat-hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Icône hero (glassmorphisme) */
+  .chat-hero-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
     flex-shrink: 0;
   }
-  .conversations-list { flex: 1; overflow-y: auto; padding: .25rem 0; }
-  .conversations-list::-webkit-scrollbar { width: 4px; }
-  .conversations-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  .conv-item {
-    display: flex; align-items: center; gap: .875rem;
-    padding: .75rem 1.25rem; cursor: pointer; transition: background .15s;
-    text-decoration: none; color: inherit; border-left: 3px solid transparent;
+  .chat-hero h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: -0.01em;
   }
-  .conv-item:hover { background: var(--bg); }
-  .conv-item.active { background: var(--brand-50); border-left-color: var(--brand-500); }
 
+  .chat-hero-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 3px;
+  }
+
+  /* Meta row : badge non-lus */
+  .chat-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1.2rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  /* Badge "X non lus" dans le hero */
+  .chat-badge-unread {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+  }
+
+  /* Point orange — indique activité non lue */
+  .chat-badge-unread .dot {
+    width: 6px; height: 6px;
+    background: #f97316;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Bouton contact support dans le hero */
+  #btn-support-hero {
+    display: none;
+    align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    backdrop-filter: blur(6px);
+  }
+  #btn-support-hero:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── FILTRES ──────────────────────────────────────────────── */
+  .chat-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .chat-filter {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .chat-filter:hover {
+    border-color: var(--brand-200);
+    background: var(--brand-50);
+    color: var(--brand-500);
+  }
+  .chat-filter.active {
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+    color: white;
+    box-shadow: 0 3px 10px rgba(30,58,138,0.25);
+  }
+
+  /* Badge nombre dans les filtres */
+  .filter-count {
+    background: rgba(255,255,255,0.22);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .chat-filter:not(.active) .filter-count {
+    background: var(--surface-3);
+    color: var(--text-muted);
+  }
+
+  /* ── CARTE CONVERSATION ──────────────────────────────────── */
+  .conv-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .conv-card:hover {
+    border-color: var(--brand-200);
+    box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+    transform: translateY(-1px);
+  }
+
+  /* Barre colorée gauche si messages non lus */
+  .conv-card.has-unread {
+    border-color: var(--brand-200);
+  }
+  .conv-card.has-unread::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #f97316, var(--brand-500));
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* Point orange non-lu (comme notifications) */
+  .conv-unread-dot {
+    width: 8px; height: 8px;
+    background: #f97316;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    animation: pulse-dot 2s ease infinite;
+    align-self: center;
+  }
+  .conv-read-spacer { width: 8px; flex-shrink: 0; }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
+    50%       { box-shadow: 0 0 0 5px rgba(249,115,22,0.08); }
+  }
+
+  /* Avatar interlocuteur */
   .conv-avatar {
-    width: 42px; height: 42px; border-radius: 12px;
+    width: 44px; height: 44px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #3b5fc0, var(--brand-600));
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 1rem; color: white;
-    flex-shrink: 0; position: relative;
+    flex-shrink: 0;
+    position: relative;
   }
-  .conv-avatar .unread-badge {
-    position: absolute; top: -5px; right: -5px;
-    min-width: 18px; height: 18px; background: var(--accent); color: white;
-    border-radius: 9px; font-size: .625rem; font-weight: 700;
+
+  /* Badge nombre messages non lus sur l'avatar */
+  .conv-avatar .badge-count {
+    position: absolute;
+    top: -5px; right: -5px;
+    min-width: 18px; height: 18px;
+    background: var(--accent);
+    color: white;
+    border-radius: 9px;
+    font-size: 0.625rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
-    padding: 0 4px; border: 2px solid var(--surface);
+    padding: 0 4px;
+    border: 2px solid var(--surface);
   }
-  .conv-info { flex: 1; min-width: 0; }
-  .conv-name-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .25rem; }
-  .conv-name { font-weight: 600; font-size: .875rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .conv-time  { font-size: .6875rem; color: var(--text-muted); flex-shrink: 0; }
-  .conv-preview { font-size: .75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .conv-preview.has-unread { color: var(--text-secondary); font-weight: 600; }
 
-  .skeleton-item { display:flex;align-items:center;gap:.875rem;padding:.75rem 1.25rem; }
-  .skeleton-avatar { width:42px;height:42px;border-radius:12px;background:var(--bg);flex-shrink:0;animation:shimmer 1.5s infinite; }
-  .skeleton-lines { flex:1; }
-  .skeleton-line { height:10px;background:var(--bg);border-radius:5px;animation:shimmer 1.5s infinite;margin-bottom:8px; }
-  @keyframes shimmer { 0%,100%{opacity:1}50%{opacity:.5} }
-
-  .chat-right-panel {
-    background: var(--bg); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; padding: 2rem; text-align: center;
+  /* Support = avatar gradient spécial */
+  .conv-avatar.support {
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
   }
-  .right-welcome { display:flex;flex-direction:column;align-items:center;gap:1rem;max-width:380px; }
-  .welcome-icon {
-    width: 88px; height: 88px; border-radius: 24px;
-    background: linear-gradient(135deg, var(--brand-100), var(--brand-50));
+
+  .conv-body { flex: 1; min-width: 0; }
+
+  .conv-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .conv-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Nom en gras si non lu */
+  .conv-card.has-unread .conv-name { font-weight: 700; }
+
+  .conv-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .conv-preview {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .conv-card.has-unread .conv-preview {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  /* Chevron flèche droite */
+  .conv-arrow {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    align-self: center;
+    transition: transform 0.2s, color 0.2s;
+  }
+  .conv-card:hover .conv-arrow {
+    color: var(--brand-500);
+    transform: translateX(3px);
+  }
+
+  /* ── SKELETON ─────────────────────────────────────────────── */
+  @keyframes shimmer {
+    0%  { background-position: -600px 0; }
+    100%{ background-position:  600px 0; }
+  }
+  .skeleton {
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* ── EMPTY STATE ──────────────────────────────────────────── */
+  .chat-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1.5px dashed var(--border);
+  }
+
+  .chat-empty-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 2px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    color: var(--brand-500); margin-bottom: .5rem;
-  }
-  .welcome-title { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: .25rem; }
-  .welcome-sub   { font-size: .875rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1rem; }
-  .welcome-features {
-    display:flex;flex-direction:column;gap:.625rem;width:100%;text-align:left;
-    background:var(--surface);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;
-  }
-  .feature-row { display:flex;align-items:center;gap:.75rem;font-size:.8125rem;color:var(--text-secondary); }
-  .feature-icon {
-    width:30px;height:30px;border-radius:8px;background:var(--brand-50);
-    display:flex;align-items:center;justify-content:center;color:var(--brand-500);flex-shrink:0;
+    margin: 0 auto 1.2rem;
+    color: var(--text-muted);
   }
 
-  .sidebar-empty {
-    flex:1;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;padding:1.5rem 1.25rem;text-align:center;
+  .chat-empty h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 6px;
   }
-  .sidebar-empty-icon {
-    width:48px;height:48px;border-radius:12px;background:var(--bg);
-    display:flex;align-items:center;justify-content:center;margin-bottom:.875rem;color:var(--text-muted);
+
+  .chat-empty p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem;
   }
-  .error-inline {
-    padding:1rem;margin:.75rem;background:#fef2f2;border:1px solid #fecaca;
-    border-radius:.625rem;display:flex;align-items:flex-start;gap:.75rem;
-    font-size:.8125rem;color:#dc2626;
+
+  /* ── GROUPES (séparateur) ─────────────────────────────────── */
+  .conv-date-group {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0 4px;
+    margin: 1rem 0 0.5rem;
   }
-  .conv-count-badge {
-    display:inline-flex;align-items:center;padding:.1875rem .625rem;
-    background:var(--bg);border:1px solid var(--border);border-radius:999px;
-    font-size:.6875rem;font-weight:600;color:var(--text-muted);
+
+  /* ── CARD SUPPORT (section assistance) ──────────────────── */
+  .support-section {
+    margin-bottom: 1.25rem;
   }
-  @media(max-width:768px){
-    .chat-layout{grid-template-columns:1fr;height:calc(100vh - 56px);}
-    .chat-right-panel{display:none;}
+
+  .support-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+  }
+  .support-card:hover {
+    border-color: var(--brand-500);
+    background: var(--brand-50);
+    box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+    transform: translateY(-1px);
+  }
+
+  .support-avatar {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: white;
+  }
+
+  .support-info { flex: 1; min-width: 0; }
+  .support-name { font-size: 0.875rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .support-sub  { font-size: 0.75rem; color: var(--text-muted); }
+
+  .support-online {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.7rem; color: #10b981; font-weight: 600; flex-shrink: 0;
+  }
+  .online-dot {
+    width: 7px; height: 7px;
+    background: #10b981; border-radius: 50%;
+    animation: pulse-dot 2s ease infinite;
+  }
+
+  /* ── SECTION LABEL (séparateur texte) ──────────────────── */
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0 4px;
+    margin-bottom: 0.5rem;
+    display: flex; align-items: center; justify-content: space-between;
   }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="chat-layout">
+<div class="chat-page">
+  <div class="chat-wrap">
 
-  <!-- SIDEBAR -->
-  <aside class="chat-sidebar">
-
-    <div class="sidebar-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <h1 style="font-size:1.0625rem;font-weight:700;color:var(--brand-600);margin-bottom:.125rem;">{% trans "Messages" %}</h1>
-          <p style="font-size:.75rem;color:var(--text-muted);">{% trans "Vos conversations" %}</p>
+    {# ── HERO HEADER ── #}
+    <div class="chat-hero">
+      <div class="chat-hero-top">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="chat-hero-icon">
+            <!-- Lucide: MessagesSquare -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/>
+              <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
+            </svg>
+          </div>
+          <div>
+            <h1>{% trans "Messages" %}</h1>
+            <p class="chat-hero-subtitle" id="conv-count-label">{% trans "Chargement…" %}</p>
+          </div>
         </div>
-        <span id="conversations-count" class="conv-count-badge" style="display:none;"></span>
+
+        {# Bouton contacter support visible si admin_id présent et pas staff/vendeur #}
+        {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}{% if admin_id %}
+        <button id="btn-support-hero" onclick="demarrerSupport()">
+          <!-- Lucide: Headphones -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+            <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+          {% trans "Support" %}
+        </button>
+        {% endif %}{% endif %}
       </div>
-      <div class="sidebar-search">
-        <i data-lucide="search" class="search-icon" style="width:14px;height:14px;"></i>
-        <input type="text" id="search-input" placeholder="{% trans 'Chercher une conversation…' %}" autocomplete="off" />
+
+      {# Badge non-lus dans le hero #}
+      <div class="chat-hero-meta">
+        <div class="chat-badge-unread" id="hero-unread-badge" style="display:none;">
+          <span class="dot"></span>
+          <span id="hero-unread-count">0</span> {% trans "non lus" %}
+        </div>
       </div>
     </div>
 
+    {# ── FILTRES ── #}
+    <div class="chat-filters">
+      {# Filtre : toutes les conversations #}
+      <button class="chat-filter active" onclick="filtrer('', this)">
+        <!-- Lucide: LayoutList -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="4" height="4"/><path d="M10 6h11"/>
+          <rect x="3" y="11" width="4" height="4"/><path d="M10 12h11"/>
+          <rect x="3" y="17" width="4" height="4"/><path d="M10 18h11"/>
+        </svg>
+        {% trans "Toutes" %}
+      </button>
+
+      {# Filtre : non lus uniquement #}
+      <button class="chat-filter" onclick="filtrer('non_lus', this)">
+        <!-- Lucide: MailOpen -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/>
+          <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/>
+        </svg>
+        {% trans "Non lus" %}
+        <span id="badge-non-lus" class="filter-count" style="display:none;"></span>
+      </button>
+
+      {# Filtre : support uniquement #}
+      <button class="chat-filter" onclick="filtrer('support', this)">
+        <!-- Lucide: Headphones -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+        {% trans "Support" %}
+      </button>
+    </div>
+
+    {# ── SECTION ASSISTANCE (card support rapide) ── #}
     {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}{% if admin_id %}
-    <div class="new-chat-section">
-      <p class="section-label">{% trans "Assistance" %}</p>
-      <button class="support-card" id="btn-contact-support" type="button">
+    <div class="support-section" id="support-section">
+      <p class="section-label">
+        <!-- Lucide: LifeBuoy -->
+        <span style="display:flex;align-items:center;gap:5px;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+            <path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 14.83 4.24 4.24"/>
+            <path d="m14.83 9.17 4.24-4.24"/><path d="m4.93 19.07 4.24-4.24"/>
+          </svg>
+          {% trans "Assistance" %}
+        </span>
+      </p>
+      <button class="support-card" onclick="demarrerSupport()">
         <div class="support-avatar">
-          <i data-lucide="headphones" style="width:20px;height:20px;"></i>
+          <!-- Lucide: Headphones -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+            <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
         </div>
         <div class="support-info">
           <div class="support-name">{% trans "Support HooYia" %}</div>
@@ -203,206 +553,285 @@
           <span class="online-dot"></span>{% trans "En ligne" %}
         </div>
         {% endif %}
+        <!-- Lucide: ChevronRight -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             style="color:var(--text-muted);flex-shrink:0;">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
       </button>
     </div>
     {% endif %}{% endif %}
 
-    <div class="convs-section-label"><span>{% trans "Conversations" %}</span></div>
-
-    <div id="skeleton-loader">
+    {# ── SKELETON (affiché pendant le chargement) ── #}
+    <div id="skeleton" style="display:flex;flex-direction:column;gap:8px;">
       {% for i in "123" %}
-      <div class="skeleton-item">
-        <div class="skeleton-avatar"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line" style="width:50%;"></div>
-          <div class="skeleton-line" style="width:75%;margin-bottom:0;"></div>
+      <div class="conv-card" style="cursor:default;pointer-events:none;">
+        <div class="conv-read-spacer"></div>
+        <div class="skeleton" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton" style="height:12px;width:45%;border-radius:4px;"></div>
+          <div class="skeleton" style="height:11px;width:80%;border-radius:4px;"></div>
         </div>
       </div>
       {% endfor %}
     </div>
 
-    <div id="sidebar-empty" style="display:none;" class="sidebar-empty">
-      <div class="sidebar-empty-icon"><i data-lucide="message-circle" style="width:22px;height:22px;"></i></div>
-      <p style="font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.25rem;">{% trans "Aucune conversation" %}</p>
-      <p style="font-size:.75rem;color:var(--text-muted);line-height:1.5;">{% trans "Utilisez le bouton ci-dessus pour contacter notre support." %}</p>
+    {# ── EMPTY STATE ── #}
+    <div id="empty-state" style="display:none;" class="chat-empty">
+      <div class="chat-empty-icon">
+        <!-- Lucide: MessageCircleOff -->
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.9 20.9 2 2"/>
+          <path d="M3 8.1v-.1a9 9 0 0 1 15.36-6.36"/>
+          <path d="M21 10.5a9 9 0 0 1-9 8.5H7l-4 2V13.5"/>
+        </svg>
+      </div>
+      <h2 id="empty-titre">{% trans "Aucune conversation" %}</h2>
+      <p id="empty-message">{% trans "Vous n'avez pas encore de messages." %}</p>
+      <a href="{% url 'products:liste' %}" class="btn btn-primary inline-flex items-center gap-2">
+        <!-- Lucide: ShoppingBag -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        {% trans "Voir le catalogue" %}
+      </a>
     </div>
 
-    <div id="sidebar-error" style="display:none;">
-      <div class="error-inline">
-        <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0;margin-top:1px;"></i>
-        <span>{% trans "Impossible de charger vos conversations." %}</span>
-      </div>
-    </div>
+    {# ── LISTE DES CONVERSATIONS ── #}
+    <div id="conv-list" style="display:none;flex-direction:column;gap:8px;"></div>
 
-    <ul id="conversations-list" class="conversations-list" style="display:none;"></ul>
-
-  </aside>
-
-  <!-- ZONE DROITE -->
-  <div class="chat-right-panel">
-    <div class="right-welcome">
-
-      <div class="welcome-icon">
-        <i data-lucide="messages-square" style="width:40px;height:40px;"></i>
-      </div>
-
-      <div>
-        <h2 class="welcome-title">{% trans "Bienvenue dans vos Messages" %}</h2>
-        <p class="welcome-sub">{% trans "Sélectionnez une conversation ou contactez notre support pour obtenir de l'aide." %}</p>
-      </div>
-
-      <div class="welcome-features">
-        <div class="feature-row">
-          <div class="feature-icon"><i data-lucide="zap" style="width:15px;height:15px;"></i></div>
-          <span>{% trans "Réponses rapides de notre équipe" %}</span>
-        </div>
-        <div class="feature-row">
-          <div class="feature-icon"><i data-lucide="package" style="width:15px;height:15px;"></i></div>
-          <span>{% trans "Suivi de commandes en temps réel" %}</span>
-        </div>
-        <div class="feature-row">
-          <div class="feature-icon"><i data-lucide="paperclip" style="width:15px;height:15px;"></i></div>
-          <span>{% trans "Partage de fichiers et images" %}</span>
-        </div>
-        <div class="feature-row">
-          <div class="feature-icon"><i data-lucide="shield-check" style="width:15px;height:15px;"></i></div>
-          <span>{% trans "Échanges sécurisés et confidentiels" %}</span>
-        </div>
-      </div>
-
-      {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
-        {% if admin_id %}
-        <button id="btn-contact-support-main" type="button"
-                class="btn btn-primary" style="gap:.5rem;width:100%;justify-content:center;">
-          <i data-lucide="headphones" style="width:16px;height:16px;"></i>
-          {% trans "Contacter le support" %}
-        </button>
-        {% else %}
-        <a href="{% url 'products:liste' %}" class="btn btn-primary" style="gap:.5rem;">
-          <i data-lucide="shopping-bag" style="width:15px;height:15px;"></i>
-          {% trans "Parcourir le catalogue" %}
-        </a>
-        {% endif %}
-      {% endif %}
-
-    </div>
   </div>
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://unpkg.com/lucide@latest"></script>
 <script>
-lucide.createIcons();
+// ════════════════════════════════════════════════════════════
+// JAVASCRIPT — chat_liste.html (redesign)
+// Architecture : chargement API → filtres → rendu HTML
+// ════════════════════════════════════════════════════════════
 
+// ID admin passé depuis Django (null si pas disponible)
 const ADMIN_ID = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
-const CHAT_I18N = {
-  demarrer   : "{% trans 'Démarrez la conversation\u2026' %}",
-  utilisateur: "{% trans 'Utilisateur' %}",
-  aInstant   : "{% trans 'À l\u0027instant' %}",
-  erreurConv : "{% trans 'Impossible de démarrer la conversation.' %}",
+
+// Filtre actif courant : '' = tous, 'non_lus', 'support'
+var filtreActuel = '';
+
+// Cache des conversations chargées (pour le filtre local)
+var allConversations = [];
+
+// Traductions inline i18n
+var CHAT_I18N = {
+  aucuneConv    : "{% trans 'Aucune conversation' %}",
+  aucunResult   : "{% trans 'Aucun résultat' %}",
+  aucunMsg      : "{% trans 'Démarrez la conversation…' %}",
+  nonLus        : "{% trans 'non lus' %}",
+  erreur        : "{% trans 'Erreur de chargement.' %}",
+  erreurSupport : "{% trans 'Impossible de démarrer la conversation.' %}",
+  utilisateur   : "{% trans 'Utilisateur' %}",
+  supportName   : "Support HooYia",
+  aInstant      : "{% trans 'À l instant' %}",
 };
 
-async function demarrerSupport() {
-  if (!ADMIN_ID) return;
-  try {
-    const data = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID });
-    window.location.href = `/chat/${data.id}/`;
-  } catch(e) {
-    window.toast && window.toast(CHAT_I18N.erreurConv, 'error');
-  }
+// ── Icône flèche droite (Lucide: ChevronRight) ───────────────
+var ARROW_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+
+// ── Calcul du temps relatif ───────────────────────────────────
+function tempsRelatif(dateStr) {
+  if (!dateStr) return '';
+  var diff = (Date.now() - new Date(dateStr)) / 1000;
+  if (diff < 60)    return CHAT_I18N.aInstant;
+  if (diff < 3600)  return 'il y a ' + Math.floor(diff / 60) + ' min';
+  if (diff < 86400) return 'il y a ' + Math.floor(diff / 3600) + ' h';
+  var d = new Date(dateStr), now = new Date();
+  if (diff < 604800) return d.toLocaleDateString('fr-FR', { weekday: 'short' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
-document.getElementById('btn-contact-support')?.addEventListener('click', demarrerSupport);
-document.getElementById('btn-contact-support-main')?.addEventListener('click', demarrerSupport);
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const skeleton = document.getElementById('skeleton-loader');
-  const empty    = document.getElementById('sidebar-empty');
-  const errorEl  = document.getElementById('sidebar-error');
-  const list     = document.getElementById('conversations-list');
-  const countEl  = document.getElementById('conversations-count');
-  const searchEl = document.getElementById('search-input');
-  let allConversations = [];
-
-  try {
-    const data = await API.get('/api/chat/', { silentError: true });
-    allConversations = data.results || data;
-    skeleton.style.display = 'none';
-    if (!allConversations.length) { empty.style.display = 'flex'; return; }
-    countEl.textContent = `${allConversations.length}`;
-    countEl.style.display = '';
-    list.style.display = '';
-    renderList(allConversations);
-  } catch(e) {
-    skeleton.style.display = 'none';
-    if (e && e.status === 401) window.location.href = '/compte/connexion/?next=/chat/';
-    else errorEl.style.display = '';
-  }
-
-  searchEl?.addEventListener('input', () => {
-    const q = searchEl.value.trim().toLowerCase();
-    const filtered = q
-      ? allConversations.filter(c => {
-          const name    = (c.interlocuteur?.username || '').toLowerCase();
-          const preview = (c.dernier_message?.contenu || '').toLowerCase();
-          return name.includes(q) || preview.includes(q);
-        })
-      : allConversations;
-    renderList(filtered);
-  });
-
-  function renderList(conversations) {
-    list.innerHTML = conversations.map(conv => {
-      const autre    = conv.interlocuteur || {};
-      const initiale = (autre.username || '?')[0].toUpperCase();
-      const nonLus   = conv.messages_non_lus || 0;
-      const dernier  = conv.dernier_message;
-      const apercu   = dernier ? escapeHtml(dernier.contenu) : CHAT_I18N.demarrer;
-      const heure    = dernier ? formatHeure(dernier.date_envoi) : '';
-      const isSupport = autre.is_admin || autre.is_staff;
-
-      const avatarContent = isSupport
-        ? `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`
-        : escapeHtml(initiale);
-      const avatarStyle = isSupport ? 'background:linear-gradient(135deg,var(--brand-500),var(--brand-600))' : '';
-      const displayName = isSupport ? 'Support HooYia' : escapeHtml(autre.username || CHAT_I18N.utilisateur);
-
-      return `
-      <li>
-        <a href="/chat/${conv.id}/" class="conv-item" data-id="${conv.id}">
-          <div class="conv-avatar" style="${avatarStyle}">
-            ${avatarContent}
-            ${nonLus > 0 ? `<span class="unread-badge">${nonLus > 9 ? '9+' : nonLus}</span>` : ''}
-          </div>
-          <div class="conv-info">
-            <div class="conv-name-row">
-              <span class="conv-name">${displayName}</span>
-              <span class="conv-time">${heure}</span>
-            </div>
-            <p class="conv-preview ${nonLus > 0 ? 'has-unread' : ''}">${apercu}</p>
-          </div>
-        </a>
-      </li>`;
-    }).join('');
-  }
-});
-
-function formatHeure(isoStr) {
-  if (!isoStr) return '';
-  const d = new Date(isoStr), now = new Date(), diff = now - d;
-  if (diff < 60000)     return CHAT_I18N.aInstant;
-  if (diff < 3600000)   return `${Math.floor(diff/60000)} min`;
-  if (diff < 86400000)  return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  if (diff < 604800000) return d.toLocaleDateString('fr-FR',{weekday:'short'});
-  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-}
-
+// ── Echapper le HTML (XSS prevention) ───────────────────────
 function escapeHtml(str) {
-  const d = document.createElement('div');
+  var d = document.createElement('div');
   d.textContent = str || '';
   return d.innerHTML;
 }
+
+// ── Rendre une carte de conversation ────────────────────────
+function renderConversation(conv) {
+  var autre     = conv.interlocuteur || {};
+  var nonLus    = conv.messages_non_lus || 0;
+  var dernier   = conv.dernier_message;
+  var apercu    = dernier ? escapeHtml(dernier.contenu || CHAT_I18N.aucunMsg) : CHAT_I18N.aucunMsg;
+  var heure     = dernier ? tempsRelatif(dernier.date_envoi) : '';
+  var isSupport = autre.is_admin || autre.is_staff;
+  var initiale  = (autre.username || '?')[0].toUpperCase();
+  var nom       = isSupport ? CHAT_I18N.supportName : escapeHtml(autre.username || CHAT_I18N.utilisateur);
+
+  // Contenu de l'avatar : icône casque pour support, initiale sinon
+  var avatarContent = isSupport
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>'
+    : escapeHtml(initiale);
+
+  // Badge nombre de messages non lus sur l'avatar
+  var badgeHtml = nonLus > 0
+    ? '<span class="badge-count">' + (nonLus > 9 ? '9+' : nonLus) + '</span>'
+    : '';
+
+  return '<a href="/chat/' + conv.id + '/" class="conv-card' + (nonLus > 0 ? ' has-unread' : '') + '">'
+    + (nonLus > 0 ? '<div class="conv-unread-dot"></div>' : '<div class="conv-read-spacer"></div>')
+    + '<div class="conv-avatar' + (isSupport ? ' support' : '') + '">' + avatarContent + badgeHtml + '</div>'
+    + '<div class="conv-body">'
+    + '<div class="conv-header-row">'
+    + '<span class="conv-name">' + nom + '</span>'
+    + '<span class="conv-time">' + heure + '</span>'
+    + '</div>'
+    + '<p class="conv-preview">' + apercu + '</p>'
+    + '</div>'
+    + '<span class="conv-arrow">' + ARROW_ICON + '</span>'
+    + '</a>';
+}
+
+// ── Afficher / masquer les éléments ──────────────────────────
+function showEl(id, display) { document.getElementById(id).style.display = display || 'block'; }
+function hideEl(id)           { document.getElementById(id).style.display = 'none'; }
+
+// ── Appliquer le filtre et re-rendre la liste ────────────────
+function appliquerFiltre(convs) {
+  var filtered = convs;
+
+  if (filtreActuel === 'non_lus') {
+    // Ne garder que les conversations avec au moins 1 message non lu
+    filtered = convs.filter(function(c) { return (c.messages_non_lus || 0) > 0; });
+  } else if (filtreActuel === 'support') {
+    // Ne garder que les conversations avec un admin/staff
+    filtered = convs.filter(function(c) {
+      var a = c.interlocuteur || {};
+      return a.is_admin || a.is_staff;
+    });
+  }
+
+  var list = document.getElementById('conv-list');
+
+  if (!filtered.length) {
+    hideEl('conv-list');
+    showEl('empty-state');
+    document.getElementById('empty-titre').textContent   = CHAT_I18N.aucunResult;
+    document.getElementById('empty-message').textContent = CHAT_I18N.erreur;
+    return;
+  }
+
+  hideEl('empty-state');
+  list.innerHTML = filtered.map(renderConversation).join('');
+  showEl('conv-list', 'flex');
+}
+
+// ── Chargement principal des conversations ───────────────────
+async function loadConversations() {
+  // Afficher skeleton, cacher le reste
+  showEl('skeleton', 'flex');
+  document.getElementById('skeleton').style.flexDirection = 'column';
+  document.getElementById('skeleton').style.gap = '8px';
+  hideEl('empty-state');
+  hideEl('conv-list');
+
+  try {
+    var data = await API.get('/api/chat/', { silentError: true });
+    allConversations = data.results || data || [];
+
+    hideEl('skeleton');
+
+    // Calcul des non-lus total
+    var nonLusTotal = allConversations.reduce(function(sum, c) {
+      return sum + (c.messages_non_lus || 0);
+    }, 0);
+
+    // Mettre à jour le label hero
+    var total = allConversations.length;
+    document.getElementById('conv-count-label').textContent =
+      total + ' conversation' + (total > 1 ? 's' : '');
+
+    // Badge non-lus dans le hero
+    var heroBadge = document.getElementById('hero-unread-badge');
+    if (nonLusTotal > 0) {
+      heroBadge.style.display = 'inline-flex';
+      document.getElementById('hero-unread-count').textContent = nonLusTotal;
+    } else {
+      heroBadge.style.display = 'none';
+    }
+
+    // Badge filtre "Non lus"
+    var badgeEl = document.getElementById('badge-non-lus');
+    if (nonLusTotal > 0) {
+      badgeEl.textContent  = nonLusTotal;
+      badgeEl.style.display = 'inline';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+
+    // Montrer bouton support dans hero si conversations présentes
+    var btnSupportHero = document.getElementById('btn-support-hero');
+    if (btnSupportHero && allConversations.length > 0) {
+      btnSupportHero.style.display = 'inline-flex';
+    }
+
+    // Masquer section support rapide si déjà une conv support existante
+    var hasSupport = allConversations.some(function(c) {
+      var a = c.interlocuteur || {};
+      return a.is_admin || a.is_staff;
+    });
+    var supportSection = document.getElementById('support-section');
+    if (supportSection && hasSupport) supportSection.style.display = 'none';
+
+    if (!allConversations.length) {
+      showEl('empty-state');
+      document.getElementById('empty-titre').textContent   = CHAT_I18N.aucuneConv;
+      document.getElementById('empty-message').textContent = "{% trans 'Vous n avez pas encore de messages.' %}";
+      return;
+    }
+
+    // Rendre la liste avec le filtre actif
+    appliquerFiltre(allConversations);
+
+  } catch(e) {
+    hideEl('skeleton');
+    // Si 401, rediriger vers connexion
+    if (e && e.status === 401) {
+      window.location.href = '/compte/connexion/?next=/chat/';
+      return;
+    }
+    showEl('empty-state');
+    document.getElementById('empty-titre').textContent   = "{% trans 'Erreur de chargement' %}";
+    document.getElementById('empty-message').textContent = CHAT_I18N.erreur;
+  }
+}
+
+// ── Changer le filtre actif ──────────────────────────────────
+function filtrer(type, btn) {
+  filtreActuel = type;
+  // Retirer la classe active de tous les filtres
+  document.querySelectorAll('.chat-filter').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+  appliquerFiltre(allConversations);
+}
+
+// ── Démarrer/rejoindre la conversation support ───────────────
+async function demarrerSupport() {
+  if (!ADMIN_ID) return;
+  try {
+    var data = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID });
+    window.location.href = '/chat/' + data.id + '/';
+  } catch(e) {
+    window.toast && window.toast(CHAT_I18N.erreurSupport, 'error');
+  }
+}
+
+// ── Lancement au chargement ──────────────────────────────────
+loadConversations();
 </script>
 {% endblock %}
