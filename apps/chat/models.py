@@ -4,21 +4,44 @@ Gestion du chat en temps réel entre utilisateurs.
 Architecture :
   - Conversation : canal de discussion entre deux utilisateurs (acheteur ↔ vendeur)
   - MessageChat  : un message dans une conversation (texte + horodatage + statut lu)
+  - FichierChat  : un fichier joint à un message (image, document, etc.)
 
 Fonctionnement avec WebSocket :
   1. L'acheteur ouvre une conversation avec le vendeur d'un produit
   2. Un ChatConsumer (consumers.py) gère la connexion WebSocket
   3. Chaque message envoyé est persisté en DB via MessageChat
-  4. Les messages non lus sont comptés pour le badge navbar (Phase 5)
+  4. Les fichiers sont uploadés via POST /api/chat/<id>/upload/ (HTTP REST)
+     puis broadcastés via WebSocket
+  5. Les messages non lus sont comptés pour le badge navbar
 
 Choix de conception :
   - unique_together sur (participant1, participant2) → une seule conversation entre deux users
   - participant1 < participant2 (par ID) → évite les doublons (conv A-B = conv B-A)
-    Cette normalisation est gérée dans le save() du modèle.
+  - FichierChat optionnel sur MessageChat → un message peut être texte seul ou texte + fichier
 """
+import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+
+
+# ═══════════════════════════════════════════════════════════════
+# UTILITAIRES — Upload
+# ═══════════════════════════════════════════════════════════════
+
+def chat_upload_path(instance, filename):
+    """
+    Génère le chemin de stockage d'un fichier uploadé dans le chat.
+    Format : media/chat/<conversation_id>/<filename>
+
+    Avantages :
+      - Fichiers regroupés par conversation → facile à nettoyer
+      - Pas de conflit de noms (UUID optionnel si nécessaire)
+    """
+    import uuid
+    ext  = os.path.splitext(filename)[1]
+    safe = f"{uuid.uuid4().hex}{ext}"
+    return f"chat/{instance.conversation_id}/{safe}"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -107,14 +130,29 @@ class Conversation(models.Model):
 
 class MessageChat(models.Model):
     """
-    Un message textuel dans une conversation.
+    Un message dans une conversation.
+
+    Types de messages :
+      - 'text'  : message texte simple
+      - 'file'  : document joint (PDF, Word, Excel…)
+      - 'image' : image jointe (PNG, JPEG, GIF, WebP)
 
     Cycle de vie :
-      1. L'expéditeur envoie un message via WebSocket
+      1. L'expéditeur envoie via WebSocket (texte) ou POST /upload/ (fichier)
       2. Le ChatConsumer reçoit et appelle MessageChat.objects.create()
       3. Le message est broadcasté à tous les membres de la conversation
       4. Quand le destinataire ouvre la conversation, is_read passe à True
     """
+
+    TYPE_TEXT  = 'text'
+    TYPE_FILE  = 'file'
+    TYPE_IMAGE = 'image'
+
+    TYPE_CHOICES = [
+        (TYPE_TEXT,  _("Texte")),
+        (TYPE_FILE,  _("Fichier")),
+        (TYPE_IMAGE, _("Image")),
+    ]
 
     conversation = models.ForeignKey(
         Conversation,
@@ -131,7 +169,19 @@ class MessageChat(models.Model):
         verbose_name=_("Expéditeur")
     )
 
-    contenu = models.TextField(verbose_name=_("Message"))
+    contenu = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_("Message")
+    )
+
+    # Type de message : text / file / image
+    type_message = models.CharField(
+        max_length=10,
+        choices=TYPE_CHOICES,
+        default=TYPE_TEXT,
+        verbose_name=_("Type")
+    )
 
     is_read = models.BooleanField(default=False, verbose_name=_("Lu"))
 
@@ -143,6 +193,100 @@ class MessageChat(models.Model):
         ordering = ['date_envoi']
 
     def __str__(self):
-        exp = self.expediteur.username if self.expediteur else "Anonyme"
+        exp    = self.expediteur.username if self.expediteur else "Anonyme"
         apercu = self.contenu[:40] + "…" if len(self.contenu) > 40 else self.contenu
-        return f"[{exp}] {apercu}"
+        return f"[{exp}] [{self.type_message}] {apercu}"
+
+
+# ═══════════════════════════════════════════════════════════════
+# FICHIER CHAT
+# Un fichier joint à un message.
+# ═══════════════════════════════════════════════════════════════
+
+class FichierChat(models.Model):
+    """
+    Fichier joint à un MessageChat (relation OneToOne).
+
+    Gestion du stockage :
+      - Les fichiers sont stockés dans MEDIA_ROOT/chat/<conversation_id>/<uuid>.<ext>
+      - Le chemin est géré par chat_upload_path()
+      - En production, servir via Nginx (X-Accel-Redirect) ou S3
+
+    Sécurité :
+      - Vérification du type MIME côté serveur (pas seulement l'extension)
+      - Taille max : 10 MB (contrôlée dans le serializer + nginx)
+      - Accès : uniquement aux participants de la conversation
+    """
+
+    TYPES_AUTORISES = [
+        # Images
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        # Documents
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        # Autres
+        'application/zip',
+        'text/plain',
+        'text/csv',
+    ]
+
+    TAILLE_MAX = 10 * 1024 * 1024  # 10 MB
+
+    message = models.OneToOneField(
+        MessageChat,
+        on_delete=models.CASCADE,
+        related_name='fichier',
+        verbose_name=_("Message")
+    )
+
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='fichiers',
+        verbose_name=_("Conversation")
+    )
+
+    fichier = models.FileField(
+        upload_to=chat_upload_path,
+        verbose_name=_("Fichier")
+    )
+
+    nom_original = models.CharField(
+        max_length=255,
+        verbose_name=_("Nom original")
+    )
+
+    taille = models.PositiveBigIntegerField(
+        verbose_name=_("Taille (octets)")
+    )
+
+    type_mime = models.CharField(
+        max_length=100,
+        verbose_name=_("Type MIME")
+    )
+
+    date_upload = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Uploadé le")
+    )
+
+    class Meta:
+        verbose_name = _("Fichier chat")
+        verbose_name_plural = _("Fichiers chat")
+        ordering = ['-date_upload']
+
+    @property
+    def est_image(self):
+        """Vrai si le fichier est une image (pour l'affichage inline)."""
+        return self.type_mime.startswith('image/')
+
+    @property
+    def url(self):
+        """URL publique du fichier (via MEDIA_URL)."""
+        return self.fichier.url if self.fichier else None
+
+    def __str__(self):
+        return f"{self.nom_original} ({self.taille} octets)"

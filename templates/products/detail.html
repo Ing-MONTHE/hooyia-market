@@ -581,18 +581,6 @@
         </div>
         {% endif %}
 
-        {% comment %} Bouton contact vendeur — clients authentifiés uniquement {% endcomment %}
-        {% if user.is_authenticated and not user.is_staff and not user.is_admin and not user.is_vendeur %}
-        {% if admin_id %}
-        <button id="btn-contact-seller" class="btn-contact-seller" type="button" onclick="contacterVendeur()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
-          {% trans "Contacter le vendeur" %}
-        </button>
-        {% endif %}
-        {% endif %}
 
         <div class="info-desc-long">
           <h3>{% trans "Description" %}</h3>
@@ -737,10 +725,10 @@ var DETAIL_I18N = {
   produitAjoute:      '{% trans "Produit ajouté au panier !" %}',
   connexion:          '{% trans "Connexion…" %}',
   contacterVendeur:   '{% trans "Contacter le vendeur" %}',
-  erreurConversation: '{% trans "Impossible d'ouvrir la conversation." %}',
+  erreurConversation: '{% trans "Impossible d\u0027ouvrir la conversation." %}',
   produitsEpuise:     '{% trans "Produit épuisé" %}',
   chargementAvis:     '{% trans "Impossible de charger les avis." %}',
-  aucunAvis:          '{% trans "Aucun avis pour l'instant. Soyez le premier !" %}',
+  aucunAvis:          '{% trans "Aucun avis pour l\u0027instant. Soyez le premier !" %}',
   anonyme:            '{% trans "Anonyme" %}',
   annuler:            '{% trans "× Annuler" %}',
   laisserAvis:        '{% trans "+ Laisser un avis" %}',

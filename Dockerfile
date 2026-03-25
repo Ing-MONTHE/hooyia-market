@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    libmagic-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copie uniquement le fichier des dépendances (pas tout le code)
@@ -34,8 +35,10 @@ ENV PYTHONUNBUFFERED=1
 COPY --from=builder /install /usr/local
 
 # Installe uniquement libpq (runtime PostgreSQL, plus léger que libpq-dev)
+# + libmagic1 (runtime pour python-magic — détection MIME dans le chat)
 RUN apt-get update && apt-get install -y \
     libpq5 \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Crée un utilisateur non-root pour des raisons de sécurité

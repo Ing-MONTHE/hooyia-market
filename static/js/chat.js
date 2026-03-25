@@ -1,12 +1,13 @@
 /**
- * HooYia Market — chat.js
+ * HooYia Market — chat.js v2.0
  * Client WebSocket pour le chat en temps réel.
  *
- * Fonctionnement :
- *   1. Charge l'historique des messages via GET /api/chat/<id>/
- *   2. Ouvre une connexion WebSocket ws://.../ws/chat/<id>/
- *   3. Envoie/reçoit des messages JSON en temps réel
- *   4. Gère les reconnexions automatiques (backoff exponentiel)
+ * Améliorations v2 :
+ *   - Support messages de type "fichier" (images, documents)
+ *   - Séparateurs de date automatiques entre les messages
+ *   - Meilleur rendu visuel (bulles, avatars, statut)
+ *   - Nouveaux IDs DOM (messages-skeleton, messages-list)
+ *   - Indicateur status-dot avec classes CSS (connected/connecting/disconnected)
  *
  * API publique :
  *   Chat.init({ conversationId, currentUserId, currentUsername })
@@ -23,20 +24,21 @@ const Chat = (() => {
   };
 
   let socket          = null;
-  let reconnectDelay  = 1000;   // ms, doublé à chaque échec
+  let reconnectDelay  = 1000;
   const MAX_DELAY     = 30000;
   let reconnectTimer  = null;
   let isDestroyed     = false;
+  let lastMessageDate = null; // Pour les séparateurs de date
 
   // ── Éléments DOM ────────────────────────────────────────────
   const els = () => ({
-    skeleton   : document.getElementById('skeleton'),
+    skeleton   : document.getElementById('messages-skeleton'),
     list       : document.getElementById('messages-list'),
     anchor     : document.getElementById('scroll-anchor'),
     input      : document.getElementById('message-input'),
     sendBtn    : document.getElementById('send-btn'),
     statusDot  : document.getElementById('status-dot'),
-    wsStatus   : document.getElementById('ws-status'),
+    wsStatus   : document.getElementById('ws-status-text'),
   });
 
   // ── Initialisation ──────────────────────────────────────────
@@ -44,22 +46,26 @@ const Chat = (() => {
     config = { ...config, ...cfg };
     isDestroyed = false;
 
+    const inputEl = document.getElementById('message-input');
+
     // Raccourci clavier : Entrée envoie, Maj+Entrée = nouvelle ligne
-    document.getElementById('message-input')?.addEventListener('keydown', (e) => {
+    inputEl?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        envoyer();
+        Chat.envoyer();
       }
-      // Auto-resize textarea
       setTimeout(autoResizeTextarea, 0);
     });
 
-    document.getElementById('message-input')?.addEventListener('input', autoResizeTextarea);
+    inputEl?.addEventListener('input', autoResizeTextarea);
+
+    // Bouton envoyer — click
+    const sendBtnEl = document.getElementById('send-btn');
+    sendBtnEl?.addEventListener('click', () => Chat.envoyer());
 
     await chargerHistorique();
     connecterWebSocket();
 
-    // Nettoyage à la fermeture de la page
     window.addEventListener('beforeunload', detruire);
   }
 
@@ -71,25 +77,38 @@ const Chat = (() => {
       const messages = data.messages || [];
 
       skeleton?.classList.add('hidden');
-      list?.classList.remove('hidden');
+      if (skeleton) skeleton.style.display = 'none';
+      if (list) list.style.display = '';
+
+      lastMessageDate = null; // Reset pour les séparateurs
 
       if (messages.length === 0) {
         list.innerHTML = `
-          <div class="text-center py-8">
-            <p class="text-ink/30 font-body text-sm">${gettext('Démarrez la conversation 👋')}</p>
+          <div class="messages-empty">
+            <div class="messages-empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <p style="font-size:0.875rem;font-weight:600;color:var(--text-secondary);">${gettext('Démarrez la conversation 👋')}</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);max-width:240px;line-height:1.5;">${gettext('Envoyez un message ou partagez un fichier.')}</p>
           </div>`;
       } else {
-        list.innerHTML = messages.map(m => renderMessage(m)).join('');
+        list.innerHTML = messages.map(m => renderMessage(normaliserMessage(m))).join('');
       }
 
       scrollerBas(false);
     } catch(e) {
-      skeleton?.classList.add('hidden');
-      list?.classList.remove('hidden');
+      if (skeleton) skeleton.style.display = 'none';
+      if (list) list.style.display = '';
       if (e && e.status === 401) {
         window.location.href = '/compte/connexion/?next=/chat/';
       } else {
-        list.innerHTML = `<p class="text-center text-ink/40 font-body text-sm py-8">${gettext('Impossible de charger les messages.')}</p>`;
+        const { list } = els();
+        if (list) {
+          list.innerHTML = `
+            <div class="messages-empty">
+              <p style="color:var(--text-muted);font-size:0.875rem;">${gettext('Impossible de charger les messages.')}</p>
+            </div>`;
+        }
       }
     }
   }
@@ -125,7 +144,7 @@ const Chat = (() => {
       }
     });
 
-    socket.addEventListener('close', (event) => {
+    socket.addEventListener('close', () => {
       activerSaisie(false);
       if (!isDestroyed) {
         setStatut('disconnected');
@@ -134,11 +153,11 @@ const Chat = (() => {
     });
 
     socket.addEventListener('error', () => {
-      // L'événement close suivra, on gère là-bas
+      // L'événement close suivra
     });
   }
 
-  // ── Envoi d'un message ───────────────────────────────────────
+  // ── Envoi d'un message texte ─────────────────────────────────
   function envoyer() {
     const { input } = els();
     if (!input) return;
@@ -162,61 +181,171 @@ const Chat = (() => {
     const { list } = els();
     if (!list) return;
 
-    // Supprimer le message "Démarrez la conversation" si présent
-    const placeholder = list.querySelector('.text-center');
-    if (placeholder) placeholder.remove();
+    // Supprimer l'état vide si présent
+    const emptyState = list.querySelector('.messages-empty');
+    if (emptyState) emptyState.remove();
 
-    // Construire l'objet message compatible avec renderMessage
-    const msgObj = {
-      expediteur      : data.expediteur_id,
-      nom_expediteur  : data.expediteur,
-      contenu         : data.message,
-      date_envoi      : data.timestamp,
-      message_id      : data.message_id,
-    };
+    const msgObj = normaliserMessage({
+      expediteur     : data.expediteur_id,
+      nom_expediteur : data.expediteur,
+      contenu        : data.message,
+      date_envoi     : data.timestamp,
+      type_message   : data.msg_type || data.type || 'text',
+      fichier        : data.fichier_url ? {
+        url         : data.fichier_url,
+        nom_original: data.fichier_nom,
+        taille      : data.fichier_taille,
+        est_image   : (data.msg_type === 'image' || data.type === 'image'),
+      } : null,
+    });
+
+    // Si pas de texte et même expéditeur que le dernier message → coller l'image au dernier message
+    if (!msgObj.contenu && msgObj.fichier_url) {
+      const lastRow = list.querySelector('.msg-row:last-child');
+      if (lastRow) {
+        const lastExpId = lastRow.dataset.expediteur;
+        if (lastExpId && parseInt(lastExpId) === parseInt(msgObj.expediteur)) {
+          const wrap = lastRow.querySelector('.msg-bubble-wrap');
+          if (wrap) {
+            const imgHtml = msgObj.fichier_url
+              ? `<img src="${escapeHtml(msgObj.fichier_url)}" alt="${escapeHtml(msgObj.fichier_nom || 'Image')}" class="msg-image" onclick="openImageModal(this.src)" loading="lazy" style="cursor:zoom-in;display:block;margin-top:4px;" />`
+              : '';
+            if (imgHtml) {
+              const timeEl = wrap.querySelector('.msg-time');
+              if (timeEl) timeEl.insertAdjacentHTML('beforebegin', imgHtml);
+              else wrap.insertAdjacentHTML('beforeend', imgHtml);
+              scrollerBas(true);
+              return;
+            }
+          }
+        }
+      }
+    }
 
     const html = renderMessage(msgObj);
     list.insertAdjacentHTML('beforeend', html);
     scrollerBas(true);
   }
 
+
+  // ── Normalise un message (API ou WS) vers un format uniforme ──
+  function normaliserMessage(m) {
+    const f = m.fichier || null;
+    return {
+      expediteur    : m.expediteur,
+      nom_expediteur: m.nom_expediteur || m.expediteur,
+      contenu       : m.contenu || '',
+      date_envoi    : m.date_envoi,
+      type          : m.type_message || m.type || 'text',
+      fichier_url   : f ? (f.url || f.fichier_url || null) : null,
+      fichier_nom   : f ? (f.nom_original || f.nom || null) : null,
+      fichier_taille: f ? (f.taille || null) : null,
+    };
+  }
+
   // ── Rendu HTML d'un message ──────────────────────────────────
   function renderMessage(m) {
-    const isMine   = parseInt(m.expediteur) === parseInt(config.currentUserId);
-    const heure    = formatHeure(m.date_envoi);
-    const contenu  = escapeHtml(m.contenu).replace(/\n/g, '<br>');
+    const isMine  = parseInt(m.expediteur) === parseInt(config.currentUserId);
+    const heure   = formatHeure(m.date_envoi);
+    const initiale = (m.nom_expediteur || '?')[0].toUpperCase();
+    const type    = m.type || 'text';
+
+    let separator = '';
+    const msgDate = m.date_envoi ? new Date(m.date_envoi) : null;
+    if (msgDate) {
+      const dateKey = msgDate.toLocaleDateString('fr-FR');
+      if (dateKey !== lastMessageDate) {
+        lastMessageDate = dateKey;
+        separator = `
+          <div class="date-separator">
+            <span class="date-label">${formatDateLabel(msgDate)}</span>
+          </div>`;
+      }
+    }
+
+    let bubbleContent = '';
+
+    if (type === 'image' && m.fichier_url) {
+      // ── Image ──
+      bubbleContent = `
+        <div class="msg-bubble" style="${isMine ? '' : ''}">
+          ${m.contenu ? `<p style="margin-bottom:0.375rem;">${escapeHtml(m.contenu).replace(/\n/g, '<br>')}</p>` : ''}
+          <img src="${escapeHtml(m.fichier_url)}" alt="${escapeHtml(m.fichier_nom || 'Image')}" class="msg-image"
+               onclick="openImageModal(this.src)" loading="lazy" style="cursor:zoom-in;" />
+        </div>`;
+    } else if (type === 'file' && m.fichier_url) {
+      // ── Document ──
+      const taille = m.fichier_taille ? formatFileSize(m.fichier_taille) : '';
+      bubbleContent = `
+        ${m.contenu ? `<div class="msg-bubble">${escapeHtml(m.contenu).replace(/\n/g, '<br>')}</div>` : ''}
+        <a href="${escapeHtml(m.fichier_url)}" class="msg-file" target="_blank" download="${escapeHtml(m.fichier_nom || 'fichier')}">
+          <div class="file-icon-wrap">
+            ${getFileIconSVG(m.fichier_nom)}
+          </div>
+          <div class="file-meta">
+            <p class="file-name">${escapeHtml(m.fichier_nom || 'Document')}</p>
+            ${taille ? `<p class="file-size">${taille}</p>` : ''}
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.6;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        </a>`;
+    } else {
+      // ── Texte ──
+      const contenu = escapeHtml(m.contenu || '').replace(/\n/g, '<br>');
+      bubbleContent = `<div class="msg-bubble">${contenu}</div>`;
+    }
 
     if (isMine) {
-      return `
-      <div class="flex justify-end">
-        <div class="max-w-[75%]">
-          <div class="bg-brand-500 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-btn text-sm font-body leading-relaxed">
-            ${contenu}
-          </div>
-          <p class="text-right text-ink/25 font-mono text-[10px] mt-1 mr-1">${heure}</p>
+      return `${separator}
+      <div class="msg-row mine" data-expediteur="${m.expediteur}">
+        <div class="msg-bubble-wrap">
+          ${bubbleContent}
+          <p class="msg-time">${heure}</p>
         </div>
       </div>`;
     } else {
-      return `
-      <div class="flex justify-start gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-300 to-brand-500 flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0 mt-auto mb-5">
-          ${(m.nom_expediteur || '?')[0].toUpperCase()}
-        </div>
-        <div class="max-w-[75%]">
-          <div class="bg-white border border-cream-border px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-card text-sm font-body leading-relaxed text-ink">
-            ${contenu}
-          </div>
-          <p class="text-ink/25 font-mono text-[10px] mt-1 ml-1">${heure}</p>
+      return `${separator}
+      <div class="msg-row theirs" data-expediteur="${m.expediteur}">
+        <div class="msg-sender-avatar">${escapeHtml(initiale)}</div>
+        <div class="msg-bubble-wrap">
+          ${bubbleContent}
+          <p class="msg-time">${heure}</p>
         </div>
       </div>`;
     }
   }
 
+  // ── Icône fichier selon l'extension ─────────────────────────
+  function getFileIconSVG(filename) {
+    const ext = (filename || '').split('.').pop().toLowerCase();
+    const colors = {
+      pdf:  '#ef4444',
+      doc:  '#2563eb', docx: '#2563eb',
+      xls:  '#16a34a', xlsx: '#16a34a',
+      zip:  '#d97706', rar: '#d97706',
+      txt:  '#6b7280', csv: '#6b7280',
+    };
+    const color = colors[ext] || '#6b7280';
+
+    if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>`;
+  }
+
+  // ── Taille fichier lisible ───────────────────────────────────
+  function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return '';
+    if (bytes < 1024)        return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   // ── Scroll vers le bas ───────────────────────────────────────
   function scrollerBas(smooth = true) {
-    const anchor = document.getElementById('scroll-anchor');
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+    const container = document.getElementById('messages-container');
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
     }
   }
 
@@ -224,13 +353,16 @@ const Chat = (() => {
   function setStatut(state) {
     const { statusDot, wsStatus } = els();
     const etats = {
-      connecting   : { dot: 'bg-amber-400',  text: gettext('Connexion…') },
-      connected    : { dot: 'bg-green-400',   text: gettext('Connecté') },
-      disconnected : { dot: 'bg-red-400',     text: gettext('Déconnecté — Reconnexion…') },
+      connecting   : { cls: 'connecting',   text: gettext('Connexion…') },
+      connected    : { cls: 'connected',    text: gettext('Connecté') },
+      disconnected : { cls: 'disconnected', text: gettext('Déconnecté — Reconnexion…') },
     };
     const s = etats[state] || etats.disconnected;
-    if (statusDot) statusDot.className = `w-2.5 h-2.5 rounded-full transition-colors duration-300 ${s.dot}`;
-    if (wsStatus)  wsStatus.textContent = s.text;
+
+    if (statusDot) {
+      statusDot.className = `status-dot ${s.cls}`;
+    }
+    if (wsStatus) wsStatus.textContent = s.text;
   }
 
   // ── Activer/désactiver la saisie ─────────────────────────────
@@ -279,6 +411,18 @@ const Chat = (() => {
       return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
     }
     return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  }
+
+  function formatDateLabel(date) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (msgDay.getTime() === today.getTime()) return 'Aujourd\'hui';
+    if (msgDay.getTime() === yesterday.getTime()) return 'Hier';
+    return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
   function escapeHtml(str) {

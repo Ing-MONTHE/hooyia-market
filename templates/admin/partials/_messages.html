@@ -29,18 +29,6 @@
                    background:var(--surface-2);border:1px solid var(--border);
                    padding:2px 9px;border-radius:99px;" id="messages-count"></span>
     </div>
-    {# Légende lecture seule #}
-    <span style="display:flex;align-items:center;gap:5px;
-                 font-size:11.5px;color:var(--text-muted);">
-      {# Lucide : Lock #}
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0110 0v4"/>
-      </svg>
-      {% trans "Lecture seule" %}
-    </span>
   </div>
   <div class="da-table-wrap">
     <table class="da-table">
@@ -51,6 +39,7 @@
           <th>{% trans "Messages" %}</th>
           <th class="hide-mobile">{% trans "Dernier message" %}</th>
           <th class="hide-mobile">{% trans "Date" %}</th>
+          <th>{% trans "Action" %}</th>
         </tr>
       </thead>
       <tbody id="tbl-messages">

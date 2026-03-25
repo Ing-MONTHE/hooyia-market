@@ -126,12 +126,31 @@ class PayUnitService:
             }
 
         # ── URLs de retour ────────────────────────────────────────────────────
-        return_url = request.build_absolute_uri(
-            f'/commandes/paiement/retour/?ref={commande.reference}'
-        )
-        notify_url = request.build_absolute_uri(
-            '/api/commandes/webhook/payunit/'
-        )
+        # On utilise SITE_URL pour garantir une URL publique.
+        # build_absolute_uri() retourne localhost en dev, ce que PayUnit refuse.
+        site_url = getattr(settings, 'SITE_URL', '').rstrip('/')
+
+        # Si SITE_URL est localhost → mock automatique
+        if not site_url or 'localhost' in site_url or '127.0.0.1' in site_url:
+            import uuid as _uuid
+            ref_mock = f'pu_mock_{str(_uuid.uuid4())[:8]}'
+            mock_url = request.build_absolute_uri(
+                f'/commandes/paiement/mock/?ref={commande.reference}&trx={ref_mock}'
+            )
+            paiement.reference_externe = ref_mock
+            paiement.authorization_url = mock_url
+            paiement.save(update_fields=['reference_externe', 'authorization_url'])
+            logger.warning(
+                f"PayUnit MOCK auto (SITE_URL=localhost) — Commande #{commande.reference_courte}"
+            )
+            return {
+                'payment_url':       mock_url,
+                'authorization_url': mock_url,
+                'transaction_id':    ref_mock,
+            }
+
+        return_url = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}'
+        notify_url = f'{site_url}/api/commandes/webhook/payunit/'
 
         # ── Corps de la requête ───────────────────────────────────────────────
         payload = {
