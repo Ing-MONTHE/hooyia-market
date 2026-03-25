@@ -4,313 +4,165 @@
 {% block title %}{% trans 'Messages' %} — HooYia Market{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/lucide@latest/dist/lucide.min.css" />
 <style>
-  /* ═══════════════════════════════════════════════════════════
-     PAGE MESSAGES — CHAT LISTE
-     Design : sidebar + zone vide/sélection de conversation
-  ═══════════════════════════════════════════════════════════ */
-
   .chat-layout {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    height: calc(100vh - 64px); /* hauteur totale - navbar */
+    grid-template-columns: 360px 1fr;
+    height: calc(100vh - 64px);
     overflow: hidden;
     background: var(--bg);
   }
-
-  /* ── Sidebar gauche ── */
   .chat-sidebar {
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     border-right: 1px solid var(--border);
-    background: var(--surface);
-    overflow: hidden;
+    background: var(--surface); overflow: hidden;
   }
-
   .sidebar-header {
     padding: 1.25rem 1.25rem 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .sidebar-search { position: relative; margin-top: .875rem; }
+  .sidebar-search input {
+    width: 100%; padding: .5rem .875rem .5rem 2.375rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: .625rem; font-family: 'Poppins',sans-serif;
+    font-size: .8125rem; color: var(--text-primary);
+    transition: border-color .2s; outline: none;
+  }
+  .sidebar-search input:focus { border-color: var(--brand-500); }
+  .sidebar-search input::placeholder { color: var(--text-muted); }
+  .sidebar-search .search-icon {
+    position: absolute; left: .75rem; top: 50%;
+    transform: translateY(-50%); color: var(--text-muted); pointer-events: none;
+  }
+  .new-chat-section {
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .section-label {
+    font-size: .6875rem; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: .625rem;
+  }
+  .support-card {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .75rem 1rem; background: var(--bg);
+    border: 1px solid var(--border); border-radius: .875rem;
+    cursor: pointer; transition: border-color .2s, box-shadow .2s, background .2s;
+    text-decoration: none; width: 100%;
+  }
+  .support-card:hover {
+    border-color: var(--brand-500); background: var(--brand-50);
+    box-shadow: 0 2px 12px rgba(30,58,138,.08);
+  }
+  .support-avatar {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: #fff;
+  }
+  .support-info { flex: 1; min-width: 0; text-align: left; }
+  .support-name { font-size: .8125rem; font-weight: 700; color: var(--text-primary); margin-bottom: .125rem; }
+  .support-sub  { font-size: .6875rem; color: var(--text-muted); line-height: 1.4; }
+  .support-online {
+    display: flex; align-items: center; gap: .3rem;
+    font-size: .6875rem; color: #10b981; font-weight: 600; flex-shrink: 0;
+  }
+  .online-dot {
+    width: 7px; height: 7px; background: #10b981;
+    border-radius: 50%; animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:.4} }
+
+  .convs-section-label {
+    padding: .75rem 1.25rem .25rem;
+    font-size: .6875rem; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: space-between;
     flex-shrink: 0;
   }
-
-  .sidebar-search {
-    position: relative;
-    margin-top: 0.875rem;
-  }
-
-  .sidebar-search input {
-    width: 100%;
-    padding: 0.5rem 0.875rem 0.5rem 2.375rem;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.8125rem;
-    color: var(--text-primary);
-    transition: border-color var(--transition), background var(--transition);
-    outline: none;
-  }
-
-  .sidebar-search input:focus {
-    border-color: var(--brand-500);
-    background: var(--surface);
-  }
-
-  .sidebar-search input::placeholder {
-    color: var(--text-muted);
-  }
-
-  .sidebar-search .search-icon {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  .conversations-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem 0;
-  }
-
+  .conversations-list { flex: 1; overflow-y: auto; padding: .25rem 0; }
   .conversations-list::-webkit-scrollbar { width: 4px; }
-  .conversations-list::-webkit-scrollbar-track { background: transparent; }
   .conversations-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  /* ── Item conversation ── */
   .conv-item {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1.25rem;
-    cursor: pointer;
-    transition: background var(--transition);
-    text-decoration: none;
-    color: inherit;
-    border-left: 3px solid transparent;
-    position: relative;
+    display: flex; align-items: center; gap: .875rem;
+    padding: .75rem 1.25rem; cursor: pointer; transition: background .15s;
+    text-decoration: none; color: inherit; border-left: 3px solid transparent;
   }
-
-  .conv-item:hover {
-    background: var(--bg);
-  }
-
-  .conv-item.active {
-    background: var(--brand-50);
-    border-left-color: var(--brand-500);
-  }
+  .conv-item:hover { background: var(--bg); }
+  .conv-item.active { background: var(--brand-50); border-left-color: var(--brand-500); }
 
   .conv-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #3b5fc0, #1E3A8A);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    color: white;
-    flex-shrink: 0;
-    position: relative;
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, #3b5fc0, var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; color: white;
+    flex-shrink: 0; position: relative;
   }
-
   .conv-avatar .unread-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 18px;
-    height: 18px;
-    background: var(--accent);
-    color: white;
-    border-radius: 9px;
-    font-size: 0.625rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    border: 2px solid var(--surface);
+    position: absolute; top: -5px; right: -5px;
+    min-width: 18px; height: 18px; background: var(--accent); color: white;
+    border-radius: 9px; font-size: .625rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; border: 2px solid var(--surface);
+  }
+  .conv-info { flex: 1; min-width: 0; }
+  .conv-name-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .25rem; }
+  .conv-name { font-weight: 600; font-size: .875rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-time  { font-size: .6875rem; color: var(--text-muted); flex-shrink: 0; }
+  .conv-preview { font-size: .75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-preview.has-unread { color: var(--text-secondary); font-weight: 600; }
+
+  .skeleton-item { display:flex;align-items:center;gap:.875rem;padding:.75rem 1.25rem; }
+  .skeleton-avatar { width:42px;height:42px;border-radius:12px;background:var(--bg);flex-shrink:0;animation:shimmer 1.5s infinite; }
+  .skeleton-lines { flex:1; }
+  .skeleton-line { height:10px;background:var(--bg);border-radius:5px;animation:shimmer 1.5s infinite;margin-bottom:8px; }
+  @keyframes shimmer { 0%,100%{opacity:1}50%{opacity:.5} }
+
+  .chat-right-panel {
+    background: var(--bg); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 2rem; text-align: center;
+  }
+  .right-welcome { display:flex;flex-direction:column;align-items:center;gap:1rem;max-width:380px; }
+  .welcome-icon {
+    width: 88px; height: 88px; border-radius: 24px;
+    background: linear-gradient(135deg, var(--brand-100), var(--brand-50));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-500); margin-bottom: .5rem;
+  }
+  .welcome-title { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: .25rem; }
+  .welcome-sub   { font-size: .875rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1rem; }
+  .welcome-features {
+    display:flex;flex-direction:column;gap:.625rem;width:100%;text-align:left;
+    background:var(--surface);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.25rem;
+  }
+  .feature-row { display:flex;align-items:center;gap:.75rem;font-size:.8125rem;color:var(--text-secondary); }
+  .feature-icon {
+    width:30px;height:30px;border-radius:8px;background:var(--brand-50);
+    display:flex;align-items:center;justify-content:center;color:var(--brand-500);flex-shrink:0;
   }
 
-  .conv-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .conv-name-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .conv-name {
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .conv-time {
-    font-size: 0.6875rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .conv-preview {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .conv-preview.has-unread {
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
-
-  /* ── Skeleton animation ── */
-  .skeleton-item {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1.25rem;
-  }
-
-  .skeleton-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: var(--bg);
-    flex-shrink: 0;
-    animation: shimmer 1.5s infinite;
-  }
-
-  .skeleton-lines { flex: 1; }
-
-  .skeleton-line {
-    height: 10px;
-    background: var(--bg);
-    border-radius: 5px;
-    animation: shimmer 1.5s infinite;
-    margin-bottom: 8px;
-  }
-
-  @keyframes shimmer {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  /* ── Zone droite : état vide ── */
-  .chat-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    padding: 2rem;
-    background: var(--bg);
-  }
-
-  .empty-illustration {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #dce7fd 0%, #eff4ff 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    color: var(--brand-500);
-  }
-
-  .empty-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .empty-subtitle {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    max-width: 280px;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  /* ── Badge compteur ── */
-  .conv-count-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.1875rem 0.625rem;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-  }
-
-  /* ── État vide dans la sidebar ── */
   .sidebar-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1.25rem;
-    text-align: center;
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:1.5rem 1.25rem;text-align:center;
   }
-
   .sidebar-empty-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    color: var(--text-muted);
+    width:48px;height:48px;border-radius:12px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;margin-bottom:.875rem;color:var(--text-muted);
   }
-
-  /* ── Responsive mobile ── */
-  @media (max-width: 768px) {
-    .chat-layout {
-      grid-template-columns: 1fr;
-      height: calc(100vh - 56px);
-    }
-
-    .chat-right-panel {
-      display: none;
-    }
-  }
-
-  /* ── Erreur inline ── */
   .error-inline {
-    padding: 1.25rem;
-    margin: 0.75rem;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 0.625rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    font-size: 0.8125rem;
-    color: #dc2626;
+    padding:1rem;margin:.75rem;background:#fef2f2;border:1px solid #fecaca;
+    border-radius:.625rem;display:flex;align-items:flex-start;gap:.75rem;
+    font-size:.8125rem;color:#dc2626;
+  }
+  .conv-count-badge {
+    display:inline-flex;align-items:center;padding:.1875rem .625rem;
+    background:var(--bg);border:1px solid var(--border);border-radius:999px;
+    font-size:.6875rem;font-weight:600;color:var(--text-muted);
+  }
+  @media(max-width:768px){
+    .chat-layout{grid-template-columns:1fr;height:calc(100vh - 56px);}
+    .chat-right-panel{display:none;}
   }
 </style>
 {% endblock %}
@@ -318,91 +170,122 @@
 {% block content %}
 <div class="chat-layout">
 
-  <!-- ═══════════════════════════════
-       SIDEBAR GAUCHE — Conversations
-  ════════════════════════════════ -->
+  <!-- SIDEBAR -->
   <aside class="chat-sidebar">
 
-    <!-- En-tête sidebar -->
     <div class="sidebar-header">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div>
-          <h1 style="font-size:1.0625rem;font-weight:700;color:var(--brand-600);margin-bottom:0.125rem;">
-            {% trans "Messages" %}
-          </h1>
-          <p style="font-size:0.75rem;color:var(--text-muted);">
-            {% trans "Vos conversations" %}
-          </p>
+          <h1 style="font-size:1.0625rem;font-weight:700;color:var(--brand-600);margin-bottom:.125rem;">{% trans "Messages" %}</h1>
+          <p style="font-size:.75rem;color:var(--text-muted);">{% trans "Vos conversations" %}</p>
         </div>
         <span id="conversations-count" class="conv-count-badge" style="display:none;"></span>
       </div>
-
-      <!-- Recherche -->
       <div class="sidebar-search">
         <i data-lucide="search" class="search-icon" style="width:14px;height:14px;"></i>
-        <input
-          type="text"
-          id="search-input"
-          placeholder="{% trans 'Chercher une conversation…' %}"
-          autocomplete="off"
-        />
+        <input type="text" id="search-input" placeholder="{% trans 'Chercher une conversation…' %}" autocomplete="off" />
       </div>
     </div>
 
-    <!-- Skeleton loader -->
+    {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}{% if admin_id %}
+    <div class="new-chat-section">
+      <p class="section-label">{% trans "Assistance" %}</p>
+      <button class="support-card" id="btn-contact-support" type="button">
+        <div class="support-avatar">
+          <i data-lucide="headphones" style="width:20px;height:20px;"></i>
+        </div>
+        <div class="support-info">
+          <div class="support-name">{% trans "Support HooYia" %}</div>
+          <div class="support-sub">{% trans "Questions, commandes, réclamations…" %}</div>
+        </div>
+        {% if admin_online %}
+        <div class="support-online">
+          <span class="online-dot"></span>{% trans "En ligne" %}
+        </div>
+        {% endif %}
+      </button>
+    </div>
+    {% endif %}{% endif %}
+
+    <div class="convs-section-label"><span>{% trans "Conversations" %}</span></div>
+
     <div id="skeleton-loader">
-      {% for i in "1234" %}
+      {% for i in "123" %}
       <div class="skeleton-item">
         <div class="skeleton-avatar"></div>
         <div class="skeleton-lines">
-          <div class="skeleton-line" style="width:55%;"></div>
-          <div class="skeleton-line" style="width:80%;margin-bottom:0;"></div>
+          <div class="skeleton-line" style="width:50%;"></div>
+          <div class="skeleton-line" style="width:75%;margin-bottom:0;"></div>
         </div>
       </div>
       {% endfor %}
     </div>
 
-    <!-- État vide (sidebar) -->
     <div id="sidebar-empty" style="display:none;" class="sidebar-empty">
-      <div class="sidebar-empty-icon">
-        <i data-lucide="message-circle" style="width:24px;height:24px;"></i>
-      </div>
-      <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.25rem;">
-        {% trans "Aucune conversation" %}
-      </p>
-      <p style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">
-        {% trans "Commandez un produit pour démarrer un chat avec un vendeur." %}
-      </p>
+      <div class="sidebar-empty-icon"><i data-lucide="message-circle" style="width:22px;height:22px;"></i></div>
+      <p style="font-size:.8125rem;font-weight:600;color:var(--text-secondary);margin-bottom:.25rem;">{% trans "Aucune conversation" %}</p>
+      <p style="font-size:.75rem;color:var(--text-muted);line-height:1.5;">{% trans "Utilisez le bouton ci-dessus pour contacter notre support." %}</p>
     </div>
 
-    <!-- Erreur -->
     <div id="sidebar-error" style="display:none;">
       <div class="error-inline">
         <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0;margin-top:1px;"></i>
-        <span>{% trans "Impossible de charger vos conversations. Veuillez réessayer." %}</span>
+        <span>{% trans "Impossible de charger vos conversations." %}</span>
       </div>
     </div>
 
-    <!-- Liste des conversations -->
     <ul id="conversations-list" class="conversations-list" style="display:none;"></ul>
 
   </aside>
 
-  <!-- ═══════════════════════════════
-       ZONE DROITE — État vide
-  ════════════════════════════════ -->
-  <div class="chat-right-panel chat-empty-state">
-    <div class="empty-illustration">
-      <i data-lucide="messages-square" style="width:36px;height:36px;"></i>
+  <!-- ZONE DROITE -->
+  <div class="chat-right-panel">
+    <div class="right-welcome">
+
+      <div class="welcome-icon">
+        <i data-lucide="messages-square" style="width:40px;height:40px;"></i>
+      </div>
+
+      <div>
+        <h2 class="welcome-title">{% trans "Bienvenue dans vos Messages" %}</h2>
+        <p class="welcome-sub">{% trans "Sélectionnez une conversation ou contactez notre support pour obtenir de l'aide." %}</p>
+      </div>
+
+      <div class="welcome-features">
+        <div class="feature-row">
+          <div class="feature-icon"><i data-lucide="zap" style="width:15px;height:15px;"></i></div>
+          <span>{% trans "Réponses rapides de notre équipe" %}</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><i data-lucide="package" style="width:15px;height:15px;"></i></div>
+          <span>{% trans "Suivi de commandes en temps réel" %}</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><i data-lucide="paperclip" style="width:15px;height:15px;"></i></div>
+          <span>{% trans "Partage de fichiers et images" %}</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon"><i data-lucide="shield-check" style="width:15px;height:15px;"></i></div>
+          <span>{% trans "Échanges sécurisés et confidentiels" %}</span>
+        </div>
+      </div>
+
+      {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
+        {% if admin_id %}
+        <button id="btn-contact-support-main" type="button"
+                class="btn btn-primary" style="gap:.5rem;width:100%;justify-content:center;">
+          <i data-lucide="headphones" style="width:16px;height:16px;"></i>
+          {% trans "Contacter le support" %}
+        </button>
+        {% else %}
+        <a href="{% url 'products:liste' %}" class="btn btn-primary" style="gap:.5rem;">
+          <i data-lucide="shopping-bag" style="width:15px;height:15px;"></i>
+          {% trans "Parcourir le catalogue" %}
+        </a>
+        {% endif %}
+      {% endif %}
+
     </div>
-    <h2 class="empty-title">{% trans "Sélectionnez une conversation" %}</h2>
-    <p class="empty-subtitle">
-      {% trans "Choisissez une conversation dans la liste à gauche pour afficher les messages." %}
-    </p>
-    <a href="{% url 'products:liste' %}" class="btn btn-primary btn-sm" style="gap:0.5rem;">
-      <i data-lucide="shopping-bag" style="width:14px;height:14px;"></i>
-      {% trans "Parcourir le catalogue" %}
-    </a>
   </div>
 
 </div>
@@ -413,11 +296,26 @@
 <script>
 lucide.createIcons();
 
+const ADMIN_ID = {% if admin_id %}{{ admin_id }}{% else %}null{% endif %};
 const CHAT_I18N = {
-  demarrer  : "{% trans 'Démarrez la conversation…' %}",
+  demarrer   : "{% trans 'Démarrez la conversation\u2026' %}",
   utilisateur: "{% trans 'Utilisateur' %}",
-  aInstant  : "{% trans 'À l\\'instant' %}",
+  aInstant   : "{% trans 'À l\u0027instant' %}",
+  erreurConv : "{% trans 'Impossible de démarrer la conversation.' %}",
 };
+
+async function demarrerSupport() {
+  if (!ADMIN_ID) return;
+  try {
+    const data = await API.post('/api/chat/creer/', { utilisateur_id: ADMIN_ID });
+    window.location.href = `/chat/${data.id}/`;
+  } catch(e) {
+    window.toast && window.toast(CHAT_I18N.erreurConv, 'error');
+  }
+}
+
+document.getElementById('btn-contact-support')?.addEventListener('click', demarrerSupport);
+document.getElementById('btn-contact-support-main')?.addEventListener('click', demarrerSupport);
 
 document.addEventListener('DOMContentLoaded', async () => {
   const skeleton = document.getElementById('skeleton-loader');
@@ -426,40 +324,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const list     = document.getElementById('conversations-list');
   const countEl  = document.getElementById('conversations-count');
   const searchEl = document.getElementById('search-input');
-
   let allConversations = [];
 
   try {
     const data = await API.get('/api/chat/', { silentError: true });
     allConversations = data.results || data;
-
     skeleton.style.display = 'none';
-
-    if (!allConversations.length) {
-      empty.style.display = 'flex';
-      return;
-    }
-
-    countEl.textContent = `${allConversations.length} conv.`;
+    if (!allConversations.length) { empty.style.display = 'flex'; return; }
+    countEl.textContent = `${allConversations.length}`;
     countEl.style.display = '';
     list.style.display = '';
     renderList(allConversations);
-
   } catch(e) {
     skeleton.style.display = 'none';
-    if (e && e.status === 401) {
-      window.location.href = '/compte/connexion/?next=/chat/';
-    } else {
-      errorEl.style.display = '';
-    }
+    if (e && e.status === 401) window.location.href = '/compte/connexion/?next=/chat/';
+    else errorEl.style.display = '';
   }
 
-  // ── Recherche filtrée ──
   searchEl?.addEventListener('input', () => {
     const q = searchEl.value.trim().toLowerCase();
     const filtered = q
       ? allConversations.filter(c => {
-          const name = (c.interlocuteur?.username || '').toLowerCase();
+          const name    = (c.interlocuteur?.username || '').toLowerCase();
           const preview = (c.dernier_message?.contenu || '').toLowerCase();
           return name.includes(q) || preview.includes(q);
         })
@@ -475,17 +361,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       const dernier  = conv.dernier_message;
       const apercu   = dernier ? escapeHtml(dernier.contenu) : CHAT_I18N.demarrer;
       const heure    = dernier ? formatHeure(dernier.date_envoi) : '';
+      const isSupport = autre.is_admin || autre.is_staff;
+
+      const avatarContent = isSupport
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`
+        : escapeHtml(initiale);
+      const avatarStyle = isSupport ? 'background:linear-gradient(135deg,var(--brand-500),var(--brand-600))' : '';
+      const displayName = isSupport ? 'Support HooYia' : escapeHtml(autre.username || CHAT_I18N.utilisateur);
 
       return `
       <li>
         <a href="/chat/${conv.id}/" class="conv-item" data-id="${conv.id}">
-          <div class="conv-avatar">
-            ${escapeHtml(initiale)}
+          <div class="conv-avatar" style="${avatarStyle}">
+            ${avatarContent}
             ${nonLus > 0 ? `<span class="unread-badge">${nonLus > 9 ? '9+' : nonLus}</span>` : ''}
           </div>
           <div class="conv-info">
             <div class="conv-name-row">
-              <span class="conv-name">${escapeHtml(autre.username || CHAT_I18N.utilisateur)}</span>
+              <span class="conv-name">${displayName}</span>
               <span class="conv-time">${heure}</span>
             </div>
             <p class="conv-preview ${nonLus > 0 ? 'has-unread' : ''}">${apercu}</p>
@@ -493,21 +386,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         </a>
       </li>`;
     }).join('');
-
-    lucide.createIcons();
   }
 });
 
 function formatHeure(isoStr) {
   if (!isoStr) return '';
-  const d   = new Date(isoStr);
-  const now = new Date();
-  const diff = now - d;
-  if (diff < 60000)    return CHAT_I18N.aInstant;
-  if (diff < 3600000)  return `${Math.floor(diff / 60000)} min`;
-  if (diff < 86400000) return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  if (diff < 604800000) return d.toLocaleDateString('fr-FR', { weekday: 'short' });
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  const d = new Date(isoStr), now = new Date(), diff = now - d;
+  if (diff < 60000)     return CHAT_I18N.aInstant;
+  if (diff < 3600000)   return `${Math.floor(diff/60000)} min`;
+  if (diff < 86400000)  return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if (diff < 604800000) return d.toLocaleDateString('fr-FR',{weekday:'short'});
+  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 }
 
 function escapeHtml(str) {

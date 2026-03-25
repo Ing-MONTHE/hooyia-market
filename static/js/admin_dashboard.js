@@ -1803,16 +1803,27 @@
         return;
       }
       tbody.innerHTML = items.map(function (c) {
-        var p1 = escHtml(c.participant1_nom || c.participant1 || '—');
-        var p2 = escHtml(c.participant2_nom || c.participant2 || '—');
-        var nbMsg   = c.nb_messages || 0;
+        var inter = c.interlocuteur || {};
+        var p1, p2;
+        if (inter.is_admin_view) {
+          p1 = escHtml(inter.participant1 || '—');
+          p2 = escHtml(inter.participant2 || '—');
+        } else {
+          // L'admin est participant : interlocuteur = l'autre côté
+          p1 = escHtml(inter.username || '—');
+          p2 = 'Support HooYia';
+        }
+        var nbMsg   = c.nb_messages || (c.dernier_message ? 1 : 0);
         var dernMsg = c.dernier_message ? escHtml((c.dernier_message.contenu || '').slice(0, 60)) : '—';
+        var nonLus  = c.messages_non_lus || 0;
+        var badgeNonLus = nonLus > 0 ? '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:var(--accent);color:#fff;border-radius:9px;font-size:10px;font-weight:700;padding:0 4px;margin-left:6px;">' + nonLus + '</span>' : '';
         return '<tr>'
-          + '<td style="font-weight:600;color:var(--text);">' + p1 + '</td>'
-          + '<td style="font-weight:600;color:var(--text);">' + p2 + '</td>'
-          + '<td>' + nbMsg + '</td>'
-          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-2);">' + dernMsg + '</td>'
+          + '<td style="font-weight:600;">' + p1 + '</td>'
+          + '<td style="font-weight:600;">' + p2 + '</td>'
+          + '<td>' + nbMsg + badgeNonLus + '</td>'
+          + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + dernMsg + '</td>'
           + '<td class="hide-mobile" style="font-size:12px;color:var(--text-muted);">' + fmtDate(c.date_creation) + '</td>'
+          + '<td><a href="/chat/' + c.id + '/" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--brand-500);color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;">Répondre</a></td>'
           + '</tr>';
       }).join('');
     } catch (e) {

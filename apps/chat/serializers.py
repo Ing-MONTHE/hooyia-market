@@ -109,9 +109,24 @@ class ConversationListSerializer(serializers.ModelSerializer):
     def get_interlocuteur(self, obj):
         user  = self.context['request'].user
         autre = obj.get_autre_participant(user)
+        # Admin : pas forcément participant → retourne les deux participants
         if autre is None:
-            return None
-        return {'id': autre.id, 'username': autre.username}
+            p1 = obj.participant1
+            p2 = obj.participant2
+            return {
+                'id': p2.id if p2 else None,
+                'username': p2.username if p2 else '—',
+                'participant1': p1.username if p1 else '—',
+                'participant2': p2.username if p2 else '—',
+                'participant1_id': p1.id if p1 else None,
+                'participant2_id': p2.id if p2 else None,
+                'is_admin_view': True,
+            }
+        return {
+            'id': autre.id,
+            'username': autre.username,
+            'is_admin': getattr(autre, 'is_admin', False) or autre.is_staff,
+        }
 
     def get_dernier_message(self, obj):
         dernier = obj.messages.last()
@@ -165,9 +180,24 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
     def get_interlocuteur(self, obj):
         user  = self.context['request'].user
         autre = obj.get_autre_participant(user)
+        # Admin : pas forcément participant → retourne les deux participants
         if autre is None:
-            return None
-        return {'id': autre.id, 'username': autre.username}
+            p1 = obj.participant1
+            p2 = obj.participant2
+            return {
+                'id': p2.id if p2 else None,
+                'username': p2.username if p2 else '—',
+                'participant1': p1.username if p1 else '—',
+                'participant2': p2.username if p2 else '—',
+                'participant1_id': p1.id if p1 else None,
+                'participant2_id': p2.id if p2 else None,
+                'is_admin_view': True,
+            }
+        return {
+            'id': autre.id,
+            'username': autre.username,
+            'is_admin': getattr(autre, 'is_admin', False) or autre.is_staff,
+        }
 
 
 # ═══════════════════════════════════════════════════════════════

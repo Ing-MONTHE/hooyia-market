@@ -19,7 +19,19 @@ def chat_liste(request):
     Affiche la liste des conversations de l'utilisateur connecté.
     Le template récupère les données via fetch('/api/chat/') en JS.
     """
-    return render(request, 'chat/chat_liste.html')
+    from django.contrib.auth import get_user_model
+    from django.utils import timezone
+    from datetime import timedelta
+    User = get_user_model()
+    admin = User.objects.filter(is_admin=True, is_active=True).first()
+    admin_online = False
+    if admin and admin.last_login:
+        admin_online = (timezone.now() - admin.last_login) < timedelta(minutes=15)
+    return render(request, 'chat/chat_liste.html', {
+        'admin_id': admin.id if admin else None,
+        'admin_username': admin.username if admin else None,
+        'admin_online': admin_online,
+    })
 
 
 @login_required
