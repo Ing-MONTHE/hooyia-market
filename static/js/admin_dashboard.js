@@ -2008,12 +2008,12 @@
 
       el.innerHTML = items.map(function (entry) {
         var color = TYPE_COLORS[entry.action] || 'var(--text-muted)';
+        var description = entry.description || entry.note || (entry.action + ' — ' + entry.url);
         return '<div class="af-item">'
           + '<div class="af-dot" style="background:' + color + ';flex-shrink:0;"></div>'
           + '<div style="flex:1;">'
           + '<div class="af-text"><strong style="color:var(--text);">' + escHtml(entry.utilisateur_nom || entry.utilisateur || '—') + '</strong>'
-          + ' · ' + escHtml(entry.action || '—')
-          + ' · <span style="color:var(--text-2);">' + escHtml(entry.url || entry.description || '') + '</span>'
+          + ' · <span style="color:var(--text-2);">' + escHtml(description) + '</span>'
           + (entry.status_code ? ' <span style="font-size:11px;color:var(--text-muted);">(' + entry.status_code + ')</span>' : '')
           + '</div>'
           + '<div class="af-time">' + timeAgo(entry.date || entry.date_action || entry.date_creation)

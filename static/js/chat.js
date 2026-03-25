@@ -321,9 +321,9 @@ const Chat = (() => {
 
   // ── Scroll vers le bas ───────────────────────────────────────
   function scrollerBas(smooth = true) {
-    const anchor = document.getElementById('scroll-anchor');
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+    const container = document.getElementById('messages-container');
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
     }
   }
 

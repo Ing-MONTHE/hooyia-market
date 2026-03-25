@@ -51,7 +51,37 @@ def chat_detail(request, pk):
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden(_("Vous n'êtes pas membre de cette conversation."))
 
+    # Conversations de la sidebar (rendu statique côté serveur)
+    from django.db.models import Q, Max
+    conversations = (
+        Conversation.objects
+        .filter(Q(participant1=request.user) | Q(participant2=request.user))
+        .select_related('participant1', 'participant2')
+        .prefetch_related('messages')
+        .annotate(dernier_msg_date=Max('messages__date_envoi'))
+        .order_by('-dernier_msg_date', '-date_creation')
+    )
+
+    # Enrichit chaque conversation avec l'interlocuteur et le nb de non-lus
+    from .models import MessageChat
+    conv_list = []
+    for conv in conversations:
+        autre = conv.get_autre_participant(request.user)
+        non_lus = MessageChat.objects.filter(
+            conversation=conv,
+            is_read=False,
+        ).exclude(expediteur=request.user).count()
+        dernier = conv.messages.order_by('-date_envoi').first()
+        conv_list.append({
+            'id': conv.id,
+            'autre': autre,
+            'non_lus': non_lus,
+            'dernier_message': dernier,
+            'active': conv.id == pk,
+        })
+
     return render(request, 'chat/chat_detail.html', {
         'conversation_id': pk,
         'interlocuteur'  : conversation.get_autre_participant(request.user),
+        'conv_list'      : conv_list,
     })

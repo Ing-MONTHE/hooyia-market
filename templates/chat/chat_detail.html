@@ -5,68 +5,427 @@
 
 {% block extra_head %}
 <style>
-  /* ════════════════════════════════════════════════════════════
-     CHAT DETAIL — Redesign basé sur la charte notifications
-     Layout : sidebar heroifiée à gauche + zone chat principale
-  ════════════════════════════════════════════════════════════ */
 
-  /* ── LAYOUT 2 COLONNES ──────────────────────────────────── */
-  .chat-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    height: calc(100vh - 64px);
-    overflow: hidden;
+  /* ── PAGE WRAPPER (identique chat_liste) ─────────────────── */
+  .chat-page {
     background: var(--surface-2);
+    padding: 2.5rem 1rem 4rem;
+    min-height: calc(100vh - 64px);
   }
 
-  /* ══════════════════════════════════════════════════════════
-     SIDEBAR GAUCHE — Redesign charte notifications
-  ══════════════════════════════════════════════════════════ */
-  .chat-sidebar {
-    display: flex;
-    flex-direction: column;
-    background: var(--surface-2);
-    overflow: hidden;
-    border-right: 1px solid var(--border);
+  .chat-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
-  /* ── Mini-hero sidebar (gradient, cercles déco) ─────────── */
-  .sidebar-hero {
+  /* ── HERO (copié de chat_liste) ─────────────────────────── */
+  .chat-hero {
     background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-500) 60%, #2563eb 100%);
-    padding: 1.25rem 1.25rem 1rem;
+    border-radius: 20px;
+    padding: 2rem 2rem 1.5rem;
+    margin-bottom: 1.5rem;
     position: relative;
     overflow: hidden;
-    flex-shrink: 0;
+    color: white;
   }
-
-  /* Cercle décoratif haut-droit */
-  .sidebar-hero::before {
+  .chat-hero::before {
     content: '';
     position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
     border-radius: 50%;
     background: rgba(255,255,255,0.06);
     pointer-events: none;
   }
-  /* Cercle décoratif bas-gauche */
-  .sidebar-hero::after {
+  .chat-hero::after {
     content: '';
     position: absolute;
-    bottom: -20px; left: 40%;
-    width: 80px; height: 80px;
+    bottom: -30px; left: 30%;
+    width: 120px; height: 120px;
     border-radius: 50%;
     background: rgba(255,255,255,0.04);
     pointer-events: none;
   }
-
-  /* Contenu hero au-dessus des cercles */
-  .sidebar-hero-inner {
+  .chat-hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
     position: relative;
     z-index: 1;
   }
+  .chat-hero-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+  .chat-hero h1 { font-size: 1.35rem; font-weight: 700; color: white; margin: 0; }
+  .chat-hero-subtitle { font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 3px; }
 
-  /* Ligne titre + compteur */
+  /* ── LAYOUT 2 COLONNES sous le hero ─────────────────────── */
+  .chat-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  /* ── SIDEBAR GAUCHE ─────────────────────────────────────── */
+  .chat-sidebar {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .sidebar-header {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-header h2 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 0.6rem;
+  }
+
+  .sidebar-search {
+    position: relative;
+  }
+  .sidebar-search input {
+    width: 100%;
+    padding: 0.45rem 0.75rem 0.45rem 2rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .sidebar-search input::placeholder { color: var(--text-muted); }
+  .sidebar-search input:focus { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(30,58,138,0.08); }
+  .sidebar-search .search-icon {
+    position: absolute; left: 0.6rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); pointer-events: none;
+    width: 13px; height: 13px;
+  }
+
+  /* ── Conversations list (identique conv-card de chat_liste) */
+  .conversations-list { list-style: none; margin: 0; padding: 0.5rem 0; max-height: calc(100vh - 280px); overflow-y: auto; }
+  .conversations-list::-webkit-scrollbar { width: 3px; }
+  .conversations-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .conv-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-decoration: none;
+    color: inherit;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .conv-item:hover { background: var(--bg); border-left-color: var(--brand-200); }
+  .conv-item.active { background: var(--brand-50); border-left-color: var(--brand-500); }
+  .conv-item.has-unread { border-left-color: #f97316; }
+
+  .conv-unread-dot {
+    width: 7px; height: 7px;
+    background: #f97316; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(249,115,22,0.15);
+    animation: pulse-dot 2s ease infinite;
+  }
+  .conv-read-spacer { width: 7px; flex-shrink: 0; }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(249,115,22,0.15); }
+    50%       { box-shadow: 0 0 0 4px rgba(249,115,22,0.08); }
+  }
+
+  .conv-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b5fc0, var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.875rem; color: white;
+    flex-shrink: 0; position: relative;
+  }
+  .conv-avatar.support { background: linear-gradient(135deg, var(--brand-500), var(--brand-600)); }
+  .conv-avatar .badge-count {
+    position: absolute; top: -5px; right: -5px;
+    min-width: 16px; height: 16px;
+    background: var(--accent); color: white;
+    border-radius: 8px; font-size: 0.6rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 3px; border: 2px solid var(--surface);
+  }
+
+  .conv-info { flex: 1; min-width: 0; }
+  .conv-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+  .conv-name { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-item.has-unread .conv-name { font-weight: 700; }
+  .conv-time { font-size: 0.67rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .conv-preview { font-size: 0.75rem; color: var(--text-muted); margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-item.has-unread .conv-preview { color: var(--text-secondary); font-weight: 600; }
+
+  /* ── ZONE CHAT PRINCIPALE ───────────────────────────────── */
+  .chat-main {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    overflow: hidden;
+    position: relative;
+    min-width: 0;
+  }
+
+  /* ── Header conversation ── */
+  .chat-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .header-back {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px; border: none;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition);
+    text-decoration: none;
+  }
+  .header-back:hover { background: var(--bg); color: var(--brand-500); }
+  .header-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b5fc0, var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9375rem; color: white;
+    flex-shrink: 0;
+  }
+  .header-avatar.support { background: linear-gradient(135deg, var(--brand-500), var(--brand-600)); }
+  .header-info { flex: 1; min-width: 0; }
+  .header-name { font-size: 0.9375rem; font-weight: 700; color: var(--brand-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ws-status { font-size: 0.6875rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 1px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.3s; flex-shrink: 0; }
+  .status-dot.connected    { background: #10b981; }
+  .status-dot.connecting   { background: #f59e0b; }
+  .status-dot.disconnected { background: #ef4444; }
+  .header-actions { display: flex; gap: 0.25rem; }
+  .tool-btn-sm {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    border-radius: 8px; border: none;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .tool-btn-sm:hover { background: var(--bg); color: var(--brand-500); }
+
+  /* ── Zone messages ── */
+  .messages-container {
+    flex: 1; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .messages-container::-webkit-scrollbar { width: 4px; }
+  .messages-container::-webkit-scrollbar-track { background: transparent; }
+  .messages-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── Bulles messages ── */
+  .msg-row { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 2px; }
+  .msg-row.mine   { flex-direction: row-reverse; }
+  .msg-row.theirs { flex-direction: row; }
+
+  .msg-bubble-wrap { display: flex; flex-direction: column; max-width: 68%; }
+  .msg-row.mine   .msg-bubble-wrap { align-items: flex-end; }
+  .msg-row.theirs .msg-bubble-wrap { align-items: flex-start; }
+
+  .msg-sender-avatar {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg, #3b5fc0, var(--brand-600));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.75rem; color: white;
+  }
+
+  .msg-bubble {
+    padding: 0.5rem 0.875rem;
+    border-radius: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .msg-row.mine   .msg-bubble { background: var(--brand-500); color: white; border-bottom-right-radius: 4px; }
+  .msg-row.theirs .msg-bubble { background: var(--surface-3); color: var(--text-primary); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+
+  .msg-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+
+  /* Groupes de date */
+  .msg-date-separator {
+    text-align: center; font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); margin: 1rem 0 0.5rem;
+  }
+
+  /* Skeleton messages */
+  @keyframes shimmer {
+    0%  { background-position: -600px 0; }
+    100%{ background-position:  600px 0; }
+  }
+  .msg-skeleton { display: flex; margin-bottom: 6px; }
+  .msg-skeleton.mine { justify-content: flex-end; }
+  .msg-skeleton-bubble {
+    height: 36px; border-radius: 14px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Fichiers / images dans les messages */
+  .msg-file-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 10px; margin-top: 4px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+    text-decoration: none; color: inherit; max-width: 260px;
+  }
+  .msg-row.theirs .msg-file-card { background: var(--bg); border-color: var(--border); }
+  .msg-file-name { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-file-size { font-size: 0.65rem; opacity: 0.7; margin-top: 1px; }
+  .msg-image-preview { max-width: 240px; max-height: 200px; border-radius: 10px; cursor: zoom-in; display: block; margin-top: 4px; object-fit: cover; }
+
+  /* ── Bouton scroll vers le bas ── */
+  #scroll-to-bottom {
+    position: absolute; bottom: 80px; right: 16px;
+    width: 36px; height: 36px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 50%; box-shadow: var(--shadow-md);
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--brand-500);
+    transition: all 0.18s; z-index: 10;
+  }
+  #scroll-to-bottom:hover { background: var(--brand-50); border-color: var(--brand-200); transform: translateY(-1px); }
+  #scroll-to-bottom.visible { display: flex; }
+
+  /* ── Zone de saisie ── */
+  .input-zone {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .upload-progress { height: 3px; border-radius: 3px; background: var(--border); margin-bottom: 6px; display: none; overflow: hidden; }
+  .upload-progress-bar { height: 100%; background: var(--brand-500); border-radius: 3px; width: 0; transition: width 0.3s; }
+  .files-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .file-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);
+    max-width: 200px;
+  }
+  .chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip-remove { cursor: pointer; color: var(--text-muted); flex-shrink: 0; }
+  .chip-remove:hover { color: #ef4444; }
+
+  #file-input { display: none; }
+
+  .input-actions { display: flex; align-items: flex-end; gap: 8px; }
+  .input-tools { display: flex; gap: 4px; }
+  .tool-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    border-radius: 8px; border: none;
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .tool-btn:hover:not(:disabled) { background: var(--bg); color: var(--brand-500); }
+  .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .message-textarea-wrap { flex: 1; }
+  .message-textarea {
+    width: 100%; min-height: 36px; max-height: 120px;
+    padding: 0.5rem 0.875rem;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif; font-size: 0.875rem; color: var(--text-primary);
+    resize: none; outline: none; transition: border-color 0.18s;
+    overflow-y: auto; line-height: 1.5;
+  }
+  .message-textarea:focus { border-color: var(--brand-500); }
+  .message-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .send-btn {
+    width: 38px; height: 38px;
+    border-radius: 10px; border: none;
+    background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+    box-shadow: var(--shadow-accent);
+  }
+  .send-btn:hover:not(:disabled) { background: var(--accent-dark); transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+
+  /* ── Drop overlay ── */
+  .drop-hint {
+    position: absolute; inset: 0;
+    background: rgba(30,58,138,0.06);
+    backdrop-filter: blur(4px);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; pointer-events: none; opacity: 0;
+    transition: opacity 0.2s; border: 2px dashed var(--brand-200);
+  }
+  .chat-main.drag-over .drop-hint { opacity: 1; }
+  .drop-hint-box { text-align: center; color: var(--brand-500); }
+  .drop-hint-box p    { font-weight: 600; font-size: 0.9375rem; margin-top: 0.75rem; }
+  .drop-hint-box span { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* ── Modal image zoom ── */
+  .img-modal-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: zoom-out;
+  }
+  .img-modal-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .chat-layout { grid-template-columns: 1fr; }
+    .chat-sidebar { display: none; }
+    .chat-layout.mobile-sidebar .chat-sidebar { display: block; }
+    .chat-layout.mobile-sidebar .chat-main { display: none; }
+    .chat-main { height: calc(100vh - 160px); }
+  }
+</style>
+{% endblock %}
+
+  /* ── Header sidebar compact (blanc, pas de gradient) ────── */
+  .sidebar-hero {
+    background: var(--surface);
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar-hero::before, .sidebar-hero::after { display: none; }
+
+  .sidebar-hero-inner { position: relative; z-index: 1; }
+
   .sidebar-hero-row {
     display: flex;
     align-items: center;
@@ -74,38 +433,32 @@
     gap: 10px;
   }
 
-  /* Icône hero (glassmorphisme) */
   .sidebar-hero-icon {
-    width: 36px; height: 36px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
+    width: 32px; height: 32px;
+    background: var(--brand-600);
+    border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.2);
     flex-shrink: 0;
   }
 
   .sidebar-hero h2 {
     font-size: 0.9375rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-primary);
     margin: 0;
   }
 
-  /* Badge compteur conversations (style badge non-lus) */
   .sidebar-count-badge {
     display: none;
     align-items: center; gap: 4px;
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: white;
+    background: var(--brand-100);
+    border: 1px solid var(--brand-200);
+    color: var(--brand-600);
     border-radius: 999px;
-    padding: 3px 10px;
+    padding: 2px 10px;
     font-size: 0.7rem;
     font-weight: 600;
-    backdrop-filter: blur(6px);
   }
-  /* Point orange si non-lus présents */
   .sidebar-count-badge .dot {
     width: 5px; height: 5px;
     background: #f97316;
@@ -116,31 +469,31 @@
   /* ── Champ recherche dans la sidebar ───────────────────── */
   .sidebar-search {
     position: relative;
-    margin-top: 0.75rem;
+    margin-top: 0.625rem;
   }
 
   .sidebar-search input {
     width: 100%;
-    padding: 0.5rem 0.875rem 0.5rem 2.25rem;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
+    padding: 0.45rem 0.875rem 0.45rem 2.1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     font-family: 'Poppins', sans-serif;
     font-size: 0.8rem;
-    color: white;
+    color: var(--text-primary);
     outline: none;
-    transition: background 0.2s;
+    transition: border-color 0.18s, box-shadow 0.18s;
   }
 
-  .sidebar-search input::placeholder { color: rgba(255,255,255,0.55); }
-  .sidebar-search input:focus { background: rgba(255,255,255,0.2); }
+  .sidebar-search input::placeholder { color: var(--text-muted); }
+  .sidebar-search input:focus { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(30,58,138,0.08); }
 
   .sidebar-search .search-icon {
     position: absolute;
-    left: 0.7rem;
+    left: 0.65rem;
     top: 50%;
     transform: translateY(-50%);
-    color: rgba(255,255,255,0.6);
+    color: var(--text-muted);
     pointer-events: none;
     width: 13px; height: 13px;
   }
@@ -714,222 +1067,158 @@
     .chat-layout.mobile-sidebar .chat-main { display: none; }
   }
 </style>
-{% endblock %}
 
 {% block content %}
-<div class="chat-layout" id="chat-layout">
+<div class="chat-page">
+  <div class="chat-wrap">
 
-  <!-- ═══════════════════════════════
-       SIDEBAR GAUCHE — Conversations
-  ════════════════════════════════ -->
-  <aside class="chat-sidebar">
-
-    {# ── Mini-hero sidebar ── #}
-    <div class="sidebar-hero">
-      <div class="sidebar-hero-inner">
-        <div class="sidebar-hero-row">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="sidebar-hero-icon">
-              <!-- Lucide: MessagesSquare -->
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/>
-                <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
-              </svg>
-            </div>
-            <h2>{% trans "Messages" %}</h2>
+    {# ── HERO (identique chat_liste) ── #}
+    <div class="chat-hero">
+      <div class="chat-hero-top">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="chat-hero-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"/>
+              <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/>
+            </svg>
           </div>
-
-          {# Badge compteur avec point orange si non-lus #}
-          <div class="sidebar-count-badge" id="sidebar-count-badge"></div>
+          <div>
+            <h1>{% trans "Messages" %}</h1>
+            <p class="chat-hero-subtitle">
+              {% if interlocuteur.is_admin or interlocuteur.is_staff %}{% trans "Support HooYia" %}{% else %}{{ interlocuteur.username }}{% endif %}
+            </p>
+          </div>
         </div>
-
-        {# Recherche dans les conversations #}
-        <div class="sidebar-search">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-          </svg>
-          <input type="text" id="search-input" placeholder="{% trans 'Chercher…' %}" autocomplete="off"/>
-        </div>
+        <a href="/chat/" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:white;border-radius:10px;padding:7px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;backdrop-filter:blur(6px);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          {% trans "Retour" %}
+        </a>
       </div>
     </div>
 
-    {# ── Skeleton (pendant le chargement API) ── #}
-    <div id="sidebar-skeleton">
-      {% for i in "1234" %}
-      <div class="skeleton-item">
-        <div style="width:7px;flex-shrink:0;"></div>
-        <div class="skeleton-avatar"></div>
-        <div class="skeleton-lines">
-          <div class="skeleton-line" style="width:52%;"></div>
-          <div class="skeleton-line" style="width:80%;margin-bottom:0;"></div>
+    {# ── LAYOUT 2 COLONNES ── #}
+    <div class="chat-layout" id="chat-layout">
+
+      {# ── SIDEBAR ── #}
+      <aside class="chat-sidebar">
+        <div class="sidebar-header">
+          <h2>{% trans "Conversations" %}</h2>
+          <div class="sidebar-search">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="search-input" placeholder="{% trans 'Chercher…' %}" autocomplete="off"/>
+          </div>
         </div>
-      </div>
-      {% endfor %}
-    </div>
 
-    {# ── Liste conversations ── #}
-    <ul id="sidebar-conversations" class="conversations-list" style="display:none;"></ul>
+        <ul class="conversations-list" id="sidebar-conversations">
+          {% for conv in conv_list %}
+          <li>
+            <a href="/chat/{{ conv.id }}/"
+               class="conv-item{% if conv.active %} active{% endif %}{% if conv.non_lus %} has-unread{% endif %}"
+               data-name="{% if conv.autre.is_admin or conv.autre.is_staff %}support hooyia{% else %}{{ conv.autre.username|lower }}{% endif %}"
+               data-preview="{% if conv.dernier_message %}{{ conv.dernier_message.contenu|lower|truncatechars:60 }}{% endif %}">
+              {% if conv.non_lus %}<div class="conv-unread-dot"></div>{% else %}<div class="conv-read-spacer"></div>{% endif %}
+              <div class="conv-avatar{% if conv.autre.is_admin or conv.autre.is_staff %} support{% endif %}">
+                {% if conv.autre.is_admin or conv.autre.is_staff %}
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                {% else %}{{ conv.autre.username|first|upper }}{% endif %}
+                {% if conv.non_lus %}<span class="badge-count">{% if conv.non_lus > 9 %}9+{% else %}{{ conv.non_lus }}{% endif %}</span>{% endif %}
+              </div>
+              <div class="conv-info">
+                <div class="conv-name-row">
+                  <span class="conv-name">{% if conv.autre.is_admin or conv.autre.is_staff %}Support HooYia{% else %}{{ conv.autre.username }}{% endif %}</span>
+                  {% if conv.dernier_message %}<span class="conv-time">{{ conv.dernier_message.date_envoi|timesince|truncatewords:2 }}</span>{% endif %}
+                </div>
+                <p class="conv-preview">{% if conv.dernier_message %}{{ conv.dernier_message.contenu|truncatechars:50 }}{% else %}Démarrez la conversation…{% endif %}</p>
+              </div>
+            </a>
+          </li>
+          {% empty %}
+          <li style="padding:1.5rem 1rem;text-align:center;color:var(--text-muted);font-size:0.8rem;">Aucune conversation</li>
+          {% endfor %}
+        </ul>
+      </aside>
 
-  </aside>
+      {# ── ZONE CHAT PRINCIPALE ── #}
+      <main class="chat-main" id="chat-main">
 
-  <!-- ═══════════════════════════════
-       ZONE CHAT PRINCIPALE
-  ════════════════════════════════ -->
-  <main class="chat-main" id="chat-main" style="position:relative;">
+        <div class="drop-hint">
+          <div class="drop-hint-box">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <p>{% trans "Déposez votre fichier ici" %}</p>
+            <span>{% trans "Documents, images, PDF…" %}</span>
+          </div>
+        </div>
 
-    {# ── Overlay drag & drop ── #}
-    <div class="drop-hint">
-      <div class="drop-hint-box">
-        <!-- Lucide: Upload -->
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
-        </svg>
-        <p>{% trans "Déposez votre fichier ici" %}</p>
-        <span>{% trans "Documents, images, PDF…" %}</span>
-      </div>
-    </div>
-
-    {# ── Header conversation ── #}
-    <div class="chat-header">
-
-      {# Retour liste (mobile) #}
-      <a href="/chat/" class="header-back" title="{% trans 'Retour' %}">
-        <!-- Lucide: ChevronLeft -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </a>
-
-      {# Avatar interlocuteur : icône casque si support, initiale sinon #}
-      {% if interlocuteur.is_admin or interlocuteur.is_staff %}
-      <div class="header-avatar support">
-        <!-- Lucide: Headphones -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-      </div>
-      {% else %}
-      <div class="header-avatar">{{ interlocuteur.username|first|upper }}</div>
-      {% endif %}
-
-      {# Infos interlocuteur + statut WebSocket #}
-      <div class="header-info">
-        <div class="header-name">
+        <div class="chat-header">
+          <a href="/chat/" class="header-back" title="{% trans 'Retour' %}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </a>
           {% if interlocuteur.is_admin or interlocuteur.is_staff %}
-            {% trans "Support HooYia" %}
+          <div class="header-avatar support">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          </div>
           {% else %}
-            {{ interlocuteur.username }}
+          <div class="header-avatar">{{ interlocuteur.username|first|upper }}</div>
           {% endif %}
+          <div class="header-info">
+            <div class="header-name">{% if interlocuteur.is_admin or interlocuteur.is_staff %}{% trans "Support HooYia" %}{% else %}{{ interlocuteur.username }}{% endif %}</div>
+            <div class="ws-status"><span class="status-dot" id="status-dot"></span><span id="ws-status-text">{% trans "Connexion…" %}</span></div>
+          </div>
+          <div class="header-actions">
+            <button class="tool-btn-sm" title="{% trans 'Voir le profil' %}" onclick="window.location.href='/vendeur/{{ interlocuteur.username }}/'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="ws-status">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="ws-status-text">{% trans "Connexion…" %}</span>
-        </div>
-      </div>
 
-      {# Bouton voir profil vendeur #}
-      <div class="header-actions">
-        <button class="tool-btn-sm" title="{% trans 'Voir le profil' %}"
-                onclick="window.location.href='/vendeur/{{ interlocuteur.username }}/'">
-          <!-- Lucide: UserCircle -->
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>
-          </svg>
+        <div class="messages-container" id="messages-container">
+          <div id="messages-skeleton">
+            {% for i in "12345" %}
+            <div class="msg-skeleton {% cycle '' 'mine' %}">
+              <div class="msg-skeleton-bubble" style="width: {% cycle '160px' '220px' '130px' '190px' '150px' %};"></div>
+            </div>
+            {% endfor %}
+          </div>
+          <div id="messages-list" style="display:none;"></div>
+          <div id="scroll-anchor"></div>
+        </div>
+
+        {# Bouton scroll vers le bas #}
+        <button id="scroll-to-bottom" title="Aller en bas" onclick="document.getElementById('messages-container').scrollTo({top:999999,behavior:'smooth'})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
-      </div>
-    </div>
 
-    {# ── Zone messages ── #}
-    <div class="messages-container" id="messages-container">
-
-      {# Skeleton messages pendant le chargement initial #}
-      <div id="messages-skeleton">
-        {% for i in "12345" %}
-        <div class="msg-skeleton {% cycle '' 'mine' %}">
-          <div class="msg-skeleton-bubble" style="width: {% cycle '160px' '220px' '130px' '190px' '150px' %};"></div>
-        </div>
-        {% endfor %}
-      </div>
-
-      {# Messages injectés dynamiquement par chat.js + WebSocket #}
-      <div id="messages-list" style="display:none;"></div>
-
-      {# Ancre de scroll bas de page #}
-      <div id="scroll-anchor"></div>
-    </div>
-
-    {# ── Zone de saisie ── #}
-    <div class="input-zone">
-
-      {# Barre progression upload fichiers #}
-      <div class="upload-progress" id="upload-progress">
-        <div class="upload-progress-bar" id="upload-progress-bar"></div>
-      </div>
-
-      {# Chips des fichiers en attente d'envoi #}
-      <div class="files-preview" id="files-preview"></div>
-
-      {# Input file caché (déclenché par les boutons outils) #}
-      <input type="file" id="file-input" multiple
-             accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.webp,.zip,.txt,.csv"/>
-
-      {# Rangée : outils + textarea + envoyer #}
-      <div class="input-actions">
-
-        <div class="input-tools">
-          {# Bouton joindre fichier (Lucide: Paperclip) #}
-          <button class="tool-btn" id="attach-btn" title="{% trans 'Joindre un fichier' %}" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-            </svg>
-          </button>
-
-          {# Bouton envoyer image (Lucide: Image) #}
-          <button class="tool-btn" id="image-btn" title="{% trans 'Envoyer une image' %}" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-              <circle cx="9" cy="9" r="2"/>
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-            </svg>
-          </button>
+        <div class="input-zone">
+          <div class="upload-progress" id="upload-progress"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
+          <div class="files-preview" id="files-preview"></div>
+          <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.webp,.zip,.txt,.csv"/>
+          <div class="input-actions">
+            <div class="input-tools">
+              <button class="tool-btn" id="attach-btn" title="{% trans 'Joindre un fichier' %}" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="tool-btn" id="image-btn" title="{% trans 'Envoyer une image' %}" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </button>
+            </div>
+            <div class="message-textarea-wrap">
+              <textarea id="message-input" class="message-textarea" rows="1" placeholder="{% trans 'Votre message…' %}" disabled></textarea>
+            </div>
+            <button class="send-btn" id="send-btn" disabled title="{% trans 'Envoyer' %}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
         </div>
 
-        {# Textarea message auto-expandable #}
-        <div class="message-textarea-wrap">
-          <textarea
-            id="message-input"
-            class="message-textarea"
-            rows="1"
-            placeholder="{% trans 'Votre message…' %}"
-            disabled
-          ></textarea>
-        </div>
-
-        {# Bouton envoyer (Lucide: Send) #}
-        <button class="send-btn" id="send-btn" disabled title="{% trans 'Envoyer' %}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
-          </svg>
-        </button>
-      </div>
-
-    </div>
-  </main>
-
-</div>
+      </main>
+    </div>{# fin .chat-layout #}
+  </div>{# fin .chat-wrap #}
+</div>{# fin .chat-page #}
 {% endblock %}
+
+{% block footer %}{% endblock %}
 
 {% block extra_scripts %}
 {# Logique WebSocket, rendu messages, envoi (fichier externe) #}
@@ -955,97 +1244,23 @@ Chat.init({
   currentUsername: CURRENT_USERNAME,
 });
 
-// ── Sidebar conversations ───────────────────────────────────
-(async () => {
-  const skeleton = document.getElementById('sidebar-skeleton');
-  const list     = document.getElementById('sidebar-conversations');
-  const countEl  = document.getElementById('sidebar-count-badge');
-  const search   = document.getElementById('search-input');
-
-  // Cache pour le filtrage local
-  let allConvs = [];
-
-  try {
-    const data = await API.get('/api/chat/', { silentError: true });
-    allConvs = data.results || data;
-
-    skeleton.style.display = 'none';
-    if (!allConvs.length) return;
-
-    // Calcul non-lus total pour le badge hero sidebar
-    const nonLusTotal = allConvs.reduce((sum, c) => sum + (c.messages_non_lus || 0), 0);
-
-    // Afficher badge avec point orange si non-lus présents
-    if (nonLusTotal > 0) {
-      countEl.innerHTML = '<span class="dot"></span>' + nonLusTotal + ' non lus';
-    } else {
-      countEl.textContent = allConvs.length + ' conv.';
-    }
-    countEl.style.display = 'inline-flex';
-
-    list.style.display = '';
-    renderSidebar(allConvs);
-
-  } catch(e) {
-    skeleton.style.display = 'none';
-  }
-
-  // ── Filtre recherche local ────────────────────────────────
-  search?.addEventListener('input', () => {
-    const q = search.value.trim().toLowerCase();
-    renderSidebar(q
-      ? allConvs.filter(c =>
-          (c.interlocuteur?.username || '').toLowerCase().includes(q) ||
-          (c.dernier_message?.contenu || '').toLowerCase().includes(q)
-        )
-      : allConvs
-    );
+// ── Sidebar : filtre recherche local (sur éléments statiques Django) ─
+document.getElementById('search-input')?.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  document.querySelectorAll('#sidebar-conversations .conv-item').forEach(item => {
+    const name    = item.dataset.name    || '';
+    const preview = item.dataset.preview || '';
+    item.closest('li').style.display = (!q || name.includes(q) || preview.includes(q)) ? '' : 'none';
   });
+});
 
-  // ── Rendu des items de la sidebar ────────────────────────
-  function renderSidebar(conversations) {
-    list.innerHTML = conversations.map(conv => {
-      const autre    = conv.interlocuteur || {};
-      const initiale = (autre.username || '?')[0].toUpperCase();
-      const nonLus   = conv.messages_non_lus || 0;
-      const dernier  = conv.dernier_message;
-      const apercu   = dernier ? escapeHtml(dernier.contenu || '') : 'Démarrez la conversation…';
-      const heure    = dernier ? formatHeure(dernier.date_envoi) : '';
-      // Conversation actuellement active
-      const isActive  = conv.id === CONVERSATION_ID;
-      const isSupport = autre.is_admin || autre.is_staff;
-
-      // Contenu avatar (icône casque ou initiale)
-      const avatarContent = isSupport
-        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>'
-        : escapeHtml(initiale);
-
-      // Badge non-lus sur l'avatar
-      const badgeHtml = nonLus > 0
-        ? `<span class="badge-count">${nonLus > 9 ? '9+' : nonLus}</span>`
-        : '';
-
-      // Nom d'affichage
-      const nom = isSupport ? 'Support HooYia' : escapeHtml(autre.username || 'Utilisateur');
-
-      return `
-      <li>
-        <a href="/chat/${conv.id}/"
-           class="conv-item${isActive ? ' active' : ''}${nonLus > 0 ? ' has-unread' : ''}">
-          ${nonLus > 0 ? '<div class="conv-unread-dot"></div>' : '<div class="conv-read-spacer"></div>'}
-          <div class="conv-avatar${isSupport ? ' support' : ''}">${avatarContent}${badgeHtml}</div>
-          <div class="conv-info">
-            <div class="conv-name-row">
-              <span class="conv-name">${nom}</span>
-              <span class="conv-time">${heure}</span>
-            </div>
-            <p class="conv-preview">${apercu}</p>
-          </div>
-        </a>
-      </li>`;
-    }).join('');
-  }
-})();
+// ── Bouton scroll vers le bas ─────────────────────────────
+const msgContainer = document.getElementById('messages-container');
+const scrollBtn    = document.getElementById('scroll-to-bottom');
+msgContainer?.addEventListener('scroll', () => {
+  const distFromBottom = msgContainer.scrollHeight - msgContainer.scrollTop - msgContainer.clientHeight;
+  scrollBtn?.classList.toggle('visible', distFromBottom > 150);
+});
 
 /* ════════════════════════════════════════════════════════════
    GESTION UPLOAD FICHIERS (joindre + drag & drop)

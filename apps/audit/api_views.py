@@ -47,16 +47,16 @@ class AuditLogListView(APIView):
 
         data = [
             {
-                'id':             log.id,
-                'action':         log.action,
-                'url':            log.url,
-                'status_code':    log.status_code,
+                'id':              log.id,
+                'action':          log.action,
+                'url':             log.url,
+                'status_code':     log.status_code,
                 'utilisateur_nom': log.utilisateur.username if log.utilisateur else '—',
-                'note':           log.note,
-                'date':           log.date.isoformat(),
-                # Alias pour compatibilité avec le JS (entry.date_action)
-                'date_action':    log.date.isoformat(),
-                'description':    f"{log.action} — {log.url}",
+                'note':            log.note,
+                'date':            log.date.isoformat(),
+                'date_action':     log.date.isoformat(),
+                # Description lisible : note si dispo, sinon fallback
+                'description':     log.note if log.note else f"{log.action} — {log.url}",
             }
             for log in page
         ]
