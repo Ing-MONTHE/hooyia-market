@@ -1,218 +1,497 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% comment %} ═══════════════════════════════════════════════════════════════
-   HooYia Market — notifications/mes_notifications.html
-   Page notifications de l'utilisateur connecté.
-
-   STRUCTURE :
-     [ En-tête : titre + compteur + bouton "Tout marquer comme lu" ]
-     [ Filtres : Toutes / Non lues / Commandes / Stock / Système ]
-     [ Skeleton ]          ← pendant le chargement AJAX
-     [ Empty state ]       ← si aucune notification
-     [ Liste notifications ] ← carte par notification, peuplée par JS
-
-   CARTE NOTIFICATION :
-     - Icône type (Bell/Package/Star/AlertTriangle)
-     - Titre + message + date relative
-     - Point bleu si non lue
-     - Clic → marquer comme lue + redirection si lien
-
-   ICÔNES Lucide (SVG inline, stroke="currentColor") :
-     Bell         → en-tête page
-     Package      → type commande
-     Star         → type avis
-     AlertTriangle→ type stock
-     Settings     → type système
-     CheckCheck   → bouton tout lire
-     Inbox        → empty state
-
-   JAVASCRIPT :
-     loadNotifications()      — GET /api/notifications/
-     marquerLue(id)           — PATCH /api/notifications/<id>/lire/
-     toutMarquerLu()          — POST /api/notifications/tout_lire/
-     renderNotification(n)    — construit le HTML d'une carte
-{% endcomment %}
-
 {% block title %}{% trans "Mes notifications" %} — HooYia Market{% endblock %}
 {% block meta_description %}{% trans "Toutes vos notifications HooYia Market" %}{% endblock %}
 
 {% block content %}
 <style>
-  /* ── Carte notification ── */
+  /* ════ PAGE LAYOUT ════ */
+  .notifs-page {
+    min-height: 70vh;
+    background: var(--surface-2);
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  .notifs-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ════ HERO HEADER ════ */
+  .notifs-hero {
+    background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-500) 60%, #2563eb 100%);
+    border-radius: 20px;
+    padding: 2rem 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    color: white;
+  }
+
+  .notifs-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .notifs-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 30%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .notifs-hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notifs-hero-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  .notifs-hero h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .notifs-hero-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 3px;
+  }
+
+  .notifs-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1.2rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .notifs-badge-unread {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+  }
+
+  .notifs-badge-unread .dot {
+    width: 6px; height: 6px;
+    background: #f97316;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Bouton tout lire */
+  #btn-tout-lire {
+    display: none;
+    align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    backdrop-filter: blur(6px);
+  }
+  #btn-tout-lire:hover { background: rgba(255,255,255,0.25); }
+
+  /* ════ FILTRES ════ */
+  .notifs-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .notif-filter {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .notif-filter:hover {
+    border-color: var(--brand-200);
+    background: var(--brand-50);
+    color: var(--brand-500);
+  }
+  .notif-filter.active {
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+    color: white;
+    box-shadow: 0 3px 10px rgba(30,58,138,0.25);
+  }
+
+  .filter-count {
+    background: rgba(255,255,255,0.22);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .notif-filter:not(.active) .filter-count {
+    background: var(--surface-3);
+    color: var(--text-muted);
+  }
+
+  /* ════ CARTE NOTIFICATION ════ */
   .notif-card {
     display: flex; align-items: flex-start; gap: 14px;
-    padding: 16px; border-radius: 12px;
-    border: 1px solid var(--border);
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
     background: var(--surface);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: all 0.2s;
     position: relative;
+    overflow: hidden;
   }
-  .notif-card:hover { background: var(--surface-2); border-color: var(--brand-200); }
-  .notif-card.non-lue { background: var(--brand-50); border-color: var(--brand-200); }
+
+  .notif-card:hover {
+    border-color: var(--brand-200);
+    box-shadow: 0 4px 16px rgba(30,58,138,0.08);
+    transform: translateY(-1px);
+  }
+
+  .notif-card.non-lue {
+    background: var(--surface);
+    border-color: var(--brand-200);
+  }
+
+  .notif-card.non-lue::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #f97316, var(--brand-500));
+    border-radius: 3px 0 0 3px;
+  }
 
   /* Point non lue */
-  .notif-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--brand-500); flex-shrink: 0;
-    margin-top: 6px;
+  .notif-unread-dot {
+    width: 8px; height: 8px;
+    background: #f97316;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    animation: pulse-dot 2s ease infinite;
+  }
+  .notif-read-spacer { width: 8px; flex-shrink: 0; }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
+    50% { box-shadow: 0 0 0 5px rgba(249,115,22,0.08); }
   }
 
   /* Icône type */
   .notif-icon {
-    width: 40px; height: 40px; border-radius: 10px;
+    width: 44px; height: 44px;
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .notif-icon.commande  { background: #eff6ff; color: #1d4ed8; }
+  .notif-icon.commande  { background: #eff6ff; color: #2563eb; }
   .notif-icon.avis      { background: #fffbeb; color: #d97706; }
   .notif-icon.stock     { background: #fef2f2; color: #dc2626; }
-  .notif-icon.systeme   { background: var(--surface-2); color: var(--text-muted); }
+  .notif-icon.systeme   { background: var(--surface-3); color: var(--text-muted); }
 
-  /* Skeleton */
-  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+  .notif-body { flex: 1; min-width: 0; }
+
+  .notif-header-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 8px;
+  }
+
+  .notif-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .notif-card.non-lue .notif-title { font-weight: 700; }
+
+  .notif-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .notif-message {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.55;
+  }
+
+  .notif-link-hint {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.72rem;
+    color: var(--brand-500);
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* ════ SKELETON ════ */
+  @keyframes shimmer {
+    0%  { background-position: -600px 0 }
+    100%{ background-position:  600px 0 }
+  }
   .skeleton {
     border-radius: 6px;
     background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
-    background-size: 400px 100%; animation: shimmer 1.4s infinite;
+    background-size: 600px 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  /* Filtre actif */
-  .notif-filter.active {
-    background: var(--brand-500); color: white;
-    border-color: var(--brand-500);
+  /* ════ EMPTY STATE ════ */
+  .notifs-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1.5px dashed var(--border);
+  }
+
+  .notifs-empty-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem;
+    color: var(--text-muted);
+  }
+
+  .notifs-empty h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+  }
+
+  .notifs-empty p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem;
+  }
+
+  /* ════ GROUPES DATE ════ */
+  .notif-date-group {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0 4px;
+    margin: 1rem 0 0.5rem;
   }
 </style>
 
-<div class="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+<div class="notifs-page">
+  <div class="notifs-wrap">
 
-  {# ── En-tête ── #}
-  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-content:center flex-shrink-0"
-           style="display:flex;align-items:center;justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    {# ── HERO HEADER ── #}
+    <div class="notifs-hero">
+      <div class="notifs-hero-top">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="notifs-hero-icon">
+            <!-- Lucide: Bell -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <div>
+            <h1>{% trans "Mes notifications" %}</h1>
+            <p class="notifs-hero-subtitle" id="notif-count-label">Chargement…</p>
+          </div>
+        </div>
+
+        <button onclick="toutMarquerLu()" id="btn-tout-lire">
+          <!-- Lucide: CheckCheck -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 7-9.5 9.5-4-4"/>
+            <path d="m2 12 5 5 10-10"/>
+          </svg>
+          {% trans "Tout marquer lu" %}
+        </button>
+      </div>
+
+      <div class="notifs-hero-meta">
+        <div class="notifs-badge-unread" id="hero-unread-badge" style="display:none;">
+          <span class="dot"></span>
+          <span id="hero-unread-count">0</span> non lues
+        </div>
+      </div>
+    </div>
+
+    {# ── FILTRES ── #}
+    <div class="notifs-filters">
+      <button class="notif-filter active" onclick="filtrer('', this)">
+        <!-- Lucide: LayoutList -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="4" height="4"/><path d="M10 6h11"/>
+          <rect x="3" y="11" width="4" height="4"/><path d="M10 12h11"/>
+          <rect x="3" y="17" width="4" height="4"/><path d="M10 18h11"/>
+        </svg>
+        {% trans "Toutes" %}
+      </button>
+
+      <button class="notif-filter" onclick="filtrer('non_lues', this)">
+        <!-- Lucide: MailOpen -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/>
+          <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/>
+        </svg>
+        {% trans "Non lues" %}
+        <span id="badge-non-lues" class="filter-count" style="display:none;"></span>
+      </button>
+
+      <button class="notif-filter" onclick="filtrer('commande', this)">
+        <!-- Lucide: Package -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/>
+        </svg>
+        {% trans "Commandes" %}
+      </button>
+
+      <button class="notif-filter" onclick="filtrer('avis', this)">
+        <!-- Lucide: Star -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        {% trans "Avis" %}
+      </button>
+
+      <button class="notif-filter" onclick="filtrer('systeme', this)">
+        <!-- Lucide: Cpu -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="2"/>
+          <rect x="9" y="9" width="6" height="6"/>
+          <path d="M15 2v2M15 20v2M9 2v2M9 20v2M2 15h2M20 15h2M2 9h2M20 9h2"/>
+        </svg>
+        {% trans "Système" %}
+      </button>
+    </div>
+
+    {# ── SKELETON ── #}
+    <div id="skeleton" style="display:flex;flex-direction:column;gap:8px;">
+      {% for i in "123" %}
+      <div class="notif-card" style="cursor:default;pointer-events:none;">
+        <div class="notif-read-spacer"></div>
+        <div class="skeleton" style="width:44px;height:44px;border-radius:12px;flex-shrink:0;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton" style="height:12px;width:55%;border-radius:4px;"></div>
+          <div class="skeleton" style="height:11px;width:90%;border-radius:4px;"></div>
+          <div class="skeleton" style="height:11px;width:35%;border-radius:4px;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# ── EMPTY STATE ── #}
+    <div id="empty-state" style="display:none;" class="notifs-empty">
+      <div class="notifs-empty-icon">
+        <!-- Lucide: BellOff -->
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 1 .6 5"/>
+          <path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          <line x1="2" x2="22" y1="2" y2="22"/>
         </svg>
       </div>
-      <div>
-        <h1 class="text-xl font-bold text-ink">{% trans "Mes notifications" %}</h1>
-        <p class="text-xs text-text-muted mt-0.5" id="notif-count-label">—</p>
-      </div>
+      <h2 id="empty-titre">{% trans "Aucune notification" %}</h2>
+      <p id="empty-message">{% trans "Vous n'avez pas encore de notifications." %}</p>
+      <a href="{% url 'products:liste' %}" class="btn btn-primary inline-flex items-center gap-2">
+        <!-- Lucide: ShoppingBag -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <line x1="3" x2="21" y1="6" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        {% trans "Voir le catalogue" %}
+      </a>
     </div>
-    <button onclick="toutMarquerLu()" id="btn-tout-lire"
-            class="btn btn-secondary text-sm flex items-center gap-2" style="display:none;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m18 7-9.5 9.5-4-4"/>
-        <path d="m2 12 5 5 10-10"/>
-      </svg>
-      {% trans "Tout marquer comme lu" %}
-    </button>
+
+    {# ── LISTE NOTIFICATIONS ── #}
+    <div id="notif-list" style="display:none;flex-direction:column;gap:8px;"></div>
+
   </div>
-
-  {# ── Filtres ── #}
-  <div class="flex gap-2 flex-wrap mb-5">
-    <button class="notif-filter btn btn-secondary text-xs py-1.5 active" onclick="filtrer('', this)">
-      {% trans "Toutes" %}
-    </button>
-    <button class="notif-filter btn btn-secondary text-xs py-1.5" onclick="filtrer('non_lues', this)">
-      {% trans "Non lues" %}
-      <span id="badge-non-lues" class="ml-1 hidden" style="display:none;background:var(--brand-500);color:white;border-radius:99px;padding:1px 7px;font-size:10px;"></span>
-    </button>
-    <button class="notif-filter btn btn-secondary text-xs py-1.5 flex items-center gap-1.5" onclick="filtrer('commande', this)">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-      </svg>
-      {% trans "Commandes" %}
-    </button>
-    <button class="notif-filter btn btn-secondary text-xs py-1.5 flex items-center gap-1.5" onclick="filtrer('avis', this)">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-      {% trans "Avis" %}
-    </button>
-    <button class="notif-filter btn btn-secondary text-xs py-1.5 flex items-center gap-1.5" onclick="filtrer('systeme', this)">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-      </svg>
-      {% trans "Système" %}
-    </button>
-  </div>
-
-  {# ── Skeleton ── #}
-  <div id="skeleton" class="space-y-3">
-    {% for i in "123" %}
-    <div class="notif-card" style="cursor:default;">
-      <div class="skeleton" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
-      <div class="flex-1 space-y-2">
-        <div class="skeleton h-3 w-2/3 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
-        <div class="skeleton h-3 w-1/3 rounded"></div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  {# ── Empty state ── #}
-  <div id="empty-state" class="hidden text-center py-16 space-y-4">
-    <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin:0 auto;">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted">
-        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-      </svg>
-    </div>
-    <p class="font-semibold text-ink" id="empty-titre">{% trans "Aucune notification" %}</p>
-    <p class="text-sm text-text-muted" id="empty-message">{% trans "Vous n'avez pas encore de notifications." %}</p>
-    <a href="{% url 'products:liste' %}" class="btn btn-primary inline-flex items-center gap-2 mt-2">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-        <line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-      {% trans "Voir le catalogue" %}
-    </a>
-  </div>
-
-  {# ── Liste notifications ── #}
-  <div id="notif-list" class="hidden space-y-3"></div>
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-// ════════════════════════════════════════════════════════════════════════════
-// JAVASCRIPT — mes_notifications.html
-//
-// loadNotifications()   — GET /api/notifications/ → rend la liste
-// filtrer(type, btn)    — filtre par type ou non_lues
-// marquerLue(id, el)    — PATCH /api/notifications/<id>/lire/
-// toutMarquerLu()       — POST /api/notifications/tout_lire/
-// renderNotification(n) — construit le HTML d'une carte notification
-// tempsRelatif(date)    — formate "il y a X min/h/j"
-// ════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// JAVASCRIPT — mes_notifications.html (redesign)
+// ════════════════════════════════════════════════════════════
 
 var filtreActuel = '';
 var NOTIF_I18N = {
-  nonLues   : '{% trans "non lues" %}',
+  nonLues      : '{% trans "non lues" %}',
   notification : '{% trans "notification" %}',
   notifications: '{% trans "notifications" %}',
   aucuneFiltre : '{% trans "Aucune notification dans cette catégorie." %}',
   toutLu       : '{% trans "Toutes les notifications ont été marquées comme lues." %}',
   erreur       : '{% trans "Erreur. Réessayez." %}',
   ilYA         : '{% trans "il y a" %}',
-  maintenant   : '{% trans "A l instant" %}',
+  maintenant   : "{% trans 'À l instant' %}",
   min          : '{% trans "min" %}',
   heure        : '{% trans "h" %}',
   jour         : '{% trans "j" %}',
 };
 
-// ── Icônes SVG par type ──────────────────────────────────────────────────────
+// Icônes Lucide par type
 var NOTIF_ICONS = {
   commande: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg>',
   avis    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
@@ -220,61 +499,74 @@ var NOTIF_ICONS = {
   systeme : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
 };
 
-// ── Temps relatif ────────────────────────────────────────────────────────────
+// Lien hint icon (Lucide: ArrowRight)
+var ARROW_ICON = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+
 function tempsRelatif(dateStr) {
   var diff = (Date.now() - new Date(dateStr)) / 1000;
-  if (diff < 60)  return NOTIF_I18N.maintenant;
+  if (diff < 60)   return NOTIF_I18N.maintenant;
   if (diff < 3600) return NOTIF_I18N.ilYA + ' ' + Math.floor(diff/60) + ' ' + NOTIF_I18N.min;
-  if (diff < 86400) return NOTIF_I18N.ilYA + ' ' + Math.floor(diff/3600) + ' ' + NOTIF_I18N.heure;
+  if (diff < 86400)return NOTIF_I18N.ilYA + ' ' + Math.floor(diff/3600) + ' ' + NOTIF_I18N.heure;
   return NOTIF_I18N.ilYA + ' ' + Math.floor(diff/86400) + ' ' + NOTIF_I18N.jour;
 }
 
-// ── Rendu d'une carte notification ───────────────────────────────────────────
 function renderNotification(n) {
   var nonLue = !n.is_read;
   var icon   = NOTIF_ICONS[n.type_notif] || NOTIF_ICONS.systeme;
-  var cls    = nonLue ? 'notif-card non-lue' : 'notif-card';
-  var dot    = nonLue ? '<div class="notif-dot"></div>' : '<div style="width:8px;flex-shrink:0;"></div>';
   var lien   = n.lien || '';
 
-  return '<div class="' + cls + '" id="notif-' + n.id + '" data-lien="' + lien + '" onclick="marquerLue(' + n.id + ', this)">'
-    + dot
+  return '<div class="notif-card' + (nonLue ? ' non-lue' : '') + '"'
+    + ' id="notif-' + n.id + '" data-lien="' + lien + '" onclick="marquerLue(' + n.id + ', this)">'
+    + (nonLue ? '<div class="notif-unread-dot"></div>' : '<div class="notif-read-spacer"></div>')
     + '<div class="notif-icon ' + (n.type_notif || 'systeme') + '">' + icon + '</div>'
-    + '<div style="flex:1;min-width:0;">'
-    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
-    + '<p style="font-size:0.875rem;font-weight:' + (nonLue ? '700' : '600') + ';color:var(--ink);line-height:1.4;">' + n.titre + '</p>'
-    + '<span style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0;">' + tempsRelatif(n.date_creation) + '</span>'
+    + '<div class="notif-body">'
+    + '<div class="notif-header-row">'
+    + '<p class="notif-title">' + n.titre + '</p>'
+    + '<span class="notif-time">' + tempsRelatif(n.date_creation) + '</span>'
     + '</div>'
-    + '<p style="font-size:0.8rem;color:var(--text-secondary);margin-top:3px;line-height:1.5;">' + n.message + '</p>'
-    + (lien ? '<p style="font-size:0.72rem;color:var(--brand-500);margin-top:5px;font-weight:500;">Voir le détail →</p>' : '')
+    + '<p class="notif-message">' + n.message + '</p>'
+    + (lien ? '<span class="notif-link-hint">Voir le détail ' + ARROW_ICON + '</span>' : '')
     + '</div>'
     + '</div>';
 }
 
-// ── Chargement des notifications ─────────────────────────────────────────────
+function showEl(id, displayType)  { document.getElementById(id).style.display = displayType || 'block'; }
+function hideEl(id)               { document.getElementById(id).style.display = 'none'; }
+
 async function loadNotifications() {
-  document.getElementById('skeleton').style.display = 'block';
-  document.getElementById('empty-state').classList.add('hidden');
-  document.getElementById('notif-list').classList.add('hidden');
+  // Reset visibilité
+  showEl('skeleton', 'flex');
+  document.getElementById('skeleton').style.flexDirection = 'column';
+  document.getElementById('skeleton').style.gap = '8px';
+  hideEl('empty-state');
+  hideEl('notif-list');
 
   var url = '/api/notifications/';
   if (filtreActuel === 'non_lues') url += '?is_read=false';
-  else if (filtreActuel) url += '?type=' + filtreActuel;
+  else if (filtreActuel && filtreActuel !== 'non_lues') url += '?type_notif=' + filtreActuel;
 
   try {
     var data  = await API.get(url);
-    var items = data.results || data;
+    var items = Array.isArray(data) ? data : (data.results || []);
 
-    document.getElementById('skeleton').style.display = 'none';
+    hideEl('skeleton');
 
-    // Compteur global non lues
     var nonLues = items.filter(function(n){ return !n.is_read; }).length;
     var total   = items.length;
     var label   = total + ' ' + (total > 1 ? NOTIF_I18N.notifications : NOTIF_I18N.notification);
-    if (nonLues > 0) label += ' · <strong>' + nonLues + ' ' + NOTIF_I18N.nonLues + '</strong>';
+    if (nonLues > 0) label += ' &middot; <strong>' + nonLues + ' ' + NOTIF_I18N.nonLues + '</strong>';
     document.getElementById('notif-count-label').innerHTML = label;
 
-    // Badge non lues sur filtre
+    // Badge hero non-lues
+    var heroBadge = document.getElementById('hero-unread-badge');
+    if (nonLues > 0) {
+      heroBadge.style.display = 'inline-flex';
+      document.getElementById('hero-unread-count').textContent = nonLues;
+    } else {
+      heroBadge.style.display = 'none';
+    }
+
+    // Badge filtre "Non lues"
     var badgeEl = document.getElementById('badge-non-lues');
     if (nonLues > 0 && filtreActuel !== 'non_lues') {
       badgeEl.textContent = nonLues;
@@ -287,30 +579,30 @@ async function loadNotifications() {
     document.getElementById('btn-tout-lire').style.display = nonLues > 0 ? 'inline-flex' : 'none';
 
     if (!items.length) {
-      document.getElementById('empty-state').classList.remove('hidden');
+      showEl('empty-state');
       if (filtreActuel) {
         document.getElementById('empty-titre').textContent   = '{% trans "Aucun résultat" %}';
         document.getElementById('empty-message').textContent = NOTIF_I18N.aucuneFiltre;
       } else {
         document.getElementById('empty-titre').textContent   = '{% trans "Aucune notification" %}';
-        document.getElementById('empty-message').textContent = "{% trans "Vous n'avez pas encore de notifications." %}";
+        document.getElementById('empty-message').textContent = '{% trans "Vous n" %} {% trans "avez pas encore de notifications." %}';
       }
       return;
     }
 
     var list = document.getElementById('notif-list');
-    list.classList.remove('hidden');
     list.innerHTML = items.map(renderNotification).join('');
+    showEl('notif-list', 'flex');
 
   } catch(e) {
-    document.getElementById('skeleton').style.display = 'none';
-    document.getElementById('empty-state').classList.remove('hidden');
+    console.error('loadNotifications error:', e);
+    hideEl('skeleton');
+    showEl('empty-state');
     document.getElementById('empty-titre').textContent   = '{% trans "Erreur de chargement" %}';
     document.getElementById('empty-message').textContent = NOTIF_I18N.erreur;
   }
 }
 
-// ── Filtre ───────────────────────────────────────────────────────────────────
 function filtrer(type, btn) {
   filtreActuel = type;
   document.querySelectorAll('.notif-filter').forEach(function(b){ b.classList.remove('active'); });
@@ -318,28 +610,22 @@ function filtrer(type, btn) {
   loadNotifications();
 }
 
-// ── Marquer une notification comme lue ──────────────────────────────────────
 async function marquerLue(id, el) {
   var lien = el ? (el.getAttribute('data-lien') || '') : '';
   try {
     await API.patch('/api/notifications/' + id + '/lire/', {});
-    // Retirer visuellement le style non-lue
     if (el) {
       el.classList.remove('non-lue');
-      var dot = el.querySelector('.notif-dot');
-      if (dot) { dot.style.width = '8px'; dot.style.background = 'transparent'; }
-      var titre = el.querySelector('p');
-      if (titre) titre.style.fontWeight = '600';
+      var dot = el.querySelector('.notif-unread-dot');
+      if (dot) { dot.className = 'notif-read-spacer'; dot.style.animation = 'none'; }
     }
-    // Rediriger si lien
     if (lien) window.location.href = lien;
-    else loadNotifications(); // Recharger pour mettre à jour les compteurs
+    else loadNotifications();
   } catch(e) {
     if (lien) window.location.href = lien;
   }
 }
 
-// ── Tout marquer comme lu ────────────────────────────────────────────────────
 async function toutMarquerLu() {
   try {
     await API.post('/api/notifications/tout_lire/', {});
@@ -350,7 +636,6 @@ async function toutMarquerLu() {
   }
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
 loadNotifications();
 </script>
 {% endblock %}

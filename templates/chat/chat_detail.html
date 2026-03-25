@@ -1,82 +1,1221 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% block title %}{% trans 'Chat' %} — HooYia Market{% endblock %}
+{% block title %}{% trans 'Chat' %} — {{ interlocuteur.username }} — HooYia Market{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     PAGE CHAT DETAIL — Layout 2 colonnes
+     Sidebar conversations + zone de chat active
+  ═══════════════════════════════════════════════════════════ */
+
+  .chat-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: calc(100vh - 64px);
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ══════════════════════════
+     SIDEBAR — Conversations
+  ══════════════════════════ */
+  .chat-sidebar {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar-search {
+    position: relative;
+    margin-top: 0.875rem;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    padding: 0.5rem 0.875rem 0.5rem 2.375rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    transition: border-color var(--transition);
+    outline: none;
+  }
+
+  .sidebar-search input:focus {
+    border-color: var(--brand-500);
+    background: var(--surface);
+  }
+
+  .sidebar-search input::placeholder { color: var(--text-muted); }
+
+  .sidebar-search .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .conversations-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+  }
+
+  .conversations-list::-webkit-scrollbar { width: 4px; }
+  .conversations-list::-webkit-scrollbar-track { background: transparent; }
+  .conversations-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── Item conversation ── */
+  .conv-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    transition: background var(--transition);
+    text-decoration: none;
+    color: inherit;
+    border-left: 3px solid transparent;
+  }
+
+  .conv-item:hover { background: var(--bg); }
+
+  .conv-item.active {
+    background: var(--brand-50);
+    border-left-color: var(--brand-500);
+  }
+
+  .conv-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b5fc0, #1E3A8A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .unread-badge {
+    position: absolute;
+    top: -5px; right: -5px;
+    min-width: 18px; height: 18px;
+    background: var(--accent);
+    color: white;
+    border-radius: 9px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid var(--surface);
+  }
+
+  .conv-info { flex: 1; min-width: 0; }
+
+  .conv-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .conv-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .conv-time { font-size: 0.6875rem; color: var(--text-muted); flex-shrink: 0; }
+
+  .conv-preview {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .conv-preview.has-unread { color: var(--text-secondary); font-weight: 600; }
+
+  .skeleton-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1.25rem;
+  }
+
+  .skeleton-avatar {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--bg);
+    flex-shrink: 0;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .skeleton-lines { flex: 1; }
+
+  .skeleton-line {
+    height: 10px;
+    background: var(--bg);
+    border-radius: 5px;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ══════════════════════════════
+     ZONE CHAT PRINCIPALE (droite)
+  ══════════════════════════════ */
+  .chat-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ── Header conversation ── */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b5fc0, #1E3A8A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .header-info { flex: 1; min-width: 0; }
+
+  .header-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--brand-600);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ws-status {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 1px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .status-dot.connected    { background: #10b981; }
+  .status-dot.connecting   { background: #f59e0b; }
+  .status-dot.disconnected { background: #ef4444; }
+
+  .header-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .header-back:hover {
+    background: var(--bg);
+    color: var(--brand-500);
+  }
+
+  /* ── Zone messages ── */
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .messages-container::-webkit-scrollbar { width: 4px; }
+  .messages-container::-webkit-scrollbar-track { background: transparent; }
+  .messages-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── Messages bulles ── */
+  .msg-row {
+    display: flex;
+    gap: 0.625rem;
+    margin-bottom: 0.125rem;
+    animation: fadeIn 0.18s ease-out both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-row.mine { justify-content: flex-end; }
+  .msg-row.theirs { justify-content: flex-start; }
+
+  .msg-sender-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #60a5fa, #3b5fc0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.6875rem;
+    color: white;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 20px;
+  }
+
+  .msg-bubble-wrap { max-width: 72%; display: flex; flex-direction: column; }
+
+  .msg-bubble {
+    padding: 0.625rem 0.875rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+
+  .msg-row.mine .msg-bubble {
+    background: var(--brand-500);
+    color: white;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+    box-shadow: 0 2px 8px rgba(30,58,138,0.2);
+  }
+
+  .msg-row.theirs .msg-bubble {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 1rem 1rem 1rem 0.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .msg-time {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .msg-row.mine .msg-time  { text-align: right; margin-right: 0.25rem; }
+  .msg-row.theirs .msg-time { margin-left: 0.25rem; }
+
+  /* ── Message avec fichier joint ── */
+  .msg-file {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.875rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .msg-row.mine .msg-file {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 0.75rem;
+    margin-top: 0.375rem;
+  }
+
+  .msg-row.theirs .msg-file {
+    background: var(--bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    margin-top: 0.375rem;
+  }
+
+  .msg-file:hover { opacity: 0.85; }
+
+  .file-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .msg-row.mine .file-icon-wrap { background: rgba(255,255,255,0.2); }
+  .msg-row.theirs .file-icon-wrap { background: var(--brand-100); color: var(--brand-500); }
+
+  .file-meta { flex: 1; min-width: 0; }
+
+  .file-name {
+    font-weight: 600;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-size { font-size: 0.6875rem; opacity: 0.7; margin-top: 1px; }
+
+  /* ── Séparateur de date ── */
+  .date-separator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    margin: 0.5rem 0;
+  }
+
+  .date-separator::before,
+  .date-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .date-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Message vide ── */
+  .messages-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .messages-empty-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+
+  /* ══════════════════════════
+     ZONE DE SAISIE
+  ══════════════════════════ */
+  .input-zone {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 0.875rem 1rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Preview des fichiers sélectionnés ── */
+  .files-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.625rem 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .files-preview:empty { display: none; }
+
+  .file-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.5rem 0.3125rem 0.625rem;
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--brand-600);
+    font-weight: 500;
+    max-width: 200px;
+  }
+
+  .file-chip .chip-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-chip .chip-remove {
+    flex-shrink: 0;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    padding: 1px;
+    border-radius: 3px;
+    transition: color var(--transition);
+  }
+
+  .file-chip .chip-remove:hover { color: #ef4444; }
+
+  /* ── Barre d'actions ── */
+  .input-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .input-tools {
+    display: flex;
+    gap: 0.25rem;
+    padding-bottom: 2px;
+  }
+
+  .tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+
+  .tool-btn:hover {
+    background: var(--bg);
+    color: var(--brand-500);
+  }
+
+  .tool-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .tool-btn:disabled:hover {
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  /* ── Textarea ── */
+  .message-textarea-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .message-textarea {
+    width: 100%;
+    min-height: 40px;
+    max-height: 120px;
+    padding: 0.5625rem 0.875rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 0.75rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color var(--transition);
+    overflow-y: auto;
+    display: block;
+  }
+
+  .message-textarea:focus {
+    border-color: var(--brand-500);
+    background: var(--surface);
+  }
+
+  .message-textarea::placeholder { color: var(--text-muted); }
+
+  .message-textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ── Bouton envoyer ── */
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+    box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+  }
+
+  .send-btn:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+  }
+
+  .send-btn:active { transform: translateY(0); }
+
+  .send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── Hint clavier ── */
+  .input-hint {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    padding-left: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hint-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.375rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  /* ── Progress upload ── */
+  .upload-progress {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    display: none;
+  }
+
+  .upload-progress.active { display: block; }
+
+  .upload-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  /* ── Input file caché ── */
+  #file-input { display: none; }
+
+  /* ── Skeleton messages ── */
+  .msg-skeleton {
+    display: flex;
+    gap: 0.625rem;
+    margin-bottom: 0.75rem;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .msg-skeleton.mine { justify-content: flex-end; }
+
+  .msg-skeleton-bubble {
+    height: 36px;
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .chat-layout { grid-template-columns: 1fr; }
+    .chat-sidebar { display: none; }
+    .chat-layout.mobile-sidebar .chat-sidebar { display: flex; }
+    .chat-layout.mobile-sidebar .chat-main { display: none; }
+  }
+
+  /* ── Zone de drop fichiers ── */
+  .chat-main.drag-over {
+    position: relative;
+  }
+
+  .chat-main.drag-over::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(30,58,138,0.06);
+    border: 2px dashed var(--brand-500);
+    border-radius: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .drop-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .chat-main.drag-over .drop-hint { opacity: 1; }
+
+  .drop-hint-box {
+    background: white;
+    border: 2px dashed var(--brand-500);
+    border-radius: 1rem;
+    padding: 2rem 3rem;
+    text-align: center;
+    color: var(--brand-500);
+  }
+
+  .drop-hint-box p { font-weight: 600; font-size: 0.9375rem; margin-top: 0.75rem; }
+  .drop-hint-box span { font-size: 0.8125rem; color: var(--text-muted); }
+
+  /* ── Image message ── */
+  .msg-image {
+    max-width: 220px;
+    border-radius: 0.75rem;
+    display: block;
+    cursor: zoom-in;
+    transition: opacity 0.2s;
+    margin-top: 0.375rem;
+  }
+
+  .msg-image:hover { opacity: 0.9; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col" style="height: calc(100vh - 120px);">
+<div class="chat-layout" id="chat-layout">
 
-  <!-- ── En-tête conversation ── -->
-  <div class="card px-5 py-4 mb-4 flex items-center gap-4 flex-shrink-0">
-    <a href="/chat/" class="text-ink/40 hover:text-brand-600 transition-colors text-lg leading-none">←</a>
+  <!-- ═══════════════════════════════
+       SIDEBAR GAUCHE — Conversations
+  ════════════════════════════════ -->
+  <aside class="chat-sidebar">
 
-    <!-- Avatar interlocuteur -->
-    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0">
-      {{ interlocuteur.username|first|upper }}
+    <div class="sidebar-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h1 style="font-size:1.0625rem;font-weight:700;color:var(--brand-600);margin-bottom:0.125rem;">
+            {% trans "Messages" %}
+          </h1>
+          <p style="font-size:0.75rem;color:var(--text-muted);">{% trans "Vos conversations" %}</p>
+        </div>
+        <span id="sidebar-conv-count" style="display:none;font-size:0.6875rem;font-weight:600;color:var(--text-muted);padding:0.1875rem 0.625rem;background:var(--bg);border:1px solid var(--border);border-radius:999px;"></span>
+      </div>
+
+      <div class="sidebar-search">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search-input" placeholder="{% trans 'Chercher…' %}" autocomplete="off" />
+      </div>
     </div>
 
-    <div class="flex-1 min-w-0">
-      <p class="font-body font-semibold text-ink text-sm truncate">{{ interlocuteur.username }}</p>
-      <p id="ws-status" class="text-xs font-mono text-ink/30 mt-0.5">{% trans "Connexion…" %}</p>
-    </div>
-
-    <!-- Indicateur connexion -->
-    <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-cream-border transition-colors duration-300"></div>
-  </div>
-
-  <!-- ── Zone messages ── -->
-  <div id="messages-container"
-       class="flex-1 overflow-y-auto space-y-2 px-1 scroll-smooth"
-       style="scroll-behavior: smooth;">
-
-    <!-- Skeleton -->
-    <div id="skeleton" class="space-y-3 pt-2">
-      {% for _ in "12345" %}
-      <div class="flex {% cycle '' 'justify-end' %}">
-        <div class="animate-pulse h-8 bg-cream-warm rounded-2xl {% cycle 'w-48' 'w-36' 'w-56' 'w-32' 'w-44' %}"></div>
+    <!-- Skeleton sidebar -->
+    <div id="sidebar-skeleton">
+      {% for i in "1234" %}
+      <div class="skeleton-item">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" style="width:55%;"></div>
+          <div class="skeleton-line" style="width:80%;margin-bottom:0;"></div>
+        </div>
       </div>
       {% endfor %}
     </div>
 
-    <!-- Messages injectés par JS -->
-    <div id="messages-list" class="hidden space-y-1.5 pt-2 pb-2"></div>
+    <!-- Liste conversations -->
+    <ul id="sidebar-conversations" class="conversations-list" style="display:none;"></ul>
 
-    <!-- Ancre scroll bas -->
-    <div id="scroll-anchor"></div>
-  </div>
+  </aside>
 
-  <!-- ── Zone saisie ── -->
-  <div class="card px-4 py-3 mt-4 flex-shrink-0">
-    <div class="flex items-end gap-3">
-      <textarea
-        id="message-input"
-        rows="1"
-        placeholder="{% trans 'Votre message…' %}"
-        class="field flex-1 resize-none text-sm py-2.5 leading-snug"
-        style="max-height: 120px; overflow-y: auto;"
-        disabled></textarea>
-      <button
-        id="send-btn"
-        onclick="Chat.envoyer()"
-        disabled
-        class="btn-primary px-4 py-2.5 text-sm flex-shrink-0 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-        <span>{% trans "Envoyer" %}</span>
-        <span class="text-base leading-none">↑</span>
-      </button>
+  <!-- ═══════════════════════════════
+       ZONE CHAT PRINCIPALE
+  ════════════════════════════════ -->
+  <main class="chat-main" id="chat-main">
+
+    <!-- Drop zone overlay -->
+    <div class="drop-hint">
+      <div class="drop-hint-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+        <p>{% trans "Déposez votre fichier ici" %}</p>
+        <span>{% trans "Documents, images, PDF…" %}</span>
+      </div>
     </div>
-    <p class="text-ink/25 font-mono text-xs mt-2">{% trans "Entrée pour envoyer · Maj+Entrée pour nouvelle ligne" %}</p>
-  </div>
 
+    <!-- ── Header conversation ── -->
+    <div class="chat-header">
+      <!-- Retour (mobile) -->
+      <a href="/chat/" class="header-back" title="{% trans 'Retour' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+
+      <!-- Avatar interlocuteur -->
+      <div class="header-avatar">
+        {{ interlocuteur.username|first|upper }}
+      </div>
+
+      <!-- Infos -->
+      <div class="header-info">
+        <div class="header-name">{{ interlocuteur.username }}</div>
+        <div class="ws-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="ws-status-text">{% trans "Connexion…" %}</span>
+        </div>
+      </div>
+
+      <!-- Actions header -->
+      <div style="display:flex;gap:0.25rem;">
+        <button class="tool-btn" title="{% trans 'Voir le profil' %}" onclick="window.location.href='/vendeur/{{ interlocuteur.username }}/' ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Zone messages ── -->
+    <div class="messages-container" id="messages-container">
+
+      <!-- Skeleton messages -->
+      <div id="messages-skeleton">
+        {% for i in "12345" %}
+        <div class="msg-skeleton {% cycle '' 'mine' %}">
+          <div class="msg-skeleton-bubble" style="width: {% cycle '160px' '220px' '130px' '190px' '150px' %};"></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Messages injectés par JS -->
+      <div id="messages-list" style="display:none;"></div>
+
+      <!-- Ancre scroll bas -->
+      <div id="scroll-anchor"></div>
+    </div>
+
+    <!-- ── Zone de saisie ── -->
+    <div class="input-zone">
+
+      <!-- Barre de progression upload -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="upload-progress-bar" id="upload-progress-bar"></div>
+      </div>
+
+      <!-- Preview fichiers en attente -->
+      <div class="files-preview" id="files-preview"></div>
+
+      <!-- Input file caché -->
+      <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.webp,.zip,.txt,.csv" />
+
+      <!-- Actions saisie -->
+      <div class="input-actions">
+
+        <!-- Outils -->
+        <div class="input-tools">
+          <!-- Upload fichier -->
+          <button class="tool-btn" id="attach-btn" title="{% trans 'Joindre un fichier' %}" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+
+          <!-- Image uniquement -->
+          <button class="tool-btn" id="image-btn" title="{% trans 'Envoyer une image' %}" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          </button>
+        </div>
+
+        <!-- Textarea message -->
+        <div class="message-textarea-wrap">
+          <textarea
+            id="message-input"
+            class="message-textarea"
+            rows="1"
+            placeholder="{% trans 'Votre message…' %}"
+            disabled
+          ></textarea>
+        </div>
+
+        <!-- Bouton envoyer -->
+        <button class="send-btn" id="send-btn" disabled title="{% trans 'Envoyer' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </div>
+
+      <!-- Hint clavier -->
+      <div class="input-hint">
+        <span class="hint-key">↵ Entrée</span>
+        <span>{% trans "envoyer" %}</span>
+        <span style="opacity:0.4;">·</span>
+        <span class="hint-key">⇧ Maj + ↵</span>
+        <span>{% trans "nouvelle ligne" %}</span>
+        <span style="opacity:0.4;">·</span>
+        <span class="hint-key">📎</span>
+        <span>{% trans "fichiers (max 10 MB)" %}</span>
+      </div>
+    </div>
+
+  </main>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="{% static 'js/chat.js' %}"></script>
 <script>
-  Chat.init({
-    conversationId : {{ conversation_id }},
-    currentUserId  : {{ request.user.id }},
-    currentUsername: '{{ request.user.username|escapejs }}',
+/* ═══════════════════════════════════════════════════════════
+   CHAT DETAIL — Script principal
+   - Init WebSocket via Chat.init()
+   - Gestion sidebar conversations
+   - Gestion upload de fichiers (drag & drop + bouton)
+═══════════════════════════════════════════════════════════ */
+
+const CONVERSATION_ID   = {{ conversation_id }};
+const CURRENT_USER_ID   = {{ request.user.id }};
+const CURRENT_USERNAME  = '{{ request.user.username|escapejs }}';
+const UPLOAD_URL        = '/api/chat/{{ conversation_id }}/upload/';
+
+// ── Init WebSocket ──────────────────────────────────────────
+Chat.init({
+  conversationId : CONVERSATION_ID,
+  currentUserId  : CURRENT_USER_ID,
+  currentUsername: CURRENT_USERNAME,
+});
+
+// ── Charger la sidebar ─────────────────────────────────────
+(async () => {
+  const skeleton = document.getElementById('sidebar-skeleton');
+  const list     = document.getElementById('sidebar-conversations');
+  const countEl  = document.getElementById('sidebar-conv-count');
+  const search   = document.getElementById('search-input');
+
+  let allConvs = [];
+
+  try {
+    const data = await API.get('/api/chat/', { silentError: true });
+    allConvs = data.results || data;
+
+    skeleton.style.display = 'none';
+
+    if (!allConvs.length) return;
+
+    countEl.textContent = `${allConvs.length}`;
+    countEl.style.display = '';
+    list.style.display = '';
+    renderSidebar(allConvs);
+
+  } catch(e) {
+    skeleton.style.display = 'none';
+  }
+
+  search?.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    renderSidebar(q
+      ? allConvs.filter(c =>
+          (c.interlocuteur?.username || '').toLowerCase().includes(q) ||
+          (c.dernier_message?.contenu || '').toLowerCase().includes(q)
+        )
+      : allConvs
+    );
   });
+
+  function renderSidebar(conversations) {
+    list.innerHTML = conversations.map(conv => {
+      const autre    = conv.interlocuteur || {};
+      const initiale = (autre.username || '?')[0].toUpperCase();
+      const nonLus   = conv.messages_non_lus || 0;
+      const dernier  = conv.dernier_message;
+      const apercu   = dernier ? escapeHtml(dernier.contenu) : 'Démarrez la conversation…';
+      const heure    = dernier ? formatHeure(dernier.date_envoi) : '';
+      const isActive = conv.id === CONVERSATION_ID;
+
+      return `
+      <li>
+        <a href="/chat/${conv.id}/" class="conv-item ${isActive ? 'active' : ''}">
+          <div class="conv-avatar">
+            ${escapeHtml(initiale)}
+            ${nonLus > 0 ? `<span class="unread-badge">${nonLus > 9 ? '9+' : nonLus}</span>` : ''}
+          </div>
+          <div class="conv-info">
+            <div class="conv-name-row">
+              <span class="conv-name">${escapeHtml(autre.username || 'Utilisateur')}</span>
+              <span class="conv-time">${heure}</span>
+            </div>
+            <p class="conv-preview ${nonLus > 0 ? 'has-unread' : ''}">${apercu}</p>
+          </div>
+        </a>
+      </li>`;
+    }).join('');
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   GESTION UPLOAD FICHIERS
+═══════════════════════════════════════════════════════════ */
+
+const fileInput     = document.getElementById('file-input');
+const filesPreview  = document.getElementById('files-preview');
+const attachBtn     = document.getElementById('attach-btn');
+const imageBtn      = document.getElementById('image-btn');
+const chatMain      = document.getElementById('chat-main');
+const progressEl    = document.getElementById('upload-progress');
+const progressBar   = document.getElementById('upload-progress-bar');
+
+let pendingFiles = [];  // Fichiers en attente d'envoi
+
+// ── Bouton joindre ──────────────────────────────────────────
+attachBtn.addEventListener('click', () => {
+  fileInput.accept = '.pdf,.doc,.docx,.xls,.xlsx,.zip,.txt,.csv,.png,.jpg,.jpeg,.gif,.webp';
+  fileInput.click();
+});
+
+imageBtn.addEventListener('click', () => {
+  fileInput.accept = 'image/*';
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', () => {
+  handleNewFiles(Array.from(fileInput.files));
+  fileInput.value = '';
+});
+
+// ── Drag & Drop ─────────────────────────────────────────────
+chatMain.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  chatMain.classList.add('drag-over');
+});
+
+chatMain.addEventListener('dragleave', (e) => {
+  if (!chatMain.contains(e.relatedTarget)) {
+    chatMain.classList.remove('drag-over');
+  }
+});
+
+chatMain.addEventListener('drop', (e) => {
+  e.preventDefault();
+  chatMain.classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files);
+  if (files.length > 0) handleNewFiles(files);
+});
+
+// ── Ajouter des fichiers à la queue ────────────────────────
+function handleNewFiles(files) {
+  const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+
+  files.forEach(file => {
+    if (file.size > MAX_SIZE) {
+      window.toast && window.toast(`${file.name} dépasse 10 MB`, 'warning');
+      return;
+    }
+    if (pendingFiles.length >= 5) {
+      window.toast && window.toast('Maximum 5 fichiers à la fois', 'warning');
+      return;
+    }
+    pendingFiles.push(file);
+  });
+
+  renderFilesPreview();
+}
+
+// ── Afficher les chips fichiers ─────────────────────────────
+function renderFilesPreview() {
+  filesPreview.innerHTML = pendingFiles.map((file, idx) => `
+    <div class="file-chip">
+      ${getFileIconSVG(file)}
+      <span class="chip-name">${escapeHtml(file.name)}</span>
+      <span class="chip-remove" onclick="removeFile(${idx})" title="Supprimer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </span>
+    </div>
+  `).join('');
+}
+
+function removeFile(idx) {
+  pendingFiles.splice(idx, 1);
+  renderFilesPreview();
+}
+
+function getFileIconSVG(file) {
+  const type = file.type;
+  if (type.startsWith('image/')) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
+  }
+  if (type === 'application/pdf') {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+}
+
+// ── Envoi des fichiers (REST multipart) ────────────────────
+async function envoyerFichiers() {
+  if (!pendingFiles.length) return;
+
+  const filesToSend = [...pendingFiles];
+  pendingFiles = [];
+  renderFilesPreview();
+
+  progressEl.classList.add('active');
+  progressBar.style.width = '0%';
+
+  for (let i = 0; i < filesToSend.length; i++) {
+    const file = filesToSend[i];
+
+    try {
+      const formData = new FormData();
+      formData.append('fichier', file);
+      formData.append('nom_fichier', file.name);
+      formData.append('taille', file.size);
+
+      // Simulation de progression
+      progressBar.style.width = `${((i + 0.5) / filesToSend.length) * 100}%`;
+
+      const resp = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+        },
+        body: formData,
+      });
+
+      progressBar.style.width = `${((i + 1) / filesToSend.length) * 100}%`;
+
+      if (!resp.ok) {
+        window.toast && window.toast(`Échec upload : ${file.name}`, 'error');
+      }
+      // Le fichier uploadé sera broadcasté via WebSocket depuis le backend
+
+    } catch(e) {
+      window.toast && window.toast(`Erreur réseau : ${file.name}`, 'error');
+    }
+  }
+
+  setTimeout(() => {
+    progressEl.classList.remove('active');
+    progressBar.style.width = '0%';
+  }, 600);
+}
+
+// ── Override Chat.envoyer pour inclure les fichiers ────────
+const _originalEnvoyer = Chat.envoyer.bind(Chat);
+Chat.envoyer = function() {
+  if (pendingFiles.length > 0) {
+    envoyerFichiers();
+  }
+  _originalEnvoyer();
+};
+
+// ── CSRF helper ─────────────────────────────────────────────
+function getCsrfToken() {
+  return document.cookie.split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('csrftoken='))
+    ?.split('=')[1] || '';
+}
+
+// ── Helpers ─────────────────────────────────────────────────
+function formatHeure(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000)    return 'À l\'instant';
+  if (diff < 3600000)  return `${Math.floor(diff / 60000)} min`;
+  if (diff < 86400000) return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+// ── Activer les boutons quand le WS est prêt ───────────────
+// On observe les changements du status-dot
+const observer = new MutationObserver(() => {
+  const dot = document.getElementById('status-dot');
+  const isConnected = dot?.classList.contains('connected');
+  document.getElementById('attach-btn').disabled = !isConnected;
+  document.getElementById('image-btn').disabled  = !isConnected;
+});
+
+const dot = document.getElementById('status-dot');
+if (dot) observer.observe(dot, { attributes: true });
 </script>
 {% endblock %}
