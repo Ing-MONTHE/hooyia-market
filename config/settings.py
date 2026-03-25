@@ -21,7 +21,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0'] + config('ALLOWED_HOSTS', 
 # URL de base du site — utilisée pour les liens dans les emails
 # Dev  : http://localhost:8000
 # Prod : https://tondomaine.com
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
+SITE_URL = config('SITE_URL', default='https://hooyiamarket.site')
 
 
 # ═══════════════════════════════════════════════
@@ -210,13 +210,32 @@ AUTHENTIFICATION_BACKENDS = [
 # CORS & CSRF
 # ═══════════════════════════════════════════════
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # True uniquement en dev
+
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:8000',
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
 
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
     default='http://localhost:8000',
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
+
+# ═══════════════════════════════════════════════
+# SÉCURITÉ HTTPS — Activé uniquement en prod
+# ═══════════════════════════════════════════════
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER   = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT        = True
+    SESSION_COOKIE_SECURE      = True
+    CSRF_COOKIE_SECURE         = True
+    SECURE_HSTS_SECONDS        = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD        = True
 
 
 # ═══════════════════════════════════════════════
@@ -243,7 +262,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'  # Aligné avec le volume Docker
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 
@@ -301,7 +320,7 @@ AVIS_ACHAT_REQUIS = config('AVIS_ACHAT_REQUIS', default=False, cast=bool)
 
 GOOGLE_CLIENT_ID     = config('GOOGLE_CLIENT_ID',     default='')
 GOOGLE_CLIENT_SECRET = config('GOOGLE_CLIENT_SECRET', default='')
-GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:8000/compte/google/callback/')
+GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='https://hooyiamarket.site/compte/google/callback/')
 
 
 # ═══════════════════════════════════════════════
@@ -314,7 +333,7 @@ GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='http://localhost:
 PAYUNIT_API_USER     = config('PAYUNIT_API_USER',     default='')
 PAYUNIT_API_PASSWORD = config('PAYUNIT_API_PASSWORD', default='')
 PAYUNIT_APP_TOKEN    = config('PAYUNIT_APP_TOKEN',    default='')
-PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='test')
+PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='live')
 
 
 # ═══════════════════════════════════════════════
