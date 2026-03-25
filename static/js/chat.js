@@ -52,12 +52,16 @@ const Chat = (() => {
     inputEl?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        envoyer();
+        Chat.envoyer();
       }
       setTimeout(autoResizeTextarea, 0);
     });
 
     inputEl?.addEventListener('input', autoResizeTextarea);
+
+    // Bouton envoyer — click
+    const sendBtnEl = document.getElementById('send-btn');
+    sendBtnEl?.addEventListener('click', () => Chat.envoyer());
 
     await chargerHistorique();
     connecterWebSocket();
@@ -88,7 +92,7 @@ const Chat = (() => {
             <p style="font-size:0.75rem;color:var(--text-muted);max-width:240px;line-height:1.5;">${gettext('Envoyez un message ou partagez un fichier.')}</p>
           </div>`;
       } else {
-        list.innerHTML = messages.map(m => renderMessage(m)).join('');
+        list.innerHTML = messages.map(m => renderMessage(normaliserMessage(m))).join('');
       }
 
       scrollerBas(false);
@@ -181,21 +185,40 @@ const Chat = (() => {
     const emptyState = list.querySelector('.messages-empty');
     if (emptyState) emptyState.remove();
 
-    const msgObj = {
+    // Normalize WS payload to API shape
+    const msgObj = normaliserMessage({
       expediteur     : data.expediteur_id,
       nom_expediteur : data.expediteur,
       contenu        : data.message,
       date_envoi     : data.timestamp,
-      message_id     : data.message_id,
-      type           : data.type || 'text',   // 'text' | 'file' | 'image'
-      fichier_url    : data.fichier_url || null,
-      fichier_nom    : data.fichier_nom || null,
-      fichier_taille : data.fichier_taille || null,
-    };
+      type_message   : data.msg_type || data.type || 'text',
+      fichier        : data.fichier_url ? {
+        url         : data.fichier_url,
+        nom_original: data.fichier_nom,
+        taille      : data.fichier_taille,
+        est_image   : (data.msg_type === 'image' || data.type === 'image'),
+      } : null,
+    });
 
     const html = renderMessage(msgObj);
     list.insertAdjacentHTML('beforeend', html);
     scrollerBas(true);
+  }
+
+
+  // ── Normalise un message (API ou WS) vers un format uniforme ──
+  function normaliserMessage(m) {
+    const f = m.fichier || null;
+    return {
+      expediteur    : m.expediteur,
+      nom_expediteur: m.nom_expediteur || m.expediteur,
+      contenu       : m.contenu || '',
+      date_envoi    : m.date_envoi,
+      type          : m.type_message || m.type || 'text',
+      fichier_url   : f ? (f.url || f.fichier_url || null) : null,
+      fichier_nom   : f ? (f.nom_original || f.nom || null) : null,
+      fichier_taille: f ? (f.taille || null) : null,
+    };
   }
 
   // ── Rendu HTML d'un message ──────────────────────────────────
@@ -226,7 +249,7 @@ const Chat = (() => {
         <div class="msg-bubble" style="${isMine ? '' : ''}">
           ${m.contenu ? `<p style="margin-bottom:0.375rem;">${escapeHtml(m.contenu).replace(/\n/g, '<br>')}</p>` : ''}
           <img src="${escapeHtml(m.fichier_url)}" alt="${escapeHtml(m.fichier_nom || 'Image')}" class="msg-image"
-               onclick="window.open(this.src, '_blank')" loading="lazy" />
+               onclick="openImageModal(this.src)" loading="lazy" style="cursor:zoom-in;" />
         </div>`;
     } else if (type === 'file' && m.fichier_url) {
       // ── Document ──

@@ -1090,7 +1090,7 @@ function renderFilesPreview() {
     const objUrl  = isImage ? URL.createObjectURL(file) : null;
     const preview = isImage
       ? `<img src="${objUrl}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:zoom-in;flex-shrink:0;"
-              onclick="window.open('${objUrl}','_blank')" />`
+              onclick="openImageModal('${objUrl}')" />`
       : getFileIconSVG(file);
     return `
     <div class="file-chip" style="${isImage ? 'padding:4px 8px 4px 4px;' : ''}">
@@ -1108,7 +1108,13 @@ function previewDoc(idx) {
   const file = pendingFiles[idx];
   if (!file) return;
   const url = URL.createObjectURL(file);
-  window.open(url, '_blank');
+  if (file.type.startsWith('image/')) {
+    openImageModal(url);
+  } else if (file.type === 'application/pdf') {
+    openDocModal(url, file.name);
+  } else {
+    window.open(url, '_blank');
+  }
 }
 
 function removeFile(idx) {
@@ -1128,7 +1134,7 @@ function getFileIconSVG(file) {
 }
 
 // ── Envoi des fichiers (REST multipart) ────────────────────
-async function envoyerFichiers() {
+async function envoyerFichiers(texte) {
   if (!pendingFiles.length) return;
 
   const filesToSend = [...pendingFiles];
@@ -1146,8 +1152,11 @@ async function envoyerFichiers() {
       formData.append('fichier', file);
       formData.append('nom_fichier', file.name);
       formData.append('taille', file.size);
+      // Attacher le texte à chaque fichier
+      if (texte) {
+        formData.append('contenu', texte);
+      }
 
-      // Simulation de progression
       progressBar.style.width = `${((i + 0.5) / filesToSend.length) * 100}%`;
 
       const resp = await fetch(UPLOAD_URL, {
@@ -1163,7 +1172,6 @@ async function envoyerFichiers() {
       if (!resp.ok) {
         window.toast && window.toast(`Échec upload : ${file.name}`, 'error');
       }
-      // Le fichier uploadé sera broadcasté via WebSocket depuis le backend
 
     } catch(e) {
       window.toast && window.toast(`Erreur réseau : ${file.name}`, 'error');
@@ -1179,12 +1187,14 @@ async function envoyerFichiers() {
 // ── Override Chat.envoyer pour inclure les fichiers ────────
 const _originalEnvoyer = Chat.envoyer.bind(Chat);
 Chat.envoyer = function() {
-  const hasText = (document.getElementById('message-input')?.value || '').trim().length > 0;
+  const inputEl = document.getElementById('message-input');
+  const texte = (inputEl?.value || '').trim();
   if (pendingFiles.length > 0) {
-    envoyerFichiers();
-  }
-  // N'envoyer le message texte que s'il y a du texte (évite message vide si seulement image)
-  if (hasText) {
+    // Passer le texte à envoyerFichiers, vider le champ manuellement
+    if (inputEl) inputEl.value = '';
+    envoyerFichiers(texte);
+  } else if (texte) {
+    // Pas de fichier → envoi texte seul via WebSocket
     _originalEnvoyer();
   }
 };
@@ -1226,5 +1236,30 @@ const observer = new MutationObserver(() => {
 
 const dot = document.getElementById('status-dot');
 if (dot) observer.observe(dot, { attributes: true });
+</script>
+
+<!-- MODALS -->
+<div id="image-modal" onclick="closeImageModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:zoom-out;">
+  <button onclick="closeImageModal()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.15);border:none;color:white;border-radius:50%;width:40px;height:40px;font-size:1.5rem;cursor:pointer;">&times;</button>
+  <img id="image-modal-img" src="" alt="" onclick="event.stopPropagation()" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:0.75rem;" />
+</div>
+<div id="doc-modal" onclick="closeDocModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;">
+  <div onclick="event.stopPropagation()" style="background:var(--surface);border-radius:1rem;overflow:hidden;width:min(90vw,900px);height:82vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <span id="doc-modal-name" style="font-weight:600;font-size:.875rem;flex:1;margin-right:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <div style="display:flex;gap:.5rem;">
+        <a id="doc-modal-dl" href="#" download style="padding:.375rem .875rem;background:var(--brand-500);color:white;border-radius:.5rem;font-size:.8rem;font-weight:600;text-decoration:none;">Télécharger</a>
+        <button onclick="closeDocModal()" style="background:var(--bg);border:1px solid var(--border);border-radius:.5rem;padding:.375rem .75rem;cursor:pointer;font-size:.8rem;">Fermer</button>
+      </div>
+    </div>
+    <iframe id="doc-modal-frame" src="" style="flex:1;border:none;width:100%;"></iframe>
+  </div>
+</div>
+<script>
+function openImageModal(src){var m=document.getElementById('image-modal');document.getElementById('image-modal-img').src=src;m.style.display='flex';document.body.style.overflow='hidden';}
+function closeImageModal(){document.getElementById('image-modal').style.display='none';document.getElementById('image-modal-img').src='';document.body.style.overflow='';}
+function openDocModal(src,name){var m=document.getElementById('doc-modal');document.getElementById('doc-modal-frame').src=src;document.getElementById('doc-modal-name').textContent=name||'Document';document.getElementById('doc-modal-dl').href=src;document.getElementById('doc-modal-dl').setAttribute('download',name||'document');m.style.display='flex';document.body.style.overflow='hidden';}
+function closeDocModal(){document.getElementById('doc-modal').style.display='none';document.getElementById('doc-modal-frame').src='';document.body.style.overflow='';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeImageModal();closeDocModal();}});
 </script>
 {% endblock %}
