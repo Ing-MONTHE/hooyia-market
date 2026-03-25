@@ -243,18 +243,28 @@ class UploadFichierAPIView(APIView):
         conv = get_object_or_404(Conversation, id=pk)
         _verifier_participant(conv, user)
 
-        serializer = UploadFichierSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Support multi-fichiers : fichier[] ou fichier (rétrocompat)
+        fichiers = request.FILES.getlist('fichier')
+        if not fichiers and 'fichier' in request.FILES:
+            fichiers = [request.FILES['fichier']]
+        if not fichiers:
+            return Response({'detail': _('Aucun fichier fourni.')}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Sauvegarde du message + fichier en DB
-        message = serializer.save(conversation=conv, expediteur=user)
+        contenu_texte = request.data.get('contenu', '').strip()
+        messages_crees = []
 
-        # Broadcast WebSocket → notifie les clients connectés en temps réel
-        _broadcaster_fichier(pk, message, request)
+        for i, fichier in enumerate(fichiers):
+            # Le texte n'est attaché qu'au PREMIER fichier
+            data = {'fichier': fichier, 'contenu': contenu_texte if i == 0 else ''}
+            serializer = UploadFichierSerializer(data=data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            message = serializer.save(conversation=conv, expediteur=user)
+            _broadcaster_fichier(pk, message, request)
+            messages_crees.append(message)
 
         return Response(
-            MessageChatSerializer(message, context={'request': request}).data,
+            MessageChatSerializer(messages_crees, many=True, context={'request': request}).data,
             status=status.HTTP_201_CREATED
         )
 

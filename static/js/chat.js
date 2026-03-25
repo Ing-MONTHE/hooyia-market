@@ -185,7 +185,6 @@ const Chat = (() => {
     const emptyState = list.querySelector('.messages-empty');
     if (emptyState) emptyState.remove();
 
-    // Normalize WS payload to API shape
     const msgObj = normaliserMessage({
       expediteur     : data.expediteur_id,
       nom_expediteur : data.expediteur,
@@ -199,6 +198,29 @@ const Chat = (() => {
         est_image   : (data.msg_type === 'image' || data.type === 'image'),
       } : null,
     });
+
+    // Si pas de texte et même expéditeur que le dernier message → coller l'image au dernier message
+    if (!msgObj.contenu && msgObj.fichier_url) {
+      const lastRow = list.querySelector('.msg-row:last-child');
+      if (lastRow) {
+        const lastExpId = lastRow.dataset.expediteur;
+        if (lastExpId && parseInt(lastExpId) === parseInt(msgObj.expediteur)) {
+          const wrap = lastRow.querySelector('.msg-bubble-wrap');
+          if (wrap) {
+            const imgHtml = msgObj.fichier_url
+              ? `<img src="${escapeHtml(msgObj.fichier_url)}" alt="${escapeHtml(msgObj.fichier_nom || 'Image')}" class="msg-image" onclick="openImageModal(this.src)" loading="lazy" style="cursor:zoom-in;display:block;margin-top:4px;" />`
+              : '';
+            if (imgHtml) {
+              const timeEl = wrap.querySelector('.msg-time');
+              if (timeEl) timeEl.insertAdjacentHTML('beforebegin', imgHtml);
+              else wrap.insertAdjacentHTML('beforeend', imgHtml);
+              scrollerBas(true);
+              return;
+            }
+          }
+        }
+      }
+    }
 
     const html = renderMessage(msgObj);
     list.insertAdjacentHTML('beforeend', html);
@@ -274,7 +296,7 @@ const Chat = (() => {
 
     if (isMine) {
       return `${separator}
-      <div class="msg-row mine">
+      <div class="msg-row mine" data-expediteur="${m.expediteur}">
         <div class="msg-bubble-wrap">
           ${bubbleContent}
           <p class="msg-time">${heure}</p>
@@ -282,7 +304,7 @@ const Chat = (() => {
       </div>`;
     } else {
       return `${separator}
-      <div class="msg-row theirs">
+      <div class="msg-row theirs" data-expediteur="${m.expediteur}">
         <div class="msg-sender-avatar">${escapeHtml(initiale)}</div>
         <div class="msg-bubble-wrap">
           ${bubbleContent}

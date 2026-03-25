@@ -1379,30 +1379,26 @@ async function envoyerFichiers(texte) {
   renderFilesPreview();
 
   progressEl.classList.add('active');
-  progressBar.style.width = '0%';
+  progressBar.style.width = '20%';
 
-  for (let i = 0; i < filesToSend.length; i++) {
-    const file     = filesToSend[i];
-    const formData = new FormData();
+  // ── Envoi de tous les fichiers en UNE SEULE requête ──────
+  const formData = new FormData();
+  for (const file of filesToSend) {
     formData.append('fichier', file);
-    formData.append('nom_fichier', file.name);
-    formData.append('taille', file.size);
-    if (texte) formData.append('contenu', texte);
+  }
+  if (texte) formData.append('contenu', texte);
 
-    progressBar.style.width = `${((i + 0.5) / filesToSend.length) * 100}%`;
-
-    try {
-      const resp = await fetch(UPLOAD_URL, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        body: formData,
-      });
-      if (!resp.ok) window.toast && window.toast(`Échec : ${file.name}`, 'error');
-    } catch(e) {
-      window.toast && window.toast(`Erreur réseau : ${file.name}`, 'error');
-    }
-
-    progressBar.style.width = `${((i + 1) / filesToSend.length) * 100}%`;
+  try {
+    progressBar.style.width = '60%';
+    const resp = await fetch(UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrfToken() },
+      body: formData,
+    });
+    progressBar.style.width = '100%';
+    if (!resp.ok) window.toast && window.toast('Échec de l\'envoi', 'error');
+  } catch(e) {
+    window.toast && window.toast('Erreur réseau', 'error');
   }
 
   setTimeout(() => { progressEl.classList.remove('active'); progressBar.style.width = '0%'; }, 600);
