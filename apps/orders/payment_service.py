@@ -149,20 +149,27 @@ class PayUnitService:
                 'transaction_id':    ref_mock,
             }
 
-        return_url = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}'
-        notify_url = f'{site_url}/api/commandes/webhook/payunit/'
+        return_url     = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}'
+        notify_url     = f'{site_url}/api/commandes/webhook/payunit/'
+        cancel_url     = f'{site_url}/commandes/passer/'
+        success_url    = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}'
+        transaction_id = str(commande.reference)
 
         # ── Corps de la requête ───────────────────────────────────────────────
         payload = {
-            'total_amount': int(paiement.montant),
-            'currency':     'XAF',
-            'return_url':   return_url,
-            'notify_url':   notify_url,
-            'purchaseRef':  str(commande.reference),
-            'description':  f'Commande HooYia #{commande.reference_courte}',
-            'name':         f'{client.prenom} {client.nom}'.strip() or client.username,
-            'email':        client.email,
-            'phone':        paiement.telephone_paiement,
+            'total_amount':   int(paiement.montant),
+            'currency':       'XAF',
+            'return_url':     return_url,
+            'notify_url':     notify_url,
+            'cancel_url':     cancel_url,
+            'success_url':    success_url,
+            'transaction_id': transaction_id,
+            'purchaseRef':    transaction_id,
+            'mode':           getattr(settings, 'PAYUNIT_MODE', 'test'),
+            'description':    f'Commande HooYia #{commande.reference_courte}',
+            'name':           f'{client.prenom} {client.nom}'.strip() or client.username,
+            'email':          client.email,
+            'phone':          paiement.telephone_paiement,
         }
 
         logger.info(
