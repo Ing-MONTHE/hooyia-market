@@ -6,6 +6,7 @@ Inclus dans config/urls.py via :
 """
 from django.urls import path
 from . import api_views
+from .webhook import PayUnitWebhookView
 
 urlpatterns = [
     # ── Liste et création ─────────────────────────────────────
@@ -13,7 +14,7 @@ urlpatterns = [
     path('creer/',  api_views.CommandeCreerAPIView.as_view(),  name='api_commande_creer'),
 
     # ── Webhook PayUnit (public — appelé par PayUnit) ────────
-    path('webhook/payunit/', api_views.PayUnitWebhookAPIView.as_view(), name='api_webhook_payunit'),
+    path('webhook/payunit/', PayUnitWebhookView.as_view(), name='api_webhook_payunit'),
 
     # ── Détail et actions sur une commande ────────────────────
     path('<int:pk>/',          api_views.CommandeDetailAPIView.as_view(),  name='api_commande_detail'),
