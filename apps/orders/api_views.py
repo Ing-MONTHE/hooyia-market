@@ -149,7 +149,7 @@ class CommandeCreerAPIView(APIView):
         try:
             from .payment_service import PayUnitService, PayUnitError
             result = PayUnitService.initialize(commande.paiement, request)
-            authorization_url = result['authorization_url']
+            authorization_url = result['payment_url']
         except PayUnitError as e:
             OrderService.annuler_commande(commande, request.user)
             return Response({'erreur': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
