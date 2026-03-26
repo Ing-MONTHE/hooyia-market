@@ -333,7 +333,7 @@ GOOGLE_REDIRECT_URI  = config('GOOGLE_REDIRECT_URI',  default='https://hooyiamar
 PAYUNIT_API_USER     = config('PAYUNIT_API_USER',     default='')
 PAYUNIT_API_PASSWORD = config('PAYUNIT_API_PASSWORD', default='')
 PAYUNIT_APP_TOKEN    = config('PAYUNIT_APP_TOKEN',    default='')
-PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='test')
+PAYUNIT_MODE         = config('PAYUNIT_MODE',         default='Sandbox')
 
 
 # ═══════════════════════════════════════════════
