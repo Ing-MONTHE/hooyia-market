@@ -113,9 +113,9 @@ class PayUnitService:
         for ligne in commande.lignes.all():
             # Récupère l'image du produit si disponible, sinon image par défaut
             image_url = f'{site_url}/static/img/product_default.png'
-            if hasattr(ligne, 'produit') and ligne.produit and ligne.produit.image:
+            if hasattr(ligne, 'produit') and ligne.produit and ligne.produit.images.exists():
                 try:
-                    image_url = f'{site_url}{ligne.produit.image.url}'
+                    image_url = f'{site_url}{ligne.produit.images.first().image.url}'
                 except Exception:
                     pass  # Garde l'image par défaut
 
