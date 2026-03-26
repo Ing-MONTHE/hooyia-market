@@ -37,7 +37,7 @@ from .models import Paiement
 
 logger = logging.getLogger(__name__)
 
-PAYUNIT_BASE_URL = 'https://gateway.payunit.net'
+PAYUNIT_BASE_URL = 'https://pu.payunit.net'
 
 
 class PayUnitError(Exception):
