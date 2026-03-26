@@ -25,7 +25,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _l
 from django_fsm import TransitionNotAllowed
 
-from .models import Commande
+from .models import Commande, Paiement
 from .serializers import (
     CommandeListSerializer,
     CommandeDetailSerializer,
@@ -255,6 +255,22 @@ class TransitionCommandeAPIView(APIView):
                 {'erreur': _('Commande introuvable.')},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+        # ── Vérification paiement avant confirmation ─────────────────────────
+        # Un admin ne peut confirmer une commande que si le paiement est réussi.
+        if self.transition_method == 'confirmer':
+            try:
+                paiement = commande.paiement
+                if paiement.statut != Paiement.StatutPaiement.REUSSI:
+                    return Response(
+                        {'erreur': _('Impossible de confirmer : le paiement n\'est pas encore effectué (statut : %(s)s).') % {'s': paiement.statut}},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except Exception:
+                return Response(
+                    {'erreur': _('Impossible de confirmer : aucun paiement associé à cette commande.')},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         try:
             methode = getattr(commande, self.transition_method)
