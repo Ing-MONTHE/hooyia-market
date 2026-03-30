@@ -13,6 +13,7 @@ Toutes ces routes nécessitent d'être authentifié (IsAuthenticated).
 Le panier est toujours celui de l'utilisateur connecté,
 on ne peut jamais accéder au panier d'un autre utilisateur.
 """
+
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -35,12 +36,14 @@ from apps.users.permissions import EstClient
 # GET /api/panier/
 # ═══════════════════════════════════════════════════════════════
 
+
 class PanierAPIView(APIView):
     """
     Retourne le panier complet de l'utilisateur connecté.
     Inclut toutes les lignes avec les infos des produits,
     les sous-totaux et le total général.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -52,7 +55,7 @@ class PanierAPIView(APIView):
         # get_or_create retourne (instance, created_bool)
         panier, _ = Panier.objects.get_or_create(utilisateur=request.user)
 
-        serializer = PanierSerializer(panier, context={'request': request})
+        serializer = PanierSerializer(panier, context={"request": request})
         return Response(serializer.data)
 
 
@@ -61,12 +64,14 @@ class PanierAPIView(APIView):
 # POST /api/panier/ajouter/
 # ═══════════════════════════════════════════════════════════════
 
+
 class AjouterItemAPIView(APIView):
     """
     Ajoute un produit au panier de l'utilisateur connecté.
     Si le produit est déjà dans le panier, la quantité est augmentée.
     Toute la logique métier est dans CartService.add_item().
     """
+
     permission_classes = [EstClient]
 
     def post(self, request):
@@ -85,25 +90,25 @@ class AjouterItemAPIView(APIView):
         try:
             # Délègue toute la logique au service
             item = CartService.add_item(
-                panier     = panier,
-                produit_id = serializer.validated_data['produit_id'],
-                quantite   = serializer.validated_data['quantite'],
+                panier=panier,
+                produit_id=serializer.validated_data["produit_id"],
+                quantite=serializer.validated_data["quantite"],
             )
         except ValidationError as e:
             # CartService lève une ValidationError si le produit est indisponible
             # ou si la quantité dépasse le stock
-            return Response(
-                {'erreur': e.message},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"erreur": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
         # Retourne la ligne créée/mise à jour et le résumé du panier
-        return Response({
-            'message'        : _('Article ajouté au panier.'),
-            'item'           : PanierItemSerializer(item, context={'request': request}).data,
-            'nombre_articles': panier.nombre_articles,
-            'total'          : str(panier.total),
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": _("Article ajouté au panier."),
+                "item": PanierItemSerializer(item, context={"request": request}).data,
+                "nombre_articles": panier.nombre_articles,
+                "total": str(panier.total),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -112,11 +117,13 @@ class AjouterItemAPIView(APIView):
 # DELETE /api/panier/items/<id>/
 # ═══════════════════════════════════════════════════════════════
 
+
 class PanierItemAPIView(APIView):
     """
     Modifie la quantité ou supprime une ligne du panier.
     Vérifie toujours que la ligne appartient au panier de l'utilisateur connecté.
     """
+
     permission_classes = [EstClient]
 
     def patch(self, request, pk):
@@ -134,33 +141,36 @@ class PanierItemAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': _('Panier introuvable.')},
-                status=status.HTTP_404_NOT_FOUND
+                {"erreur": _("Panier introuvable.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         try:
             item = CartService.update_quantity(
-                panier            = panier,
-                item_id           = pk,
-                nouvelle_quantite = serializer.validated_data['quantite'],
+                panier=panier,
+                item_id=pk,
+                nouvelle_quantite=serializer.validated_data["quantite"],
             )
         except ValidationError as e:
-            return Response({'erreur': e.message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"erreur": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
         # Si quantite = 0, CartService retourne None (ligne supprimée)
         if item is None:
-            return Response({
-                'message'        : _('Article supprimé du panier.'),
-                'nombre_articles': panier.nombre_articles,
-                'total'          : str(panier.total),
-            })
+            return Response(
+                {
+                    "message": _("Article supprimé du panier."),
+                    "nombre_articles": panier.nombre_articles,
+                    "total": str(panier.total),
+                }
+            )
 
-        return Response({
-            'message'        : _('Quantité mise à jour.'),
-            'item'           : PanierItemSerializer(item, context={'request': request}).data,
-            'nombre_articles': panier.nombre_articles,
-            'total'          : str(panier.total),
-        })
+        return Response(
+            {
+                "message": _("Quantité mise à jour."),
+                "item": PanierItemSerializer(item, context={"request": request}).data,
+                "nombre_articles": panier.nombre_articles,
+                "total": str(panier.total),
+            }
+        )
 
     def delete(self, request, pk):
         """
@@ -171,20 +181,22 @@ class PanierItemAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': _('Panier introuvable.')},
-                status=status.HTTP_404_NOT_FOUND
+                {"erreur": _("Panier introuvable.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         try:
             CartService.remove_item(panier=panier, item_id=pk)
         except ValidationError as e:
-            return Response({'erreur': e.message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"erreur": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({
-            'message'        : _('Article supprimé du panier.'),
-            'nombre_articles': panier.nombre_articles,
-            'total'          : str(panier.total),
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": _("Article supprimé du panier."),
+                "nombre_articles": panier.nombre_articles,
+                "total": str(panier.total),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -192,11 +204,13 @@ class PanierItemAPIView(APIView):
 # DELETE /api/panier/vider/
 # ═══════════════════════════════════════════════════════════════
 
+
 class ViderPanierAPIView(APIView):
     """
     Supprime tous les articles du panier en une seule opération.
     Le panier lui-même est conservé (prêt pour la prochaine commande).
     """
+
     permission_classes = [EstClient]
 
     def delete(self, request):
@@ -208,42 +222,51 @@ class ViderPanierAPIView(APIView):
             panier = request.user.panier
         except Panier.DoesNotExist:
             return Response(
-                {'erreur': _('Panier introuvable.')},
-                status=status.HTTP_404_NOT_FOUND
+                {"erreur": _("Panier introuvable.")}, status=status.HTTP_404_NOT_FOUND
             )
 
         panier.vider()  # Supprime tous les PanierItem (méthode du modèle)
 
         return Response(
-            {'message': _('Panier vidé avec succès.')},
-            status=status.HTTP_200_OK
+            {"message": _("Panier vidé avec succès.")}, status=status.HTTP_200_OK
         )
+
 
 # ═══════════════════════════════════════════════════════════════
 # VUE API ADMIN — Liste tous les paniers actifs
 # GET /api/panier/admin/ → réservé aux admins
 # ═══════════════════════════════════════════════════════════════
 
+
 class PaniersAdminAPIView(APIView):
     """Liste tous les paniers avec articles — admin seulement."""
+
     permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
         from apps.cart.models import Panier
-        paniers = Panier.objects.filter(
-            items__isnull=False
-        ).distinct().select_related('utilisateur').prefetch_related('items__produit')
+
+        paniers = (
+            Panier.objects.filter(items__isnull=False)
+            .distinct()
+            .select_related("utilisateur")
+            .prefetch_related("items__produit")
+        )
 
         data = []
         for p in paniers:
             items = p.items.all()
             total = sum(i.prix_snapshot * i.quantite for i in items)
-            data.append({
-                'id': p.id,
-                'utilisateur': p.utilisateur.username if p.utilisateur else '—',
-                'utilisateur_email': p.utilisateur.email if p.utilisateur else '—',
-                'nb_articles': sum(i.quantite for i in items),
-                'montant_total': float(total),
-                'date_modification': p.date_modification.isoformat() if p.date_modification else None,
-            })
+            data.append(
+                {
+                    "id": p.id,
+                    "utilisateur": p.utilisateur.username if p.utilisateur else "—",
+                    "utilisateur_email": p.utilisateur.email if p.utilisateur else "—",
+                    "nb_articles": sum(i.quantite for i in items),
+                    "montant_total": float(total),
+                    "date_modification": (
+                        p.date_modification.isoformat() if p.date_modification else None
+                    ),
+                }
+            )
         return Response(data)

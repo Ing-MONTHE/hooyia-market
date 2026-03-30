@@ -3,12 +3,14 @@ Vues HTML pour le catalogue produits.
 Ces vues retournent des pages HTML qui chargent
 les données via JavaScript (fetch API → JSON).
 """
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.cache import cache
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from .models import Produit, Categorie, ImageProduit
+
 
 def est_admin(user):
     return user.is_authenticated and user.is_staff
@@ -20,38 +22,45 @@ def est_admin(user):
 
 from django.contrib.auth.decorators import login_required
 
+
 def conditions_utilisation(request):
-    return render(request, 'legal/conditions.html')
+    return render(request, "legal/conditions.html")
 
 
 def politique_confidentialite(request):
-    return render(request, 'legal/politique.html')
+    return render(request, "legal/politique.html")
 
 
-@login_required(login_url='/compte/connexion/')
-@login_required(login_url='/compte/connexion/')
+@login_required(login_url="/compte/connexion/")
+@login_required(login_url="/compte/connexion/")
 def contact(request):
-    return render(request, 'legal/contact.html')
+    return render(request, "legal/contact.html")
 
 
 def faq(request):
-    return render(request, 'legal/faq.html')
+    return render(request, "legal/faq.html")
 
 
 def assistance(request):
-    return render(request, 'legal/assistance.html')
+    return render(request, "legal/assistance.html")
 
 
 def apropos(request):
-    return render(request, 'legal/apropos.html')
+    return render(request, "legal/apropos.html")
 
 
 def mentions_legales(request):
     u = request.user
-    if not (u.is_staff or u.is_superuser or getattr(u, 'is_admin', False) or getattr(u, 'is_vendeur', False)):
+    if not (
+        u.is_staff
+        or u.is_superuser
+        or getattr(u, "is_admin", False)
+        or getattr(u, "is_vendeur", False)
+    ):
         from django.core.exceptions import PermissionDenied
+
         raise PermissionDenied
-    return render(request, 'legal/mentions.html')
+    return render(request, "legal/mentions.html")
 
 
 def avis_plateforme(request):
@@ -61,15 +70,21 @@ def avis_plateforme(request):
     La soumission se fait via l'API POST /api/avis-app/creer/ en JS.
     """
     from apps.reviews.models import AvisApp
+
     deja_soumis = AvisApp.objects.filter(utilisateur=request.user).exists()
-    return render(request, 'products/avis_plateforme.html', {
-        'deja_soumis': deja_soumis,
-    })
+    return render(
+        request,
+        "products/avis_plateforme.html",
+        {
+            "deja_soumis": deja_soumis,
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Page d'accueil
 # ═══════════════════════════════════════════════════════════════
+
 
 def accueil(request):
     """
@@ -81,49 +96,44 @@ def accueil(request):
       - nouveaux_arrivages: les 8 produits les plus récents (statut actif)
     """
     # ── Catégories racines — mises en cache 1h ──
-    categories = cache.get('categories_racines')
+    categories = cache.get("categories_racines")
     if not categories:
-        categories = Categorie.objects.filter(
-            parent=None,
-            est_active=True
-        )
-        cache.set('categories_racines', categories, 3600)
+        categories = Categorie.objects.filter(parent=None, est_active=True)
+        cache.set("categories_racines", categories, 3600)
 
     # ── Produits en vedette (maxi 8) ──
     # prefetch_related('images') évite les N+1 queries pour les images
     produits_vedette = (
-        Produit.objects
-        .filter(statut='actif', en_vedette=True)
-        .prefetch_related('images')
-        .select_related('categorie')
-        [:8]
+        Produit.objects.filter(statut="actif", en_vedette=True)
+        .prefetch_related("images")
+        .select_related("categorie")[:8]
     )
 
     # ── Nouveaux arrivages (8 derniers produits actifs) ──
     nouveaux_arrivages = (
-        Produit.objects
-        .filter(statut='actif')
-        .prefetch_related('images')
-        .select_related('categorie')
-        .order_by('-date_creation')
-        [:8]
+        Produit.objects.filter(statut="actif")
+        .prefetch_related("images")
+        .select_related("categorie")
+        .order_by("-date_creation")[:8]
     )
 
     u = request.user
     context = {
-        'categories':        categories,
-        'produits_vedette':  produits_vedette,
-        'nouveaux_arrivages': nouveaux_arrivages,
-        'titre':             'HooYia Market — Électronique & Informatique',
-        'est_admin':   u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
-        'est_vendeur': u.is_authenticated and getattr(u, 'is_vendeur', False),
+        "categories": categories,
+        "produits_vedette": produits_vedette,
+        "nouveaux_arrivages": nouveaux_arrivages,
+        "titre": "HooYia Market — Électronique & Informatique",
+        "est_admin": u.is_authenticated
+        and (getattr(u, "is_admin", False) or u.is_staff or u.is_superuser),
+        "est_vendeur": u.is_authenticated and getattr(u, "is_vendeur", False),
     }
-    return render(request, 'home.html', context)
+    return render(request, "home.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Liste des produits (Catalogue)
 # ═══════════════════════════════════════════════════════════════
+
 
 def liste_produits(request):
     """
@@ -134,77 +144,97 @@ def liste_produits(request):
     from django.core.paginator import Paginator
     from .filters import ProduitFilter
 
-    categories = Categorie.objects.filter(est_active=True, parent=None).prefetch_related('sous_categories')
+    categories = Categorie.objects.filter(
+        est_active=True, parent=None
+    ).prefetch_related("sous_categories")
 
-    categorie_slug = request.GET.get('categorie', '')
+    categorie_slug = request.GET.get("categorie", "")
     categorie_active = None
     if categorie_slug:
         categorie_active = Categorie.objects.filter(slug=categorie_slug).first()
 
     # Construire le queryset avec filtres GET
-    qs = Produit.objects.filter(statut='actif').select_related('categorie').prefetch_related('images')
+    qs = (
+        Produit.objects.filter(statut="actif")
+        .select_related("categorie")
+        .prefetch_related("images")
+    )
 
-    search = request.GET.get('search', '').strip()
+    search = request.GET.get("search", "").strip()
     if search:
         from django.db.models import Q
+
         qs = qs.filter(Q(nom__icontains=search) | Q(description__icontains=search))
 
     if categorie_slug and categorie_active:
         # Si la catégorie a des enfants (mère), inclure tous les enfants
         # Si c'est une feuille (sous-catégorie), filtrer uniquement sur elle
-        sous_slugs = list(categorie_active.sous_categories.values_list('slug', flat=True))
+        sous_slugs = list(
+            categorie_active.sous_categories.values_list("slug", flat=True)
+        )
         if sous_slugs:
             # Catégorie mère : produits de la mère ET de tous ses enfants
             from django.db.models import Q
-            qs = qs.filter(Q(categorie__slug=categorie_slug) | Q(categorie__slug__in=sous_slugs))
+
+            qs = qs.filter(
+                Q(categorie__slug=categorie_slug) | Q(categorie__slug__in=sous_slugs)
+            )
         else:
             # Sous-catégorie feuille : filtre exact
             qs = qs.filter(categorie__slug=categorie_slug)
 
-    promo = request.GET.get('promo')
+    promo = request.GET.get("promo")
     if promo:
         qs = qs.filter(prix_promo__isnull=False)
 
-    en_vedette = request.GET.get('en_vedette')
+    en_vedette = request.GET.get("en_vedette")
     if en_vedette:
         qs = qs.filter(en_vedette=True)
 
-    ordering = request.GET.get('ordering', '-date_creation')
-    allowed_orderings = ['prix', '-prix', '-date_creation', 'date_creation', '-note_moyenne']
+    ordering = request.GET.get("ordering", "-date_creation")
+    allowed_orderings = [
+        "prix",
+        "-prix",
+        "-date_creation",
+        "date_creation",
+        "-note_moyenne",
+    ]
     if ordering in allowed_orderings:
         qs = qs.order_by(ordering)
     else:
-        qs = qs.order_by('-date_creation')
+        qs = qs.order_by("-date_creation")
 
     paginator = Paginator(qs, 12)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
 
     # Conserver les paramètres GET sans 'page' pour les liens de pagination
     params = request.GET.copy()
-    params.pop('page', None)
+    params.pop("page", None)
     params_str = params.urlencode()
 
     u = request.user
     context = {
-        'categories'      : categories,
-        'categorie_active': categorie_active,
-        'titre'           : 'Catalogue — HooYia Market',
-        'page_obj'        : page_obj,
-        'paginator'       : paginator,
-        'params_str'      : params_str,
-        'total_count'     : paginator.count,
-        'search'          : search,
-        'ordering'        : ordering,
-        'est_admin': u.is_authenticated and (getattr(u, 'is_admin', False) or u.is_staff or u.is_superuser),
-        'est_vendeur': u.is_authenticated and getattr(u, 'is_vendeur', False),
+        "categories": categories,
+        "categorie_active": categorie_active,
+        "titre": "Catalogue — HooYia Market",
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "params_str": params_str,
+        "total_count": paginator.count,
+        "search": search,
+        "ordering": ordering,
+        "est_admin": u.is_authenticated
+        and (getattr(u, "is_admin", False) or u.is_staff or u.is_superuser),
+        "est_vendeur": u.is_authenticated and getattr(u, "is_vendeur", False),
     }
-    return render(request, 'products/list.html', context)
+    return render(request, "products/list.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Détail d'un produit
 # ═══════════════════════════════════════════════════════════════
+
 
 def detail_produit(request, slug):
     """
@@ -216,13 +246,15 @@ def detail_produit(request, slug):
     from apps.users.models import CustomUser
 
     # Mise en cache du produit 10 minutes
-    cache_key = f'produit_slug_{slug}'
-    produit   = cache.get(cache_key)
+    cache_key = f"produit_slug_{slug}"
+    produit = cache.get(cache_key)
 
     if not produit:
         produit = get_object_or_404(
-            Produit.objects.select_related('categorie', 'vendeur').prefetch_related('images'),
-            slug=slug
+            Produit.objects.select_related("categorie", "vendeur").prefetch_related(
+                "images"
+            ),
+            slug=slug,
         )
         cache.set(cache_key, produit, 600)
 
@@ -230,31 +262,35 @@ def detail_produit(request, slug):
     admin = CustomUser.objects.filter(is_admin=True, is_active=True).first()
 
     context = {
-        'produit'  : produit,
-        'titre'    : f'{produit.nom} — HooYia Market',
-        'admin_id' : admin.id if admin else None,
+        "produit": produit,
+        "titre": f"{produit.nom} — HooYia Market",
+        "admin_id": admin.id if admin else None,
     }
-    return render(request, 'products/detail.html', context)
+    return render(request, "products/detail.html", context)
+
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Ajouter un produit (admin uniquement)
 # ═══════════════════════════════════════════════════════════════
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
-def ajouter_produit(request):
-    categories = Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories')
 
-    if request.method == 'POST':
-        nom = request.POST.get('nom', '').strip()
-        description = request.POST.get('description', '').strip()
-        description_courte = request.POST.get('description_courte', '').strip()
-        categorie_id = request.POST.get('categorie')
-        prix = request.POST.get('prix')
-        prix_promo = request.POST.get('prix_promo') or None
-        stock = request.POST.get('stock', 0)
-        stock_minimum = request.POST.get('stock_minimum', 5)
-        statut = request.POST.get('statut', 'actif')
-        en_vedette = 'en_vedette' in request.POST
+@user_passes_test(est_admin, login_url="/compte/connexion/")
+def ajouter_produit(request):
+    categories = Categorie.objects.filter(
+        parent=None, est_active=True
+    ).prefetch_related("sous_categories")
+
+    if request.method == "POST":
+        nom = request.POST.get("nom", "").strip()
+        description = request.POST.get("description", "").strip()
+        description_courte = request.POST.get("description_courte", "").strip()
+        categorie_id = request.POST.get("categorie")
+        prix = request.POST.get("prix")
+        prix_promo = request.POST.get("prix_promo") or None
+        stock = request.POST.get("stock", 0)
+        stock_minimum = request.POST.get("stock_minimum", 5)
+        statut = request.POST.get("statut", "actif")
+        en_vedette = "en_vedette" in request.POST
 
         if not nom or not description or not prix:
             messages.error(request, _("Veuillez remplir tous les champs obligatoires."))
@@ -275,7 +311,7 @@ def ajouter_produit(request):
                 )
 
                 # Traitement des images
-                images = request.FILES.getlist('images')
+                images = request.FILES.getlist("images")
                 for i, img_file in enumerate(images):
                     ImageProduit.objects.create(
                         produit=produit,
@@ -285,60 +321,84 @@ def ajouter_produit(request):
                     )
 
                 # Invalider le cache
-                cache.delete('categories_api')
-                cache.delete('categories_racines')
+                cache.delete("categories_api")
+                cache.delete("categories_racines")
 
-                messages.success(request, _("Produit « %(nom)s » créé avec succès !") % {'nom': produit.nom})
-                return redirect('products:detail', slug=produit.slug)
+                messages.success(
+                    request,
+                    _("Produit « %(nom)s » créé avec succès !") % {"nom": produit.nom},
+                )
+                return redirect("products:detail", slug=produit.slug)
 
             except Exception as e:
-                messages.error(request, _("Erreur lors de la création : %(err)s") % {'err': str(e)})
+                messages.error(
+                    request, _("Erreur lors de la création : %(err)s") % {"err": str(e)}
+                )
 
     context = {
-        'categories': categories,
-        'form': type('obj', (object,), {
-            'nom': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-            'description': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-            'description_courte': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-            'prix': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-            'prix_promo': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-            'stock': type('f', (object,), {'value': lambda s: 0, 'errors': []})(),
-            'stock_minimum': type('f', (object,), {'value': lambda s: 5, 'errors': []})(),
-            'statut': type('f', (object,), {'value': 'actif', 'errors': []})(),
-            'en_vedette': type('f', (object,), {'value': False, 'errors': []})(),
-            'categorie': type('f', (object,), {'value': lambda s: '', 'errors': []})(),
-        })(),
+        "categories": categories,
+        "form": type(
+            "obj",
+            (object,),
+            {
+                "nom": type("f", (object,), {"value": lambda s: "", "errors": []})(),
+                "description": type(
+                    "f", (object,), {"value": lambda s: "", "errors": []}
+                )(),
+                "description_courte": type(
+                    "f", (object,), {"value": lambda s: "", "errors": []}
+                )(),
+                "prix": type("f", (object,), {"value": lambda s: "", "errors": []})(),
+                "prix_promo": type(
+                    "f", (object,), {"value": lambda s: "", "errors": []}
+                )(),
+                "stock": type("f", (object,), {"value": lambda s: 0, "errors": []})(),
+                "stock_minimum": type(
+                    "f", (object,), {"value": lambda s: 5, "errors": []}
+                )(),
+                "statut": type("f", (object,), {"value": "actif", "errors": []})(),
+                "en_vedette": type("f", (object,), {"value": False, "errors": []})(),
+                "categorie": type(
+                    "f", (object,), {"value": lambda s: "", "errors": []}
+                )(),
+            },
+        )(),
     }
-    return render(request, 'products/ajouter_produit.html', context)
+    return render(request, "products/ajouter_produit.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Modifier un produit (admin uniquement)
 # ═══════════════════════════════════════════════════════════════
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
+
+@user_passes_test(est_admin, login_url="/compte/connexion/")
 def modifier_produit(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
-    categories = Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories')
+    categories = Categorie.objects.filter(
+        parent=None, est_active=True
+    ).prefetch_related("sous_categories")
 
-    if request.method == 'POST':
-        produit.nom = request.POST.get('nom', produit.nom).strip()
-        produit.description = request.POST.get('description', produit.description).strip()
-        produit.description_courte = request.POST.get('description_courte', '').strip()
-        categorie_id = request.POST.get('categorie')
+    if request.method == "POST":
+        produit.nom = request.POST.get("nom", produit.nom).strip()
+        produit.description = request.POST.get(
+            "description", produit.description
+        ).strip()
+        produit.description_courte = request.POST.get("description_courte", "").strip()
+        categorie_id = request.POST.get("categorie")
         produit.categorie_id = categorie_id if categorie_id else None
-        produit.prix = request.POST.get('prix', produit.prix)
-        produit.prix_promo = request.POST.get('prix_promo') or None
-        produit.stock = request.POST.get('stock', produit.stock)
-        produit.stock_minimum = request.POST.get('stock_minimum', produit.stock_minimum)
-        produit.statut = request.POST.get('statut', produit.statut)
-        produit.en_vedette = 'en_vedette' in request.POST
+        produit.prix = request.POST.get("prix", produit.prix)
+        produit.prix_promo = request.POST.get("prix_promo") or None
+        produit.stock = request.POST.get("stock", produit.stock)
+        produit.stock_minimum = request.POST.get("stock_minimum", produit.stock_minimum)
+        produit.statut = request.POST.get("statut", produit.statut)
+        produit.en_vedette = "en_vedette" in request.POST
 
         try:
             produit.save()
 
             # Nouvelles images
-            images = request.FILES.getlist('images')
+            images = request.FILES.getlist("images")
             for i, img_file in enumerate(images):
                 ImageProduit.objects.create(
                     produit=produit,
@@ -347,84 +407,125 @@ def modifier_produit(request, produit_id):
                     est_principale=(produit.images.count() == 0 and i == 0),
                 )
 
-            cache.delete(f'produit_slug_{produit.slug}')
+            cache.delete(f"produit_slug_{produit.slug}")
             messages.success(request, _("Produit modifié avec succès !"))
-            return redirect('products:detail', slug=produit.slug)
+            return redirect("products:detail", slug=produit.slug)
         except Exception as e:
-            messages.error(request, _("Erreur : %(err)s") % {'err': str(e)})
+            messages.error(request, _("Erreur : %(err)s") % {"err": str(e)})
 
     context = {
-        'produit': produit,
-        'categories': categories,
-        'form': type('obj', (object,), {
-            'nom': type('f', (object,), {'value': produit.nom, 'errors': []})(),
-            'description': type('f', (object,), {'value': produit.description, 'errors': []})(),
-            'description_courte': type('f', (object,), {'value': produit.description_courte, 'errors': []})(),
-            'prix': type('f', (object,), {'value': str(produit.prix), 'errors': []})(),
-            'prix_promo': type('f', (object,), {'value': str(produit.prix_promo) if produit.prix_promo else '', 'errors': []})(),
-            'stock': type('f', (object,), {'value': produit.stock, 'errors': []})(),
-            'stock_minimum': type('f', (object,), {'value': produit.stock_minimum, 'errors': []})(),
-            'statut': type('f', (object,), {'value': produit.statut, 'errors': []})(),
-            'en_vedette': type('f', (object,), {'value': produit.en_vedette, 'errors': []})(),
-            'categorie': type('f', (object,), {'value': str(produit.categorie_id) if produit.categorie_id else '', 'errors': []})(),
-        })(),
+        "produit": produit,
+        "categories": categories,
+        "form": type(
+            "obj",
+            (object,),
+            {
+                "nom": type("f", (object,), {"value": produit.nom, "errors": []})(),
+                "description": type(
+                    "f", (object,), {"value": produit.description, "errors": []}
+                )(),
+                "description_courte": type(
+                    "f", (object,), {"value": produit.description_courte, "errors": []}
+                )(),
+                "prix": type(
+                    "f", (object,), {"value": str(produit.prix), "errors": []}
+                )(),
+                "prix_promo": type(
+                    "f",
+                    (object,),
+                    {
+                        "value": str(produit.prix_promo) if produit.prix_promo else "",
+                        "errors": [],
+                    },
+                )(),
+                "stock": type("f", (object,), {"value": produit.stock, "errors": []})(),
+                "stock_minimum": type(
+                    "f", (object,), {"value": produit.stock_minimum, "errors": []}
+                )(),
+                "statut": type(
+                    "f", (object,), {"value": produit.statut, "errors": []}
+                )(),
+                "en_vedette": type(
+                    "f", (object,), {"value": produit.en_vedette, "errors": []}
+                )(),
+                "categorie": type(
+                    "f",
+                    (object,),
+                    {
+                        "value": (
+                            str(produit.categorie_id) if produit.categorie_id else ""
+                        ),
+                        "errors": [],
+                    },
+                )(),
+            },
+        )(),
     }
-    return render(request, 'products/ajouter_produit.html', context)
+    return render(request, "products/ajouter_produit.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Supprimer un produit (admin uniquement)
 # ═══════════════════════════════════════════════════════════════
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
+
+@user_passes_test(est_admin, login_url="/compte/connexion/")
 def supprimer_produit(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
-    if request.method == 'POST':
+    if request.method == "POST":
         nom = produit.nom
-        cache.delete(f'produit_slug_{produit.slug}')
+        cache.delete(f"produit_slug_{produit.slug}")
         produit.delete()
-        messages.success(request, _("Produit « %(nom)s » supprimé.") % {'nom': nom})
-        return redirect('products:liste')
-    return redirect('products:detail', slug=produit.slug)
+        messages.success(request, _("Produit « %(nom)s » supprimé.") % {"nom": nom})
+        return redirect("products:liste")
+    return redirect("products:detail", slug=produit.slug)
+
 
 # ──────────────────────────────────────────────────────────────
 # GESTION DES CATÉGORIES (admin uniquement)
 # ──────────────────────────────────────────────────────────────
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
+
+@user_passes_test(est_admin, login_url="/compte/connexion/")
 def gestion_categories(request):
     """Liste + formulaire d'ajout/modification de catégories."""
     categories_racines = Categorie.objects.filter(parent=None, est_active=True)
     toutes_categories = Categorie.objects.filter(est_active=True)
 
-    modifier_id = request.GET.get('modifier')
+    modifier_id = request.GET.get("modifier")
     categorie_edit = None
     if modifier_id:
         categorie_edit = get_object_or_404(Categorie, id=modifier_id)
 
-    if request.method == 'POST':
-        action = request.POST.get('action', 'creer')
-        nom = request.POST.get('nom', '').strip()
-        description = request.POST.get('description', '').strip()
-        parent_id = request.POST.get('parent') or None
-        est_active = 'est_active' in request.POST
+    if request.method == "POST":
+        action = request.POST.get("action", "creer")
+        nom = request.POST.get("nom", "").strip()
+        description = request.POST.get("description", "").strip()
+        parent_id = request.POST.get("parent") or None
+        est_active = "est_active" in request.POST
 
         if not nom:
             messages.error(request, _("Le nom est obligatoires."))
         else:
             try:
-                if action == 'modifier' and request.POST.get('categorie_id'):
-                    cat = get_object_or_404(Categorie, id=request.POST.get('categorie_id'))
+                if action == "modifier" and request.POST.get("categorie_id"):
+                    cat = get_object_or_404(
+                        Categorie, id=request.POST.get("categorie_id")
+                    )
                     cat.nom = nom
                     cat.description = description
                     cat.parent_id = parent_id
                     cat.est_active = est_active
-                    if 'image' in request.FILES:
-                        cat.image = request.FILES['image']
+                    if "image" in request.FILES:
+                        cat.image = request.FILES["image"]
                     cat.save()
-                    cache.delete('categories_api')
-                    cache.delete('categories_racines')
-                    messages.success(request, _("Catégorie « %(nom)s » modifiée avec succès !") % {'nom': cat.nom})
+                    cache.delete("categories_api")
+                    cache.delete("categories_racines")
+                    messages.success(
+                        request,
+                        _("Catégorie « %(nom)s » modifiée avec succès !")
+                        % {"nom": cat.nom},
+                    )
                 else:
                     cat = Categorie.objects.create(
                         nom=nom,
@@ -432,56 +533,70 @@ def gestion_categories(request):
                         parent_id=parent_id,
                         est_active=est_active,
                     )
-                    if 'image' in request.FILES:
-                        cat.image = request.FILES['image']
+                    if "image" in request.FILES:
+                        cat.image = request.FILES["image"]
                         cat.save()
-                    cache.delete('categories_api')
-                    cache.delete('categories_racines')
-                    messages.success(request, _("Catégorie « %(nom)s » créée avec succès !") % {'nom': cat.nom})
-                return redirect('products:gestion_categories')
+                    cache.delete("categories_api")
+                    cache.delete("categories_racines")
+                    messages.success(
+                        request,
+                        _("Catégorie « %(nom)s » créée avec succès !")
+                        % {"nom": cat.nom},
+                    )
+                return redirect("products:gestion_categories")
             except Exception as e:
-                messages.error(request, _("Erreur : %(err)s") % {'err': str(e)})
+                messages.error(request, _("Erreur : %(err)s") % {"err": str(e)})
 
-    return render(request, 'products/gestion_categories.html', {
-        'categories_racines': categories_racines,
-        'toutes_categories': toutes_categories,
-        'categorie_edit': categorie_edit,
-    })
+    return render(
+        request,
+        "products/gestion_categories.html",
+        {
+            "categories_racines": categories_racines,
+            "toutes_categories": toutes_categories,
+            "categorie_edit": categorie_edit,
+        },
+    )
 
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
+@user_passes_test(est_admin, login_url="/compte/connexion/")
 def api_categories_crud(request):
     """Endpoint JSON pour le CRUD des catégories depuis le dashboard."""
     from django.http import JsonResponse
     import json
 
-    if request.method == 'GET':
+    if request.method == "GET":
         # Liste toutes les catégories (racines + sous-catégories)
-        cats = Categorie.objects.filter(est_active=True).select_related('parent').order_by('tree_id', 'lft')
+        cats = (
+            Categorie.objects.filter(est_active=True)
+            .select_related("parent")
+            .order_by("tree_id", "lft")
+        )
         data = []
         for c in cats:
-            data.append({
-                'id': c.id,
-                'nom': c.nom,
-                'slug': c.slug,
-                'description': c.description,
-                'parent_id': c.parent_id,
-                'parent_nom': c.parent.nom if c.parent else None,
-                'est_active': c.est_active,
-                'image': c.image.url if c.image else None,
-                'niveau': 'Niveau 1' if c.parent else 'Niveau 0',
-                'nb_produits': c.produits.count(),
-            })
-        return JsonResponse({'categories': data})
+            data.append(
+                {
+                    "id": c.id,
+                    "nom": c.nom,
+                    "slug": c.slug,
+                    "description": c.description,
+                    "parent_id": c.parent_id,
+                    "parent_nom": c.parent.nom if c.parent else None,
+                    "est_active": c.est_active,
+                    "image": c.image.url if c.image else None,
+                    "niveau": "Niveau 1" if c.parent else "Niveau 0",
+                    "nb_produits": c.produits.count(),
+                }
+            )
+        return JsonResponse({"categories": data})
 
-    elif request.method == 'POST':
-        nom = request.POST.get('nom', '').strip()
+    elif request.method == "POST":
+        nom = request.POST.get("nom", "").strip()
         if not nom:
-            return JsonResponse({'error': _('Le nom est obligatoire.')}, status=400)
-        description = request.POST.get('description', '').strip()
-        parent_id = request.POST.get('parent_id') or None
-        est_active = request.POST.get('est_active', 'true') == 'true'
-        cat_id = request.POST.get('cat_id')
+            return JsonResponse({"error": _("Le nom est obligatoire.")}, status=400)
+        description = request.POST.get("description", "").strip()
+        parent_id = request.POST.get("parent_id") or None
+        est_active = request.POST.get("est_active", "true") == "true"
+        cat_id = request.POST.get("cat_id")
 
         try:
             if cat_id:
@@ -491,10 +606,10 @@ def api_categories_crud(request):
                 cat.description = description
                 cat.parent_id = parent_id
                 cat.est_active = est_active
-                if 'image' in request.FILES:
-                    cat.image = request.FILES['image']
+                if "image" in request.FILES:
+                    cat.image = request.FILES["image"]
                 cat.save()
-                action = 'modified'
+                action = "modified"
             else:
                 # Création
                 cat = Categorie.objects.create(
@@ -503,57 +618,59 @@ def api_categories_crud(request):
                     parent_id=parent_id,
                     est_active=est_active,
                 )
-                if 'image' in request.FILES:
-                    cat.image = request.FILES['image']
+                if "image" in request.FILES:
+                    cat.image = request.FILES["image"]
                     cat.save()
-                action = 'created'
-            cache.delete('categories_api')
-            cache.delete('categories_racines')
-            return JsonResponse({
-                'success': True,
-                'action': action,
-                'categorie': {
-                    'id': cat.id,
-                    'nom': cat.nom,
-                    'slug': cat.slug,
-                    'parent_id': cat.parent_id,
-                    'parent_nom': cat.parent.nom if cat.parent else None,
-                    'image': cat.image.url if cat.image else None,
-                    'est_active': cat.est_active,
-                    'niveau': 'Niveau 1' if cat.parent else 'Niveau 0',
-                    'nb_produits': cat.produits.count(),
+                action = "created"
+            cache.delete("categories_api")
+            cache.delete("categories_racines")
+            return JsonResponse(
+                {
+                    "success": True,
+                    "action": action,
+                    "categorie": {
+                        "id": cat.id,
+                        "nom": cat.nom,
+                        "slug": cat.slug,
+                        "parent_id": cat.parent_id,
+                        "parent_nom": cat.parent.nom if cat.parent else None,
+                        "image": cat.image.url if cat.image else None,
+                        "est_active": cat.est_active,
+                        "niveau": "Niveau 1" if cat.parent else "Niveau 0",
+                        "nb_produits": cat.produits.count(),
+                    },
                 }
-            })
+            )
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({"error": str(e)}, status=400)
 
-    elif request.method == 'DELETE':
-        body = json.loads(request.body or '{}')
-        cat_id = body.get('cat_id')
+    elif request.method == "DELETE":
+        body = json.loads(request.body or "{}")
+        cat_id = body.get("cat_id")
         if not cat_id:
-            return JsonResponse({'error': _('cat_id manquant')}, status=400)
+            return JsonResponse({"error": _("cat_id manquant")}, status=400)
         cat = get_object_or_404(Categorie, id=cat_id)
         nom = cat.nom
         cat.est_active = False
         cat.save()
-        cache.delete('categories_api')
-        cache.delete('categories_racines')
-        return JsonResponse({'success': True, 'nom': nom})
+        cache.delete("categories_api")
+        cache.delete("categories_racines")
+        return JsonResponse({"success": True, "nom": nom})
 
-    return JsonResponse({'error': _('Méthode non autorisée')}, status=405)
+    return JsonResponse({"error": _("Méthode non autorisée")}, status=405)
 
 
-@user_passes_test(est_admin, login_url='/compte/connexion/')
+@user_passes_test(est_admin, login_url="/compte/connexion/")
 def supprimer_categorie(request, cat_id):
     """Suppression (désactivation) d'une catégorie."""
     cat = get_object_or_404(Categorie, id=cat_id)
     nom = cat.nom
     cat.est_active = False
     cat.save()
-    cache.delete('categories_api')
-    cache.delete('categories_racines')
-    messages.success(request, _("Catégorie « %(nom)s » supprimée.") % {'nom': nom})
-    return redirect('products:gestion_categories')
+    cache.delete("categories_api")
+    cache.delete("categories_racines")
+    messages.success(request, _("Catégorie « %(nom)s » supprimée.") % {"nom": nom})
+    return redirect("products:gestion_categories")
 
 
 # ──────────────────────────────────────────────────────────────
@@ -566,11 +683,14 @@ def admin_dashboard(request):
     from apps.cart.models import Panier
 
     context = {
-        'users_count':  CustomUser.objects.filter(is_active=True).count(),
-        'paniers_count': Panier.objects.filter(items__isnull=False).distinct().count(),
-        'categories': Categorie.objects.filter(parent=None, est_active=True).prefetch_related('sous_categories'),
+        "users_count": CustomUser.objects.filter(is_active=True).count(),
+        "paniers_count": Panier.objects.filter(items__isnull=False).distinct().count(),
+        "categories": Categorie.objects.filter(
+            parent=None, est_active=True
+        ).prefetch_related("sous_categories"),
     }
-    return render(request, 'admin/admin_dashboard.html', context)
+    return render(request, "admin/admin_dashboard.html", context)
+
 
 # ── Autocomplete recherche ──
 from django.http import JsonResponse
@@ -583,12 +703,13 @@ from django.db.models import Q
 # pour une première version simple et fonctionnelle.
 # ═══════════════════════════════════════════════════════════════
 
+
 def est_vendeur(user):
     """Guard : utilisateur authentifié ET vendeur (ou admin)."""
     return user.is_authenticated and (user.is_vendeur or user.is_staff)
 
 
-@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+@user_passes_test(est_vendeur, login_url="/compte/connexion/")
 def vendeur_dashboard(request):
     """
     Tableau de bord vendeur.
@@ -610,21 +731,24 @@ def vendeur_dashboard(request):
     ).distinct()
 
     # CA total sur commandes livrées
-    ca = commandes_qs.filter(statut='livree').aggregate(
-        total=Sum('montant_total')
-    )['total'] or 0
+    ca = (
+        commandes_qs.filter(statut="livree").aggregate(total=Sum("montant_total"))[
+            "total"
+        ]
+        or 0
+    )
 
     context = {
-        'nb_produits':       produits_qs.filter(statut='actif').count(),
-        'nb_commandes':      commandes_qs.count(),
-        'ca_total':          ca,
-        'produits_recents':  produits_qs.order_by('-date_creation')[:5],
-        'commandes_recentes': commandes_qs.order_by('-date_creation')[:5],
+        "nb_produits": produits_qs.filter(statut="actif").count(),
+        "nb_commandes": commandes_qs.count(),
+        "ca_total": ca,
+        "produits_recents": produits_qs.order_by("-date_creation")[:5],
+        "commandes_recentes": commandes_qs.order_by("-date_creation")[:5],
     }
-    return render(request, 'vendeur/dashboard.html', context)
+    return render(request, "vendeur/dashboard.html", context)
 
 
-@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+@user_passes_test(est_vendeur, login_url="/compte/connexion/")
 def vendeur_produits(request):
     """
     Liste de tous les produits du vendeur avec filtres statut.
@@ -632,25 +756,24 @@ def vendeur_produits(request):
       - produits  : queryset filtré selon ?statut=
       - statut    : valeur du filtre actif
     """
-    statut = request.GET.get('statut', '')
+    statut = request.GET.get("statut", "")
     produits_qs = (
-        Produit.objects
-        .filter(vendeur=request.user)
-        .prefetch_related('images')
-        .select_related('categorie')
-        .order_by('-date_creation')
+        Produit.objects.filter(vendeur=request.user)
+        .prefetch_related("images")
+        .select_related("categorie")
+        .order_by("-date_creation")
     )
     if statut:
         produits_qs = produits_qs.filter(statut=statut)
 
     context = {
-        'produits': produits_qs,
-        'statut':   statut,
+        "produits": produits_qs,
+        "statut": statut,
     }
-    return render(request, 'vendeur/produits.html', context)
+    return render(request, "vendeur/produits.html", context)
 
 
-@user_passes_test(est_vendeur, login_url='/compte/connexion/')
+@user_passes_test(est_vendeur, login_url="/compte/connexion/")
 def vendeur_commandes(request):
     """
     Commandes contenant les produits du vendeur, avec filtre statut.
@@ -660,44 +783,43 @@ def vendeur_commandes(request):
     """
     from apps.orders.models import Commande
 
-    statut = request.GET.get('statut', '')
+    statut = request.GET.get("statut", "")
     commandes_qs = (
-        Commande.objects
-        .filter(lignes__produit__vendeur=request.user)
+        Commande.objects.filter(lignes__produit__vendeur=request.user)
         .distinct()
-        .select_related('utilisateur')
-        .prefetch_related('lignes__produit')
-        .order_by('-date_creation')
+        .select_related("utilisateur")
+        .prefetch_related("lignes__produit")
+        .order_by("-date_creation")
     )
     if statut:
         commandes_qs = commandes_qs.filter(statut=statut)
 
     context = {
-        'commandes': commandes_qs,
-        'statut':    statut,
+        "commandes": commandes_qs,
+        "statut": statut,
     }
-    return render(request, 'vendeur/commandes.html', context)
+    return render(request, "vendeur/commandes.html", context)
 
 
 def autocomplete_search(request):
-    q = request.GET.get('q', '').strip()
+    q = request.GET.get("q", "").strip()
     if len(q) < 2:
-        return JsonResponse({'results': []})
+        return JsonResponse({"results": []})
     produits = (
-        Produit.objects
-        .filter(statut='actif')
+        Produit.objects.filter(statut="actif")
         .filter(Q(nom__icontains=q) | Q(categorie__nom__icontains=q))
-        .select_related('categorie')
-        .prefetch_related('images')
-        [:8]
+        .select_related("categorie")
+        .prefetch_related("images")[:8]
     )
     results = []
     for p in produits:
         img = p.images.filter(est_principale=True).first() or p.images.first()
-        results.append({
-            'nom': p.nom,
-            'slug': p.slug,
-            'prix': str(p.prix_actuel),
-            'image': img.image.url if img else None,
-        })
-    return JsonResponse({'results': results})
+        results.append(
+            {
+                "nom": p.nom,
+                "slug": p.slug,
+                "prix": str(p.prix_actuel),
+                "image": img.image.url if img else None,
+            }
+        )
+    return JsonResponse({"results": results})

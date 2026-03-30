@@ -1,29 +1,49 @@
 from django.urls import path
 from . import views
 
-app_name = 'products'
+app_name = "products"
 
 urlpatterns = [
-    path('',                              views.accueil,          name='accueil'),
-    path('conditions-utilisation/',       views.conditions_utilisation,    name='conditions'),
-    path('politique-confidentialite/',    views.politique_confidentialite, name='politique'),
-    path('mentions-legales/',              views.mentions_legales,          name='mentions'),
-    path('a-propos/',                      views.apropos,                   name='apropos'),
-    path('assistance/',                    views.assistance,                name='assistance'),
-    path('faq/',                           views.faq,                       name='faq'),
-    path('contact/',                      views.contact,                   name='contact'),
-    path('avis-plateforme/',              views.avis_plateforme,  name='avis_plateforme'),
-    path('produits/',                     views.liste_produits,   name='liste'),
-    path('produits/autocomplete/',        views.autocomplete_search, name='autocomplete'),
-    path('produits/ajouter/',             views.ajouter_produit,  name='ajouter'),
-    path('produits/modifier/<int:produit_id>/', views.modifier_produit, name='modifier'),
-    path('produits/supprimer/<int:produit_id>/', views.supprimer_produit, name='supprimer'),
-    path('produits/<slug:slug>/',         views.detail_produit,   name='detail'),
-    path('administration/',              views.admin_dashboard,  name='admin_dashboard'),
-    path('administration/categories/',   views.gestion_categories, name='gestion_categories'),
-    path('administration/categories/supprimer/<int:cat_id>/', views.supprimer_categorie, name='supprimer_categorie'),
-    path('administration/categories/api/', views.api_categories_crud, name='api_categories_crud'),
-    path('vendeur/',                      views.vendeur_dashboard,  name='vendeur_dashboard'),
-    path('vendeur/produits/',             views.vendeur_produits,   name='vendeur_produits'),
-    path('vendeur/commandes/',            views.vendeur_commandes,  name='vendeur_commandes'),
+    path("", views.accueil, name="accueil"),
+    path("conditions-utilisation/", views.conditions_utilisation, name="conditions"),
+    path(
+        "politique-confidentialite/", views.politique_confidentialite, name="politique"
+    ),
+    path("mentions-legales/", views.mentions_legales, name="mentions"),
+    path("a-propos/", views.apropos, name="apropos"),
+    path("assistance/", views.assistance, name="assistance"),
+    path("faq/", views.faq, name="faq"),
+    path("contact/", views.contact, name="contact"),
+    path("avis-plateforme/", views.avis_plateforme, name="avis_plateforme"),
+    path("produits/", views.liste_produits, name="liste"),
+    path("produits/autocomplete/", views.autocomplete_search, name="autocomplete"),
+    path("produits/ajouter/", views.ajouter_produit, name="ajouter"),
+    path(
+        "produits/modifier/<int:produit_id>/", views.modifier_produit, name="modifier"
+    ),
+    path(
+        "produits/supprimer/<int:produit_id>/",
+        views.supprimer_produit,
+        name="supprimer",
+    ),
+    path("produits/<slug:slug>/", views.detail_produit, name="detail"),
+    path("administration/", views.admin_dashboard, name="admin_dashboard"),
+    path(
+        "administration/categories/",
+        views.gestion_categories,
+        name="gestion_categories",
+    ),
+    path(
+        "administration/categories/supprimer/<int:cat_id>/",
+        views.supprimer_categorie,
+        name="supprimer_categorie",
+    ),
+    path(
+        "administration/categories/api/",
+        views.api_categories_crud,
+        name="api_categories_crud",
+    ),
+    path("vendeur/", views.vendeur_dashboard, name="vendeur_dashboard"),
+    path("vendeur/produits/", views.vendeur_produits, name="vendeur_produits"),
+    path("vendeur/commandes/", views.vendeur_commandes, name="vendeur_commandes"),
 ]

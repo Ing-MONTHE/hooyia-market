@@ -2,13 +2,14 @@
 Configuration de l'application orders.
 Charge les signals au démarrage de Django.
 """
+
 from django.apps import AppConfig
 
 
 class OrdersConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.orders'
-    verbose_name = 'Commandes'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.orders"
+    verbose_name = "Commandes"
 
     def ready(self):
         # Importe les signals → Django les enregistre au démarrage

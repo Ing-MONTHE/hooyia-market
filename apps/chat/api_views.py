@@ -13,6 +13,7 @@ Endpoints :
 Toutes les routes nécessitent d'être authentifié.
 Un utilisateur ne voit que SES conversations.
 """
+
 from rest_framework import generics, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -38,6 +39,7 @@ from .serializers import (
 # HELPERS
 # ═══════════════════════════════════════════════════════════════
 
+
 def _verifier_participant(conversation, user):
     """
     Lève PermissionDenied si l'utilisateur n'est pas participant.
@@ -45,6 +47,7 @@ def _verifier_participant(conversation, user):
     """
     if conversation.participant1 != user and conversation.participant2 != user:
         from rest_framework.exceptions import PermissionDenied
+
         raise PermissionDenied(_("Vous n'êtes pas membre de cette conversation."))
 
 
@@ -73,16 +76,16 @@ def _broadcaster_fichier(conversation_id, message, request):
     try:
         fichier = message.fichier
         payload = {
-            'type'          : 'chat_message',
-            'message'       : message.contenu,
-            'message_id'    : message.id,
-            'expediteur_id' : message.expediteur.id,
-            'expediteur'    : message.expediteur.username,
-            'timestamp'     : message.date_envoi.isoformat(),
-            'msg_type'      : message.type_message,  # 'file' ou 'image'
-            'fichier_url'   : request.build_absolute_uri(fichier.fichier.url),
-            'fichier_nom'   : fichier.nom_original,
-            'fichier_taille': fichier.taille,
+            "type": "chat_message",
+            "message": message.contenu,
+            "message_id": message.id,
+            "expediteur_id": message.expediteur.id,
+            "expediteur": message.expediteur.username,
+            "timestamp": message.date_envoi.isoformat(),
+            "msg_type": message.type_message,  # 'file' ou 'image'
+            "fichier_url": request.build_absolute_uri(fichier.fichier.url),
+            "fichier_nom": fichier.nom_original,
+            "fichier_taille": fichier.taille,
         }
         group_name = f"chat_{conversation_id}"
         async_to_sync(channel_layer.group_send)(group_name, payload)
@@ -94,23 +97,27 @@ def _broadcaster_fichier(conversation_id, message, request):
 # VUE API — Liste et création des conversations
 # ═══════════════════════════════════════════════════════════════
 
+
 class ConversationListeAPIView(generics.ListAPIView):
     """
     GET : retourne la liste des conversations de l'utilisateur connecté.
     """
-    serializer_class   = ConversationListSerializer
+
+    serializer_class = ConversationListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        qs = Conversation.objects.select_related(
-            'participant1', 'participant2'
-        ).prefetch_related(
-            'messages__expediteur',
-            'messages__fichier',
-        ).order_by('-date_creation')
+        qs = (
+            Conversation.objects.select_related("participant1", "participant2")
+            .prefetch_related(
+                "messages__expediteur",
+                "messages__fichier",
+            )
+            .order_by("-date_creation")
+        )
 
-        if user.is_staff or getattr(user, 'is_admin', False):
+        if user.is_staff or getattr(user, "is_admin", False):
             return qs
         return qs.filter(Q(participant1=user) | Q(participant2=user))
 
@@ -120,12 +127,12 @@ class ConversationCreerAPIView(APIView):
     POST /api/chat/creer/
     Démarre une conversation avec un autre utilisateur.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = CreerConversationSerializer(
-            data=request.data,
-            context={'request': request}
+            data=request.data, context={"request": request}
         )
 
         if not serializer.is_valid():
@@ -134,8 +141,7 @@ class ConversationCreerAPIView(APIView):
         conversation, created = serializer.save()
 
         response_data = ConversationListSerializer(
-            conversation,
-            context={'request': request}
+            conversation, context={"request": request}
         ).data
 
         http_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
@@ -146,20 +152,23 @@ class ConversationCreerAPIView(APIView):
 # VUE API — Détail d'une conversation
 # ═══════════════════════════════════════════════════════════════
 
+
 class ConversationDetailAPIView(generics.RetrieveAPIView):
     """
     GET /api/chat/<id>/ → messages de la conversation.
     Marque automatiquement les messages non lus comme lus.
     """
-    serializer_class   = ConversationDetailSerializer
+
+    serializer_class = ConversationDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         user = self.request.user
         conv = get_object_or_404(
-            Conversation.objects.select_related('participant1', 'participant2')
-            .prefetch_related('messages__expediteur', 'messages__fichier'),
-            id=self.kwargs['pk'],
+            Conversation.objects.select_related(
+                "participant1", "participant2"
+            ).prefetch_related("messages__expediteur", "messages__fichier"),
+            id=self.kwargs["pk"],
         )
         _verifier_participant(conv, user)
 
@@ -167,7 +176,9 @@ class ConversationDetailAPIView(generics.RetrieveAPIView):
         MessageChat.objects.filter(
             conversation=conv,
             is_read=False,
-        ).exclude(expediteur=user).update(is_read=True)
+        ).exclude(
+            expediteur=user
+        ).update(is_read=True)
 
         return conv
 
@@ -176,11 +187,13 @@ class ConversationDetailAPIView(generics.RetrieveAPIView):
 # VUE API — Envoyer un message texte (fallback HTTP)
 # ═══════════════════════════════════════════════════════════════
 
+
 class EnvoyerMessageAPIView(APIView):
     """
     POST /api/chat/<id>/envoyer/
     Envoie un message texte via REST (fallback si WebSocket non disponible).
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
@@ -188,11 +201,11 @@ class EnvoyerMessageAPIView(APIView):
         conv = get_object_or_404(Conversation, id=pk)
         _verifier_participant(conv, user)
 
-        contenu = request.data.get('message', '').strip()
+        contenu = request.data.get("message", "").strip()
         if not contenu:
             return Response(
-                {'detail': _('Le message ne peut pas être vide.')},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("Le message ne peut pas être vide.")},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         message = MessageChat.objects.create(
@@ -203,8 +216,8 @@ class EnvoyerMessageAPIView(APIView):
         )
 
         return Response(
-            MessageChatSerializer(message, context={'request': request}).data,
-            status=status.HTTP_201_CREATED
+            MessageChatSerializer(message, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -212,6 +225,7 @@ class EnvoyerMessageAPIView(APIView):
 # VUE API — Upload d'un fichier            ← NOUVEAU
 # POST /api/chat/<id>/upload/
 # ═══════════════════════════════════════════════════════════════
+
 
 class UploadFichierAPIView(APIView):
     """
@@ -235,8 +249,9 @@ class UploadFichierAPIView(APIView):
       403 : utilisateur non participant
       404 : conversation introuvable
     """
+
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes     = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, pk):
         user = request.user
@@ -244,18 +259,21 @@ class UploadFichierAPIView(APIView):
         _verifier_participant(conv, user)
 
         # Support multi-fichiers : fichier[] ou fichier (rétrocompat)
-        fichiers = request.FILES.getlist('fichier')
-        if not fichiers and 'fichier' in request.FILES:
-            fichiers = [request.FILES['fichier']]
+        fichiers = request.FILES.getlist("fichier")
+        if not fichiers and "fichier" in request.FILES:
+            fichiers = [request.FILES["fichier"]]
         if not fichiers:
-            return Response({'detail': _('Aucun fichier fourni.')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": _("Aucun fichier fourni.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        contenu_texte = request.data.get('contenu', '').strip()
+        contenu_texte = request.data.get("contenu", "").strip()
         messages_crees = []
 
         for i, fichier in enumerate(fichiers):
             # Le texte n'est attaché qu'au PREMIER fichier
-            data = {'fichier': fichier, 'contenu': contenu_texte if i == 0 else ''}
+            data = {"fichier": fichier, "contenu": contenu_texte if i == 0 else ""}
             serializer = UploadFichierSerializer(data=data)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -264,8 +282,10 @@ class UploadFichierAPIView(APIView):
             messages_crees.append(message)
 
         return Response(
-            MessageChatSerializer(messages_crees, many=True, context={'request': request}).data,
-            status=status.HTTP_201_CREATED
+            MessageChatSerializer(
+                messages_crees, many=True, context={"request": request}
+            ).data,
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -273,6 +293,7 @@ class UploadFichierAPIView(APIView):
 # VUE API — Lister les fichiers d'une conversation  ← NOUVEAU
 # GET /api/chat/<id>/fichiers/
 # ═══════════════════════════════════════════════════════════════
+
 
 class FichiersConversationAPIView(generics.ListAPIView):
     """
@@ -282,26 +303,31 @@ class FichiersConversationAPIView(generics.ListAPIView):
 
     Response : liste de FichierChatSerializer.data, triés par date (récent en premier)
     """
-    serializer_class   = FichierChatSerializer
+
+    serializer_class = FichierChatSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        conv = get_object_or_404(Conversation, id=self.kwargs['pk'])
+        conv = get_object_or_404(Conversation, id=self.kwargs["pk"])
         _verifier_participant(conv, self.request.user)
-        return FichierChat.objects.filter(
-            conversation=conv
-        ).select_related('message').order_by('-date_upload')
+        return (
+            FichierChat.objects.filter(conversation=conv)
+            .select_related("message")
+            .order_by("-date_upload")
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE API — Marquer les messages comme lus
 # ═══════════════════════════════════════════════════════════════
 
+
 class MarquerLuAPIView(APIView):
     """
     POST /api/chat/<id>/marquer_lu/
     Marque tous les messages non lus de la conversation comme lus.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
@@ -309,12 +335,16 @@ class MarquerLuAPIView(APIView):
         conv = get_object_or_404(Conversation, id=pk)
         _verifier_participant(conv, user)
 
-        updated = MessageChat.objects.filter(
-            conversation=conv,
-            is_read=False,
-        ).exclude(expediteur=user).update(is_read=True)
+        updated = (
+            MessageChat.objects.filter(
+                conversation=conv,
+                is_read=False,
+            )
+            .exclude(expediteur=user)
+            .update(is_read=True)
+        )
 
         return Response(
-            {'detail': _('%(n)s message(s) marqué(s) comme lu(s).') % {'n': updated}},
-            status=status.HTTP_200_OK
+            {"detail": _("%(n)s message(s) marqué(s) comme lu(s).") % {"n": updated}},
+            status=status.HTTP_200_OK,
         )

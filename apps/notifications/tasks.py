@@ -20,6 +20,7 @@ Comment appeler une tâche Celery depuis le code :
   # Exécution synchrone (pour les tests uniquement)
   send_order_confirmation_email(commande_id)
 """
+
 import logging
 from celery import shared_task
 from django.utils import timezone
@@ -33,7 +34,8 @@ logger = logging.getLogger(__name__)
 # UTILITAIRE — Diffuser une notification WebSocket
 # ═══════════════════════════════════════════════════════════════
 
-def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien=''):
+
+def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien=""):
     """
     Crée une Notification en DB et la diffuse via WebSocket (Redis Channel Layer).
     Appelé par toutes les tâches après envoi d'email.
@@ -53,25 +55,24 @@ def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien='
         from asgiref.sync import async_to_sync
 
         channel_layer = get_channel_layer()
-        group_name    = f"notifications_{utilisateur_id}"
+        group_name = f"notifications_{utilisateur_id}"
 
         unread_count = Notification.objects.filter(
-            utilisateur_id=utilisateur_id,
-            is_read=False
+            utilisateur_id=utilisateur_id, is_read=False
         ).count()
 
         async_to_sync(channel_layer.group_send)(
             group_name,
             {
-                'type'        : 'notif_message',
-                'id'          : notif.id,
-                'titre'       : titre,
-                'message'     : message,
-                'type_notif'  : type_notif,
-                'lien'        : lien,
-                'unread_count': unread_count,
-                'date'        : notif.date_creation.isoformat(),
-            }
+                "type": "notif_message",
+                "id": notif.id,
+                "titre": titre,
+                "message": message,
+                "type_notif": type_notif,
+                "lien": lien,
+                "unread_count": unread_count,
+                "date": notif.date_creation.isoformat(),
+            },
         )
     except Exception as e:
         logger.warning(f"WebSocket notification non diffusée : {e}")
@@ -82,6 +83,7 @@ def _diffuser_notification_ws(utilisateur_id, titre, message, type_notif, lien='
 # ═══════════════════════════════════════════════════════════════
 # UTILITAIRE — Créer et envoyer un email loggué
 # ═══════════════════════════════════════════════════════════════
+
 
 def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=None):
     """
@@ -109,18 +111,18 @@ def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=
         )
         if html_template and html_context:
             html_content = render_to_string(html_template, html_context)
-            email.attach_alternative(html_content, 'text/html')
+            email.attach_alternative(html_content, "text/html")
         email.send(fail_silently=False)
 
-        log_email.statut     = EmailAsynchrone.STATUT_ENVOYE
+        log_email.statut = EmailAsynchrone.STATUT_ENVOYE
         log_email.date_envoi = timezone.now()
-        log_email.save(update_fields=['statut', 'date_envoi'])
+        log_email.save(update_fields=["statut", "date_envoi"])
         logger.info(f"Email envoyé à {destinataire.email} : {sujet}")
 
     except Exception as e:
         log_email.statut = EmailAsynchrone.STATUT_ECHEC
         log_email.erreur = str(e)
-        log_email.save(update_fields=['statut', 'erreur'])
+        log_email.save(update_fields=["statut", "erreur"])
         logger.error(f"Échec envoi email à {destinataire.email} : {e}")
 
     return log_email
@@ -131,6 +133,7 @@ def _envoyer_email(destinataire, sujet, corps, html_template=None, html_context=
 # Déclenchée par : orders/signals.py après transition CONFIRMEE
 # Appel          : send_order_confirmation_email.delay(commande_id)
 # ═══════════════════════════════════════════════════════════════
+
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_order_confirmation_email(self, commande_id):
@@ -144,54 +147,61 @@ def send_order_confirmation_email(self, commande_id):
     from apps.orders.models import Commande
 
     try:
-        commande = Commande.objects.select_related('client').get(pk=commande_id)
-        client   = commande.client
+        commande = Commande.objects.select_related("client").get(pk=commande_id)
+        client = commande.client
 
-        sujet = _("[HooYia Market] Commande #%(ref)s confirmée ✓") % {'ref': commande.reference_courte}
-        corps = (
-            _("Bonjour %(username)s,\n\n"
-              "Votre commande #%(ref)s a bien été confirmée.\n"
-              "Montant total : %(montant)s FCFA\n\n"
-              "Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n\n"
-              "Merci pour votre confiance !\n"
-              "L'équipe HooYia Market") % {
-                'username': client.username,
-                'ref'     : commande.reference_courte,
-                'montant' : commande.montant_total,
-            }
-        )
+        sujet = _("[HooYia Market] Commande #%(ref)s confirmée ✓") % {
+            "ref": commande.reference_courte
+        }
+        corps = _(
+            "Bonjour %(username)s,\n\n"
+            "Votre commande #%(ref)s a bien été confirmée.\n"
+            "Montant total : %(montant)s FCFA\n\n"
+            "Nous préparons votre colis. Vous recevrez un email dès l'expédition.\n\n"
+            "Merci pour votre confiance !\n"
+            "L'équipe HooYia Market"
+        ) % {
+            "username": client.username,
+            "ref": commande.reference_courte,
+            "montant": commande.montant_total,
+        }
 
         _envoyer_email(
-            client, sujet, corps,
-            html_template='notifications/emails/order_confirm.html',
+            client,
+            sujet,
+            corps,
+            html_template="notifications/emails/order_confirm.html",
             html_context={
-                'client_username': client.username,
-                'reference'      : commande.reference_courte,
-                'date'           : commande.date_creation.strftime('%d/%m/%Y'),
-                'montant_total'  : commande.montant_total,
-                'lignes'         : [
+                "client_username": client.username,
+                "reference": commande.reference_courte,
+                "date": commande.date_creation.strftime("%d/%m/%Y"),
+                "montant_total": commande.montant_total,
+                "lignes": [
                     {
-                        'nom'     : l.produit_nom,
-                        'quantite': l.quantite,
-                        'total'   : l.prix_unitaire * l.quantite
+                        "nom": l.produit_nom,
+                        "quantite": l.quantite,
+                        "total": l.prix_unitaire * l.quantite,
                     }
                     for l in commande.lignes.all()
                 ],
-                'lien_commande': f"/commandes/{commande.id}/",
-                'lien_chat'    : "/chat/",
-            }
+                "lien_commande": f"/commandes/{commande.id}/",
+                "lien_chat": "/chat/",
+            },
         )
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
             titre=_("Commande confirmée !"),
-            message=_("Votre commande #%(ref)s est confirmée.") % {'ref': commande.reference_courte},
-            type_notif='commande',
+            message=_("Votre commande #%(ref)s est confirmée.")
+            % {"ref": commande.reference_courte},
+            type_notif="commande",
             lien=f"/commandes/{commande.id}/",
         )
 
     except Commande.DoesNotExist:
-        logger.error(f"send_order_confirmation_email : commande #{commande_id} introuvable")
+        logger.error(
+            f"send_order_confirmation_email : commande #{commande_id} introuvable"
+        )
 
     except Exception as exc:
         logger.error(f"send_order_confirmation_email erreur : {exc}")
@@ -205,6 +215,7 @@ def send_order_confirmation_email(self, commande_id):
 # Appel          : send_status_update_email.delay(commande_id)
 # ═══════════════════════════════════════════════════════════════
 
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_status_update_email(self, commande_id):
     """
@@ -213,70 +224,84 @@ def send_status_update_email(self, commande_id):
     from apps.orders.models import Commande
 
     MESSAGES_STATUT = {
-        Commande.EN_PREPARATION: (_("En préparation 📦"), _("Votre commande est en cours de préparation.")),
-        Commande.EXPEDIEE      : (_("Commande expédiée 🚚"), _("Votre commande est en route !")),
-        Commande.LIVREE        : (_("Commande livrée ✓"), _("Votre commande a bien été livrée.")),
-        Commande.ANNULEE       : (_("Commande annulée"), _("Votre commande a été annulée.")),
+        Commande.EN_PREPARATION: (
+            _("En préparation 📦"),
+            _("Votre commande est en cours de préparation."),
+        ),
+        Commande.EXPEDIEE: (
+            _("Commande expédiée 🚚"),
+            _("Votre commande est en route !"),
+        ),
+        Commande.LIVREE: (
+            _("Commande livrée ✓"),
+            _("Votre commande a bien été livrée."),
+        ),
+        Commande.ANNULEE: (_("Commande annulée"), _("Votre commande a été annulée.")),
     }
 
     LABELS_STATUT = {
         Commande.EN_PREPARATION: _("En préparation 📦"),
-        Commande.EXPEDIEE      : _("Expédiée 🚚"),
-        Commande.LIVREE        : _("Livrée ✅"),
-        Commande.ANNULEE       : _("Annulée ❌"),
+        Commande.EXPEDIEE: _("Expédiée 🚚"),
+        Commande.LIVREE: _("Livrée ✅"),
+        Commande.ANNULEE: _("Annulée ❌"),
     }
 
     ICONES_STATUT = {
         Commande.EN_PREPARATION: "📦",
-        Commande.EXPEDIEE      : "🚚",
-        Commande.LIVREE        : "✅",
-        Commande.ANNULEE       : "❌",
+        Commande.EXPEDIEE: "🚚",
+        Commande.LIVREE: "✅",
+        Commande.ANNULEE: "❌",
     }
 
     try:
-        commande = Commande.objects.select_related('client').get(pk=commande_id)
-        client   = commande.client
+        commande = Commande.objects.select_related("client").get(pk=commande_id)
+        client = commande.client
 
         titre_statut, msg_statut = MESSAGES_STATUT.get(
             commande.statut,
-            (_("Mise à jour commande"), _("Statut : %(statut)s") % {'statut': commande.statut})
+            (
+                _("Mise à jour commande"),
+                _("Statut : %(statut)s") % {"statut": commande.statut},
+            ),
         )
 
         sujet = _("[HooYia Market] Commande #%(ref)s — %(titre)s") % {
-            'ref'  : commande.reference_courte,
-            'titre': titre_statut,
+            "ref": commande.reference_courte,
+            "titre": titre_statut,
         }
-        corps = (
-            _("Bonjour %(username)s,\n\n%(msg)s\nRéférence : #%(ref)s\n\nL'équipe HooYia Market") % {
-                'username': client.username,
-                'msg'     : msg_statut,
-                'ref'     : commande.reference_courte,
-            }
-        )
+        corps = _(
+            "Bonjour %(username)s,\n\n%(msg)s\nRéférence : #%(ref)s\n\nL'équipe HooYia Market"
+        ) % {
+            "username": client.username,
+            "msg": msg_statut,
+            "ref": commande.reference_courte,
+        }
 
         _envoyer_email(
-            client, sujet, corps,
-            html_template='notifications/emails/status_update.html',
+            client,
+            sujet,
+            corps,
+            html_template="notifications/emails/status_update.html",
             html_context={
-                'client_username': client.username,
-                'reference'      : commande.reference_courte,
-                'date'           : commande.date_creation.strftime('%d/%m/%Y'),
-                'montant_total'  : commande.montant_total,
-                'statut'         : commande.statut,
-                'titre_statut'   : titre_statut,
-                'label_statut'   : LABELS_STATUT.get(commande.statut, commande.statut),
-                'icone'          : ICONES_STATUT.get(commande.statut, "📋"),
-                'message_intro'  : msg_statut,
-                'lien_commande'  : f"/commandes/{commande.id}/",
-                'lien_chat'      : "/chat/",
-            }
+                "client_username": client.username,
+                "reference": commande.reference_courte,
+                "date": commande.date_creation.strftime("%d/%m/%Y"),
+                "montant_total": commande.montant_total,
+                "statut": commande.statut,
+                "titre_statut": titre_statut,
+                "label_statut": LABELS_STATUT.get(commande.statut, commande.statut),
+                "icone": ICONES_STATUT.get(commande.statut, "📋"),
+                "message_intro": msg_statut,
+                "lien_commande": f"/commandes/{commande.id}/",
+                "lien_chat": "/chat/",
+            },
         )
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
             titre=titre_statut,
             message=msg_statut,
-            type_notif='commande',
+            type_notif="commande",
             lien=f"/commandes/{commande.id}/",
         )
 
@@ -297,6 +322,7 @@ def send_status_update_email(self, commande_id):
 #                  )
 # ═══════════════════════════════════════════════════════════════
 
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_review_reminder(self, commande_id):
     """
@@ -306,35 +332,38 @@ def send_review_reminder(self, commande_id):
     from apps.orders.models import Commande
 
     try:
-        commande = Commande.objects.select_related('client').prefetch_related(
-            'lignes__produit'
-        ).get(pk=commande_id)
+        commande = (
+            Commande.objects.select_related("client")
+            .prefetch_related("lignes__produit")
+            .get(pk=commande_id)
+        )
         client = commande.client
 
-        noms_produits  = [l.produit_nom for l in commande.lignes.all()]
+        noms_produits = [l.produit_nom for l in commande.lignes.all()]
         liste_produits = "\n".join(f"  - {nom}" for nom in noms_produits[:5])
 
         sujet = _("[HooYia Market] Votre avis nous intéresse !")
-        corps = (
-            _("Bonjour %(username)s,\n\n"
-              "Votre commande #%(ref)s a été livrée.\n"
-              "Nous espérons que vous êtes satisfait(e) de vos achats :\n\n"
-              "%(produits)s\n\n"
-              "Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n\n"
-              "L'équipe HooYia Market") % {
-                'username': client.username,
-                'ref'     : commande.reference_courte,
-                'produits': liste_produits,
-            }
-        )
+        corps = _(
+            "Bonjour %(username)s,\n\n"
+            "Votre commande #%(ref)s a été livrée.\n"
+            "Nous espérons que vous êtes satisfait(e) de vos achats :\n\n"
+            "%(produits)s\n\n"
+            "Prenez 2 minutes pour laisser un avis et aider les autres acheteurs !\n\n"
+            "L'équipe HooYia Market"
+        ) % {
+            "username": client.username,
+            "ref": commande.reference_courte,
+            "produits": liste_produits,
+        }
 
         _envoyer_email(client, sujet, corps)
 
         _diffuser_notification_ws(
             utilisateur_id=client.id,
             titre=_("Partagez votre avis !"),
-            message=_("Donnez votre avis sur votre commande #%(ref)s.") % {'ref': commande.reference_courte},
-            type_notif='avis',
+            message=_("Donnez votre avis sur votre commande #%(ref)s.")
+            % {"ref": commande.reference_courte},
+            type_notif="avis",
             lien=f"/commandes/{commande.id}/",
         )
 
@@ -351,6 +380,7 @@ def send_review_reminder(self, commande_id):
 # Appel : alert_low_stock.delay()
 # ═══════════════════════════════════════════════════════════════
 
+
 @shared_task
 def alert_low_stock():
     """
@@ -360,7 +390,7 @@ def alert_low_stock():
     from apps.products.models import Produit
     from apps.users.models import CustomUser
 
-    produits_faibles = Produit.stock_bas.all().select_related('categorie', 'vendeur')
+    produits_faibles = Produit.stock_bas.all().select_related("categorie", "vendeur")
 
     if not produits_faibles.exists():
         logger.info("alert_low_stock : aucun produit en stock faible")
@@ -372,22 +402,24 @@ def alert_low_stock():
     )
     nb = produits_faibles.count()
 
-    sujet = _("[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)") % {'nb': nb}
-    corps = (
-        _("Bonjour,\n\n%(nb)s produit(s) sont en stock faible :\n\n%(liste)s\n\n"
-          "Pensez à réapprovisionner ces articles.\n\nHooYia Market — Système automatique") % {
-            'nb': nb, 'liste': liste,
-        }
-    )
+    sujet = _("[HooYia Market] ⚠️ Alerte stock faible — %(nb)s produit(s)") % {"nb": nb}
+    corps = _(
+        "Bonjour,\n\n%(nb)s produit(s) sont en stock faible :\n\n%(liste)s\n\n"
+        "Pensez à réapprovisionner ces articles.\n\nHooYia Market — Système automatique"
+    ) % {
+        "nb": nb,
+        "liste": liste,
+    }
 
     admins = CustomUser.objects.filter(is_staff=True, is_active=True)
     for admin in admins:
         _envoyer_email(admin, sujet, corps)
         _diffuser_notification_ws(
             utilisateur_id=admin.id,
-            titre=_("⚠️ Stock faible : %(nb)s produit(s)") % {'nb': nb},
-            message=_("%(nb)s produit(s) nécessitent un réapprovisionnement.") % {'nb': nb},
-            type_notif='stock',
+            titre=_("⚠️ Stock faible : %(nb)s produit(s)") % {"nb": nb},
+            message=_("%(nb)s produit(s) nécessitent un réapprovisionnement.")
+            % {"nb": nb},
+            type_notif="stock",
             lien="/admin/products/produit/?statut=stock_faible",
         )
 
@@ -398,6 +430,7 @@ def alert_low_stock():
 # TÂCHE 5 — Nettoyage paniers inactifs > 30 jours
 # Appel : cleanup_old_carts.delay()
 # ═══════════════════════════════════════════════════════════════
+
 
 @shared_task
 def cleanup_old_carts():
@@ -411,8 +444,7 @@ def cleanup_old_carts():
     seuil = timezone.now() - timedelta(days=30)
 
     paniers_vieux = Panier.objects.filter(
-        date_modification__lt=seuil,
-        items__isnull=False
+        date_modification__lt=seuil, items__isnull=False
     ).distinct()
 
     nb = paniers_vieux.count()

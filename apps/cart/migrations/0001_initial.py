@@ -12,38 +12,111 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('products', '0001_initial'),
+        ("products", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Panier',
+            name="Panier",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_creation', models.DateTimeField(auto_now_add=True, verbose_name='Date de création')),
-                ('date_modification', models.DateTimeField(auto_now=True, verbose_name='Dernière modification')),
-                ('utilisateur', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='panier', to=settings.AUTH_USER_MODEL, verbose_name='Utilisateur')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "date_creation",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date de création"
+                    ),
+                ),
+                (
+                    "date_modification",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Dernière modification"
+                    ),
+                ),
+                (
+                    "utilisateur",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="panier",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Utilisateur",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Panier',
-                'verbose_name_plural': 'Paniers',
+                "verbose_name": "Panier",
+                "verbose_name_plural": "Paniers",
             },
         ),
         migrations.CreateModel(
-            name='PanierItem',
+            name="PanierItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantite', models.PositiveIntegerField(default=1, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Quantité')),
-                ('prix_snapshot', models.DecimalField(decimal_places=2, max_digits=10, validators=[django.core.validators.MinValueValidator(Decimal('0.01'))], verbose_name="Prix au moment de l'ajout (FCFA)")),
-                ('date_ajout', models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout")),
-                ('panier', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='cart.panier', verbose_name='Panier')),
-                ('produit', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='paniers_items', to='products.produit', verbose_name='Produit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "quantite",
+                    models.PositiveIntegerField(
+                        default=1,
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name="Quantité",
+                    ),
+                ),
+                (
+                    "prix_snapshot",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=10,
+                        validators=[
+                            django.core.validators.MinValueValidator(Decimal("0.01"))
+                        ],
+                        verbose_name="Prix au moment de l'ajout (FCFA)",
+                    ),
+                ),
+                (
+                    "date_ajout",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date d'ajout"
+                    ),
+                ),
+                (
+                    "panier",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="items",
+                        to="cart.panier",
+                        verbose_name="Panier",
+                    ),
+                ),
+                (
+                    "produit",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="paniers_items",
+                        to="products.produit",
+                        verbose_name="Produit",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Article du panier',
-                'verbose_name_plural': 'Articles du panier',
-                'unique_together': {('panier', 'produit')},
+                "verbose_name": "Article du panier",
+                "verbose_name_plural": "Articles du panier",
+                "unique_together": {("panier", "produit")},
             },
         ),
     ]

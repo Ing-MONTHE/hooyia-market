@@ -15,6 +15,7 @@ Flux normal :
   3. Client passe commande → OrderService.create_from_cart() lit ce panier
   4. Commande créée → panier.vider() supprime tous les PanierItem
 """
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -28,6 +29,7 @@ from decimal import Decimal
 # Créé automatiquement à l'inscription via users/signals.py.
 # ═══════════════════════════════════════════════════════════════
 
+
 class Panier(models.Model):
     """
     Le panier de l'utilisateur.
@@ -39,18 +41,16 @@ class Panier(models.Model):
     utilisateur = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='panier',
-        verbose_name=_("Utilisateur")
+        related_name="panier",
+        verbose_name=_("Utilisateur"),
     )
 
     date_creation = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date de création")
+        auto_now_add=True, verbose_name=_("Date de création")
     )
 
     date_modification = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_("Dernière modification")
+        auto_now=True, verbose_name=_("Dernière modification")
     )
 
     class Meta:
@@ -71,10 +71,11 @@ class Panier(models.Model):
         Affiché dans le badge du panier sur la navbar.
         """
         from django.db.models import Sum
+
         # aggregate() fait le calcul directement en SQL (plus performant qu'une boucle Python)
-        result = self.items.aggregate(total=Sum('quantite'))
+        result = self.items.aggregate(total=Sum("quantite"))
         # Si le panier est vide, result['total'] vaut None → on retourne 0
-        return result['total'] or 0
+        return result["total"] or 0
 
     @property
     def total(self):
@@ -104,6 +105,7 @@ class Panier(models.Model):
 # Chaque ligne représente : un produit + une quantité + un prix capturé.
 # ═══════════════════════════════════════════════════════════════
 
+
 class PanierItem(models.Model):
     """
     Une ligne du panier.
@@ -120,42 +122,34 @@ class PanierItem(models.Model):
     """
 
     panier = models.ForeignKey(
-        Panier,
-        on_delete=models.CASCADE,
-        related_name='items',
-        verbose_name=_("Panier")
+        Panier, on_delete=models.CASCADE, related_name="items", verbose_name=_("Panier")
     )
 
     produit = models.ForeignKey(
-        'products.Produit',
+        "products.Produit",
         on_delete=models.SET_NULL,
         null=True,
-        related_name='paniers_items',
-        verbose_name=_("Produit")
+        related_name="paniers_items",
+        verbose_name=_("Produit"),
     )
 
     quantite = models.PositiveIntegerField(
-        default=1,
-        validators=[MinValueValidator(1)],
-        verbose_name=_("Quantité")
+        default=1, validators=[MinValueValidator(1)], verbose_name=_("Quantité")
     )
 
     prix_snapshot = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))],
-        verbose_name=_("Prix au moment de l'ajout (FCFA)")
+        validators=[MinValueValidator(Decimal("0.01"))],
+        verbose_name=_("Prix au moment de l'ajout (FCFA)"),
     )
 
-    date_ajout = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date d'ajout")
-    )
+    date_ajout = models.DateTimeField(auto_now_add=True, verbose_name=_("Date d'ajout"))
 
     class Meta:
         verbose_name = _("Article du panier")
         verbose_name_plural = _("Articles du panier")
-        unique_together = ('panier', 'produit')
+        unique_together = ("panier", "produit")
 
     def __str__(self):
         nom_produit = self.produit.nom if self.produit else "Produit supprimé"

@@ -7,24 +7,31 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AuditLog',
+            name="AuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(max_length=10)),
-                ('url', models.CharField(max_length=255)),
-                ('status_code', models.IntegerField()),
-                ('date', models.DateTimeField(auto_now_add=True)),
-                ('note', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("action", models.CharField(max_length=10)),
+                ("url", models.CharField(max_length=255)),
+                ("status_code", models.IntegerField()),
+                ("date", models.DateTimeField(auto_now_add=True)),
+                ("note", models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'Log Audit',
-                'verbose_name_plural': 'Logs Audit',
-                'ordering': ['-date'],
+                "verbose_name": "Log Audit",
+                "verbose_name_plural": "Logs Audit",
+                "ordering": ["-date"],
             },
         ),
     ]

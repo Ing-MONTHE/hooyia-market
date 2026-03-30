@@ -6,57 +6,63 @@ Enregistre les actions HTTP qui ne sont PAS couvertes par les signals Django
 Les actions métier principales (commandes, messages, produits, etc.)
 sont gérées par apps/audit/audit_signals.py via les signals Django.
 """
+
 import threading
 
 METHOD_TO_ACTION = {
-    'POST':   'CREATE',
-    'PUT':    'UPDATE',
-    'PATCH':  'UPDATE',
-    'DELETE': 'DELETE',
+    "POST": "CREATE",
+    "PUT": "UPDATE",
+    "PATCH": "UPDATE",
+    "DELETE": "DELETE",
 }
 
 # URLs ignorées (bruit, boucle infinie, fichiers statiques)
 IGNORED_PATHS = (
-    '/static/', '/media/', '/favicon.ico',
-    '/api/audit/',
-    '/admin/jsi18n/',
+    "/static/",
+    "/media/",
+    "/favicon.ico",
+    "/api/audit/",
+    "/admin/jsi18n/",
 )
 
 # URLs couvertes par les signals → pas besoin de double log
 SIGNAL_COVERED = (
-    '/api/commandes',
-    '/api/produits',
-    '/api/categories',
-    '/api/avis',
-    '/api/chat',
-    '/api/panier',
-    '/api/cart',
-    '/api/users',
-    '/api/comptes',
-    '/api/notifications',
-    '/login',
-    '/logout',
+    "/api/commandes",
+    "/api/produits",
+    "/api/categories",
+    "/api/avis",
+    "/api/chat",
+    "/api/panier",
+    "/api/cart",
+    "/api/users",
+    "/api/comptes",
+    "/api/notifications",
+    "/login",
+    "/logout",
 )
 
 SPECIAL_ROUTES = {
-    'login':  'LOGIN',
-    'logout': 'LOGOUT',
+    "login": "LOGIN",
+    "logout": "LOGOUT",
 }
 
 ACTION_LABELS = {
-    'CREATE': 'Création',
-    'UPDATE': 'Modification',
-    'DELETE': 'Suppression',
-    'LOGIN':  'Connexion',
-    'LOGOUT': 'Déconnexion',
+    "CREATE": "Création",
+    "UPDATE": "Modification",
+    "DELETE": "Suppression",
+    "LOGIN": "Connexion",
+    "LOGOUT": "Déconnexion",
 }
 
 
-def _save_log(user, action, path, status_code, note=''):
+def _save_log(user, action, path, status_code, note=""):
     try:
         from .models import AuditLog
+
         AuditLog.objects.create(
-            utilisateur=user if (user and getattr(user, 'is_authenticated', False)) else None,
+            utilisateur=(
+                user if (user and getattr(user, "is_authenticated", False)) else None
+            ),
             action=action,
             url=path,
             status_code=status_code,
@@ -78,7 +84,7 @@ class AuditLogMiddleware:
         method = request.method
 
         # Ignorer GET et chemins non pertinents
-        if method == 'GET':
+        if method == "GET":
             return response
         if any(path.startswith(p) for p in IGNORED_PATHS):
             return response
@@ -88,9 +94,9 @@ class AuditLogMiddleware:
             return response
 
         status = response.status_code
-        user = getattr(request, 'user', None)
+        user = getattr(request, "user", None)
 
-        path_lower = path.strip('/').split('/')[-1]
+        path_lower = path.strip("/").split("/")[-1]
         if path_lower in SPECIAL_ROUTES and status in (200, 302):
             action = SPECIAL_ROUTES[path_lower]
         else:

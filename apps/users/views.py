@@ -10,6 +10,7 @@ Pages gérées :
   - Profil utilisateur
   - Gestion des adresses
 """
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -25,15 +26,18 @@ def _get_jwt_tokens(user):
     """Génère une paire access/refresh JWT pour l'utilisateur."""
     refresh = RefreshToken.for_user(user)
     return {
-        'access':  str(refresh.access_token),
-        'refresh': str(refresh),
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
     }
+
+
 from .forms import InscriptionForm, ConnexionForm
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Inscription
 # ═══════════════════════════════════════════════════════════════
+
 
 def inscription(request):
     """
@@ -42,29 +46,33 @@ def inscription(request):
     """
     # Si l'utilisateur est déjà connecté, on le redirige
     if request.user.is_authenticated:
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = InscriptionForm(request.POST)
         if form.is_valid():
             # Crée l'utilisateur (is_active=False par défaut)
             user = form.save()
             messages.success(
                 request,
-                _("Compte créé ! Vérifiez votre email %(email)s pour activer votre compte.") % {'email': user.email}
+                _(
+                    "Compte créé ! Vérifiez votre email %(email)s pour activer votre compte."
+                )
+                % {"email": user.email},
             )
-            return redirect('users:connexion')
+            return redirect("users:connexion")
         else:
             messages.error(request, _("Veuillez corriger les erreurs ci-dessous."))
     else:
         form = InscriptionForm()
 
-    return render(request, 'users/register.html', {'form': form})
+    return render(request, "users/register.html", {"form": form})
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Connexion
 # ═══════════════════════════════════════════════════════════════
+
 
 def connexion(request):
     """
@@ -72,13 +80,13 @@ def connexion(request):
     POST → vérifie les identifiants et connecte l'utilisateur
     """
     if request.user.is_authenticated:
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ConnexionForm(request.POST)
         if form.is_valid():
-            email    = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
 
             # Vérifie les identifiants
             user = authenticate(request, username=email, password=password)
@@ -88,23 +96,40 @@ def connexion(request):
                 if not user.is_active:
                     messages.warning(
                         request,
-                        _("Votre compte n'est pas encore activé. Vérifiez votre email.")
+                        _(
+                            "Votre compte n'est pas encore activé. Vérifiez votre email."
+                        ),
                     )
-                    return redirect('users:connexion')
+                    return redirect("users:connexion")
 
                 login(request, user)
                 user.derniere_connexion = timezone.now()
-                user.save(update_fields=['derniere_connexion'])
+                user.save(update_fields=["derniere_connexion"])
 
-                messages.success(request, _("Bienvenue %(prenom)s !") % {'prenom': user.get_short_name()})
+                messages.success(
+                    request,
+                    _("Bienvenue %(prenom)s !") % {"prenom": user.get_short_name()},
+                )
 
                 # Génère les JWT et les injecte via cookies courts (5s)
                 # base.html les lit et les transfère dans localStorage
                 jwt = _get_jwt_tokens(user)
-                next_url = request.GET.get('next', '/')
+                next_url = request.GET.get("next", "/")
                 response = redirect(next_url)
-                response.set_cookie('_jwt_access',  jwt['access'],  max_age=5, httponly=False, samesite='Lax')
-                response.set_cookie('_jwt_refresh', jwt['refresh'], max_age=5, httponly=False, samesite='Lax')
+                response.set_cookie(
+                    "_jwt_access",
+                    jwt["access"],
+                    max_age=5,
+                    httponly=False,
+                    samesite="Lax",
+                )
+                response.set_cookie(
+                    "_jwt_refresh",
+                    jwt["refresh"],
+                    max_age=5,
+                    httponly=False,
+                    samesite="Lax",
+                )
                 return response
 
             else:
@@ -112,12 +137,13 @@ def connexion(request):
     else:
         form = ConnexionForm()
 
-    return render(request, 'users/login.html', {'form': form})
+    return render(request, "users/login.html", {"form": form})
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Déconnexion
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def deconnexion(request):
@@ -127,13 +153,14 @@ def deconnexion(request):
     """
     logout(request)
     messages.info(request, _("Vous êtes déconnecté."))
-    return redirect('products:accueil')
+    return redirect("products:accueil")
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Vérification email
 # L'utilisateur clique sur le lien reçu par email
 # ═══════════════════════════════════════════════════════════════
+
 
 def verifier_email(request, token):
     """
@@ -145,27 +172,30 @@ def verifier_email(request, token):
         token_obj = TokenVerificationEmail.objects.get(token=token)
     except TokenVerificationEmail.DoesNotExist:
         messages.error(request, _("Lien de vérification invalide."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
     if token_obj.est_expire():
         messages.error(request, _("Ce lien a expiré. Inscrivez-vous à nouveau."))
         token_obj.utilisateur.delete()
-        return redirect('users:inscription')
+        return redirect("users:inscription")
 
     user = token_obj.utilisateur
-    user.is_active      = True
-    user.email_verifie  = True
-    user.save(update_fields=['is_active', 'email_verifie'])
+    user.is_active = True
+    user.email_verifie = True
+    user.save(update_fields=["is_active", "email_verifie"])
 
     token_obj.delete()
 
-    messages.success(request, _("Votre compte est activé ! Vous pouvez vous connecter."))
-    return redirect('users:connexion')
+    messages.success(
+        request, _("Votre compte est activé ! Vous pouvez vous connecter.")
+    )
+    return redirect("users:connexion")
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Profil utilisateur
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def profil(request):
@@ -174,32 +204,38 @@ def profil(request):
     GET  → affiche le profil
     POST → met à jour les informations
     """
-    if request.method == 'POST':
-        action = request.POST.get('action', 'update_profil')
-        if action == 'update_profil':
+    if request.method == "POST":
+        action = request.POST.get("action", "update_profil")
+        if action == "update_profil":
             user = request.user
-            user.prenom    = request.POST.get('prenom', user.prenom).strip()
-            user.nom       = request.POST.get('nom', user.nom).strip()
-            user.telephone = request.POST.get('telephone', user.telephone).strip()
-            username = request.POST.get('username', user.username).strip()
+            user.prenom = request.POST.get("prenom", user.prenom).strip()
+            user.nom = request.POST.get("nom", user.nom).strip()
+            user.telephone = request.POST.get("telephone", user.telephone).strip()
+            username = request.POST.get("username", user.username).strip()
             from apps.users.models import CustomUser
+
             if username and username != user.username:
-                if not CustomUser.objects.filter(username=username).exclude(pk=user.pk).exists():
+                if (
+                    not CustomUser.objects.filter(username=username)
+                    .exclude(pk=user.pk)
+                    .exists()
+                ):
                     user.username = username
-            if request.FILES.get('photo_profil'):
-                user.photo_profil = request.FILES['photo_profil']
+            if request.FILES.get("photo_profil"):
+                user.photo_profil = request.FILES["photo_profil"]
             user.save()
             messages.success(request, _("Profil mis à jour avec succès."))
-            return redirect('users:profil')
+            return redirect("users:profil")
 
     adresses = request.user.adresses.all()
-    context = { 'adresses': adresses }
-    return render(request, 'users/profile.html', context)
+    context = {"adresses": adresses}
+    return render(request, "users/profile.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Ajouter une adresse de livraison
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def ajouter_adresse(request):
@@ -208,7 +244,7 @@ def ajouter_adresse(request):
     """
     from .forms import AdresseForm
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AdresseForm(request.POST)
         if form.is_valid():
             adresse = form.save(commit=False)
@@ -216,16 +252,17 @@ def ajouter_adresse(request):
             adresse.utilisateur = request.user
             adresse.save()
             messages.success(request, _("Adresse ajoutée avec succès."))
-            return redirect('users:profil')
+            return redirect("users:profil")
     else:
         form = AdresseForm()
 
-    return render(request, 'users/adresse_form.html', {'form': form})
+    return render(request, "users/adresse_form.html", {"form": form})
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Supprimer une adresse de livraison
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def supprimer_adresse(request, adresse_id):
@@ -236,14 +273,15 @@ def supprimer_adresse(request, adresse_id):
     adresse = get_object_or_404(
         AdresseLivraison,
         id=adresse_id,
-        utilisateur=request.user  # Sécurité : on ne peut supprimer que ses propres adresses
+        utilisateur=request.user,  # Sécurité : on ne peut supprimer que ses propres adresses
     )
 
-    if request.method == 'POST':
+    if request.method == "POST":
         adresse.delete()
         messages.success(request, _("Adresse supprimée."))
 
-    return redirect('users:profil')
+    return redirect("users:profil")
+
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Google OAuth2
@@ -257,88 +295,92 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-GOOGLE_AUTH_URL     = 'https://accounts.google.com/o/oauth2/v2/auth'
-GOOGLE_TOKEN_URL    = 'https://oauth2.googleapis.com/token'
-GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
 def google_login(request):
     """Redirige vers Google pour l'authentification."""
     state = secrets.token_urlsafe(16)
-    request.session['google_oauth_state'] = state
+    request.session["google_oauth_state"] = state
 
     params = {
-        'client_id':     settings.GOOGLE_CLIENT_ID,
-        'redirect_uri':  settings.GOOGLE_REDIRECT_URI,
-        'response_type': 'code',
-        'scope':         'openid email profile',
-        'state':         state,
-        'access_type':   'online',
-        'prompt':        'select_account',
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
     }
-    url = GOOGLE_AUTH_URL + '?' + urllib.parse.urlencode(params)
+    url = GOOGLE_AUTH_URL + "?" + urllib.parse.urlencode(params)
     return redirect(url)
 
 
 def google_callback(request):
     """Reçoit le code de Google, récupère le profil et connecte l'utilisateur."""
     # Vérification CSRF state
-    state = request.GET.get('state', '')
-    if state != request.session.get('google_oauth_state', ''):
+    state = request.GET.get("state", "")
+    if state != request.session.get("google_oauth_state", ""):
         messages.error(request, _("Erreur de sécurité OAuth. Réessayez."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
-    code = request.GET.get('code')
+    code = request.GET.get("code")
     if not code:
         messages.error(request, _("Connexion Google annulée ou refusée."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
     # Échange du code contre un access_token
     try:
-        token_resp = http_requests.post(GOOGLE_TOKEN_URL, data={
-            'code':          code,
-            'client_id':     settings.GOOGLE_CLIENT_ID,
-            'client_secret': settings.GOOGLE_CLIENT_SECRET,
-            'redirect_uri':  settings.GOOGLE_REDIRECT_URI,
-            'grant_type':    'authorization_code',
-        }, timeout=10)
+        token_resp = http_requests.post(
+            GOOGLE_TOKEN_URL,
+            data={
+                "code": code,
+                "client_id": settings.GOOGLE_CLIENT_ID,
+                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                "grant_type": "authorization_code",
+            },
+            timeout=10,
+        )
         token_data = token_resp.json()
     except Exception:
         messages.error(request, _("Impossible de contacter Google. Réessayez."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
-    access_token = token_data.get('access_token')
+    access_token = token_data.get("access_token")
     if not access_token:
         messages.error(request, _("Échec de l'authentification Google."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
     # Récupération du profil Google
     try:
         userinfo_resp = http_requests.get(
             GOOGLE_USERINFO_URL,
-            headers={'Authorization': f'Bearer {access_token}'},
-            timeout=10
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10,
         )
         userinfo = userinfo_resp.json()
     except Exception:
         messages.error(request, _("Impossible de récupérer le profil Google."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
-    email      = userinfo.get('email', '').lower()
-    first_name = userinfo.get('given_name', '')
-    last_name  = userinfo.get('family_name', '')
-    google_id  = userinfo.get('sub', '')
+    email = userinfo.get("email", "").lower()
+    first_name = userinfo.get("given_name", "")
+    last_name = userinfo.get("family_name", "")
+    google_id = userinfo.get("sub", "")
 
     if not email:
         messages.error(request, _("Impossible de récupérer votre email Google."))
-        return redirect('users:connexion')
+        return redirect("users:connexion")
 
     # Connexion ou création du compte
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
         # Génère un username unique depuis l'email
-        base_username = email.split('@')[0].replace('.', '_')[:30]
+        base_username = email.split("@")[0].replace(".", "_")[:30]
         username = base_username
         counter = 1
         while User.objects.filter(username=username).exists():
@@ -346,26 +388,33 @@ def google_callback(request):
             counter += 1
 
         user = User.objects.create_user(
-            email    = email,
-            username = username,
-            password = None,
+            email=email,
+            username=username,
+            password=None,
         )
-        user.prenom        = first_name
-        user.nom           = last_name
-        user.is_active     = True
+        user.prenom = first_name
+        user.nom = last_name
+        user.is_active = True
         user.email_verifie = True
         user.save()
 
     # Activer le compte si pas encore actif (cas edge)
     if not user.is_active:
-        user.is_active     = True
+        user.is_active = True
         user.email_verifie = True
         user.save()
 
-    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-    messages.success(request, _("Bienvenue %(prenom)s ! 👋") % {'prenom': user.prenom or user.username})
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    messages.success(
+        request,
+        _("Bienvenue %(prenom)s ! 👋") % {"prenom": user.prenom or user.username},
+    )
     jwt = _get_jwt_tokens(user)
     response = redirect(settings.LOGIN_REDIRECT_URL)
-    response.set_cookie('_jwt_access',  jwt['access'],  max_age=5, httponly=False, samesite='Lax')
-    response.set_cookie('_jwt_refresh', jwt['refresh'], max_age=5, httponly=False, samesite='Lax')
+    response.set_cookie(
+        "_jwt_access", jwt["access"], max_age=5, httponly=False, samesite="Lax"
+    )
+    response.set_cookie(
+        "_jwt_refresh", jwt["refresh"], max_age=5, httponly=False, samesite="Lax"
+    )
     return response

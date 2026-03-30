@@ -12,15 +12,15 @@ import os
 from celery import Celery
 
 # Indique à Celery quel fichier settings Django utiliser
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 # Crée l'application Celery — "config" = nom du projet
-app = Celery('config')
+app = Celery("config")
 
 # Charge la configuration Celery depuis settings.py
 # namespace='CELERY' signifie que toutes les variables Celery
 # dans settings.py doivent commencer par CELERY_ (ex: CELERY_BROKER_URL)
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Découvre automatiquement les tâches dans tous les fichiers tasks.py
 # de toutes les apps installées dans INSTALLED_APPS

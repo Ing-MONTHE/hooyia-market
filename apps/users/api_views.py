@@ -11,6 +11,7 @@ Endpoints gérés :
   - GET/POST /api/auth/adresses/     → Lister/ajouter adresses
   - DELETE /api/auth/adresses/<id>/  → Supprimer adresse
 """
+
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,7 +23,7 @@ from .serializers import (
     InscriptionSerializer,
     ProfilSerializer,
     ChangerMotDePasseSerializer,
-    AdresseLivraisonSerializer
+    AdresseLivraisonSerializer,
 )
 
 
@@ -31,6 +32,7 @@ from .serializers import (
 # POST /api/auth/register/
 # ═══════════════════════════════════════════════════════════════
 
+
 class InscriptionAPIView(generics.CreateAPIView):
     """
     Crée un nouveau compte utilisateur.
@@ -38,7 +40,8 @@ class InscriptionAPIView(generics.CreateAPIView):
     Après création, un email de vérification est envoyé
     automatiquement via le signal users/signals.py.
     """
-    serializer_class   = InscriptionSerializer
+
+    serializer_class = InscriptionSerializer
     permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
@@ -46,10 +49,16 @@ class InscriptionAPIView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        return Response({
-            'message': _("Compte créé ! Vérifiez votre email %(email)s pour activer votre compte.") % {'email': user.email},
-            'email'  : user.email
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "message": _(
+                    "Compte créé ! Vérifiez votre email %(email)s pour activer votre compte."
+                )
+                % {"email": user.email},
+                "email": user.email,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -57,31 +66,31 @@ class InscriptionAPIView(generics.CreateAPIView):
 # POST /api/auth/logout/
 # ═══════════════════════════════════════════════════════════════
 
+
 class DeconnexionAPIView(APIView):
     """
     Invalide le refresh token pour déconnecter l'utilisateur.
     SimpleJWT garde les tokens valides jusqu'à expiration,
     la blacklist permet de les invalider avant.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
             # Récupère le refresh token envoyé dans le body
-            refresh_token = request.data.get('refresh')
+            refresh_token = request.data.get("refresh")
             token = RefreshToken(refresh_token)
 
             # Ajoute le token à la blacklist → il ne sera plus accepté
             token.blacklist()
 
             return Response(
-                {'message': _('Déconnexion réussie.')},
-                status=status.HTTP_200_OK
+                {"message": _("Déconnexion réussie.")}, status=status.HTTP_200_OK
             )
         except Exception:
             return Response(
-                {'erreur': _('Token invalide.')},
-                status=status.HTTP_400_BAD_REQUEST
+                {"erreur": _("Token invalide.")}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -91,12 +100,14 @@ class DeconnexionAPIView(APIView):
 # PUT  /api/auth/profil/ → met à jour le profil
 # ═══════════════════════════════════════════════════════════════
 
+
 class ProfilAPIView(generics.RetrieveUpdateAPIView):
     """
     Affiche et modifie le profil de l'utilisateur connecté.
     Chaque utilisateur ne voit et modifie QUE son propre profil.
     """
-    serializer_class   = ProfilSerializer
+
+    serializer_class = ProfilSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
@@ -109,23 +120,24 @@ class ProfilAPIView(generics.RetrieveUpdateAPIView):
 # POST /api/auth/changer-password/
 # ═══════════════════════════════════════════════════════════════
 
+
 class ChangerMotDePasseAPIView(APIView):
     """
     Permet à l'utilisateur connecté de changer son mot de passe.
     Requiert l'ancien mot de passe pour confirmer l'identité.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = ChangerMotDePasseSerializer(
-            data=request.data,
-            context={'request': request}
+            data=request.data, context={"request": request}
         )
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {'message': _('Mot de passe changé avec succès.')},
-                status=status.HTTP_200_OK
+                {"message": _("Mot de passe changé avec succès.")},
+                status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,12 +148,14 @@ class ChangerMotDePasseAPIView(APIView):
 # POST /api/auth/adresses/     → ajoute une adresse
 # ═══════════════════════════════════════════════════════════════
 
+
 class AdresseListeAPIView(generics.ListCreateAPIView):
     """
     Liste et crée des adresses de livraison.
     Chaque utilisateur ne voit QUE ses propres adresses.
     """
-    serializer_class   = AdresseLivraisonSerializer
+
+    serializer_class = AdresseLivraisonSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -156,17 +170,20 @@ class AdresseListeAPIView(generics.ListCreateAPIView):
 # DELETE /api/auth/adresses/<id>/ → supprimer adresse
 # ═══════════════════════════════════════════════════════════════
 
+
 class AdresseDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     Détail, modification et suppression d'une adresse.
     Vérification que l'adresse appartient bien à l'utilisateur connecté.
     """
-    serializer_class   = AdresseLivraisonSerializer
+
+    serializer_class = AdresseLivraisonSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         # Sécurité : on ne peut accéder qu'à ses propres adresses
         return AdresseLivraison.objects.filter(utilisateur=self.request.user)
+
 
 # ═══════════════════════════════════════════════════════════════
 # VUE API ADMIN — Liste tous les utilisateurs
@@ -174,65 +191,76 @@ class AdresseDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 # POST /api/auth/utilisateurs/<id>/toggle_actif/ → activer/désactiver
 # ═══════════════════════════════════════════════════════════════
 
+
 class ListeUtilisateursAdminAPIView(generics.ListAPIView):
     """Liste tous les utilisateurs — réservée aux admins."""
+
     permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
         from apps.users.models import CustomUser
-        return CustomUser.objects.all().order_by('-date_inscription')
+
+        return CustomUser.objects.all().order_by("-date_inscription")
 
     def list(self, request, *args, **kwargs):
         from apps.users.models import CustomUser
         from django.db.models import Q
-        qs = CustomUser.objects.all().order_by('-date_inscription')
+
+        qs = CustomUser.objects.all().order_by("-date_inscription")
 
         # ── Filtres optionnels ────────────────────────────────
-        role   = request.query_params.get('role', '')
-        search = request.query_params.get('search', '')
+        role = request.query_params.get("role", "")
+        search = request.query_params.get("search", "")
 
-        if role == 'admin':
+        if role == "admin":
             qs = qs.filter(is_staff=True)
-        elif role == 'vendeur':
+        elif role == "vendeur":
             qs = qs.filter(is_vendeur=True, is_staff=False)
-        elif role == 'actif':
+        elif role == "actif":
             qs = qs.filter(is_active=True)
-        elif role == 'inactif':
+        elif role == "inactif":
             qs = qs.filter(is_active=False)
 
         if search:
             qs = qs.filter(
-                Q(nom__icontains=search) |
-                Q(prenom__icontains=search) |
-                Q(username__icontains=search) |
-                Q(email__icontains=search)
+                Q(nom__icontains=search)
+                | Q(prenom__icontains=search)
+                | Q(username__icontains=search)
+                | Q(email__icontains=search)
             )
 
-        data = [{
-            'id': u.id,
-            'nom': u.nom,
-            'prenom': u.prenom,
-            'username': u.username,
-            'email': u.email,
-            'telephone': u.telephone or '',
-            'is_active': u.is_active,
-            'is_staff': u.is_staff,
-            'email_verifie': u.email_verifie,
-            'date_inscription': u.date_inscription.isoformat() if u.date_inscription else None,
-        } for u in qs]
+        data = [
+            {
+                "id": u.id,
+                "nom": u.nom,
+                "prenom": u.prenom,
+                "username": u.username,
+                "email": u.email,
+                "telephone": u.telephone or "",
+                "is_active": u.is_active,
+                "is_staff": u.is_staff,
+                "email_verifie": u.email_verifie,
+                "date_inscription": (
+                    u.date_inscription.isoformat() if u.date_inscription else None
+                ),
+            }
+            for u in qs
+        ]
         return Response(data)
 
 
 class ToggleUtilisateurAPIView(APIView):
     """Activer ou désactiver un compte utilisateur — admin seulement."""
+
     permission_classes = [permissions.IsAdminUser]
 
     def post(self, request, pk):
         from apps.users.models import CustomUser
+
         try:
             user = CustomUser.objects.get(pk=pk)
             user.is_active = not user.is_active
-            user.save(update_fields=['is_active'])
-            return Response({'status': 'ok', 'is_active': user.is_active})
+            user.save(update_fields=["is_active"])
+            return Response({"status": "ok", "is_active": user.is_active})
         except CustomUser.DoesNotExist:
-            return Response({'error': 'Utilisateur introuvable'}, status=404)
+            return Response({"error": "Utilisateur introuvable"}, status=404)

@@ -6,6 +6,7 @@ Tâches Celery pour les emails liés aux commandes.
     → Email à l'admin : remboursement à effectuer manuellement
     → Email au client : son remboursement est en cours de traitement
 """
+
 from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
@@ -24,18 +25,24 @@ def _envoyer_emails_remboursement(commande_pk, demandeur_pk):
     from apps.users.models import CustomUser
 
     try:
-        commande   = Commande.objects.select_related('client', 'paiement').get(pk=commande_pk)
-        demandeur  = CustomUser.objects.get(pk=demandeur_pk)
-        client     = commande.client
-        paiement   = commande.paiement
-        admin_email = getattr(settings, 'ADMIN_EMAIL', settings.EMAIL_HOST_USER)
+        commande = Commande.objects.select_related("client", "paiement").get(
+            pk=commande_pk
+        )
+        demandeur = CustomUser.objects.get(pk=demandeur_pk)
+        client = commande.client
+        paiement = commande.paiement
+        admin_email = getattr(settings, "ADMIN_EMAIL", settings.EMAIL_HOST_USER)
 
-        montant    = f"{int(paiement.montant):,} FCFA".replace(',', ' ')
-        ref        = commande.reference_courte
-        mode       = paiement.get_mode_display()
-        tel        = paiement.telephone_paiement or '—'
-        date       = timezone.now().strftime('%d/%m/%Y à %H:%M')
-        demandeur_label = 'Admin' if demandeur.is_admin else f'{client.prenom} {client.nom}'.strip() or client.username
+        montant = f"{int(paiement.montant):,} FCFA".replace(",", " ")
+        ref = commande.reference_courte
+        mode = paiement.get_mode_display()
+        tel = paiement.telephone_paiement or "—"
+        date = timezone.now().strftime("%d/%m/%Y à %H:%M")
+        demandeur_label = (
+            "Admin"
+            if demandeur.is_admin
+            else f"{client.prenom} {client.nom}".strip() or client.username
+        )
 
         # ── Email à l'ADMIN ───────────────────────────────────────────────────
         sujet_admin = f"[ACTION REQUISE] Remboursement — Commande #{ref}"
@@ -75,8 +82,8 @@ ACTION À FAIRE :
 
         # ── Email au CLIENT ───────────────────────────────────────────────────
         prenom_client = client.prenom or client.username
-        sujet_client  = f"Remboursement en cours — Commande #{ref}"
-        corps_client  = f"""
+        sujet_client = f"Remboursement en cours — Commande #{ref}"
+        corps_client = f"""
 Bonjour {prenom_client},
 
 Votre commande #{ref} a été annulée et votre remboursement est en cours de traitement.
@@ -112,7 +119,9 @@ Nous vous présentons nos excuses pour la gêne occasionnée.
         )
 
     except Exception as e:
-        logger.error(f"Erreur envoi emails remboursement — Commande #{commande_pk} : {e}")
+        logger.error(
+            f"Erreur envoi emails remboursement — Commande #{commande_pk} : {e}"
+        )
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)

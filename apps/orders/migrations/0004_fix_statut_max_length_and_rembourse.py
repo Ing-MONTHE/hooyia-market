@@ -6,13 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0003_rename_verbose_name_payunit'),
+        ("orders", "0003_rename_verbose_name_payunit"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paiement',
-            name='statut',
-            field=models.CharField(choices=[('en_attente', 'En attente'), ('reussi', 'Réussi'), ('echoue', 'Échoué'), ('rembourse_en_attente', 'Remboursement en attente'), ('rembourse', 'Remboursé')], default='en_attente', max_length=20, verbose_name='Statut du paiement'),
+            model_name="paiement",
+            name="statut",
+            field=models.CharField(
+                choices=[
+                    ("en_attente", "En attente"),
+                    ("reussi", "Réussi"),
+                    ("echoue", "Échoué"),
+                    ("rembourse_en_attente", "Remboursement en attente"),
+                    ("rembourse", "Remboursé"),
+                ],
+                default="en_attente",
+                max_length=20,
+                verbose_name="Statut du paiement",
+            ),
         ),
     ]

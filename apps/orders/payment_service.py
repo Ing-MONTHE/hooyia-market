@@ -37,11 +37,12 @@ from .models import Paiement
 logger = logging.getLogger(__name__)
 
 # URL de base de l'API PayUnit
-PAYUNIT_BASE_URL = 'https://gateway.payunit.net'
+PAYUNIT_BASE_URL = "https://gateway.payunit.net"
 
 
 class PayUnitError(Exception):
     """Exception levée quand l'API PayUnit retourne une erreur."""
+
     pass
 
 
@@ -63,20 +64,20 @@ class PayUnitService:
         - x-api-key     : token de l'application
         - mode          : live ou test
         """
-        api_user     = getattr(settings, 'PAYUNIT_API_USER', '')
-        api_password = getattr(settings, 'PAYUNIT_API_PASSWORD', '')
-        app_token    = getattr(settings, 'PAYUNIT_APP_TOKEN', '')
-        mode         = getattr(settings, 'PAYUNIT_MODE', 'test')
+        api_user = getattr(settings, "PAYUNIT_API_USER", "")
+        api_password = getattr(settings, "PAYUNIT_API_PASSWORD", "")
+        app_token = getattr(settings, "PAYUNIT_APP_TOKEN", "")
+        mode = getattr(settings, "PAYUNIT_MODE", "test")
 
         credentials = base64.b64encode(
-            f'{api_user}:{api_password}'.encode('utf-8')
-        ).decode('utf-8')
+            f"{api_user}:{api_password}".encode("utf-8")
+        ).decode("utf-8")
 
         return {
-            'Authorization': f'Basic {credentials}',
-            'x-api-key':     app_token,
-            'mode':          mode,
-            'Content-Type':  'application/json',
+            "Authorization": f"Basic {credentials}",
+            "x-api-key": app_token,
+            "mode": mode,
+            "Content-Type": "application/json",
         }
 
     @staticmethod
@@ -85,16 +86,16 @@ class PayUnitService:
         Retourne True si le mode mock doit être activé.
         Cas : PAYUNIT_MOCK=True, token absent, ou SITE_URL en localhost.
         """
-        app_token = getattr(settings, 'PAYUNIT_APP_TOKEN', '')
-        site_url  = getattr(settings, 'SITE_URL', '')
+        app_token = getattr(settings, "PAYUNIT_APP_TOKEN", "")
+        site_url = getattr(settings, "SITE_URL", "")
 
         return (
-            getattr(settings, 'PAYUNIT_MOCK', False)
+            getattr(settings, "PAYUNIT_MOCK", False)
             or not app_token
-            or app_token == 'your_sandbox_token_here'
+            or app_token == "your_sandbox_token_here"
             or not site_url
-            or 'localhost' in site_url
-            or '127.0.0.1' in site_url
+            or "localhost" in site_url
+            or "127.0.0.1" in site_url
         )
 
     @staticmethod
@@ -108,42 +109,52 @@ class PayUnitService:
           - quantity                       : quantité commandée
         """
         items = []
-        site_url = getattr(settings, 'SITE_URL', '').rstrip('/')
+        site_url = getattr(settings, "SITE_URL", "").rstrip("/")
 
         for ligne in commande.lignes.all():
             # Récupère l'image du produit si disponible, sinon image par défaut
-            image_url = f'{site_url}/static/img/product_default.png'
-            if hasattr(ligne, 'produit') and ligne.produit and ligne.produit.images.exists():
+            image_url = f"{site_url}/static/img/product_default.png"
+            if (
+                hasattr(ligne, "produit")
+                and ligne.produit
+                and ligne.produit.images.exists()
+            ):
                 try:
-                    image_url = f'{site_url}{ligne.produit.images.first().image.url}'
+                    image_url = f"{site_url}{ligne.produit.images.first().image.url}"
                 except Exception:
                     pass  # Garde l'image par défaut
 
-            items.append({
-                'price_description': {
-                    'unit_amount': int(ligne.prix_unitaire),  # montant entier (FCFA)
-                },
-                'product_description': {
-                    'name':          ligne.produit_nom,       # snapshot du nom
-                    'image_url':     image_url,               # doit être HTTPS en prod
-                    'about_product': f'Ref: {commande.reference_courte}',
-                },
-                'quantity': ligne.quantite,
-            })
+            items.append(
+                {
+                    "price_description": {
+                        "unit_amount": int(
+                            ligne.prix_unitaire
+                        ),  # montant entier (FCFA)
+                    },
+                    "product_description": {
+                        "name": ligne.produit_nom,  # snapshot du nom
+                        "image_url": image_url,  # doit être HTTPS en prod
+                        "about_product": f"Ref: {commande.reference_courte}",
+                    },
+                    "quantity": ligne.quantite,
+                }
+            )
 
         # Sécurité : si la commande n'a pas de lignes, on crée un item générique
         if not items:
-            items.append({
-                'price_description': {
-                    'unit_amount': int(commande.montant_total),
-                },
-                'product_description': {
-                    'name':          f'Commande #{commande.reference_courte}',
-                    'image_url':     f'{site_url}/static/img/product_default.png',
-                    'about_product': 'HooYia Market',
-                },
-                'quantity': 1,
-            })
+            items.append(
+                {
+                    "price_description": {
+                        "unit_amount": int(commande.montant_total),
+                    },
+                    "product_description": {
+                        "name": f"Commande #{commande.reference_courte}",
+                        "image_url": f"{site_url}/static/img/product_default.png",
+                        "about_product": "HooYia Market",
+                    },
+                    "quantity": 1,
+                }
+            )
 
         return items
 
@@ -171,52 +182,53 @@ class PayUnitService:
             PayUnitError : si l'API retourne une erreur ou est injoignable
         """
         commande = paiement.commande
-        client   = commande.client
+        client = commande.client
 
         # ── Mode MOCK (dev local ou token absent) ──────────────────────────
         if PayUnitService._is_mock():
             import uuid as _uuid
-            ref_mock = f'pu_mock_{str(_uuid.uuid4())[:8]}'
+
+            ref_mock = f"pu_mock_{str(_uuid.uuid4())[:8]}"
             mock_url = request.build_absolute_uri(
-                f'/commandes/paiement/mock/?ref={commande.reference}&trx={ref_mock}'
+                f"/commandes/paiement/mock/?ref={commande.reference}&trx={ref_mock}"
             )
             # Stocke la référence mock comme checkout_id
             paiement.reference_externe = ref_mock
             paiement.authorization_url = mock_url
-            paiement.save(update_fields=['reference_externe', 'authorization_url'])
+            paiement.save(update_fields=["reference_externe", "authorization_url"])
 
             logger.warning(
                 f"[PayUnit MOCK] Commande #{commande.reference_courte} | Ref: {ref_mock}"
             )
             return {
-                'payment_url':    mock_url,
-                'checkout_id':    ref_mock,
-                'transaction_id': ref_mock,
+                "payment_url": mock_url,
+                "checkout_id": ref_mock,
+                "transaction_id": ref_mock,
             }
 
         # ── URLs de retour (doivent être publiques et HTTPS) ───────────────
-        site_url   = getattr(settings, 'SITE_URL', '').rstrip('/')
-        success_url = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}&status=success'
-        cancel_url  = f'{site_url}/commandes/paiement/retour/?ref={commande.reference}&status=cancel'
-        notify_url  = f'{site_url}/api/commandes/webhook/payunit/'
+        site_url = getattr(settings, "SITE_URL", "").rstrip("/")
+        success_url = f"{site_url}/commandes/paiement/retour/?ref={commande.reference}&status=success"
+        cancel_url = f"{site_url}/commandes/paiement/retour/?ref={commande.reference}&status=cancel"
+        notify_url = f"{site_url}/api/commandes/webhook/payunit/"
 
         # ── Payload V2 ─────────────────────────────────────────────────────
         # Champs obligatoires selon la doc V2 :
         # total_amount, transaction_id, mode, currency,
         # success_url, cancel_url, items, meta
         payload = {
-            'total_amount':   int(paiement.montant),          # montant entier en FCFA
-            'transaction_id': str(commande.reference),         # référence unique interne
-            'mode':           'payment',                       # toujours 'payment'
-            'currency':       'XAF',
-            'success_url':    success_url,
-            'cancel_url':     cancel_url,
-            'notify_url':     notify_url,                      # webhook (optionnel mais requis pour nous)
-            'payment_country': 'CM',                           # affiche uniquement les opérateurs CM
-            'items':          PayUnitService._build_items(commande),
-            'meta': {
-                'phone_number_collection': True,               # PayUnit affiche le champ téléphone
-                'address_collection':      False,              # on gère l'adresse en interne
+            "total_amount": int(paiement.montant),  # montant entier en FCFA
+            "transaction_id": str(commande.reference),  # référence unique interne
+            "mode": "payment",  # toujours 'payment'
+            "currency": "XAF",
+            "success_url": success_url,
+            "cancel_url": cancel_url,
+            "notify_url": notify_url,  # webhook (optionnel mais requis pour nous)
+            "payment_country": "CM",  # affiche uniquement les opérateurs CM
+            "items": PayUnitService._build_items(commande),
+            "meta": {
+                "phone_number_collection": True,  # PayUnit affiche le champ téléphone
+                "address_collection": False,  # on gère l'adresse en interne
             },
         }
 
@@ -228,7 +240,7 @@ class PayUnitService:
         # ── Appel API PayUnit ──────────────────────────────────────────────
         try:
             response = requests.post(
-                f'{PAYUNIT_BASE_URL}/api/gateway/checkout/initialize',
+                f"{PAYUNIT_BASE_URL}/api/gateway/checkout/initialize",
                 json=payload,
                 headers=PayUnitService._headers(),
                 timeout=15,
@@ -246,15 +258,19 @@ class PayUnitService:
 
         # ── Gestion des erreurs HTTP ────────────────────────────────────────
         if response.status_code not in (200, 201):
-            message = data.get('message', data.get('error', 'Erreur PayUnit inconnue'))
-            logger.error(f"[PayUnit] initialize — Erreur {response.status_code} : {message}")
+            message = data.get("message", data.get("error", "Erreur PayUnit inconnue"))
+            logger.error(
+                f"[PayUnit] initialize — Erreur {response.status_code} : {message}"
+            )
             raise PayUnitError(f"Erreur paiement : {message}")
 
         # ── Extraction de la réponse V2 ─────────────────────────────────────
         # Réponse V2 : { "status": "SUCCESS", "data": { "redirect": "https://..." } }
-        result_data  = data.get('data', {})
-        payment_url  = result_data.get('redirect', '')  # V2 → clé "redirect"
-        checkout_id  = payment_url.split('/')[-1] if payment_url else ''  # extrait l'ID depuis l'URL
+        result_data = data.get("data", {})
+        payment_url = result_data.get("redirect", "")  # V2 → clé "redirect"
+        checkout_id = (
+            payment_url.split("/")[-1] if payment_url else ""
+        )  # extrait l'ID depuis l'URL
 
         if not payment_url:
             logger.error(f"[PayUnit] initialize — Pas d'URL dans la réponse : {data}")
@@ -265,16 +281,16 @@ class PayUnitService:
         # authorization_url = URL de redirection vers PayUnit
         paiement.reference_externe = checkout_id or str(commande.reference)
         paiement.authorization_url = payment_url
-        paiement.save(update_fields=['reference_externe', 'authorization_url'])
+        paiement.save(update_fields=["reference_externe", "authorization_url"])
 
         logger.info(
             f"[PayUnit] initialize — OK | checkout_id: {checkout_id} | URL: {payment_url}"
         )
 
         return {
-            'payment_url':    payment_url,
-            'checkout_id':    checkout_id,
-            'transaction_id': str(commande.reference),
+            "payment_url": payment_url,
+            "checkout_id": checkout_id,
+            "transaction_id": str(commande.reference),
         }
 
     @staticmethod
@@ -297,7 +313,7 @@ class PayUnitService:
         """
         try:
             response = requests.get(
-                f'{PAYUNIT_BASE_URL}/api/gateway/checkout/status/{checkout_id}',
+                f"{PAYUNIT_BASE_URL}/api/gateway/checkout/status/{checkout_id}",
                 headers=PayUnitService._headers(),
                 timeout=10,
             )
@@ -307,19 +323,19 @@ class PayUnitService:
             raise PayUnitError("Impossible de vérifier le paiement.")
 
         if response.status_code != 200:
-            raise PayUnitError(data.get('message', 'Erreur vérification PayUnit'))
+            raise PayUnitError(data.get("message", "Erreur vérification PayUnit"))
 
         # Réponse V2 : data.status = PENDING | SUCCESS | FAILED | CANCELLED
-        result_data = data.get('data', {})
-        status      = result_data.get('status', 'PENDING')
-        amount      = result_data.get('total_amount', 0)
+        result_data = data.get("data", {})
+        status = result_data.get("status", "PENDING")
+        amount = result_data.get("total_amount", 0)
 
         logger.info(f"[PayUnit] verify — checkout_id: {checkout_id} | status: {status}")
 
         return {
-            'status':      status,
-            'amount':      amount,
-            'checkout_id': checkout_id,
+            "status": status,
+            "amount": amount,
+            "checkout_id": checkout_id,
         }
 
     @staticmethod
@@ -331,9 +347,9 @@ class PayUnitService:
         """
         commande = paiement.commande
 
-        paiement.statut        = Paiement.StatutPaiement.REUSSI
+        paiement.statut = Paiement.StatutPaiement.REUSSI
         paiement.date_paiement = timezone.now()
-        paiement.save(update_fields=['statut', 'date_paiement'])
+        paiement.save(update_fields=["statut", "date_paiement"])
 
         # Transition FSM : EN_ATTENTE → CONFIRMEE
         commande.confirmer()
@@ -359,7 +375,7 @@ class PayUnitService:
         La commande reste EN_ATTENTE — le client peut retenter.
         """
         paiement.statut = Paiement.StatutPaiement.ECHOUE
-        paiement.save(update_fields=['statut'])
+        paiement.save(update_fields=["statut"])
 
         logger.warning(
             f"[PayUnit] Paiement échoué | Commande #{paiement.commande.reference_courte} "

@@ -19,6 +19,7 @@ Flux de création d'une commande :
        h. Confirme la commande → déclenche le signal → email Celery
   4. Retourne la commande créée
 """
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -31,6 +32,7 @@ from apps.cart.models import Panier
 # SERVICE — OrderService
 # Point d'entrée unique pour la création et gestion des commandes.
 # ═══════════════════════════════════════════════════════════════
+
 
 class OrderService:
     """
@@ -46,7 +48,9 @@ class OrderService:
 
     @staticmethod
     @transaction.atomic
-    def create_from_cart(utilisateur, adresse, mode_paiement, telephone_paiement='', note_client=''):
+    def create_from_cart(
+        utilisateur, adresse, mode_paiement, telephone_paiement="", note_client=""
+    ):
         """
         Crée une commande complète depuis le panier de l'utilisateur.
 
@@ -77,66 +81,73 @@ class OrderService:
             raise ValidationError(_("Votre panier est vide."))
 
         # Charge tous les articles du panier avec leurs produits en une seule requête
-        items = panier.items.select_related('produit').all()
+        items = panier.items.select_related("produit").all()
 
         # ── Étape 2 : Vérifie le stock de chaque produit ─────
         # On vérifie AVANT de créer la commande pour éviter les commandes impossibles
         for item in items:
             if not item.produit:
                 raise ValidationError(
-                    _("Un produit de votre panier n'est plus disponible. "
-                      "Veuillez le retirer de votre panier.")
+                    _(
+                        "Un produit de votre panier n'est plus disponible. "
+                        "Veuillez le retirer de votre panier."
+                    )
                 )
             if item.produit.stock < item.quantite:
                 raise ValidationError(
-                    _("Stock insuffisant pour « %(nom)s ». "
-                      "Disponible : %(stock)s — Demandé : %(quantite)s.") % {
-                        'nom': item.produit.nom,
-                        'stock': item.produit.stock,
-                        'quantite': item.quantite,
+                    _(
+                        "Stock insuffisant pour « %(nom)s ». "
+                        "Disponible : %(stock)s — Demandé : %(quantite)s."
+                    )
+                    % {
+                        "nom": item.produit.nom,
+                        "stock": item.produit.stock,
+                        "quantite": item.quantite,
                     }
                 )
 
         # ── Étape 3 : Crée la Commande ────────────────────────
         # On copie les champs de l'adresse (snapshot) pour figer l'adresse au moment t
         commande = Commande.objects.create(
-            client                     = utilisateur,
-            montant_total              = panier.total,
-            note_client                = note_client,
+            client=utilisateur,
+            montant_total=panier.total,
+            note_client=note_client,
             # ── Snapshot de l'adresse de livraison ────────────
-            adresse_livraison_nom      = adresse.nom_complet,
-            adresse_livraison_telephone = adresse.telephone,
-            adresse_livraison_adresse  = adresse.adresse,
-            adresse_livraison_ville    = adresse.ville,
-            adresse_livraison_region   = adresse.region,
-            adresse_livraison_pays     = adresse.pays,
+            adresse_livraison_nom=adresse.nom_complet,
+            adresse_livraison_telephone=adresse.telephone,
+            adresse_livraison_adresse=adresse.adresse,
+            adresse_livraison_ville=adresse.ville,
+            adresse_livraison_region=adresse.region,
+            adresse_livraison_pays=adresse.pays,
         )
 
         # ── Étape 4 : Crée les lignes de commande ────────────
         # bulk_create() insère toutes les lignes en une seule requête SQL (performances)
         lignes = []
         for item in items:
-            lignes.append(LigneCommande(
-                commande      = commande,
-                produit       = item.produit,
-                produit_nom   = item.produit.nom,       # Snapshot du nom
-                quantite      = item.quantite,
-                prix_unitaire = item.prix_snapshot,     # Snapshot du prix
-            ))
+            lignes.append(
+                LigneCommande(
+                    commande=commande,
+                    produit=item.produit,
+                    produit_nom=item.produit.nom,  # Snapshot du nom
+                    quantite=item.quantite,
+                    prix_unitaire=item.prix_snapshot,  # Snapshot du prix
+                )
+            )
         LigneCommande.objects.bulk_create(lignes)
 
         # ── Étape 5 : Décrémente le stock des produits ────────
         for item in items:
             item.produit.stock -= item.quantite
             # update_fields = ne met à jour que ces champs (évite les effets de bord)
-            item.produit.save(update_fields=['stock', 'statut'])
+            item.produit.save(update_fields=["stock", "statut"])
 
         # ── Étape 6 : Crée le Paiement ───────────────────────
         Paiement.objects.create(
-            commande           = commande,
-            mode               = mode_paiement,
-            montant            = commande.montant_total,
-            telephone_paiement = telephone_paiement,
+            commande=commande,
+            mode=mode_paiement,
+            montant=commande.montant_total,
+            telephone_paiement=telephone_paiement,
             # statut EN_ATTENTE par défaut → sera mis à REUSSI par le webhook PayUnit
         )
 
@@ -178,12 +189,16 @@ class OrderService:
         """
         # Vérifie que l'utilisateur est propriétaire ou admin
         if commande.client != utilisateur and not utilisateur.is_admin:
-            raise ValidationError(_("Vous n'êtes pas autorisé à annuler cette commande."))
+            raise ValidationError(
+                _("Vous n'êtes pas autorisé à annuler cette commande.")
+            )
 
         if not commande.peut_etre_annulee:
             raise ValidationError(
-                _("Cette commande ne peut plus être annulée "
-                  "(déjà livrée ou déjà annulée).")
+                _(
+                    "Cette commande ne peut plus être annulée "
+                    "(déjà livrée ou déjà annulée)."
+                )
             )
 
         # La transition FSM annuler() gère la remise en stock automatiquement
@@ -198,12 +213,12 @@ class OrderService:
             if paiement.statut == Paiement.StatutPaiement.EN_ATTENTE:
                 # Pas encore payé → simple échec, pas de remboursement
                 paiement.statut = Paiement.StatutPaiement.ECHOUE
-                paiement.save(update_fields=['statut'])
+                paiement.save(update_fields=["statut"])
 
             elif paiement.statut == Paiement.StatutPaiement.REUSSI:
                 # Déjà payé → remboursement manuel requis
                 paiement.statut = Paiement.StatutPaiement.REMBOURSE_EN_ATTENTE
-                paiement.save(update_fields=['statut'])
+                paiement.save(update_fields=["statut"])
                 remboursement_requis = True
 
         except Exception:
@@ -213,11 +228,13 @@ class OrderService:
         if remboursement_requis:
             try:
                 from apps.orders.tasks import notifier_remboursement
+
                 notifier_remboursement.delay(commande.pk, utilisateur.pk)
             except Exception:
                 # Celery indisponible → envoyer en synchrone
                 try:
                     from apps.orders.tasks import _envoyer_emails_remboursement
+
                     _envoyer_emails_remboursement(commande.pk, utilisateur.pk)
                 except Exception:
                     pass

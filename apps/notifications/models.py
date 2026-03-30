@@ -18,6 +18,7 @@ Types de notifications (TYPE_CHOICES) :
   - stock      : alerte stock faible (admin uniquement)
   - systeme    : message système général
 """
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -27,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 # NOTIFICATION
 # Un message destiné à un utilisateur, affiché en temps réel.
 # ═══════════════════════════════════════════════════════════════
+
 
 class Notification(models.Model):
     """
@@ -39,45 +41,47 @@ class Notification(models.Model):
       4. L'utilisateur clique → is_read=True via PATCH /api/notifications/<id>/lire/
     """
 
-    TYPE_COMMANDE = 'commande'
-    TYPE_AVIS     = 'avis'
-    TYPE_STOCK    = 'stock'
-    TYPE_SYSTEME  = 'systeme'
+    TYPE_COMMANDE = "commande"
+    TYPE_AVIS = "avis"
+    TYPE_STOCK = "stock"
+    TYPE_SYSTEME = "systeme"
 
     TYPE_CHOICES = [
-        (TYPE_COMMANDE, _('Commande')),
-        (TYPE_AVIS,     _('Avis')),
-        (TYPE_STOCK,    _('Stock')),
-        (TYPE_SYSTEME,  _('Système')),
+        (TYPE_COMMANDE, _("Commande")),
+        (TYPE_AVIS, _("Avis")),
+        (TYPE_STOCK, _("Stock")),
+        (TYPE_SYSTEME, _("Système")),
     ]
 
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='notifications',
-        verbose_name=_("Destinataire")
+        related_name="notifications",
+        verbose_name=_("Destinataire"),
     )
 
-    titre   = models.CharField(max_length=200, verbose_name=_("Titre"))
+    titre = models.CharField(max_length=200, verbose_name=_("Titre"))
     message = models.TextField(verbose_name=_("Message"))
 
     type_notif = models.CharField(
         max_length=20,
         choices=TYPE_CHOICES,
         default=TYPE_SYSTEME,
-        verbose_name=_("Type")
+        verbose_name=_("Type"),
     )
 
     is_read = models.BooleanField(default=False, verbose_name=_("Lue"))
 
-    lien = models.CharField(max_length=500, blank=True, verbose_name=_("Lien (optionnel)"))
+    lien = models.CharField(
+        max_length=500, blank=True, verbose_name=_("Lien (optionnel)")
+    )
 
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("Créée le"))
 
     class Meta:
-        verbose_name        = _("Notification")
+        verbose_name = _("Notification")
         verbose_name_plural = _("Notifications")
-        ordering            = ['-date_creation']
+        ordering = ["-date_creation"]
 
     def __str__(self):
         return f"[{self.get_type_notif_display()}] {self.titre} → {self.utilisateur.username}"
@@ -87,6 +91,7 @@ class Notification(models.Model):
 # EMAIL ASYNCHRONE
 # Log de chaque email envoyé via Celery (traçabilité complète).
 # ═══════════════════════════════════════════════════════════════
+
 
 class EmailAsynchrone(models.Model):
     """
@@ -103,45 +108,49 @@ class EmailAsynchrone(models.Model):
       - echec      : erreur lors de l'envoi (détail dans erreur)
     """
 
-    STATUT_EN_ATTENTE = 'en_attente'
-    STATUT_ENVOYE     = 'envoye'
-    STATUT_ECHEC      = 'echec'
+    STATUT_EN_ATTENTE = "en_attente"
+    STATUT_ENVOYE = "envoye"
+    STATUT_ECHEC = "echec"
 
     STATUT_CHOICES = [
-        (STATUT_EN_ATTENTE, _('En attente')),
-        (STATUT_ENVOYE,     _('Envoyé')),
-        (STATUT_ECHEC,      _('Échec')),
+        (STATUT_EN_ATTENTE, _("En attente")),
+        (STATUT_ENVOYE, _("Envoyé")),
+        (STATUT_ECHEC, _("Échec")),
     ]
 
     destinataire = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='emails_recus',
-        verbose_name=_("Destinataire")
+        related_name="emails_recus",
+        verbose_name=_("Destinataire"),
     )
 
-    sujet              = models.CharField(max_length=300, verbose_name=_("Sujet"))
-    corps              = models.TextField(verbose_name=_("Corps de l'email"))
+    sujet = models.CharField(max_length=300, verbose_name=_("Sujet"))
+    corps = models.TextField(verbose_name=_("Corps de l'email"))
     email_destinataire = models.EmailField(verbose_name=_("Email destinataire"))
 
     statut = models.CharField(
         max_length=20,
         choices=STATUT_CHOICES,
         default=STATUT_EN_ATTENTE,
-        verbose_name=_("Statut")
+        verbose_name=_("Statut"),
     )
 
     erreur = models.TextField(blank=True, verbose_name=_("Détail erreur"))
 
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("Créé le"))
-    date_envoi    = models.DateTimeField(null=True, blank=True, verbose_name=_("Envoyé le"))
+    date_envoi = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Envoyé le")
+    )
 
     class Meta:
-        verbose_name        = _("Email asynchrone")
+        verbose_name = _("Email asynchrone")
         verbose_name_plural = _("Emails asynchrones")
-        ordering            = ['-date_creation']
+        ordering = ["-date_creation"]
 
     def __str__(self):
-        dest = self.destinataire.username if self.destinataire else self.email_destinataire
+        dest = (
+            self.destinataire.username if self.destinataire else self.email_destinataire
+        )
         return f"Email [{self.get_statut_display()}] → {dest} : {self.sujet}"

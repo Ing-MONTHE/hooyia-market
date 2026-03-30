@@ -6,6 +6,7 @@ Serializers pour les avis clients.
 - AvisCreerSerializer  → validation + création d'un avis
                          Vérifie que le client a bien reçu le produit (commande LIVREE)
 """
+
 from rest_framework import serializers
 from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
@@ -19,40 +20,43 @@ from apps.orders.models import Commande
 # Utilisé pour afficher les avis sur la fiche produit
 # ═══════════════════════════════════════════════════════════════
 
+
 class AvisListSerializer(serializers.ModelSerializer):
     """
     Sérialise un avis pour l'affichage en liste.
     Utilisé pour la fiche produit (clients) et le tableau de modération (admin).
     """
 
-    nom_utilisateur = serializers.CharField(source='utilisateur.username', read_only=True)
-    auteur          = serializers.CharField(source='utilisateur.username', read_only=True)
-    auteur_nom      = serializers.CharField(source='utilisateur.username', read_only=True)
-    produit_nom     = serializers.CharField(source='produit.nom', read_only=True)
+    nom_utilisateur = serializers.CharField(
+        source="utilisateur.username", read_only=True
+    )
+    auteur = serializers.CharField(source="utilisateur.username", read_only=True)
+    auteur_nom = serializers.CharField(source="utilisateur.username", read_only=True)
+    produit_nom = serializers.CharField(source="produit.nom", read_only=True)
 
     # Photo de profil : URL complète si elle existe, sinon None
     auteur_photo = serializers.SerializerMethodField()
 
     def get_auteur_photo(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         photo = obj.utilisateur.photo_profil
         if photo and request:
             return request.build_absolute_uri(photo.url)
         return None
 
     class Meta:
-        model  = Avis
+        model = Avis
         fields = [
-            'id',
-            'nom_utilisateur',  # Pour la fiche produit (frontend client)
-            'auteur',           # Pour le dashboard admin
-            'auteur_nom',       # Pour la carte avis (fiche produit)
-            'auteur_photo',     # URL photo de profil (None si absente)
-            'produit_nom',      # Pour le dashboard admin
-            'note',
-            'commentaire',
-            'is_validated',
-            'date_creation',
+            "id",
+            "nom_utilisateur",  # Pour la fiche produit (frontend client)
+            "auteur",  # Pour le dashboard admin
+            "auteur_nom",  # Pour la carte avis (fiche produit)
+            "auteur_photo",  # URL photo de profil (None si absente)
+            "produit_nom",  # Pour le dashboard admin
+            "note",
+            "commentaire",
+            "is_validated",
+            "date_creation",
         ]
         read_only_fields = fields
 
@@ -60,6 +64,7 @@ class AvisListSerializer(serializers.ModelSerializer):
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Détail (lecture complète, admin)
 # ═══════════════════════════════════════════════════════════════
+
 
 class AvisDetailSerializer(serializers.ModelSerializer):
     """
@@ -69,25 +74,21 @@ class AvisDetailSerializer(serializers.ModelSerializer):
     """
 
     nom_utilisateur = serializers.CharField(
-        source='utilisateur.username',
-        read_only=True
+        source="utilisateur.username", read_only=True
     )
-    nom_produit = serializers.CharField(
-        source='produit.nom',
-        read_only=True
-    )
+    nom_produit = serializers.CharField(source="produit.nom", read_only=True)
 
     class Meta:
-        model  = Avis
+        model = Avis
         fields = [
-            'id',
-            'nom_utilisateur',
-            'nom_produit',
-            'note',
-            'commentaire',
-            'is_validated',          # Visible uniquement en mode détail / admin
-            'date_creation',
-            'date_modification',
+            "id",
+            "nom_utilisateur",
+            "nom_produit",
+            "note",
+            "commentaire",
+            "is_validated",  # Visible uniquement en mode détail / admin
+            "date_creation",
+            "date_modification",
         ]
         read_only_fields = fields
 
@@ -96,6 +97,7 @@ class AvisDetailSerializer(serializers.ModelSerializer):
 # SERIALIZER — Créer un avis (écriture)
 # Contient la validation métier complète
 # ═══════════════════════════════════════════════════════════════
+
 
 class AvisCreerSerializer(serializers.ModelSerializer):
     """
@@ -110,11 +112,11 @@ class AvisCreerSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model  = Avis
+        model = Avis
         fields = [
-            'produit',      # FK → ID du produit (obligatoire)
-            'note',         # 1 à 5 (obligatoire)
-            'commentaire',  # Texte libre (facultatif)
+            "produit",  # FK → ID du produit (obligatoire)
+            "note",  # 1 à 5 (obligatoire)
+            "commentaire",  # Texte libre (facultatif)
         ]
 
     def validate_produit(self, produit):
@@ -123,10 +125,8 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         Appelé automatiquement par DRF lors de la validation du champ 'produit'.
         """
         # Un produit épuisé ou inactif ne devrait plus recevoir d'avis
-        if produit.statut not in ['actif', 'stock_faible']:
-            raise serializers.ValidationError(
-                _("Ce produit n'accepte plus d'avis.")
-            )
+        if produit.statut not in ["actif", "stock_faible"]:
+            raise serializers.ValidationError(_("Ce produit n'accepte plus d'avis."))
         return produit
 
     def validate(self, data):
@@ -136,8 +136,8 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         Vérifie que l'utilisateur connecté a bien commandé et reçu le produit.
         Cette règle garantit que seuls les vrais acheteurs peuvent noter.
         """
-        utilisateur = self.context['request'].user
-        produit     = data['produit']
+        utilisateur = self.context["request"].user
+        produit = data["produit"]
 
         # ── Vérification : l'utilisateur n'est pas admin/staff/vendeur ────────
         # Couche de sécurité supplémentaire côté serializer (la permission EstClient
@@ -145,7 +145,9 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         # appelée directement sans passer par la vue standard).
         if utilisateur.is_staff or utilisateur.is_admin or utilisateur.is_vendeur:
             raise serializers.ValidationError(
-                _("Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette fonctionnalité est réservée aux clients.")
+                _(
+                    "Les administrateurs et vendeurs ne peuvent pas laisser d'avis. Cette fonctionnalité est réservée aux clients."
+                )
             )
 
         # ── Vérification : l'utilisateur a-t-il reçu ce produit ? ─────────────
@@ -153,24 +155,24 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         # En production : True → seuls les vrais acheteurs peuvent noter.
         # En développement : False → n'importe quel client peut laisser un avis.
         from django.conf import settings
-        if getattr(settings, 'AVIS_ACHAT_REQUIS', False):
+
+        if getattr(settings, "AVIS_ACHAT_REQUIS", False):
             a_commande = Commande.objects.filter(
-                client=utilisateur,
-                statut=Commande.LIVREE,
-                lignes__produit=produit
+                client=utilisateur, statut=Commande.LIVREE, lignes__produit=produit
             ).exists()
 
             if not a_commande:
                 raise serializers.ValidationError(
-                    _("Vous ne pouvez laisser un avis que sur un produit que vous avez reçu.")
+                    _(
+                        "Vous ne pouvez laisser un avis que sur un produit que vous avez reçu."
+                    )
                 )
 
         # ── Vérification : l'utilisateur n'a-t-il pas déjà noté ce produit ? ──
         # Double sécurité : la DB lève IntegrityError (unique_together),
         # mais on préfère intercepter ici pour renvoyer un message clair en JSON.
         deja_note = Avis.objects.filter(
-            utilisateur=utilisateur,
-            produit=produit
+            utilisateur=utilisateur, produit=produit
         ).exists()
 
         if deja_note:
@@ -190,8 +192,7 @@ class AvisCreerSerializer(serializers.ModelSerializer):
         """
         try:
             return Avis.objects.create(
-                utilisateur=self.context['request'].user,
-                **validated_data
+                utilisateur=self.context["request"].user, **validated_data
             )
         except IntegrityError:
             # Cas de concurrence rare : deux requêtes simultanées du même user
@@ -199,20 +200,25 @@ class AvisCreerSerializer(serializers.ModelSerializer):
                 _("Vous avez déjà laissé un avis sur ce produit.")
             )
 
+
 # ===============================================================
 # SERIALIZER — AvisApp (avis sur la plateforme)
 # ===============================================================
 
 from .models import AvisApp
 
+
 class AvisAppListSerializer(serializers.ModelSerializer):
     """Lecture publique — affiché sur la home page."""
-    auteur_nom   = serializers.CharField(source='utilisateur.get_full_name', read_only=True)
-    auteur_user  = serializers.CharField(source='utilisateur.username', read_only=True)
+
+    auteur_nom = serializers.CharField(
+        source="utilisateur.get_full_name", read_only=True
+    )
+    auteur_user = serializers.CharField(source="utilisateur.username", read_only=True)
     auteur_photo = serializers.SerializerMethodField()
 
     def get_auteur_photo(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         try:
             photo = obj.utilisateur.photo_profil
             if photo and request:
@@ -222,8 +228,16 @@ class AvisAppListSerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        model  = AvisApp
-        fields = ['id', 'auteur_nom', 'auteur_user', 'auteur_photo', 'note', 'commentaire', 'date_creation']
+        model = AvisApp
+        fields = [
+            "id",
+            "auteur_nom",
+            "auteur_user",
+            "auteur_photo",
+            "note",
+            "commentaire",
+            "date_creation",
+        ]
         read_only_fields = fields
 
 
@@ -231,20 +245,23 @@ class AvisAppCreerSerializer(serializers.ModelSerializer):
     """Création d'un avis app par l'utilisateur connecté."""
 
     class Meta:
-        model  = AvisApp
-        fields = ['note', 'commentaire']
+        model = AvisApp
+        fields = ["note", "commentaire"]
 
     def validate(self, data):
-        utilisateur = self.context['request'].user
+        utilisateur = self.context["request"].user
         if AvisApp.objects.filter(utilisateur=utilisateur).exists():
-            raise serializers.ValidationError(_("Vous avez déjà laissé un avis sur la plateforme."))
+            raise serializers.ValidationError(
+                _("Vous avez déjà laissé un avis sur la plateforme.")
+            )
         return data
 
     def create(self, validated_data):
         try:
             return AvisApp.objects.create(
-                utilisateur=self.context['request'].user,
-                **validated_data
+                utilisateur=self.context["request"].user, **validated_data
             )
         except IntegrityError:
-            raise serializers.ValidationError(_("Vous avez déjà laissé un avis sur la plateforme."))
+            raise serializers.ValidationError(
+                _("Vous avez déjà laissé un avis sur la plateforme.")
+            )

@@ -17,6 +17,7 @@ Lien avec products/Produit :
     - produit.note_moyenne  (moyenne de toutes les notes validées)
     - produit.nombre_avis   (nombre total d'avis validés)
 """
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -27,6 +28,7 @@ from django.utils.translation import gettext_lazy as _
 # AVIS
 # Un avis laissé par un utilisateur sur un produit qu'il a acheté.
 # ═══════════════════════════════════════════════════════════════
+
 
 class Avis(models.Model):
     """
@@ -48,15 +50,15 @@ class Avis(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='avis',
-        verbose_name=_("Auteur")
+        related_name="avis",
+        verbose_name=_("Auteur"),
     )
 
     produit = models.ForeignKey(
-        'products.Produit',
+        "products.Produit",
         on_delete=models.CASCADE,
-        related_name='avis',
-        verbose_name=_("Produit")
+        related_name="avis",
+        verbose_name=_("Produit"),
     )
 
     note = models.PositiveSmallIntegerField(
@@ -64,30 +66,30 @@ class Avis(models.Model):
             MinValueValidator(1, message=_("La note minimale est 1 étoile.")),
             MaxValueValidator(5, message=_("La note maximale est 5 étoiles.")),
         ],
-        verbose_name=_("Note (1 à 5)")
+        verbose_name=_("Note (1 à 5)"),
     )
 
-    commentaire = models.TextField(
-        blank=True,
-        verbose_name=_("Commentaire")
-    )
+    commentaire = models.TextField(blank=True, verbose_name=_("Commentaire"))
 
     is_validated = models.BooleanField(
-        default=False,
-        verbose_name=_("Validé par un admin")
+        default=False, verbose_name=_("Validé par un admin")
     )
 
-    date_creation     = models.DateTimeField(auto_now_add=True, verbose_name=_("Date de l'avis"))
-    date_modification = models.DateTimeField(auto_now=True,     verbose_name=_("Dernière modification"))
+    date_creation = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("Date de l'avis")
+    )
+    date_modification = models.DateTimeField(
+        auto_now=True, verbose_name=_("Dernière modification")
+    )
 
     class Meta:
         verbose_name = _("Avis")
         verbose_name_plural = _("Avis")
-        ordering = ['-date_creation']
-        unique_together = ('utilisateur', 'produit')
+        ordering = ["-date_creation"]
+        unique_together = ("utilisateur", "produit")
 
     def __str__(self):
-        nom_user    = self.utilisateur.username if self.utilisateur else "Anonyme"
+        nom_user = self.utilisateur.username if self.utilisateur else "Anonyme"
         nom_produit = self.produit.nom if self.produit else "Produit supprimé"
         return f"Avis de {nom_user} sur {nom_produit} — {self.note}/5"
 
@@ -97,6 +99,7 @@ class Avis(models.Model):
 # Avis laissé par un utilisateur sur la plateforme HooYia Market.
 # Indépendant des produits — concerne l'expérience globale du site.
 # ===============================================================
+
 
 class AvisApp(models.Model):
     """
@@ -111,8 +114,8 @@ class AvisApp(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='avis_app',
-        verbose_name=_("Auteur")
+        related_name="avis_app",
+        verbose_name=_("Auteur"),
     )
 
     note = models.PositiveSmallIntegerField(
@@ -120,14 +123,13 @@ class AvisApp(models.Model):
             MinValueValidator(1, message=_("Note minimale : 1.")),
             MaxValueValidator(5, message=_("Note maximale : 5.")),
         ],
-        verbose_name=_("Note (1 à 5)")
+        verbose_name=_("Note (1 à 5)"),
     )
 
     commentaire = models.TextField(verbose_name=_("Commentaire"))
 
     is_valide = models.BooleanField(
-        default=False,
-        verbose_name=_("Validé (affiché sur la home)")
+        default=False, verbose_name=_("Validé (affiché sur la home)")
     )
 
     date_creation = models.DateTimeField(auto_now_add=True)
@@ -135,8 +137,8 @@ class AvisApp(models.Model):
     class Meta:
         verbose_name = _("Avis sur l'application")
         verbose_name_plural = _("Avis sur l'application")
-        ordering = ['-date_creation']
-        unique_together = ('utilisateur',)
+        ordering = ["-date_creation"]
+        unique_together = ("utilisateur",)
 
     def __str__(self):
         nom = self.utilisateur.username if self.utilisateur else "Anonyme"

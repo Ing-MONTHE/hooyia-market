@@ -2,5 +2,5 @@ from django.urls import path
 from .api_views import AuditLogListView
 
 urlpatterns = [
-    path('', AuditLogListView.as_view(), name='audit-list'),
+    path("", AuditLogListView.as_view(), name="audit-list"),
 ]

@@ -13,14 +13,15 @@ Endpoints générés par le router :
   POST   /api/avis/<id>/valider/       → valider un avis (admin)
   POST   /api/avis/<id>/invalider/     → invalider un avis (admin)
 """
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .api_views import AvisViewSet
 from .api_views import AvisAppListView, AvisAppCreerView
 
 router = DefaultRouter()
-router.register(r'', AvisViewSet, basename='avis')
+router.register(r"", AvisViewSet, basename="avis")
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]
