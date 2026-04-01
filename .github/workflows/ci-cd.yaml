@@ -115,7 +115,7 @@ jobs:
             git pull origin main
 
             echo "🐳 Rebuild et redémarrage des conteneurs..."
-            docker-compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml up -d --build
 
             echo "🧹 Nettoyage des images Docker inutilisées..."
             docker image prune -f
