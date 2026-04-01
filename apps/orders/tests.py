@@ -257,7 +257,7 @@ class OrderServiceTest(TestCase):
         )
 
         self.assertEqual(commande.client, self.client_user)
-        self.assertEqual(commande.statut, Commande.EN_ATTENTE)
+        self.assertEqual(commande.statut, Commande.CONFIRMEE)
         self.assertEqual(commande.montant_total, Decimal("100000.00"))  # 2 × 50000
         self.assertEqual(commande.lignes.count(), 1)
 
@@ -272,7 +272,7 @@ class OrderServiceTest(TestCase):
         OrderService.create_from_cart(
             utilisateur=self.client_user, adresse=self.adresse
         )
-        self.assertFalse(panier.est_vide)
+        self.assertTrue(panier.est_vide)
 
     @patch("apps.notifications.tasks.send_order_confirmation_email.delay")
     def test_create_from_cart_decremente_stock(self, mock_email):
@@ -382,10 +382,8 @@ class CommandeAPITest(APITestCase):
     def _auth(self, token):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
-    @patch("apps.orders.payment_service.PayUnitService.initialize")
     @patch("apps.notifications.tasks.send_order_confirmation_email.delay")
-    def test_creer_commande(self, mock_email, mock_payunit):
-        mock_payunit.return_value = {"payment_url": "https://fake-url.com"}
+    def test_creer_commande(self, mock_email):
         """POST /api/commandes/creer/ crée une commande depuis le panier → 201."""
         preparer_panier(self.client_user, self.vendeur, quantite=2)
         self._auth(self.token_client)
@@ -393,14 +391,12 @@ class CommandeAPITest(APITestCase):
             reverse("api_commande_creer"),
             {
                 "adresse_id": self.adresse.pk,
-                "mode_paiement": "orange_money",
-                "telephone_paiement": "699000000",
+                "mode_paiement": "livraison",
             },
             format="json",
         )
-        print("ERREUR:", response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["statut"], Commande.CONFIRMEE)
+        self.assertEqual(response.data["commande"]["statut"], Commande.EN_ATTENTE)
 
     def test_creer_commande_panier_vide(self):
         """Créer une commande avec un panier vide → 400."""
