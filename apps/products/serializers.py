@@ -7,6 +7,7 @@ Serializers pour les produits :
 - ProduitCreateUpdateSerializer → création/modification
 - MouvementStockSerializer   → historique stock
 """
+
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 from .models import Produit, Categorie, ImageProduit, MouvementStock
@@ -15,6 +16,7 @@ from .models import Produit, Categorie, ImageProduit, MouvementStock
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Catégorie
 # ═══════════════════════════════════════════════════════════════
+
 
 class CategorieSerializer(serializers.ModelSerializer):
     """
@@ -26,27 +28,42 @@ class CategorieSerializer(serializers.ModelSerializer):
     # Lecture seule — calculés, non envoyés au POST
     sous_categories = serializers.SerializerMethodField()
     nombre_produits = serializers.SerializerMethodField()
-    nb_produits     = serializers.SerializerMethodField()
-    parent_nom      = serializers.SerializerMethodField()
+    nb_produits = serializers.SerializerMethodField()
+    parent_nom = serializers.SerializerMethodField()
 
     class Meta:
-        model  = Categorie
+        model = Categorie
         fields = [
-            'id', 'nom', 'slug', 'description',
-            'image', 'parent', 'parent_nom', 'sous_categories',
-            'nombre_produits', 'nb_produits', 'est_active'
+            "id",
+            "nom",
+            "slug",
+            "description",
+            "image",
+            "parent",
+            "parent_nom",
+            "sous_categories",
+            "nombre_produits",
+            "nb_produits",
+            "est_active",
         ]
-        read_only_fields = ['id', 'slug', 'sous_categories', 'nombre_produits', 'nb_produits', 'parent_nom']
+        read_only_fields = [
+            "id",
+            "slug",
+            "sous_categories",
+            "nombre_produits",
+            "nb_produits",
+            "parent_nom",
+        ]
 
     def get_sous_categories(self, obj):
         sous_cats = obj.sous_categories.all()
         return CategorieSerializer(sous_cats, many=True, context=self.context).data
 
     def get_nombre_produits(self, obj):
-        return obj.produits.filter(statut='actif').count()
+        return obj.produits.filter(statut="actif").count()
 
     def get_nb_produits(self, obj):
-        return obj.produits.filter(statut='actif').count()
+        return obj.produits.filter(statut="actif").count()
 
     def get_parent_nom(self, obj):
         return obj.parent.nom if obj.parent else None
@@ -56,6 +73,7 @@ class CategorieSerializer(serializers.ModelSerializer):
 # SERIALIZER — Image produit
 # ═══════════════════════════════════════════════════════════════
 
+
 class ImageProduitSerializer(serializers.ModelSerializer):
     """
     Sérialise les images d'un produit.
@@ -63,11 +81,8 @@ class ImageProduitSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model  = ImageProduit
-        fields = [
-            'id', 'image', 'alt_text',
-            'ordre', 'est_principale'
-        ]
+        model = ImageProduit
+        fields = ["id", "image", "alt_text", "ordre", "est_principale"]
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -76,6 +91,7 @@ class ImageProduitSerializer(serializers.ModelSerializer):
 # Ne charge que les champs nécessaires pour les performances.
 # ═══════════════════════════════════════════════════════════════
 
+
 class ProduitListSerializer(serializers.ModelSerializer):
     """
     Version allégée pour la liste des produits.
@@ -83,44 +99,47 @@ class ProduitListSerializer(serializers.ModelSerializer):
     """
 
     # Champs calculés via @property du modèle
-    prix_actuel        = serializers.ReadOnlyField()
-    est_en_stock       = serializers.ReadOnlyField()
+    prix_actuel = serializers.ReadOnlyField()
+    est_en_stock = serializers.ReadOnlyField()
     pourcentage_remise = serializers.ReadOnlyField()
 
     # Image principale uniquement
     image_principale = serializers.SerializerMethodField()
 
     # Nom de la catégorie (pas l'objet complet)
-    categorie_nom = serializers.CharField(
-        source='categorie.nom',
-        read_only=True
-    )
+    categorie_nom = serializers.CharField(source="categorie.nom", read_only=True)
 
     # Stock maximum historique (pour calculer le % de remplissage correct)
     stock_max = serializers.SerializerMethodField()
 
     class Meta:
-        model  = Produit
+        model = Produit
         fields = [
-            'id', 'nom', 'slug',
-            'prix', 'prix_promo', 'prix_actuel',
-            'pourcentage_remise',
-            'stock', 'stock_minimum', 'stock_max', 'est_en_stock',
-            'note_moyenne', 'nombre_avis',
-            'categorie_nom',
-            'en_vedette', 'statut',
-            'image_principale',
-            'date_creation'
+            "id",
+            "nom",
+            "slug",
+            "prix",
+            "prix_promo",
+            "prix_actuel",
+            "pourcentage_remise",
+            "stock",
+            "stock_minimum",
+            "stock_max",
+            "est_en_stock",
+            "note_moyenne",
+            "nombre_avis",
+            "categorie_nom",
+            "en_vedette",
+            "statut",
+            "image_principale",
+            "date_creation",
         ]
 
     def get_image_principale(self, obj):
         """Retourne uniquement l'image principale"""
-        image = (
-            obj.images.filter(est_principale=True).first()
-            or obj.images.first()
-        )
+        image = obj.images.filter(est_principale=True).first() or obj.images.first()
         if image:
-            request = self.context.get('request')
+            request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(image.image.url)
             return image.image.url
@@ -133,8 +152,9 @@ class ProduitListSerializer(serializers.ModelSerializer):
         Si aucun mouvement, fallback sur stock actuel.
         """
         from django.db.models import Max
-        result = obj.mouvements_stock.aggregate(Max('stock_apres'))
-        max_val = result.get('stock_apres__max')
+
+        result = obj.mouvements_stock.aggregate(Max("stock_apres"))
+        max_val = result.get("stock_apres__max")
         if max_val and max_val > 0:
             return max_val
         # Fallback : stock actuel (100% par défaut si pas d'historique)
@@ -146,38 +166,47 @@ class ProduitListSerializer(serializers.ModelSerializer):
 # Utilisé pour la fiche produit individuelle.
 # ═══════════════════════════════════════════════════════════════
 
+
 class ProduitDetailSerializer(serializers.ModelSerializer):
     """
     Version complète pour la fiche d'un produit.
     Inclut toutes les images, la catégorie complète, le vendeur.
     """
 
-    images             = ImageProduitSerializer(many=True, read_only=True)
-    categorie          = CategorieSerializer(read_only=True)
-    prix_actuel        = serializers.ReadOnlyField()
-    est_en_stock       = serializers.ReadOnlyField()
-    stock_faible       = serializers.ReadOnlyField()
+    images = ImageProduitSerializer(many=True, read_only=True)
+    categorie = CategorieSerializer(read_only=True)
+    prix_actuel = serializers.ReadOnlyField()
+    est_en_stock = serializers.ReadOnlyField()
+    stock_faible = serializers.ReadOnlyField()
     pourcentage_remise = serializers.ReadOnlyField()
 
     # Informations publiques du vendeur
-    vendeur_nom = serializers.CharField(
-        source='vendeur.username',
-        read_only=True
-    )
+    vendeur_nom = serializers.CharField(source="vendeur.username", read_only=True)
 
     class Meta:
-        model  = Produit
+        model = Produit
         fields = [
-            'id', 'nom', 'slug',
-            'description', 'description_courte',
-            'prix', 'prix_promo', 'prix_actuel',
-            'pourcentage_remise',
-            'stock', 'est_en_stock', 'stock_faible',
-            'note_moyenne', 'nombre_avis',
-            'categorie', 'vendeur_nom',
-            'en_vedette', 'statut',
-            'images',
-            'date_creation', 'date_modification'
+            "id",
+            "nom",
+            "slug",
+            "description",
+            "description_courte",
+            "prix",
+            "prix_promo",
+            "prix_actuel",
+            "pourcentage_remise",
+            "stock",
+            "est_en_stock",
+            "stock_faible",
+            "note_moyenne",
+            "nombre_avis",
+            "categorie",
+            "vendeur_nom",
+            "en_vedette",
+            "statut",
+            "images",
+            "date_creation",
+            "date_modification",
         ]
 
 
@@ -186,6 +215,7 @@ class ProduitDetailSerializer(serializers.ModelSerializer):
 # Utilisé par les vendeurs et admins pour gérer les produits.
 # ═══════════════════════════════════════════════════════════════
 
+
 class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
     """
     Gère la création et modification d'un produit.
@@ -193,19 +223,23 @@ class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model  = Produit
+        model = Produit
         fields = [
-            'nom', 'description', 'description_courte',
-            'prix', 'prix_promo',
-            'stock', 'stock_minimum',
-            'categorie', 'statut', 'en_vedette'
+            "nom",
+            "description",
+            "description_courte",
+            "prix",
+            "prix_promo",
+            "stock",
+            "stock_minimum",
+            "categorie",
+            "statut",
+            "en_vedette",
         ]
 
     def validate_prix(self, value):
         if value <= 0:
-            raise serializers.ValidationError(
-                _("Le prix doit être supérieur à 0.")
-            )
+            raise serializers.ValidationError(_("Le prix doit être supérieur à 0."))
         return value
 
     def validate_prix_promo(self, value):
@@ -216,26 +250,31 @@ class ProduitCreateUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        prix       = attrs.get('prix')
-        prix_promo = attrs.get('prix_promo')
+        prix = attrs.get("prix")
+        prix_promo = attrs.get("prix_promo")
 
         if prix and prix_promo and prix_promo >= prix:
-            raise serializers.ValidationError({
-                'prix_promo': _("Le prix promotionnel doit être inférieur au prix normal.")
-            })
+            raise serializers.ValidationError(
+                {
+                    "prix_promo": _(
+                        "Le prix promotionnel doit être inférieur au prix normal."
+                    )
+                }
+            )
         return attrs
 
     def create(self, validated_data):
         """
         Associe automatiquement le vendeur connecté au produit.
         """
-        validated_data['vendeur'] = self.context['request'].user
+        validated_data["vendeur"] = self.context["request"].user
         return super().create(validated_data)
 
 
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Mouvement de stock
 # ═══════════════════════════════════════════════════════════════
+
 
 class MouvementStockSerializer(serializers.ModelSerializer):
     """
@@ -244,15 +283,20 @@ class MouvementStockSerializer(serializers.ModelSerializer):
     """
 
     effectue_par_nom = serializers.CharField(
-        source='effectue_par.username',
-        read_only=True
+        source="effectue_par.username", read_only=True
     )
 
     class Meta:
-        model  = MouvementStock
+        model = MouvementStock
         fields = [
-            'id', 'produit', 'type_mouvement',
-            'quantite', 'stock_avant', 'stock_apres',
-            'note', 'effectue_par_nom', 'date'
+            "id",
+            "produit",
+            "type_mouvement",
+            "quantite",
+            "stock_avant",
+            "stock_apres",
+            "note",
+            "effectue_par_nom",
+            "date",
         ]
-        read_only_fields = ['stock_avant', 'stock_apres', 'date']
+        read_only_fields = ["stock_avant", "stock_apres", "date"]

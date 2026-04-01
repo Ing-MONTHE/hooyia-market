@@ -8,6 +8,7 @@ Serializers pour le chat.
 - CreerConversationSerializer  → démarrer une conversation avec un utilisateur
 - UploadFichierSerializer      → valider et créer un message avec fichier joint
 """
+
 import magic  # python-magic pour la détection MIME côté serveur
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -22,27 +23,29 @@ User = get_user_model()
 # SERIALIZER — Fichier joint
 # ═══════════════════════════════════════════════════════════════
 
+
 class FichierChatSerializer(serializers.ModelSerializer):
     """
     Sérialise un fichier joint pour l'affichage dans un message.
     """
+
     url = serializers.SerializerMethodField()
 
     class Meta:
-        model  = FichierChat
+        model = FichierChat
         fields = [
-            'id',
-            'nom_original',  # Nom affiché dans l'interface
-            'taille',        # En octets (formaté côté frontend)
-            'type_mime',     # Pour l'icône et l'affichage inline
-            'url',           # URL publique pour le téléchargement
-            'est_image',     # Boolean : affichage inline ou icône
+            "id",
+            "nom_original",  # Nom affiché dans l'interface
+            "taille",  # En octets (formaté côté frontend)
+            "type_mime",  # Pour l'icône et l'affichage inline
+            "url",  # URL publique pour le téléchargement
+            "est_image",  # Boolean : affichage inline ou icône
         ]
         read_only_fields = fields
 
     def get_url(self, obj):
         """Retourne l'URL absolue du fichier."""
-        request = self.context.get('request')
+        request = self.context.get("request")
         if obj.fichier and request:
             return request.build_absolute_uri(obj.fichier.url)
         return obj.url
@@ -52,31 +55,29 @@ class FichierChatSerializer(serializers.ModelSerializer):
 # SERIALIZER — Message
 # ═══════════════════════════════════════════════════════════════
 
+
 class MessageChatSerializer(serializers.ModelSerializer):
     """
     Sérialise un message pour l'affichage dans la conversation.
     Inclut le nom de l'expéditeur et le fichier joint si présent.
     """
 
-    nom_expediteur = serializers.CharField(
-        source='expediteur.username',
-        read_only=True
-    )
+    nom_expediteur = serializers.CharField(source="expediteur.username", read_only=True)
 
     # Fichier joint (null si message texte)
     fichier = FichierChatSerializer(read_only=True)
 
     class Meta:
-        model  = MessageChat
+        model = MessageChat
         fields = [
-            'id',
-            'nom_expediteur',   # "jean_dupont"
-            'expediteur',       # ID de l'expéditeur
-            'contenu',          # Texte du message
-            'type_message',     # 'text' | 'file' | 'image'
-            'fichier',          # Objet FichierChat ou null
-            'is_read',          # Statut de lecture
-            'date_envoi',       # Horodatage ISO 8601
+            "id",
+            "nom_expediteur",  # "jean_dupont"
+            "expediteur",  # ID de l'expéditeur
+            "contenu",  # Texte du message
+            "type_message",  # 'text' | 'file' | 'image'
+            "fichier",  # Objet FichierChat ou null
+            "is_read",  # Statut de lecture
+            "date_envoi",  # Horodatage ISO 8601
         ]
         read_only_fields = fields
 
@@ -85,47 +86,48 @@ class MessageChatSerializer(serializers.ModelSerializer):
 # SERIALIZER — Liste des conversations (aperçu)
 # ═══════════════════════════════════════════════════════════════
 
+
 class ConversationListSerializer(serializers.ModelSerializer):
     """
     Sérialise une conversation pour la liste des chats.
     Inclut : interlocuteur, dernier message, nombre de messages non lus.
     """
 
-    interlocuteur    = serializers.SerializerMethodField()
-    dernier_message  = serializers.SerializerMethodField()
+    interlocuteur = serializers.SerializerMethodField()
+    dernier_message = serializers.SerializerMethodField()
     messages_non_lus = serializers.SerializerMethodField()
 
     class Meta:
-        model  = Conversation
+        model = Conversation
         fields = [
-            'id',
-            'interlocuteur',
-            'dernier_message',
-            'messages_non_lus',
-            'date_creation',
+            "id",
+            "interlocuteur",
+            "dernier_message",
+            "messages_non_lus",
+            "date_creation",
         ]
         read_only_fields = fields
 
     def get_interlocuteur(self, obj):
-        user  = self.context['request'].user
+        user = self.context["request"].user
         autre = obj.get_autre_participant(user)
         # Admin : pas forcément participant → retourne les deux participants
         if autre is None:
             p1 = obj.participant1
             p2 = obj.participant2
             return {
-                'id': p2.id if p2 else None,
-                'username': p2.username if p2 else '—',
-                'participant1': p1.username if p1 else '—',
-                'participant2': p2.username if p2 else '—',
-                'participant1_id': p1.id if p1 else None,
-                'participant2_id': p2.id if p2 else None,
-                'is_admin_view': True,
+                "id": p2.id if p2 else None,
+                "username": p2.username if p2 else "—",
+                "participant1": p1.username if p1 else "—",
+                "participant2": p2.username if p2 else "—",
+                "participant1_id": p1.id if p1 else None,
+                "participant2_id": p2.id if p2 else None,
+                "is_admin_view": True,
             }
         return {
-            'id': autre.id,
-            'username': autre.username,
-            'is_admin': getattr(autre, 'is_admin', False) or autre.is_staff,
+            "id": autre.id,
+            "username": autre.username,
+            "is_admin": getattr(autre, "is_admin", False) or autre.is_staff,
         }
 
     def get_dernier_message(self, obj):
@@ -133,30 +135,33 @@ class ConversationListSerializer(serializers.ModelSerializer):
         if dernier is None:
             return None
 
-        apercu = dernier.contenu[:80] if dernier.contenu else ''
+        apercu = dernier.contenu[:80] if dernier.contenu else ""
 
         # Si message fichier sans texte → aperçu générique
-        if not apercu and dernier.type_message in ('file', 'image'):
+        if not apercu and dernier.type_message in ("file", "image"):
             try:
                 apercu = f"📎 {dernier.fichier.nom_original}"
             except FichierChat.DoesNotExist:
                 apercu = "📎 Fichier joint"
 
         return {
-            'contenu'     : apercu,
-            'date_envoi'  : dernier.date_envoi.isoformat(),
-            'expediteur'  : dernier.expediteur.username if dernier.expediteur else "Anonyme",
-            'type_message': dernier.type_message,
+            "contenu": apercu,
+            "date_envoi": dernier.date_envoi.isoformat(),
+            "expediteur": (
+                dernier.expediteur.username if dernier.expediteur else "Anonyme"
+            ),
+            "type_message": dernier.type_message,
         }
 
     def get_messages_non_lus(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         return obj.messages.filter(is_read=False).exclude(expediteur=user).count()
 
 
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Détail d'une conversation (avec messages)
 # ═══════════════════════════════════════════════════════════════
+
 
 class ConversationDetailSerializer(serializers.ModelSerializer):
     """
@@ -165,44 +170,45 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
     """
 
     interlocuteur = serializers.SerializerMethodField()
-    messages      = MessageChatSerializer(many=True, read_only=True)
+    messages = MessageChatSerializer(many=True, read_only=True)
 
     class Meta:
-        model  = Conversation
+        model = Conversation
         fields = [
-            'id',
-            'interlocuteur',
-            'messages',
-            'date_creation',
+            "id",
+            "interlocuteur",
+            "messages",
+            "date_creation",
         ]
         read_only_fields = fields
 
     def get_interlocuteur(self, obj):
-        user  = self.context['request'].user
+        user = self.context["request"].user
         autre = obj.get_autre_participant(user)
         # Admin : pas forcément participant → retourne les deux participants
         if autre is None:
             p1 = obj.participant1
             p2 = obj.participant2
             return {
-                'id': p2.id if p2 else None,
-                'username': p2.username if p2 else '—',
-                'participant1': p1.username if p1 else '—',
-                'participant2': p2.username if p2 else '—',
-                'participant1_id': p1.id if p1 else None,
-                'participant2_id': p2.id if p2 else None,
-                'is_admin_view': True,
+                "id": p2.id if p2 else None,
+                "username": p2.username if p2 else "—",
+                "participant1": p1.username if p1 else "—",
+                "participant2": p2.username if p2 else "—",
+                "participant1_id": p1.id if p1 else None,
+                "participant2_id": p2.id if p2 else None,
+                "is_admin_view": True,
             }
         return {
-            'id': autre.id,
-            'username': autre.username,
-            'is_admin': getattr(autre, 'is_admin', False) or autre.is_staff,
+            "id": autre.id,
+            "username": autre.username,
+            "is_admin": getattr(autre, "is_admin", False) or autre.is_staff,
         }
 
 
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Créer une conversation
 # ═══════════════════════════════════════════════════════════════
+
 
 class CreerConversationSerializer(serializers.Serializer):
     """
@@ -220,22 +226,23 @@ class CreerConversationSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
-        user = self.context['request'].user
-        if data['utilisateur_id'] == user.id:
+        user = self.context["request"].user
+        if data["utilisateur_id"] == user.id:
             raise serializers.ValidationError(
                 _("Vous ne pouvez pas démarrer une conversation avec vous-même.")
             )
         return data
 
     def save(self):
-        user         = self.context['request'].user
-        destinataire = User.objects.get(id=self.validated_data['utilisateur_id'])
+        user = self.context["request"].user
+        destinataire = User.objects.get(id=self.validated_data["utilisateur_id"])
         return Conversation.get_or_create_between(user, destinataire)
 
 
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Upload d'un fichier dans le chat
 # ═══════════════════════════════════════════════════════════════
+
 
 class UploadFichierSerializer(serializers.Serializer):
     """
@@ -255,16 +262,14 @@ class UploadFichierSerializer(serializers.Serializer):
       MessageChatSerializer(message).data
     """
 
-    fichier = serializers.FileField(
-        help_text=_("Fichier à envoyer (max 10 MB)")
-    )
+    fichier = serializers.FileField(help_text=_("Fichier à envoyer (max 10 MB)"))
 
     contenu = serializers.CharField(
         required=False,
         allow_blank=True,
-        default='',
+        default="",
         max_length=2000,
-        help_text=_("Message texte optionnel accompagnant le fichier")
+        help_text=_("Message texte optionnel accompagnant le fichier"),
     )
 
     def validate_fichier(self, value):
@@ -291,11 +296,13 @@ class UploadFichierSerializer(serializers.Serializer):
             mime = magic.from_buffer(header, mime=True)
         except Exception:
             # python-magic non disponible → fallback sur le content_type déclaré
-            mime = value.content_type or 'application/octet-stream'
+            mime = value.content_type or "application/octet-stream"
 
         if mime not in FichierChat.TYPES_AUTORISES:
             raise serializers.ValidationError(
-                _("Type de fichier non autorisé. Types acceptés : PDF, Word, Excel, images, ZIP, texte.")
+                _(
+                    "Type de fichier non autorisé. Types acceptés : PDF, Word, Excel, images, ZIP, texte."
+                )
             )
 
         # Stocker le type MIME détecté pour l'utiliser dans save()
@@ -313,10 +320,14 @@ class UploadFichierSerializer(serializers.Serializer):
         Returns:
             instance MessageChat (avec fichier)
         """
-        fichier      = self.validated_data['fichier']
-        contenu      = self.validated_data.get('contenu', '').strip()
-        mime         = getattr(fichier, '_detected_mime', fichier.content_type or 'application/octet-stream')
-        est_image    = mime.startswith('image/')
+        fichier = self.validated_data["fichier"]
+        contenu = self.validated_data.get("contenu", "").strip()
+        mime = getattr(
+            fichier,
+            "_detected_mime",
+            fichier.content_type or "application/octet-stream",
+        )
+        est_image = mime.startswith("image/")
         type_message = MessageChat.TYPE_IMAGE if est_image else MessageChat.TYPE_FILE
 
         # Création du message

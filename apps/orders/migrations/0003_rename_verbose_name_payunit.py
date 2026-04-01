@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0002_paiement_authorization_url_paiement_date_creation_and_more'),
+        ("orders", "0002_paiement_authorization_url_paiement_date_creation_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paiement',
-            name='authorization_url',
-            field=models.URLField(blank=True, max_length=500, verbose_name='URL de paiement PayUnit'),
+            model_name="paiement",
+            name="authorization_url",
+            field=models.URLField(
+                blank=True, max_length=500, verbose_name="URL de paiement PayUnit"
+            ),
         ),
         migrations.AlterField(
-            model_name='paiement',
-            name='reference_externe',
-            field=models.CharField(blank=True, max_length=200, verbose_name='Référence PayUnit'),
+            model_name="paiement",
+            name="reference_externe",
+            field=models.CharField(
+                blank=True, max_length=200, verbose_name="Référence PayUnit"
+            ),
         ),
     ]

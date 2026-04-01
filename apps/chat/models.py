@@ -19,6 +19,7 @@ Choix de conception :
   - participant1 < participant2 (par ID) → évite les doublons (conv A-B = conv B-A)
   - FichierChat optionnel sur MessageChat → un message peut être texte seul ou texte + fichier
 """
+
 import os
 from django.db import models
 from django.conf import settings
@@ -28,6 +29,7 @@ from django.utils.translation import gettext_lazy as _
 # ═══════════════════════════════════════════════════════════════
 # UTILITAIRES — Upload
 # ═══════════════════════════════════════════════════════════════
+
 
 def chat_upload_path(instance, filename):
     """
@@ -39,7 +41,8 @@ def chat_upload_path(instance, filename):
       - Pas de conflit de noms (UUID optionnel si nécessaire)
     """
     import uuid
-    ext  = os.path.splitext(filename)[1]
+
+    ext = os.path.splitext(filename)[1]
     safe = f"{uuid.uuid4().hex}{ext}"
     return f"chat/{instance.conversation_id}/{safe}"
 
@@ -48,6 +51,7 @@ def chat_upload_path(instance, filename):
 # CONVERSATION
 # Un canal de discussion entre exactement deux utilisateurs.
 # ═══════════════════════════════════════════════════════════════
+
 
 class Conversation(models.Model):
     """
@@ -63,15 +67,15 @@ class Conversation(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='conversations_participant1',
-        verbose_name=_("Participant 1")
+        related_name="conversations_participant1",
+        verbose_name=_("Participant 1"),
     )
     participant2 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='conversations_participant2',
-        verbose_name=_("Participant 2")
+        related_name="conversations_participant2",
+        verbose_name=_("Participant 2"),
     )
 
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("Créée le"))
@@ -79,8 +83,8 @@ class Conversation(models.Model):
     class Meta:
         verbose_name = _("Conversation")
         verbose_name_plural = _("Conversations")
-        ordering = ['-date_creation']
-        unique_together = ('participant1', 'participant2')
+        ordering = ["-date_creation"]
+        unique_together = ("participant1", "participant2")
 
     def save(self, *args, **kwargs):
         """
@@ -91,7 +95,8 @@ class Conversation(models.Model):
         if self.participant1_id and self.participant2_id:
             if self.participant1_id > self.participant2_id:
                 self.participant1_id, self.participant2_id = (
-                    self.participant2_id, self.participant1_id
+                    self.participant2_id,
+                    self.participant1_id,
                 )
         super().save(*args, **kwargs)
 
@@ -128,6 +133,7 @@ class Conversation(models.Model):
 # Un message envoyé dans une conversation.
 # ═══════════════════════════════════════════════════════════════
 
+
 class MessageChat(models.Model):
     """
     Un message dans une conversation.
@@ -144,43 +150,36 @@ class MessageChat(models.Model):
       4. Quand le destinataire ouvre la conversation, is_read passe à True
     """
 
-    TYPE_TEXT  = 'text'
-    TYPE_FILE  = 'file'
-    TYPE_IMAGE = 'image'
+    TYPE_TEXT = "text"
+    TYPE_FILE = "file"
+    TYPE_IMAGE = "image"
 
     TYPE_CHOICES = [
-        (TYPE_TEXT,  _("Texte")),
-        (TYPE_FILE,  _("Fichier")),
+        (TYPE_TEXT, _("Texte")),
+        (TYPE_FILE, _("Fichier")),
         (TYPE_IMAGE, _("Image")),
     ]
 
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
-        related_name='messages',
-        verbose_name=_("Conversation")
+        related_name="messages",
+        verbose_name=_("Conversation"),
     )
 
     expediteur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='messages_envoyes',
-        verbose_name=_("Expéditeur")
+        related_name="messages_envoyes",
+        verbose_name=_("Expéditeur"),
     )
 
-    contenu = models.TextField(
-        blank=True,
-        default='',
-        verbose_name=_("Message")
-    )
+    contenu = models.TextField(blank=True, default="", verbose_name=_("Message"))
 
     # Type de message : text / file / image
     type_message = models.CharField(
-        max_length=10,
-        choices=TYPE_CHOICES,
-        default=TYPE_TEXT,
-        verbose_name=_("Type")
+        max_length=10, choices=TYPE_CHOICES, default=TYPE_TEXT, verbose_name=_("Type")
     )
 
     is_read = models.BooleanField(default=False, verbose_name=_("Lu"))
@@ -190,10 +189,10 @@ class MessageChat(models.Model):
     class Meta:
         verbose_name = _("Message")
         verbose_name_plural = _("Messages")
-        ordering = ['date_envoi']
+        ordering = ["date_envoi"]
 
     def __str__(self):
-        exp    = self.expediteur.username if self.expediteur else "Anonyme"
+        exp = self.expediteur.username if self.expediteur else "Anonyme"
         apercu = self.contenu[:40] + "…" if len(self.contenu) > 40 else self.contenu
         return f"[{exp}] [{self.type_message}] {apercu}"
 
@@ -202,6 +201,7 @@ class MessageChat(models.Model):
 # FICHIER CHAT
 # Un fichier joint à un message.
 # ═══════════════════════════════════════════════════════════════
+
 
 class FichierChat(models.Model):
     """
@@ -220,17 +220,20 @@ class FichierChat(models.Model):
 
     TYPES_AUTORISES = [
         # Images
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
         # Documents
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         # Autres
-        'application/zip',
-        'text/plain',
-        'text/csv',
+        "application/zip",
+        "text/plain",
+        "text/csv",
     ]
 
     TAILLE_MAX = 10 * 1024 * 1024  # 10 MB
@@ -238,50 +241,36 @@ class FichierChat(models.Model):
     message = models.OneToOneField(
         MessageChat,
         on_delete=models.CASCADE,
-        related_name='fichier',
-        verbose_name=_("Message")
+        related_name="fichier",
+        verbose_name=_("Message"),
     )
 
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
-        related_name='fichiers',
-        verbose_name=_("Conversation")
+        related_name="fichiers",
+        verbose_name=_("Conversation"),
     )
 
-    fichier = models.FileField(
-        upload_to=chat_upload_path,
-        verbose_name=_("Fichier")
-    )
+    fichier = models.FileField(upload_to=chat_upload_path, verbose_name=_("Fichier"))
 
-    nom_original = models.CharField(
-        max_length=255,
-        verbose_name=_("Nom original")
-    )
+    nom_original = models.CharField(max_length=255, verbose_name=_("Nom original"))
 
-    taille = models.PositiveBigIntegerField(
-        verbose_name=_("Taille (octets)")
-    )
+    taille = models.PositiveBigIntegerField(verbose_name=_("Taille (octets)"))
 
-    type_mime = models.CharField(
-        max_length=100,
-        verbose_name=_("Type MIME")
-    )
+    type_mime = models.CharField(max_length=100, verbose_name=_("Type MIME"))
 
-    date_upload = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Uploadé le")
-    )
+    date_upload = models.DateTimeField(auto_now_add=True, verbose_name=_("Uploadé le"))
 
     class Meta:
         verbose_name = _("Fichier chat")
         verbose_name_plural = _("Fichiers chat")
-        ordering = ['-date_upload']
+        ordering = ["-date_upload"]
 
     @property
     def est_image(self):
         """Vrai si le fichier est une image (pour l'affichage inline)."""
-        return self.type_mime.startswith('image/')
+        return self.type_mime.startswith("image/")
 
     @property
     def url(self):

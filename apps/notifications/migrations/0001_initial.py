@@ -15,40 +15,119 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='EmailAsynchrone',
+            name="EmailAsynchrone",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sujet', models.CharField(max_length=300, verbose_name='Sujet')),
-                ('corps', models.TextField(verbose_name="Corps de l'email")),
-                ('email_destinataire', models.EmailField(max_length=254, verbose_name='Email destinataire')),
-                ('statut', models.CharField(choices=[('en_attente', 'En attente'), ('envoye', 'Envoyé'), ('echec', 'Échec')], default='en_attente', max_length=20, verbose_name='Statut')),
-                ('erreur', models.TextField(blank=True, verbose_name='Détail erreur')),
-                ('date_creation', models.DateTimeField(auto_now_add=True, verbose_name='Créé le')),
-                ('date_envoi', models.DateTimeField(blank=True, null=True, verbose_name='Envoyé le')),
-                ('destinataire', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='emails_recus', to=settings.AUTH_USER_MODEL, verbose_name='Destinataire')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("sujet", models.CharField(max_length=300, verbose_name="Sujet")),
+                ("corps", models.TextField(verbose_name="Corps de l'email")),
+                (
+                    "email_destinataire",
+                    models.EmailField(
+                        max_length=254, verbose_name="Email destinataire"
+                    ),
+                ),
+                (
+                    "statut",
+                    models.CharField(
+                        choices=[
+                            ("en_attente", "En attente"),
+                            ("envoye", "Envoyé"),
+                            ("echec", "Échec"),
+                        ],
+                        default="en_attente",
+                        max_length=20,
+                        verbose_name="Statut",
+                    ),
+                ),
+                ("erreur", models.TextField(blank=True, verbose_name="Détail erreur")),
+                (
+                    "date_creation",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Créé le"),
+                ),
+                (
+                    "date_envoi",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Envoyé le"
+                    ),
+                ),
+                (
+                    "destinataire",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="emails_recus",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Destinataire",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Email asynchrone',
-                'verbose_name_plural': 'Emails asynchrones',
-                'ordering': ['-date_creation'],
+                "verbose_name": "Email asynchrone",
+                "verbose_name_plural": "Emails asynchrones",
+                "ordering": ["-date_creation"],
             },
         ),
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titre', models.CharField(max_length=200, verbose_name='Titre')),
-                ('message', models.TextField(verbose_name='Message')),
-                ('type_notif', models.CharField(choices=[('commande', 'Commande'), ('avis', 'Avis'), ('stock', 'Stock'), ('systeme', 'Système')], default='systeme', max_length=20, verbose_name='Type')),
-                ('is_read', models.BooleanField(default=False, verbose_name='Lue')),
-                ('lien', models.CharField(blank=True, max_length=500, verbose_name='Lien (optionnel)')),
-                ('date_creation', models.DateTimeField(auto_now_add=True, verbose_name='Créée le')),
-                ('utilisateur', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL, verbose_name='Destinataire')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("titre", models.CharField(max_length=200, verbose_name="Titre")),
+                ("message", models.TextField(verbose_name="Message")),
+                (
+                    "type_notif",
+                    models.CharField(
+                        choices=[
+                            ("commande", "Commande"),
+                            ("avis", "Avis"),
+                            ("stock", "Stock"),
+                            ("systeme", "Système"),
+                        ],
+                        default="systeme",
+                        max_length=20,
+                        verbose_name="Type",
+                    ),
+                ),
+                ("is_read", models.BooleanField(default=False, verbose_name="Lue")),
+                (
+                    "lien",
+                    models.CharField(
+                        blank=True, max_length=500, verbose_name="Lien (optionnel)"
+                    ),
+                ),
+                (
+                    "date_creation",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Créée le"),
+                ),
+                (
+                    "utilisateur",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Destinataire",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Notification',
-                'verbose_name_plural': 'Notifications',
-                'ordering': ['-date_creation'],
+                "verbose_name": "Notification",
+                "verbose_name_plural": "Notifications",
+                "ordering": ["-date_creation"],
             },
         ),
     ]

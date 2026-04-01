@@ -30,6 +30,7 @@ Sécurité :
   - Utilisateur non participant  → rejeté (close code 4003)
   - Messages vides               → ignorés silencieusement
 """
+
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -41,9 +42,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
-        self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
-        self.group_name      = f"chat_{self.conversation_id}"
-        self.user            = self.scope['user']
+        self.conversation_id = self.scope["url_route"]["kwargs"]["conversation_id"]
+        self.group_name = f"chat_{self.conversation_id}"
+        self.user = self.scope["user"]
 
         # ── Vérif 1 : authentifié ─────────────────────────────────────────────
         if not self.user.is_authenticated:
@@ -64,7 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self._marquer_messages_lus()
 
     async def disconnect(self, close_code):
-        if hasattr(self, 'group_name'):
+        if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
@@ -80,7 +81,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except (json.JSONDecodeError, TypeError):
             return
 
-        contenu = data.get('message', '').strip()
+        contenu = data.get("message", "").strip()
         if not contenu:
             return
 
@@ -91,17 +92,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.group_name,
             {
-                'type'          : 'chat_message',
-                'message'       : contenu,
-                'message_id'    : message.id,
-                'expediteur_id' : self.user.id,
-                'expediteur'    : self.user.username,
-                'timestamp'     : message.date_envoi.isoformat(),
-                'msg_type'      : 'text',
-                'fichier_url'   : None,
-                'fichier_nom'   : None,
-                'fichier_taille': None,
-            }
+                "type": "chat_message",
+                "message": contenu,
+                "message_id": message.id,
+                "expediteur_id": self.user.id,
+                "expediteur": self.user.username,
+                "timestamp": message.date_envoi.isoformat(),
+                "msg_type": "text",
+                "fichier_url": None,
+                "fichier_nom": None,
+                "fichier_taille": None,
+            },
         )
 
     async def chat_message(self, event):
@@ -109,23 +110,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         Handler appelé par le Channel Layer pour chaque message broadcasté.
         Envoie le JSON au client WebSocket — fonctionne pour les textes ET les fichiers.
         """
-        await self.send(text_data=json.dumps({
-            'message'       : event.get('message', ''),
-            'expediteur_id' : event.get('expediteur_id'),
-            'expediteur'    : event.get('expediteur', ''),
-            'timestamp'     : event.get('timestamp', ''),
-            'message_id'    : event.get('message_id'),
-            'type'          : event.get('msg_type', 'text'),   # 'text' | 'file' | 'image'
-            'fichier_url'   : event.get('fichier_url'),
-            'fichier_nom'   : event.get('fichier_nom'),
-            'fichier_taille': event.get('fichier_taille'),
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": event.get("message", ""),
+                    "expediteur_id": event.get("expediteur_id"),
+                    "expediteur": event.get("expediteur", ""),
+                    "timestamp": event.get("timestamp", ""),
+                    "message_id": event.get("message_id"),
+                    "type": event.get("msg_type", "text"),  # 'text' | 'file' | 'image'
+                    "fichier_url": event.get("fichier_url"),
+                    "fichier_nom": event.get("fichier_nom"),
+                    "fichier_taille": event.get("fichier_taille"),
+                }
+            )
+        )
 
     # ── Méthodes ORM ──────────────────────────────────────────────────────────
 
     @database_sync_to_async
     def _get_conversation(self):
         from apps.chat.models import Conversation
+
         try:
             return Conversation.objects.get(id=self.conversation_id)
         except Conversation.DoesNotExist:
@@ -134,6 +140,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def _creer_message(self, contenu):
         from apps.chat.models import MessageChat
+
         return MessageChat.objects.create(
             conversation=self.conversation,
             expediteur=self.user,
@@ -144,9 +151,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def _marquer_messages_lus(self):
         from apps.chat.models import MessageChat
+
         MessageChat.objects.filter(
             conversation=self.conversation,
             is_read=False,
-        ).exclude(
-            expediteur=self.user
-        ).update(is_read=True)
+        ).exclude(expediteur=self.user).update(is_read=True)

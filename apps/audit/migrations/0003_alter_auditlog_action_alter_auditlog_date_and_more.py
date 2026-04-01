@@ -8,39 +8,46 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('audit', '0002_initial'),
+        ("audit", "0002_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='auditlog',
-            name='action',
-            field=models.CharField(max_length=10, verbose_name='Action'),
+            model_name="auditlog",
+            name="action",
+            field=models.CharField(max_length=10, verbose_name="Action"),
         ),
         migrations.AlterField(
-            model_name='auditlog',
-            name='date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Date'),
+            model_name="auditlog",
+            name="date",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="Date"),
         ),
         migrations.AlterField(
-            model_name='auditlog',
-            name='note',
-            field=models.TextField(blank=True, verbose_name='Note'),
+            model_name="auditlog",
+            name="note",
+            field=models.TextField(blank=True, verbose_name="Note"),
         ),
         migrations.AlterField(
-            model_name='auditlog',
-            name='status_code',
-            field=models.IntegerField(verbose_name='Code HTTP'),
+            model_name="auditlog",
+            name="status_code",
+            field=models.IntegerField(verbose_name="Code HTTP"),
         ),
         migrations.AlterField(
-            model_name='auditlog',
-            name='url',
-            field=models.CharField(max_length=255, verbose_name='URL'),
+            model_name="auditlog",
+            name="url",
+            field=models.CharField(max_length=255, verbose_name="URL"),
         ),
         migrations.AlterField(
-            model_name='auditlog',
-            name='utilisateur',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='audit_logs', to=settings.AUTH_USER_MODEL, verbose_name='Utilisateur'),
+            model_name="auditlog",
+            name="utilisateur",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="audit_logs",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Utilisateur",
+            ),
         ),
     ]

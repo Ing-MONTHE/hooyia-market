@@ -5,10 +5,10 @@ from .models import AuditLog
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
     # Colonnes affichées dans la liste admin
-    list_display  = ['action', 'url', 'utilisateur', 'status_code', 'date']
-    list_filter   = ['action', 'status_code']
-    search_fields = ['url', 'utilisateur__username']
-    readonly_fields = ['action', 'url', 'utilisateur', 'status_code', 'date', 'note']
+    list_display = ["action", "url", "utilisateur", "status_code", "date"]
+    list_filter = ["action", "status_code"]
+    search_fields = ["url", "utilisateur__username"]
+    readonly_fields = ["action", "url", "utilisateur", "status_code", "date", "note"]
 
     # Personne ne peut créer ou supprimer un log depuis l'admin
     def has_add_permission(self, request):

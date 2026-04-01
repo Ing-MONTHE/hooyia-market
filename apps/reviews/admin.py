@@ -6,6 +6,7 @@ Fonctionnalités :
   - Actions en masse : valider / invalider plusieurs avis
   - Filtres par note, statut de validation, produit
 """
+
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Avis
@@ -20,49 +21,50 @@ class AvisAdmin(admin.ModelAdmin):
 
     # ── Colonnes affichées dans la liste ──────────────────────
     list_display = [
-        'utilisateur',
-        'produit',
-        'note_etoiles',     # Affichage visuel avec ★
-        'commentaire_court',
-        'statut_badge',     # Badge coloré vert/rouge
-        'date_creation',
+        "utilisateur",
+        "produit",
+        "note_etoiles",  # Affichage visuel avec ★
+        "commentaire_court",
+        "statut_badge",  # Badge coloré vert/rouge
+        "date_creation",
     ]
 
     # ── Filtres latéraux ──────────────────────────────────────
     list_filter = [
-        'is_validated',        # Avis validés / en attente
-        'note',             # Filtrer par note (1, 2, 3, 4, 5)
-        'date_creation',
+        "is_validated",  # Avis validés / en attente
+        "note",  # Filtrer par note (1, 2, 3, 4, 5)
+        "date_creation",
     ]
 
     # ── Recherche ─────────────────────────────────────────────
     search_fields = [
-        'utilisateur__username',
-        'utilisateur__email',
-        'produit__nom',
-        'commentaire',
+        "utilisateur__username",
+        "utilisateur__email",
+        "produit__nom",
+        "commentaire",
     ]
 
     # ── Tri par défaut : les plus récents d'abord ─────────────
-    ordering = ['-date_creation']
+    ordering = ["-date_creation"]
 
     # ── Champs non modifiables ────────────────────────────────
-    readonly_fields = ['date_creation', 'date_modification']
+    readonly_fields = ["date_creation", "date_modification"]
 
     # ── Actions en masse ──────────────────────────────────────
-    actions = ['valider_avis_selectionnes', 'invalider_avis_selectionnes']
+    actions = ["valider_avis_selectionnes", "invalider_avis_selectionnes"]
 
     # ── Méthodes d'affichage personnalisées ───────────────────
 
     def note_etoiles(self, obj):
         """Affiche la note sous forme d'étoiles (ex: ★★★☆☆ pour 3/5)"""
-        etoiles_pleines = '★' * obj.note
-        etoiles_vides   = '☆' * (5 - obj.note)
+        etoiles_pleines = "★" * obj.note
+        etoiles_vides = "☆" * (5 - obj.note)
         return format_html(
             '<span style="color: #f59e0b; font-size: 16px;">{}{}</span>',
             etoiles_pleines,
-            etoiles_vides
+            etoiles_vides,
         )
+
     note_etoiles.short_description = "Note"
 
     def commentaire_court(self, obj):
@@ -72,6 +74,7 @@ class AvisAdmin(admin.ModelAdmin):
         if len(obj.commentaire) > 60:
             return obj.commentaire[:60] + "…"
         return obj.commentaire
+
     commentaire_court.short_description = "Commentaire"
 
     def statut_badge(self, obj):
@@ -85,6 +88,7 @@ class AvisAdmin(admin.ModelAdmin):
             '<span style="background:#d97706; color:white; padding:2px 8px; '
             'border-radius:4px; font-size:11px;">⏳ En attente</span>'
         )
+
     statut_badge.short_description = "Statut"
 
     # ── Actions en masse ──────────────────────────────────────
@@ -99,9 +103,12 @@ class AvisAdmin(admin.ModelAdmin):
         count = 0
         for avis in queryset.filter(is_validated=False):
             avis.is_validated = True
-            avis.save(update_fields=['is_validated'])  # Déclenche le signal
+            avis.save(update_fields=["is_validated"])  # Déclenche le signal
             count += 1
-        self.message_user(request, f"{count} avis validé(s). Les notes moyennes ont été recalculées.")
+        self.message_user(
+            request, f"{count} avis validé(s). Les notes moyennes ont été recalculées."
+        )
+
     valider_avis_selectionnes.short_description = "✓ Valider les avis sélectionnés"
 
     def invalider_avis_selectionnes(self, request, queryset):
@@ -112,18 +119,24 @@ class AvisAdmin(admin.ModelAdmin):
         count = 0
         for avis in queryset.filter(is_validated=True):
             avis.is_validated = False
-            avis.save(update_fields=['is_validated'])  # Déclenche le signal
+            avis.save(update_fields=["is_validated"])  # Déclenche le signal
             count += 1
-        self.message_user(request, f"{count} avis invalidé(s). Les notes moyennes ont été recalculées.")
+        self.message_user(
+            request,
+            f"{count} avis invalidé(s). Les notes moyennes ont été recalculées.",
+        )
+
     invalider_avis_selectionnes.short_description = "✗ Invalider les avis sélectionnés"
+
 
 from .models import AvisApp
 
+
 @admin.register(AvisApp)
 class AvisAppAdmin(admin.ModelAdmin):
-    list_display  = ['utilisateur', 'note', 'commentaire', 'is_valide', 'date_creation']
-    list_filter   = ['is_valide', 'note']
-    actions       = ['valider', 'invalider']
+    list_display = ["utilisateur", "note", "commentaire", "is_valide", "date_creation"]
+    list_filter = ["is_valide", "note"]
+    actions = ["valider", "invalider"]
 
     @admin.action(description="Valider les avis sélectionnés")
     def valider(self, request, queryset):

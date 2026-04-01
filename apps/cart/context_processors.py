@@ -12,10 +12,10 @@ Usage dans les templates :
   {{ cart_count }}  → affiche le badge avec le nombre d'articles
 """
 
-
 # ═══════════════════════════════════════════════════════════════
 # CONTEXT PROCESSOR — Nombre d'articles dans le panier
 # ═══════════════════════════════════════════════════════════════
+
 
 def cart_count(request):
     """
@@ -29,7 +29,7 @@ def cart_count(request):
     """
     # Les visiteurs non connectés n'ont pas de panier
     if not request.user.is_authenticated:
-        return {'cart_count': 0}
+        return {"cart_count": 0}
 
     try:
         # Accède au panier via la relation OneToOne (user.panier)
@@ -39,4 +39,4 @@ def cart_count(request):
         # Si le panier n'existe pas encore (cas rare), on retourne 0
         count = 0
 
-    return {'cart_count': count}
+    return {"cart_count": count}

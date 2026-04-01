@@ -7,27 +7,30 @@ Endpoints (préfixe 'api/notifications/' défini dans config/urls.py) :
   PATCH /api/notifications/<id>/lire/   → marquer une notification comme lue
   POST  /api/notifications/tout_lire/   → tout marquer comme lu
 """
+
 from django.urls import path
 from . import api_views
 
 urlpatterns = [
-    path('',
-         api_views.NotificationListeAPIView.as_view(),
-         name='notifications-liste'),
-
-    path('admin/',
-         api_views.NotificationAdminListeAPIView.as_view(),
-         name='notifications-admin-liste'),
-
-    path('<int:pk>/lire/',
-         api_views.MarquerLuAPIView.as_view(),
-         name='notifications-lire'),
-
-    path('tout_lire/',
-         api_views.ToutLireAPIView.as_view(),
-         name='notifications-tout-lire'),
-
-    path('envoyer/',
-         api_views.EnvoyerNotificationAdminAPIView.as_view(),
-         name='notifications-envoyer'),
+    path("", api_views.NotificationListeAPIView.as_view(), name="notifications-liste"),
+    path(
+        "admin/",
+        api_views.NotificationAdminListeAPIView.as_view(),
+        name="notifications-admin-liste",
+    ),
+    path(
+        "<int:pk>/lire/",
+        api_views.MarquerLuAPIView.as_view(),
+        name="notifications-lire",
+    ),
+    path(
+        "tout_lire/",
+        api_views.ToutLireAPIView.as_view(),
+        name="notifications-tout-lire",
+    ),
+    path(
+        "envoyer/",
+        api_views.EnvoyerNotificationAdminAPIView.as_view(),
+        name="notifications-envoyer",
+    ),
 ]

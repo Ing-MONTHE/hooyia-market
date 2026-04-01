@@ -20,9 +20,9 @@ def notif_count(request):
     """
     if request.user.is_authenticated:
         from apps.notifications.models import Notification
+
         count = Notification.objects.filter(
-            utilisateur=request.user,
-            is_read=False
+            utilisateur=request.user, is_read=False
         ).count()
-        return {'notif_count': count}
-    return {'notif_count': 0}
+        return {"notif_count": count}
+    return {"notif_count": 0}

@@ -13,6 +13,7 @@ Sécurité :
   - Utilisateur non authentifié → rejeté (close code 4001)
   - Chaque utilisateur n'a accès qu'à SON groupe (isolation totale)
 """
+
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -35,7 +36,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
           3. Accepte la connexion
           4. Envoie le nombre de notifications non lues (badge initial)
         """
-        self.user = self.scope['user']
+        self.user = self.scope["user"]
 
         # ── Vérification : authentifié ────────────────────────────────────────
         if not self.user.is_authenticated:
@@ -55,14 +56,18 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # ── Envoyer le badge initial (notifications non lues) ─────────────────
         # Permet de mettre à jour le badge navbar dès la connexion
         unread_count = await self._get_unread_count()
-        await self.send(text_data=json.dumps({
-            'type'        : 'init',
-            'unread_count': unread_count,
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "init",
+                    "unread_count": unread_count,
+                }
+            )
+        )
 
     async def disconnect(self, close_code):
         """Quitte proprement le groupe Redis à la déconnexion."""
-        if hasattr(self, 'group_name'):
+        if hasattr(self, "group_name"):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data):
@@ -80,16 +85,20 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         event contient : id, titre, message, type_notif, lien, unread_count, date
         """
-        await self.send(text_data=json.dumps({
-            'type'        : 'notification',
-            'id'          : event['id'],
-            'titre'       : event['titre'],
-            'message'     : event['message'],
-            'type_notif'  : event['type_notif'],
-            'lien'        : event['lien'],
-            'unread_count': event['unread_count'],
-            'date'        : event['date'],
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "notification",
+                    "id": event["id"],
+                    "titre": event["titre"],
+                    "message": event["message"],
+                    "type_notif": event["type_notif"],
+                    "lien": event["lien"],
+                    "unread_count": event["unread_count"],
+                    "date": event["date"],
+                }
+            )
+        )
 
     # ── Méthode ORM (sync → async) ────────────────────────────────────────────
 
@@ -100,7 +109,5 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         Appelé à la connexion pour initialiser le badge navbar.
         """
         from apps.notifications.models import Notification
-        return Notification.objects.filter(
-            utilisateur=self.user,
-            is_read=False
-        ).count()
+
+        return Notification.objects.filter(utilisateur=self.user, is_read=False).count()

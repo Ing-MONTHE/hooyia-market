@@ -2,6 +2,7 @@
 API REST pour le journal d'audit.
 GET /api/audit/ → liste paginée des logs (admin uniquement)
 """
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -12,17 +13,19 @@ from .models import AuditLog
 
 class AuditPagination(PageNumberPagination):
     page_size = 20
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = 100
 
     def get_paginated_response(self, data):
-        return Response({
-            'count':     self.page.paginator.count,
-            'next':      self.get_next_link(),
-            'previous':  self.get_previous_link(),
-            'page_size': self.page_size,
-            'results':   data,
-        })
+        return Response(
+            {
+                "count": self.page.paginator.count,
+                "next": self.get_next_link(),
+                "previous": self.get_previous_link(),
+                "page_size": self.page_size,
+                "results": data,
+            }
+        )
 
 
 class AuditLogListView(APIView):
@@ -31,32 +34,34 @@ class AuditLogListView(APIView):
     Retourne la liste paginée des logs d'audit.
     Accessible aux admins et staff uniquement.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def check_permissions(self, request):
         super().check_permissions(request)
-        if not (request.user.is_staff or getattr(request.user, 'is_admin', False)):
+        if not (request.user.is_staff or getattr(request.user, "is_admin", False)):
             from rest_framework.exceptions import PermissionDenied
+
             raise PermissionDenied()
 
     def get(self, request):
-        qs = AuditLog.objects.select_related('utilisateur').order_by('-date')
+        qs = AuditLog.objects.select_related("utilisateur").order_by("-date")
 
         paginator = AuditPagination()
         page = paginator.paginate_queryset(qs, request)
 
         data = [
             {
-                'id':              log.id,
-                'action':          log.action,
-                'url':             log.url,
-                'status_code':     log.status_code,
-                'utilisateur_nom': log.utilisateur.username if log.utilisateur else '—',
-                'note':            log.note,
-                'date':            log.date.isoformat(),
-                'date_action':     log.date.isoformat(),
+                "id": log.id,
+                "action": log.action,
+                "url": log.url,
+                "status_code": log.status_code,
+                "utilisateur_nom": log.utilisateur.username if log.utilisateur else "—",
+                "note": log.note,
+                "date": log.date.isoformat(),
+                "date_action": log.date.isoformat(),
                 # Description lisible : note si dispo, sinon fallback
-                'description':     log.note if log.note else f"{log.action} — {log.url}",
+                "description": log.note if log.note else f"{log.action} — {log.url}",
             }
             for log in page
         ]

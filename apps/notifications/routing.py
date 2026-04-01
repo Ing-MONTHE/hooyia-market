@@ -6,11 +6,12 @@ Format WebSocket : ws://localhost:8000/ws/notifications/
 
 Ce fichier est importé par config/asgi.py au démarrage.
 """
+
 from django.urls import re_path
 from . import consumers
 
 websocket_urlpatterns = [
     # ws://localhost:8000/ws/notifications/
     # Le consumer identifie l'utilisateur via son token JWT dans les headers
-    re_path(r'^ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
+    re_path(r"^ws/notifications/$", consumers.NotificationConsumer.as_asgi()),
 ]

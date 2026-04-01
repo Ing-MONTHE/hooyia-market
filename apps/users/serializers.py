@@ -4,6 +4,7 @@ Ils font deux choses :
   1. Convertir un objet Python (modèle) → JSON (pour envoyer au frontend)
   2. Valider et convertir du JSON reçu → objet Python (pour sauvegarder en DB)
 """
+
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
@@ -15,20 +16,23 @@ from .models import CustomUser, AdresseLivraison
 # Utilisé quand on affiche un profil (pas d'infos sensibles)
 # ═══════════════════════════════════════════════════════════════
 
+
 class UtilisateurPublicSerializer(serializers.ModelSerializer):
     """
     Version légère — uniquement les infos non sensibles.
     Utilisé par exemple pour afficher l'auteur d'un avis.
     """
+
     class Meta:
-        model  = CustomUser
-        fields = ['id', 'username', 'photo_profil', 'date_inscription']
+        model = CustomUser
+        fields = ["id", "username", "photo_profil", "date_inscription"]
 
 
 # ═══════════════════════════════════════════════════════════════
 # SERIALIZER — Profil complet de l'utilisateur connecté
 # Utilisé pour afficher et modifier son propre profil
 # ═══════════════════════════════════════════════════════════════
+
 
 class ProfilSerializer(serializers.ModelSerializer):
     """
@@ -40,16 +44,22 @@ class ProfilSerializer(serializers.ModelSerializer):
     nom_complet = serializers.SerializerMethodField()
 
     class Meta:
-        model  = CustomUser
+        model = CustomUser
         fields = [
-            'id', 'username', 'email',
-            'nom', 'prenom', 'nom_complet',
-            'telephone', 'photo_profil',
-            'is_vendeur', 'email_verifie',
-            'date_inscription'
+            "id",
+            "username",
+            "email",
+            "nom",
+            "prenom",
+            "nom_complet",
+            "telephone",
+            "photo_profil",
+            "is_vendeur",
+            "email_verifie",
+            "date_inscription",
         ]
         # Ces champs sont affichés mais non modifiables via l'API
-        read_only_fields = ['email', 'email_verifie', 'date_inscription']
+        read_only_fields = ["email", "email_verifie", "date_inscription"]
 
     def get_nom_complet(self, obj):
         """Retourne 'Prénom Nom' ou le username si pas renseigné"""
@@ -60,6 +70,7 @@ class ProfilSerializer(serializers.ModelSerializer):
 # SERIALIZER — Inscription d'un nouvel utilisateur
 # Valide les données du formulaire d'inscription
 # ═══════════════════════════════════════════════════════════════
+
 
 class InscriptionSerializer(serializers.ModelSerializer):
     """
@@ -73,23 +84,27 @@ class InscriptionSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
         validators=[validate_password],  # Vérifie la force du mot de passe
-        style={'input_type': 'password'}
+        style={"input_type": "password"},
     )
 
     # Confirmation du mot de passe — uniquement pour la validation
     password2 = serializers.CharField(
         write_only=True,
         required=True,
-        style={'input_type': 'password'},
-        label=_("Confirmer le mot de passe")
+        style={"input_type": "password"},
+        label=_("Confirmer le mot de passe"),
     )
 
     class Meta:
-        model  = CustomUser
+        model = CustomUser
         fields = [
-            'username', 'email',
-            'nom', 'prenom', 'telephone',
-            'password', 'password2'
+            "username",
+            "email",
+            "nom",
+            "prenom",
+            "telephone",
+            "password",
+            "password2",
         ]
 
     def validate_email(self, value):
@@ -109,10 +124,10 @@ class InscriptionSerializer(serializers.ModelSerializer):
         Validation croisée — vérifie que les deux
         mots de passe sont identiques.
         """
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({
-                'password': _("Les deux mots de passe ne correspondent pas.")
-            })
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError(
+                {"password": _("Les deux mots de passe ne correspondent pas.")}
+            )
         return attrs
 
     def create(self, validated_data):
@@ -121,13 +136,12 @@ class InscriptionSerializer(serializers.ModelSerializer):
         On supprime password2 car il ne correspond à aucun champ du modèle.
         """
         # Retire le champ de confirmation avant la création
-        validated_data.pop('password2')
+        validated_data.pop("password2")
 
         # Crée l'utilisateur avec le mot de passe hashé
         # is_active=False → le compte est inactif jusqu'à vérification email
         user = CustomUser.objects.create_user(
-            **validated_data,
-            is_active=False   # Activé après vérification email
+            **validated_data, is_active=False  # Activé après vérification email
         )
         return user
 
@@ -136,6 +150,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
 # SERIALIZER — Changement de mot de passe
 # ═══════════════════════════════════════════════════════════════
 
+
 class ChangerMotDePasseSerializer(serializers.Serializer):
     """
     Permet à un utilisateur connecté de changer son mot de passe.
@@ -143,42 +158,38 @@ class ChangerMotDePasseSerializer(serializers.Serializer):
     """
 
     ancien_password = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'}
+        write_only=True, required=True, style={"input_type": "password"}
     )
     nouveau_password = serializers.CharField(
         write_only=True,
         required=True,
         validators=[validate_password],
-        style={'input_type': 'password'}
+        style={"input_type": "password"},
     )
     nouveau_password2 = serializers.CharField(
         write_only=True,
         required=True,
-        style={'input_type': 'password'},
-        label=_("Confirmer le nouveau mot de passe")
+        style={"input_type": "password"},
+        label=_("Confirmer le nouveau mot de passe"),
     )
 
     def validate_ancien_password(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not user.check_password(value):
-            raise serializers.ValidationError(
-                _("L'ancien mot de passe est incorrect.")
-            )
+            raise serializers.ValidationError(_("L'ancien mot de passe est incorrect."))
         return value
 
     def validate(self, attrs):
-        if attrs['nouveau_password'] != attrs['nouveau_password2']:
-            raise serializers.ValidationError({
-                'nouveau_password': _("Les deux mots de passe ne correspondent pas.")
-            })
+        if attrs["nouveau_password"] != attrs["nouveau_password2"]:
+            raise serializers.ValidationError(
+                {"nouveau_password": _("Les deux mots de passe ne correspondent pas.")}
+            )
         return attrs
 
     def save(self, **kwargs):
         """Applique le nouveau mot de passe"""
-        user = self.context['request'].user
-        user.set_password(self.validated_data['nouveau_password'])
+        user = self.context["request"].user
+        user.set_password(self.validated_data["nouveau_password"])
         user.save()
         return user
 
@@ -187,6 +198,7 @@ class ChangerMotDePasseSerializer(serializers.Serializer):
 # SERIALIZER — Adresse de livraison
 # ═══════════════════════════════════════════════════════════════
 
+
 class AdresseLivraisonSerializer(serializers.ModelSerializer):
     """
     Gère l'affichage et la création des adresses de livraison.
@@ -194,14 +206,20 @@ class AdresseLivraisonSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model  = AdresseLivraison
+        model = AdresseLivraison
         fields = [
-            'id', 'nom_complet', 'telephone',
-            'adresse', 'ville', 'region',
-            'pays', 'code_postal', 'is_default',
-            'date_creation'
+            "id",
+            "nom_complet",
+            "telephone",
+            "adresse",
+            "ville",
+            "region",
+            "pays",
+            "code_postal",
+            "is_default",
+            "date_creation",
         ]
-        read_only_fields = ['date_creation']
+        read_only_fields = ["date_creation"]
 
     def create(self, validated_data):
         """
@@ -209,8 +227,7 @@ class AdresseLivraisonSerializer(serializers.ModelSerializer):
         à l'adresse créée.
         """
         # L'utilisateur vient du contexte de la requête
-        utilisateur = self.context['request'].user
+        utilisateur = self.context["request"].user
         return AdresseLivraison.objects.create(
-            utilisateur=utilisateur,
-            **validated_data
+            utilisateur=utilisateur, **validated_data
         )

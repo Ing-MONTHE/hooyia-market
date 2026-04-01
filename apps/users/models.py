@@ -4,8 +4,13 @@ Gestion des utilisateurs, adresses de livraison et rôles.
 On remplace le modèle User par défaut de Django par notre propre modèle
 CustomUser pour avoir un contrôle total sur les champs et comportements.
 """
+
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -16,6 +21,7 @@ from django.utils.translation import gettext_lazy as _
 # un utilisateur. On le personnalise car on utilise l'email
 # comme identifiant principal au lieu du username.
 # ═══════════════════════════════════════════════════════════════
+
 
 class CustomUserManager(BaseUserManager):
 
@@ -44,10 +50,10 @@ class CustomUserManager(BaseUserManager):
         Crée un administrateur (accès total).
         Appelé via : python manage.py createsuperuser
         """
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('is_admin', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("is_admin", True)
 
         return self.create_user(email, username, password, **extra_fields)
 
@@ -59,83 +65,46 @@ class CustomUserManager(BaseUserManager):
 # PermissionsMixin = ajoute la gestion des permissions Django
 # ═══════════════════════════════════════════════════════════════
 
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     username = models.CharField(
-        max_length=50,
-        unique=True,
-        verbose_name=_("Nom d'utilisateur")
+        max_length=50, unique=True, verbose_name=_("Nom d'utilisateur")
     )
-    email = models.EmailField(
-        unique=True,
-        verbose_name=_("Adresse email")
-    )
-    nom = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name=_("Nom")
-    )
-    prenom = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name=_("Prénom")
-    )
-    telephone = models.CharField(
-        max_length=20,
-        blank=True,
-        verbose_name=_("Téléphone")
-    )
+    email = models.EmailField(unique=True, verbose_name=_("Adresse email"))
+    nom = models.CharField(max_length=100, blank=True, verbose_name=_("Nom"))
+    prenom = models.CharField(max_length=100, blank=True, verbose_name=_("Prénom"))
+    telephone = models.CharField(max_length=20, blank=True, verbose_name=_("Téléphone"))
     photo_profil = models.ImageField(
-        upload_to='profils/',
-        null=True,
-        blank=True,
-        verbose_name=_("Photo de profil")
+        upload_to="profils/", null=True, blank=True, verbose_name=_("Photo de profil")
     )
 
-    is_active = models.BooleanField(
-        default=False,
-        verbose_name=_("Compte actif")
-    )
-    is_staff = models.BooleanField(
-        default=False,
-        verbose_name=_("Staff")
-    )
-    is_admin = models.BooleanField(
-        default=False,
-        verbose_name=_("Administrateur")
-    )
-    is_vendeur = models.BooleanField(
-        default=False,
-        verbose_name=_("Vendeur")
-    )
-    email_verifie = models.BooleanField(
-        default=False,
-        verbose_name=_("Email vérifié")
-    )
+    is_active = models.BooleanField(default=False, verbose_name=_("Compte actif"))
+    is_staff = models.BooleanField(default=False, verbose_name=_("Staff"))
+    is_admin = models.BooleanField(default=False, verbose_name=_("Administrateur"))
+    is_vendeur = models.BooleanField(default=False, verbose_name=_("Vendeur"))
+    email_verifie = models.BooleanField(default=False, verbose_name=_("Email vérifié"))
 
     date_inscription = models.DateTimeField(
-        default=timezone.now,
-        verbose_name=_("Date d'inscription")
+        default=timezone.now, verbose_name=_("Date d'inscription")
     )
     derniere_connexion = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name=_("Dernière connexion")
+        null=True, blank=True, verbose_name=_("Dernière connexion")
     )
 
     # ── Configuration du manager ──────────────────────────────
     objects = CustomUserManager()
 
     # On utilise l'email comme identifiant de connexion
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
 
     # Champs demandés lors de createsuperuser (en plus de email + password)
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ["username"]
 
     class Meta:
         verbose_name = _("Utilisateur")
         verbose_name_plural = _("Utilisateurs")
-        ordering = ['-date_inscription']
+        ordering = ["-date_inscription"]
 
     def __str__(self):
         return f"{self.username} ({self.email})"
@@ -155,31 +124,36 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 # Une seule peut être "par défaut" à la fois.
 # ═══════════════════════════════════════════════════════════════
 
+
 class AdresseLivraison(models.Model):
 
     utilisateur = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='adresses',
-        verbose_name=_("Utilisateur")
+        related_name="adresses",
+        verbose_name=_("Utilisateur"),
     )
 
     nom_complet = models.CharField(max_length=150, verbose_name=_("Nom complet"))
-    telephone   = models.CharField(max_length=20,  verbose_name=_("Téléphone"))
-    adresse     = models.CharField(max_length=255, verbose_name=_("Adresse"))
-    ville       = models.CharField(max_length=100, verbose_name=_("Ville"))
-    region      = models.CharField(max_length=100, verbose_name=_("Région"))
-    pays        = models.CharField(max_length=100, default="Cameroun", verbose_name=_("Pays"))
-    code_postal = models.CharField(max_length=10,  blank=True, verbose_name=_("Code postal"))
+    telephone = models.CharField(max_length=20, verbose_name=_("Téléphone"))
+    adresse = models.CharField(max_length=255, verbose_name=_("Adresse"))
+    ville = models.CharField(max_length=100, verbose_name=_("Ville"))
+    region = models.CharField(max_length=100, verbose_name=_("Région"))
+    pays = models.CharField(max_length=100, default="Cameroun", verbose_name=_("Pays"))
+    code_postal = models.CharField(
+        max_length=10, blank=True, verbose_name=_("Code postal")
+    )
 
-    is_default = models.BooleanField(default=False, verbose_name=_("Adresse par défaut"))
+    is_default = models.BooleanField(
+        default=False, verbose_name=_("Adresse par défaut")
+    )
 
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = _("Adresse de livraison")
         verbose_name_plural = _("Adresses de livraison")
-        ordering = ['-is_default', '-date_creation']
+        ordering = ["-is_default", "-date_creation"]
 
     def __str__(self):
         return f"{self.nom_complet} — {self.ville}, {self.pays}"
@@ -192,8 +166,7 @@ class AdresseLivraison(models.Model):
         """
         if self.is_default:
             AdresseLivraison.objects.filter(
-                utilisateur=self.utilisateur,
-                is_default=True
+                utilisateur=self.utilisateur, is_default=True
             ).exclude(pk=self.pk).update(is_default=False)
 
         super().save(*args, **kwargs)
@@ -208,12 +181,11 @@ class AdresseLivraison(models.Model):
 
 import uuid
 
+
 class TokenVerificationEmail(models.Model):
 
     utilisateur = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='token_verification'
+        CustomUser, on_delete=models.CASCADE, related_name="token_verification"
     )
 
     # Token unique généré automatiquement
@@ -228,4 +200,5 @@ class TokenVerificationEmail(models.Model):
     def est_expire(self):
         """Vérifie si le token a plus de 24h"""
         from datetime import timedelta
+
         return timezone.now() > self.date_creation + timedelta(hours=24)

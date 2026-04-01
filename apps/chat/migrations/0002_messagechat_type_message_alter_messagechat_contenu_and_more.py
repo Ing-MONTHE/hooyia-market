@@ -8,36 +8,83 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0001_initial'),
+        ("chat", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='messagechat',
-            name='type_message',
-            field=models.CharField(choices=[('text', 'Texte'), ('file', 'Fichier'), ('image', 'Image')], default='text', max_length=10, verbose_name='Type'),
+            model_name="messagechat",
+            name="type_message",
+            field=models.CharField(
+                choices=[("text", "Texte"), ("file", "Fichier"), ("image", "Image")],
+                default="text",
+                max_length=10,
+                verbose_name="Type",
+            ),
         ),
         migrations.AlterField(
-            model_name='messagechat',
-            name='contenu',
-            field=models.TextField(blank=True, default='', verbose_name='Message'),
+            model_name="messagechat",
+            name="contenu",
+            field=models.TextField(blank=True, default="", verbose_name="Message"),
         ),
         migrations.CreateModel(
-            name='FichierChat',
+            name="FichierChat",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fichier', models.FileField(upload_to=apps.chat.models.chat_upload_path, verbose_name='Fichier')),
-                ('nom_original', models.CharField(max_length=255, verbose_name='Nom original')),
-                ('taille', models.PositiveBigIntegerField(verbose_name='Taille (octets)')),
-                ('type_mime', models.CharField(max_length=100, verbose_name='Type MIME')),
-                ('date_upload', models.DateTimeField(auto_now_add=True, verbose_name='Uploadé le')),
-                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fichiers', to='chat.conversation', verbose_name='Conversation')),
-                ('message', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='fichier', to='chat.messagechat', verbose_name='Message')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "fichier",
+                    models.FileField(
+                        upload_to=apps.chat.models.chat_upload_path,
+                        verbose_name="Fichier",
+                    ),
+                ),
+                (
+                    "nom_original",
+                    models.CharField(max_length=255, verbose_name="Nom original"),
+                ),
+                (
+                    "taille",
+                    models.PositiveBigIntegerField(verbose_name="Taille (octets)"),
+                ),
+                (
+                    "type_mime",
+                    models.CharField(max_length=100, verbose_name="Type MIME"),
+                ),
+                (
+                    "date_upload",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Uploadé le"),
+                ),
+                (
+                    "conversation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fichiers",
+                        to="chat.conversation",
+                        verbose_name="Conversation",
+                    ),
+                ),
+                (
+                    "message",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fichier",
+                        to="chat.messagechat",
+                        verbose_name="Message",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fichier chat',
-                'verbose_name_plural': 'Fichiers chat',
-                'ordering': ['-date_upload'],
+                "verbose_name": "Fichier chat",
+                "verbose_name_plural": "Fichiers chat",
+                "ordering": ["-date_upload"],
             },
         ),
     ]

@@ -1,6 +1,6 @@
 # 🛒 HooYia Market
 
-> Plateforme e-commerce spécialisée dans la vente d'électronique, d'équipements informatiques et d'accessoires.  
+> Plateforme e-commerce spécialisée dans la vente d'électronique, d'équipements informatiques et d'accessoires.
 > Inspirée d'Amazon, construite avec Django et son écosystème avancé.
 
 ---
@@ -462,7 +462,7 @@ async function apiFetch(url, options = {}) {
 }
 ```
 
-Fichiers à créer : `api.js` · `products.js` · `cart.js` · `chat.js` · `notifications.js`  
+Fichiers à créer : `api.js` · `products.js` · `cart.js` · `chat.js` · `notifications.js`
 Templates à créer : `base.html` · `home.html` · `partials/` · `users/` · `products/` · `cart/` · `orders/` · `chat/` · emails HTML
 
 ---
@@ -491,5 +491,5 @@ Templates à créer : `base.html` · `home.html` · `partials/` · `users/` · `
 
 ---
 
-> **HooYia Market** — Développé avec :  
+> **HooYia Market** — Développé avec :
 > Django 5 · DRF · Celery · Redis · Daphne · TailwindCSS · JavaScript JSON/Fetch

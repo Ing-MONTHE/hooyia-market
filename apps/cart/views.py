@@ -3,6 +3,7 @@ Vues HTML pour le panier.
 Ces vues retournent des pages HTML qui chargent les données
 via JavaScript (fetch API → JSON depuis api_views.py).
 """
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 # ═══════════════════════════════════════════════════════════════
 # VUE — Page panier
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def panier(request):
@@ -24,9 +26,9 @@ def panier(request):
     """
     if request.user.is_staff or request.user.is_admin or request.user.is_vendeur:
         messages.info(request, _("Les administrateurs n'ont pas accès au panier."))
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
     context = {
-        'titre': _('Mon Panier — HooYia Market'),
+        "titre": _("Mon Panier — HooYia Market"),
     }
-    return render(request, 'cart/cart.html', context)
+    return render(request, "cart/cart.html", context)

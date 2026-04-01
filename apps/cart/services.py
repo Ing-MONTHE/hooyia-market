@@ -13,6 +13,7 @@ Pourquoi un service séparé des vues ?
 Toutes les méthodes utilisent transaction.atomic() pour garantir
 qu'en cas d'erreur, aucun changement partiel n'est sauvegardé en base.
 """
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -26,6 +27,7 @@ from apps.products.models import Produit
 # Point d'entrée unique pour toutes les opérations sur le panier.
 # S'utilise via les méthodes de classe (pas besoin d'instancier).
 # ═══════════════════════════════════════════════════════════════
+
 
 class CartService:
     """
@@ -78,7 +80,8 @@ class CartService:
         # Vérifie le stock disponible
         if produit.stock < quantite:
             raise ValidationError(
-                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).") % {'stock': produit.stock}
+                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).")
+                % {"stock": produit.stock}
             )
 
         # Capture le prix actuel (promo si disponible, sinon prix normal)
@@ -88,12 +91,12 @@ class CartService:
         # Cherche si le produit est déjà dans le panier
         # get_or_create retourne (instance, created_bool)
         item, created = PanierItem.objects.get_or_create(
-            panier  = panier,
-            produit = produit,
+            panier=panier,
+            produit=produit,
             defaults={
-                'quantite'     : quantite,
-                'prix_snapshot': prix_capture,
-            }
+                "quantite": quantite,
+                "prix_snapshot": prix_capture,
+            },
         )
 
         if not created:
@@ -103,11 +106,14 @@ class CartService:
             # Vérifie que la nouvelle quantité totale ne dépasse pas le stock
             if nouvelle_quantite > produit.stock:
                 raise ValidationError(
-                    _("Quantité maximale atteinte. "
-                      "Vous avez déjà %(dans_panier)s unité(s) dans votre panier "
-                      "et il reste %(en_stock)s unité(s) en stock.") % {
-                        'dans_panier': item.quantite,
-                        'en_stock': produit.stock,
+                    _(
+                        "Quantité maximale atteinte. "
+                        "Vous avez déjà %(dans_panier)s unité(s) dans votre panier "
+                        "et il reste %(en_stock)s unité(s) en stock."
+                    )
+                    % {
+                        "dans_panier": item.quantite,
+                        "en_stock": produit.stock,
                     }
                 )
 
@@ -175,7 +181,8 @@ class CartService:
         # Vérifie le stock disponible avant la mise à jour
         if item.produit and nouvelle_quantite > item.produit.stock:
             raise ValidationError(
-                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).") % {'stock': item.produit.stock}
+                _("Stock insuffisant. Il reste %(stock)s unité(s) disponible(s).")
+                % {"stock": item.produit.stock}
             )
 
         item.quantite = nouvelle_quantite
@@ -195,17 +202,19 @@ class CartService:
                 'nombre_articles' : quantité totale d'articles
             }
         """
-        items = panier.items.select_related('produit').all()
+        items = panier.items.select_related("produit").all()
 
         lignes = []
         for item in items:
-            lignes.append({
-                'item'       : item,
-                'sous_total' : item.sous_total,
-            })
+            lignes.append(
+                {
+                    "item": item,
+                    "sous_total": item.sous_total,
+                }
+            )
 
         return {
-            'items'           : lignes,
-            'total'           : panier.total,
-            'nombre_articles' : panier.nombre_articles,
+            "items": lignes,
+            "total": panier.total,
+            "nombre_articles": panier.nombre_articles,
         }

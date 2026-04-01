@@ -13,6 +13,7 @@ Règles d'envoi de l'email de vérification :
   - Uniquement si l'email n'est pas déjà vérifié (email_verifie=False)
   → Exclut les comptes Google OAuth (créés avec is_active=True et email_verifie=True)
 """
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
@@ -25,6 +26,7 @@ from .models import CustomUser, TokenVerificationEmail
 # SIGNAL 1 — Création du token de vérification email
 # Se déclenche automatiquement après chaque création d'utilisateur
 # ═══════════════════════════════════════════════════════════════
+
 
 @receiver(post_save, sender=CustomUser)
 def creer_token_verification(sender, instance, created, **kwargs):
@@ -73,6 +75,7 @@ L'équipe HooYia Market
 # On le crée automatiquement dès l'inscription.
 # ═══════════════════════════════════════════════════════════════
 
+
 @receiver(post_save, sender=CustomUser)
 def creer_panier_utilisateur(sender, instance, created, **kwargs):
     """
@@ -86,4 +89,5 @@ def creer_panier_utilisateur(sender, instance, created, **kwargs):
         # Import ici pour éviter les imports circulaires
         # (users importe cart, cart importe users → boucle infinie)
         from apps.cart.models import Panier
+
         Panier.objects.get_or_create(utilisateur=instance)

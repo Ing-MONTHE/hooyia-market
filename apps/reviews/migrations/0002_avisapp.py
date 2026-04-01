@@ -9,26 +9,61 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reviews', '0001_initial'),
+        ("reviews", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AvisApp',
+            name="AvisApp",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('note', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1, message='Note minimale : 1.'), django.core.validators.MaxValueValidator(5, message='Note maximale : 5.')], verbose_name='Note (1 à 5)')),
-                ('commentaire', models.TextField(verbose_name='Commentaire')),
-                ('is_valide', models.BooleanField(default=False, verbose_name='Validé (affiché sur la home)')),
-                ('date_creation', models.DateTimeField(auto_now_add=True)),
-                ('utilisateur', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='avis_app', to=settings.AUTH_USER_MODEL, verbose_name='Auteur')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "note",
+                    models.PositiveSmallIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(
+                                1, message="Note minimale : 1."
+                            ),
+                            django.core.validators.MaxValueValidator(
+                                5, message="Note maximale : 5."
+                            ),
+                        ],
+                        verbose_name="Note (1 à 5)",
+                    ),
+                ),
+                ("commentaire", models.TextField(verbose_name="Commentaire")),
+                (
+                    "is_valide",
+                    models.BooleanField(
+                        default=False, verbose_name="Validé (affiché sur la home)"
+                    ),
+                ),
+                ("date_creation", models.DateTimeField(auto_now_add=True)),
+                (
+                    "utilisateur",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="avis_app",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Auteur",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': "Avis sur l'application",
-                'verbose_name_plural': "Avis sur l'application",
-                'ordering': ['-date_creation'],
-                'unique_together': {('utilisateur',)},
+                "verbose_name": "Avis sur l'application",
+                "verbose_name_plural": "Avis sur l'application",
+                "ordering": ["-date_creation"],
+                "unique_together": {("utilisateur",)},
             },
         ),
     ]

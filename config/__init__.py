@@ -9,4 +9,4 @@
 from .celery import app as celery_app
 
 # Rend celery_app disponible quand on importe "config"
-__all__ = ('celery_app',)
+__all__ = ("celery_app",)

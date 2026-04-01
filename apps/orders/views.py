@@ -2,6 +2,7 @@
 Vues HTML pour les commandes.
 Les données sont chargées via JavaScript (fetch API → JSON).
 """
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,18 +15,23 @@ def client_required(view_func):
     Décorateur : redirige les admins/vendeurs vers l'accueil.
     Le passage de commande est réservé aux clients uniquement.
     """
+
     @login_required
     def _wrapped(request, *args, **kwargs):
         if request.user.is_staff or request.user.is_admin or request.user.is_vendeur:
-            messages.warning(request, _("Cette fonctionnalité est réservée aux clients."))
-            return redirect('products:accueil')
+            messages.warning(
+                request, _("Cette fonctionnalité est réservée aux clients.")
+            )
+            return redirect("products:accueil")
         return view_func(request, *args, **kwargs)
+
     return _wrapped
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Page checkout (passage de commande)
 # ═══════════════════════════════════════════════════════════════
+
 
 @client_required
 def checkout(request):
@@ -36,17 +42,18 @@ def checkout(request):
     La commande est créée via POST /api/commandes/.
     """
     # Adresses enregistrées de l'utilisateur (pour le select du formulaire)
-    adresses = request.user.adresses.order_by('-is_default', '-date_creation')
+    adresses = request.user.adresses.order_by("-is_default", "-date_creation")
     context = {
-        'titre'   : _('Finaliser ma commande — HooYia Market'),
-        'adresses': adresses,
+        "titre": _("Finaliser ma commande — HooYia Market"),
+        "adresses": adresses,
     }
-    return render(request, 'orders/checkout.html', context)
+    return render(request, "orders/checkout.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Page de confirmation de commande
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def confirmation(request, pk):
@@ -59,15 +66,17 @@ def confirmation(request, pk):
     commande = get_object_or_404(Commande, pk=pk, client=request.user)
 
     context = {
-        'commande': commande,
-        'titre'   : _('Commande #%(ref)s — HooYia Market') % {'ref': commande.reference_courte},
+        "commande": commande,
+        "titre": _("Commande #%(ref)s — HooYia Market")
+        % {"ref": commande.reference_courte},
     }
-    return render(request, 'orders/confirm.html', context)
+    return render(request, "orders/confirm.html", context)
 
 
 # ═══════════════════════════════════════════════════════════════
 # VUE — Historique des commandes
 # ═══════════════════════════════════════════════════════════════
+
 
 @login_required
 def detail_commande(request, pk):
@@ -77,10 +86,11 @@ def detail_commande(request, pk):
     """
     commande = get_object_or_404(Commande, pk=pk, client=request.user)
     context = {
-        'commande': commande,
-        'titre': _('Commande #%(ref)s — HooYia Market') % {'ref': commande.reference_courte},
+        "commande": commande,
+        "titre": _("Commande #%(ref)s — HooYia Market")
+        % {"ref": commande.reference_courte},
     }
-    return render(request, 'orders/detail_commande.html', context)
+    return render(request, "orders/detail_commande.html", context)
 
 
 @login_required
@@ -97,23 +107,24 @@ def retour_paiement(request):
 
     Une fois confirmé, on redirige vers la page de confirmation.
     """
-    ref = request.GET.get('ref', '')
+    ref = request.GET.get("ref", "")
     if not ref:
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
     try:
         import uuid
+
         uuid.UUID(ref)
         commande = get_object_or_404(Commande, reference=ref, client=request.user)
     except (ValueError, Exception):
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
     context = {
-        'commande':        commande,
-        'ref':             ref,
-        'titre':           _('Vérification du paiement — HooYia Market'),
+        "commande": commande,
+        "ref": ref,
+        "titre": _("Vérification du paiement — HooYia Market"),
     }
-    return render(request, 'orders/retour_paiement.html', context)
+    return render(request, "orders/retour_paiement.html", context)
 
 
 @login_required
@@ -127,39 +138,40 @@ def mock_paiement(request):
     from .models import Paiement
     from .payment_service import PayUnitService
 
-    ref = request.GET.get('ref', '')
-    trx = request.GET.get('trx', '')
-    action = request.POST.get('action', '')  # 'success' ou 'fail'
+    ref = request.GET.get("ref", "")
+    trx = request.GET.get("trx", "")
+    action = request.POST.get("action", "")  # 'success' ou 'fail'
 
     try:
         import uuid
+
         uuid.UUID(str(ref))
         commande = get_object_or_404(Commande, reference=ref, client=request.user)
     except (ValueError, Exception):
-        return redirect('products:accueil')
+        return redirect("products:accueil")
 
-    if action == 'success':
+    if action == "success":
         try:
             paiement = commande.paiement
             PayUnitService.confirmer_paiement(paiement)
         except Exception:
             pass
-        return redirect('orders:confirmation', pk=commande.pk)
+        return redirect("orders:confirmation", pk=commande.pk)
 
-    elif action == 'fail':
+    elif action == "fail":
         try:
             paiement = commande.paiement
             PayUnitService.echouer_paiement(paiement)
         except Exception:
             pass
-        return redirect(f'/commandes/paiement/retour/?ref={ref}')
+        return redirect(f"/commandes/paiement/retour/?ref={ref}")
 
     context = {
-        'commande': commande,
-        'ref':      ref,
-        'trx':      trx,
+        "commande": commande,
+        "ref": ref,
+        "trx": trx,
     }
-    return render(request, 'orders/mock_paiement.html', context)
+    return render(request, "orders/mock_paiement.html", context)
 
 
 @login_required
@@ -169,6 +181,6 @@ def historique(request):
     La liste est chargée via GET /api/commandes/.
     """
     context = {
-        'titre': _('Mes commandes — HooYia Market'),
+        "titre": _("Mes commandes — HooYia Market"),
     }
-    return render(request, 'orders/history.html', context)
+    return render(request, "orders/history.html", context)

@@ -11,6 +11,7 @@ Endpoints exposés (préfixe défini dans config/urls.py : api/avis/) :
   POST   /api/avis/<id>/valider/   → valide un avis (admin seulement)
   POST   /api/avis/<id>/invalider/ → invalide un avis (admin seulement)
 """
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,6 +26,7 @@ from apps.users.permissions import EstClient
 # ═══════════════════════════════════════════════════════════════
 # VIEWSET — Avis
 # ═══════════════════════════════════════════════════════════════
+
 
 class AvisViewSet(viewsets.ModelViewSet):
     """
@@ -44,7 +46,7 @@ class AvisViewSet(viewsets.ModelViewSet):
 
     # Filtre par produit : GET /api/avis/?produit=42
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['produit']
+    filterset_fields = ["produit"]
 
     # ── Queryset de base ──────────────────────────────────────────────────────
     # Surcharge complète dans get_queryset() → ce queryset sert uniquement
@@ -62,35 +64,37 @@ class AvisViewSet(viewsets.ModelViewSet):
           - Anonyme → uniquement les avis validés
         """
         # Base : toujours avec select_related pour éviter les requêtes N+1
-        qs = Avis.objects.select_related('utilisateur', 'produit').order_by('-date_creation')
+        qs = Avis.objects.select_related("utilisateur", "produit").order_by(
+            "-date_creation"
+        )
 
         user = self.request.user
 
         # Admin : accès complet avec filtres optionnels
         if user.is_authenticated and user.is_staff:
-            statut = self.request.query_params.get('statut', '')
-            search = self.request.query_params.get('search', '')
-            if statut == 'en_attente':
+            statut = self.request.query_params.get("statut", "")
+            search = self.request.query_params.get("search", "")
+            if statut == "en_attente":
                 qs = qs.filter(is_validated=False)
-            elif statut == 'valide':
+            elif statut == "valide":
                 qs = qs.filter(is_validated=True)
-            elif statut == 'invalide':
+            elif statut == "invalide":
                 qs = qs.filter(is_validated=False)
             if search:
                 from django.db.models import Q as DQ
+
                 qs = qs.filter(
-                    DQ(produit__nom__icontains=search) |
-                    DQ(utilisateur__nom__icontains=search) |
-                    DQ(utilisateur__prenom__icontains=search)
+                    DQ(produit__nom__icontains=search)
+                    | DQ(utilisateur__nom__icontains=search)
+                    | DQ(utilisateur__prenom__icontains=search)
                 )
             return qs
 
         # Utilisateur connecté : avis validés + ses propres avis non validés
         if user.is_authenticated:
             from django.db.models import Q
-            return qs.filter(
-                Q(is_validated=True) | Q(utilisateur=user)
-            )
+
+            return qs.filter(Q(is_validated=True) | Q(utilisateur=user))
 
         # Anonyme : uniquement les avis validés (publication publique)
         return qs.filter(is_validated=True)
@@ -103,11 +107,11 @@ class AvisViewSet(viewsets.ModelViewSet):
           - destroy              : authentifié (propriétaire ou admin vérifié dans perform_destroy)
           - valider / invalider  : admin seulement
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
-        if self.action in ['valider', 'invalider']:
+        if self.action in ["valider", "invalider"]:
             return [permissions.IsAdminUser()]
-        if self.action == 'create':
+        if self.action == "create":
             # Seuls les clients peuvent laisser un avis
             # Les admins/vendeurs gèrent les produits mais ne peuvent pas les noter
             return [EstClient()]
@@ -121,9 +125,9 @@ class AvisViewSet(viewsets.ModelViewSet):
           - Détail   → AvisDetailSerializer (inclut is_validated, dates)
           - Liste    → AvisListSerializer (allégé pour l'affichage public)
         """
-        if self.action == 'create':
+        if self.action == "create":
             return AvisCreerSerializer
-        if self.action == 'retrieve':
+        if self.action == "retrieve":
             return AvisDetailSerializer
         return AvisListSerializer
 
@@ -138,12 +142,13 @@ class AvisViewSet(viewsets.ModelViewSet):
         # Seul le propriétaire ou un admin peut supprimer l'avis
         if not user.is_staff and instance.utilisateur != user:
             from rest_framework.exceptions import PermissionDenied
+
             raise PermissionDenied(_("Vous ne pouvez supprimer que votre propre avis."))
 
         instance.delete()
 
     # ── Action : valider un avis ───────────────────────────────────────────────
-    @action(detail=True, methods=['post'], url_path='valider')
+    @action(detail=True, methods=["post"], url_path="valider")
     def valider(self, request, pk=None):
         """
         POST /api/avis/<id>/valider/
@@ -154,20 +159,23 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         if avis.is_validated:
             return Response(
-                {'detail': _('Cet avis est déjà validé.')},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("Cet avis est déjà validé.")},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         avis.is_validated = True
-        avis.save(update_fields=['is_validated'])
+        avis.save(update_fields=["is_validated"])
 
         return Response(
-            {'detail': _('Avis #%(id)s validé. Note moyenne du produit mise à jour.') % {'id': avis.id}},
-            status=status.HTTP_200_OK
+            {
+                "detail": _("Avis #%(id)s validé. Note moyenne du produit mise à jour.")
+                % {"id": avis.id}
+            },
+            status=status.HTTP_200_OK,
         )
 
     # ── Action : invalider un avis ─────────────────────────────────────────────
-    @action(detail=True, methods=['post'], url_path='invalider')
+    @action(detail=True, methods=["post"], url_path="invalider")
     def invalider(self, request, pk=None):
         """
         POST /api/avis/<id>/invalider/
@@ -178,17 +186,23 @@ class AvisViewSet(viewsets.ModelViewSet):
 
         if not avis.is_validated:
             return Response(
-                {'detail': _('Cet avis est déjà invalide.')},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": _("Cet avis est déjà invalide.")},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         avis.is_validated = False
-        avis.save(update_fields=['is_validated'])
+        avis.save(update_fields=["is_validated"])
 
         return Response(
-            {'detail': _('Avis #%(id)s invalidé. Note moyenne du produit recalculée.') % {'id': avis.id}},
-            status=status.HTTP_200_OK
+            {
+                "detail": _(
+                    "Avis #%(id)s invalidé. Note moyenne du produit recalculée."
+                )
+                % {"id": avis.id}
+            },
+            status=status.HTTP_200_OK,
         )
+
 
 # ===============================================================
 # VIEWS — AvisApp
@@ -204,25 +218,32 @@ from .serializers import AvisAppListSerializer, AvisAppCreerSerializer
 
 class AvisAppListView(generics.ListAPIView):
     """Liste publique des avis validés sur la plateforme."""
-    serializer_class   = AvisAppListSerializer
+
+    serializer_class = AvisAppListSerializer
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return AvisApp.objects.filter(is_valide=True).order_by('-date_creation')[:6]
+        return AvisApp.objects.filter(is_valide=True).order_by("-date_creation")[:6]
 
 
 class AvisAppCreerView(APIView):
     """Crée un avis sur la plateforme (utilisateur connecté uniquement)."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = AvisAppCreerSerializer(data=request.data, context={'request': request})
+        serializer = AvisAppCreerSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': _('Avis soumis, en attente de validation.')}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": _("Avis soumis, en attente de validation.")},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         """Vérifie si l'utilisateur a déjà soumis un avis."""
         existe = AvisApp.objects.filter(utilisateur=request.user).exists()
-        return Response({'deja_soumis': existe})
+        return Response({"deja_soumis": existe})

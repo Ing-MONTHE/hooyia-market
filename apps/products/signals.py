@@ -4,6 +4,7 @@ Signals pour l'app products :
 2. Invalidation du cache Redis après modification d'un produit
 3. Mise à jour du statut produit quand le stock change
 """
+
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
@@ -17,7 +18,8 @@ logger = logging.getLogger(__name__)
 # Se déclenche après chaque sauvegarde d'une ImageProduit
 # ═══════════════════════════════════════════════════════════════
 
-@receiver(post_save, sender='products.ImageProduit')
+
+@receiver(post_save, sender="products.ImageProduit")
 def resize_image_produit(sender, instance, created, **kwargs):
     """
     Après upload d'une image, on la redimensionne automatiquement
@@ -33,8 +35,8 @@ def resize_image_produit(sender, instance, created, **kwargs):
             # Ouvre l'image avec Pillow
             with Image.open(img_path) as img:
                 # Convertit en RGB si nécessaire (ex: PNG avec transparence)
-                if img.mode in ('RGBA', 'P'):
-                    img = img.convert('RGB')
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
 
                 # Redimensionne seulement si l'image est trop grande
                 max_size = (1200, 1200)
@@ -53,7 +55,8 @@ def resize_image_produit(sender, instance, created, **kwargs):
 # Se déclenche après chaque sauvegarde ou suppression d'un Produit
 # ═══════════════════════════════════════════════════════════════
 
-@receiver(post_save, sender='products.Produit')
+
+@receiver(post_save, sender="products.Produit")
 def invalider_cache_produit(sender, instance, **kwargs):
     """
     Quand un produit est modifié, on supprime son cache Redis
@@ -65,29 +68,34 @@ def invalider_cache_produit(sender, instance, **kwargs):
     - Cache des produits en vedette
     """
     # Supprime le cache de ce produit spécifique
-    cache.delete(f'produit_{instance.pk}')
-    cache.delete(f'produit_slug_{instance.slug}')
+    cache.delete(f"produit_{instance.pk}")
+    cache.delete(f"produit_slug_{instance.slug}")
 
     # Supprime les caches de listes (toutes les pages)
-    cache.delete_pattern('produits_liste_*') if hasattr(cache, 'delete_pattern') else None
-    cache.delete('produits_vedette')
+    (
+        cache.delete_pattern("produits_liste_*")
+        if hasattr(cache, "delete_pattern")
+        else None
+    )
+    cache.delete("produits_vedette")
 
     logger.info(f"Cache invalidé pour le produit : {instance.nom}")
 
 
-@receiver(post_delete, sender='products.Produit')
+@receiver(post_delete, sender="products.Produit")
 def invalider_cache_produit_supprime(sender, instance, **kwargs):
     """Invalide le cache quand un produit est supprimé"""
-    cache.delete(f'produit_{instance.pk}')
-    cache.delete(f'produit_slug_{instance.slug}')
-    cache.delete('produits_vedette')
+    cache.delete(f"produit_{instance.pk}")
+    cache.delete(f"produit_slug_{instance.slug}")
+    cache.delete("produits_vedette")
 
 
 # ═══════════════════════════════════════════════════════════════
 # SIGNAL 3 — Mise à jour statut produit selon le stock
 # ═══════════════════════════════════════════════════════════════
 
-@receiver(post_save, sender='products.MouvementStock')
+
+@receiver(post_save, sender="products.MouvementStock")
 def mettre_a_jour_stock_produit(sender, instance, created, **kwargs):
     """
     Après chaque mouvement de stock, met à jour le stock du produit
@@ -97,16 +105,16 @@ def mettre_a_jour_stock_produit(sender, instance, created, **kwargs):
         produit = instance.produit
 
         # Recalcule le stock depuis le mouvement
-        if instance.type_mouvement in ['entree', 'retour', 'ajustement']:
+        if instance.type_mouvement in ["entree", "retour", "ajustement"]:
             produit.stock = instance.stock_apres
-        elif instance.type_mouvement == 'sortie':
+        elif instance.type_mouvement == "sortie":
             produit.stock = instance.stock_apres
 
         # Met à jour le statut selon le stock
         if produit.stock == 0:
-            produit.statut = 'epuise'
-        elif produit.statut == 'epuise' and produit.stock > 0:
-            produit.statut = 'actif'
+            produit.statut = "epuise"
+        elif produit.statut == "epuise" and produit.stock > 0:
+            produit.statut = "actif"
 
         # update_fields = ne sauvegarde que ces champs (évite une boucle infinie)
-        produit.save(update_fields=['stock', 'statut'])
+        produit.save(update_fields=["stock", "statut"])
