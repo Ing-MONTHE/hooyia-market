@@ -291,7 +291,7 @@ class AvisAPITest(APITestCase):
         self.assertEqual(response.data["count"], 1)
 
     # ── Création ──────────────────────────────────────────────
-
+    @override_settings(AVIS_ACHAT_REQUIS=True)
     def test_creer_avis_sans_achat_refuse(self):
         """POST /api/avis/ est refusé si l'utilisateur n'a pas acheté le produit → 400."""
         response = self.client.post(

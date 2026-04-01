@@ -53,7 +53,7 @@ class PanierAPIView(APIView):
         get_or_create : si le panier n'existe pas encore (cas rare), on le crée.
         """
         # get_or_create retourne (instance, created_bool)
-        panier, _ = Panier.objects.get_or_create(utilisateur=request.user)
+        panier, created = Panier.objects.get_or_create(utilisateur=request.user)
 
         serializer = PanierSerializer(panier, context={"request": request})
         return Response(serializer.data)
@@ -85,7 +85,7 @@ class AjouterItemAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Récupère ou crée le panier
-        panier, _ = Panier.objects.get_or_create(utilisateur=request.user)
+        panier, created = Panier.objects.get_or_create(utilisateur=request.user)
 
         try:
             # Délègue toute la logique au service
