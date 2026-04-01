@@ -83,7 +83,7 @@ jobs:
           pip install -r requirements.txt
 
       # 5. Lance les tests Django
-      - name: Lancement des tests
+      - name: 🧪 Lancement des tests
         run: python manage.py test --verbosity=2
 
   # ════════════════════════════════════════════════════════════
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       # 1. Se connecte au VPS via SSH et déploie
-      - name: Connexion SSH + Déploiement
+      - name: 🔐 Connexion SSH + Déploiement
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -108,16 +108,16 @@ jobs:
           script: |
             set -e
 
-            echo "Accès au dossier du projet..."
+            echo "📁 Accès au dossier du projet..."
             cd ${{ secrets.VPS_PROJECT_PATH }}
 
-            echo "⬇Récupération du dernier code..."
+            echo "⬇️  Récupération du dernier code..."
             git pull origin main
 
-            echo "Rebuild et redémarrage des conteneurs..."
+            echo "🐳 Rebuild et redémarrage des conteneurs..."
             docker-compose -f docker-compose.prod.yml up -d --build
 
-            echo "Nettoyage des images Docker inutilisées..."
+            echo "🧹 Nettoyage des images Docker inutilisées..."
             docker image prune -f
 
-            echo "Déploiement terminé !"
+            echo "✅ Déploiement terminé !"
