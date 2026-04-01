@@ -382,7 +382,7 @@ class CommandeAPITest(APITestCase):
     def _auth(self, token):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
-    @patch("apps.orders.api_views.PayUnitService.initialize")
+    @patch("apps.orders.payment_service.PayUnitService.initialize")
     @patch("apps.notifications.tasks.send_order_confirmation_email.delay")
     def test_creer_commande(self, mock_email, mock_payunit):
         mock_payunit.return_value = {"payment_url": "https://fake-url.com"}
