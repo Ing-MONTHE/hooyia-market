@@ -46,9 +46,11 @@ class NotificationListeAPIView(generics.ListAPIView):
 
         # Filtre optionnel par statut de lecture
         is_read = self.request.query_params.get("is_read")
+        non_lues = self.request.query_params.get("non_lues")
         if is_read is not None:
-            # Conversion string → bool ('false' → False, 'true' → True)
             qs = qs.filter(is_read=is_read.lower() == "true")
+        elif non_lues is not None:
+            qs = qs.filter(is_read=False)
 
         return qs
 

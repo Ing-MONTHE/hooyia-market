@@ -18,3 +18,4 @@ class ReviewsConfig(AppConfig):
         Django ne les "découvre" pas automatiquement.
         """
         import apps.users.signals
+        import apps.reviews.signals

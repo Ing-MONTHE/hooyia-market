@@ -49,7 +49,11 @@ class OrderService:
     @staticmethod
     @transaction.atomic
     def create_from_cart(
-        utilisateur, adresse, mode_paiement, telephone_paiement="", note_client=""
+        utilisateur,
+        adresse,
+        mode_paiement="livraison",
+        telephone_paiement="",
+        note_client="",
     ):
         """
         Crée une commande complète depuis le panier de l'utilisateur.
