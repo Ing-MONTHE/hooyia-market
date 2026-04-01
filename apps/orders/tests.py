@@ -393,7 +393,8 @@ class CommandeAPITest(APITestCase):
             reverse("api_commande_creer"),
             {
                 "adresse_id": self.adresse.pk,
-                "mode_paiement": "livraison",
+                "mode_paiement": "orange_money",
+                "telephone_paiement": "699000000",
             },
             format="json",
         )
