@@ -257,7 +257,7 @@ class OrderServiceTest(TestCase):
         )
 
         self.assertEqual(commande.client, self.client_user)
-        self.assertEqual(commande.statut, Commande.CONFIRMEE)
+        self.assertEqual(commande.statut, Commande.EN_ATTENTE)
         self.assertEqual(commande.montant_total, Decimal("100000.00"))  # 2 × 50000
         self.assertEqual(commande.lignes.count(), 1)
 
@@ -272,7 +272,7 @@ class OrderServiceTest(TestCase):
         OrderService.create_from_cart(
             utilisateur=self.client_user, adresse=self.adresse
         )
-        self.assertTrue(panier.est_vide)
+        self.assertFalse(panier.est_vide)
 
     @patch("apps.notifications.tasks.send_order_confirmation_email.delay")
     def test_create_from_cart_decremente_stock(self, mock_email):
@@ -382,8 +382,10 @@ class CommandeAPITest(APITestCase):
     def _auth(self, token):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
+    @patch("apps.orders.api_views.PayUnitService.initialize")
     @patch("apps.notifications.tasks.send_order_confirmation_email.delay")
-    def test_creer_commande(self, mock_email):
+    def test_creer_commande(self, mock_email, mock_payunit):
+        mock_payunit.return_value = {"payment_url": "https://fake-url.com"}
         """POST /api/commandes/creer/ crée une commande depuis le panier → 201."""
         preparer_panier(self.client_user, self.vendeur, quantite=2)
         self._auth(self.token_client)

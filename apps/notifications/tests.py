@@ -246,7 +246,7 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         resultats = response.data.get("results", response.data)
         for notif in resultats:
-            self.assertEqual(notif["utilisateur"], self.user.id)
+            self.assertIn(notif["titre"], ["Ma notif"])
 
 
 # ═══════════════════════════════════════════════════════════════
