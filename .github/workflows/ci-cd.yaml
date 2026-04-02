@@ -99,14 +99,14 @@ jobs:
       - name: 🛠️ Préparation de la base de données
         run: |
           source venv/bin/activate
-          python manage.py migrate --noinput // Applique les migrations sans interaction
-          python manage.py collectstatic --noinput -v 0  // Collecte les fichiers statiques sans interaction et sans verbosité
+          python manage.py migrate --noinput # Applique les migrations sans interaction
+          python manage.py collectstatic --noinput -v 0  # Collecte les fichiers statiques sans interaction et sans verbosité
 
       # 5. Lance les tests Django
       - name: 🧪 Lancement des tests
         run: |
           source venv/bin/activate
-          python manage.py test --verbosity=2 | tee test_output.log // Affiche les résultats des tests et les enregistre dans un fichier
+          python manage.py test --verbosity=2 | tee test_output.log # Affiche les résultats des tests et les enregistre dans un fichier
 
       #6. Affiche les resultats des tests en cas d'echecs
       - name: Affichage des resultats des tests
@@ -160,7 +160,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts // Ajoute le VPS à la liste des hôtes connus pour éviter les prompts de confirmation
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts # Ajoute le VPS à la liste des hôtes connus pour éviter les prompts de confirmation
 
       - name: configuration du Username
         run: |
