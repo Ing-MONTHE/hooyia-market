@@ -39,15 +39,15 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
+      # redis:
+      #   image: redis:7-alpine
+      #   ports:
+      #     - 6379:6379
+      #   options: >-
+      #     --health-cmd "redis-cli ping"
+      #     --health-interval 5s
+      #     --health-timeout 5s
+      #     --health-retries 5
 
     # Variables d'environnement pour les tests
     env:
@@ -58,7 +58,7 @@ jobs:
       DB_PASSWORD: hooyia_test_password
       DB_HOST: localhost
       DB_PORT: 5432
-      REDIS_URL: redis://localhost:6379/0
+      # REDIS_URL: redis://localhost:6379/0
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
 
     steps:
@@ -73,7 +73,7 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      # 3. Installe les dépendances système (comme dans le Dockerfile)
+      # 3. Installe les dépendances
       - name: installation des dependances
         run: |
           python -m pip install --upgrade pip
@@ -89,12 +89,12 @@ jobs:
             sleep 5
           done
 
-      - name: attendre que redis soit pret
-        run: |
-          until redis-cli -h localhost -p 6379 ping | grep PONG; do
-            echo "Attente de Redis..."
-            sleep 5
-          done
+      # - name: attendre que redis soit pret
+      #   run: |
+      #     until redis-cli -h localhost -p 6379 ping | grep PONG; do
+      #       echo "Attente de Redis..."
+      #       sleep 5
+      #     done
 
       - name: 🛠️ Préparation de la base de données
         run: |
