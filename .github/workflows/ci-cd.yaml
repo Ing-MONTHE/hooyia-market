@@ -8,6 +8,10 @@ on:
   push:
     branches: [main]
 
+# Force l'exécution des actions GitHub sur Node.js 24 pour éviter les warnings de dépréciation Node.js 20
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # Annulation des executions precedentes sur la meme branche pour éviter les redondances
 concurrency:
   group: ${{ github.ref }}
