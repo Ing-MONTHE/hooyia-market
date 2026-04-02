@@ -7,8 +7,11 @@ name: CI/CD — Hooyia Market
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
+# Annulation des executions precedentes sur la meme branche pour éviter les redondances
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
 
@@ -20,7 +23,7 @@ jobs:
     name: Tests Django
     runs-on: ubuntu-latest
 
-    # Services nécessaires pour les tests (PostgreSQL + Redis)
+    # Services pour les tests (PostgreSQL + Redis)
     services:
       postgres:
         image: postgres:16-alpine
@@ -71,20 +74,72 @@ jobs:
           cache: "pip"
 
       # 3. Installe les dépendances système (comme dans le Dockerfile)
-      - name: Dépendances système
+      - name: installation des dependances
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libpq-dev libmagic-dev
-
-      # 4. Installe les dépendances Python
-      - name: Dépendances Python
-        run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
+          python -m pip install virtualenv
+          virtualenv venv
+          source venv/bin/activate
           pip install -r requirements.txt
+
+      - name: attendre que postgres soit pret
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo "Attente de PostgreSQL..."
+            sleep 5
+          done
+
+      - name: attendre que redis soit pret
+        run: |
+          until redis-cli -h localhost -p 6379 ping | grep PONG; do
+            echo "Attente de Redis..."
+            sleep 5
+          done
+
+      - name: 🛠️ Préparation de la base de données
+        run: |
+          source venv/bin/activate
+          python manage.py migrate --noinput // Applique les migrations sans interaction
+          python manage.py collectstatic --noinput -v 0  // Collecte les fichiers statiques sans interaction et sans verbosité
 
       # 5. Lance les tests Django
       - name: 🧪 Lancement des tests
-        run: python manage.py test --verbosity=2
+        run: |
+          source venv/bin/activate
+          python manage.py test --verbosity=2 | tee test_output.log // Affiche les résultats des tests et les enregistre dans un fichier
+
+      #6. Affiche les resultats des tests en cas d'echecs
+      - name: Affichage des resultats des tests
+        if: failure ()
+        run: |
+          echo "❌ Certains tests ont échoué. Voici les détails :"
+          cat test_output.log
+          exit 1
+
+      - name : envoi notification en cas de succes
+        if : success ()
+        run: |
+          echo "✅ Tous les tests ont réussi ! Prêt pour le déploiement."
+
+      - name: Envoi des emails en cas d'echec
+        if: failure ()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME}}
+          password: ${{ secrets.EMAIL_PASSWORD}}
+          subject: "❌ Échec des tests sur Hooyia Market"
+          to: "monthejunior45@gmail.com"
+          from: "CI/CD Hooyia MArket"
+          body: |
+            Bonjour,
+
+            Les tests automatisés pour le projet Hooyia Market ont échoué. Veuillez consulter les logs pour plus de détails.
+
+            Cordialement,
+            Votre equipe Hooyia Market
+          attachments: test_output.log
 
   # ════════════════════════════════════════════════════════════
   # JOB 2 — DÉPLOIEMENT (CD)
@@ -92,20 +147,31 @@ jobs:
   # Ne se lance QUE si les tests passent ET sur la branche main
   # ════════════════════════════════════════════════════════════
   deploy:
-    name: 🚀 Déploiement sur Linode
-    runs-on: ubuntu-latest
     needs: tests  # Attend que les tests réussissent
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    name: Déploiement sur Linode
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. Se connecte au VPS via SSH et déploie
-      - name: 🔐 Connexion SSH + Déploiement
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
+      - name: checkout du code
+        uses: actions/checkout@v4
+
+      - name : configuration du SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts // Ajoute le VPS à la liste des hôtes connus pour éviter les prompts de confirmation
+
+      - name: configuration du Username
+        run: |
+          echo "VPS_USER=${{ secrets.VPS_USER }}" >> $GITHUB_ENV
+          echo "VPS_HOST=${{ secrets.VPS_HOST }}" >> $GITHUB_ENV
+          echo "VPS_PROJECT_PATH=${{ secrets.VPS_PROJECT_PATH }}" >> $GITHUB_ENV
+
+      - name: deploiement
+        run: |
+          echo "🚀 Déploiement en cours sur le VPS..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
 
             echo "📁 Accès au dossier du projet..."
@@ -121,3 +187,49 @@ jobs:
             docker image prune -f
 
             echo "✅ Déploiement terminé !"
+          EOF // Exécute les commandes de déploiement sur le VPS via SSH
+
+      - name: detail de deploiement
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: notification email en cas d'echec du deploiement
+        if: failure ()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME}}
+          password: ${{ secrets.EMAIL_PASSWORD}}
+          subject: "❌ Échec du déploiement sur Hooyia Market"
+          to: "monthejunior45@gmail.com"
+          from: "CI/CD Hooyia MArket"
+          body: |
+            Bonjour,
+
+            Le déploiement de la dernière version de Hooyia Market sur le VPS a échoué. Veuillez vérifier les logs du pipeline pour plus de détails.
+
+            Cordialement,
+            Votre Equipe Hooyia Market
+
+      - name: notification email en cas de succes du deploiement
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME}}
+          password: ${{ secrets.EMAIL_PASSWORD}}
+          subject: "✅ Déploiement réussi sur Hooyia Market"
+          to: "monthejunior45@gmail.com"
+          from: "CI/CD Hooyia MArket"
+          body: |
+            Bonjour,
+
+            Le deploiement de la dernière version de Hooyia Market sur le VPS a été effectué avec succès. La nouvelle version est maintenant en ligne !
+
+            Cordialement,
+            Votre Equipe Hooyia Market
