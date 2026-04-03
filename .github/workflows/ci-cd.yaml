@@ -79,7 +79,10 @@ jobs:
       # sache quelle image tirer depuis ghcr.io
       - name: 🧪 Tests Django dans l'image buildée
         run: |
-          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm web             | tee test_output.log
+          # set -o pipefail : force le pipeline à échouer si les tests échouent
+          # sans ça, "tee" absorbe le code de sortie et le pipeline déploie quand même
+          set -o pipefail
+          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm web | tee test_output.log
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
 

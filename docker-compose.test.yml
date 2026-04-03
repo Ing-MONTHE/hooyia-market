@@ -24,9 +24,16 @@ services:
     # Pas de ports exposés — seul le réseau interne est utilisé
 
   # ════════════════════════════════════════════════════════════
+  # REDIS — Nécessaire pour les tests WebSocket (channels_redis)
+  # Les tests chat/notifications utilisent Redis comme channel layer
+  # ════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    # Pas de volume ni de mot de passe — contexte de test uniquement
+
+  # ════════════════════════════════════════════════════════════
   # APPLICATION — Utilise l'image déjà buildée sur ghcr.io
   # Pas de build: ici — on tire l'image du registry
-  # Pas de Celery ni Redis — inutiles pour les tests Django
   # ════════════════════════════════════════════════════════════
   web:
     # L'image est injectée par le pipeline via la variable IMAGE_NAME et github.sha
@@ -45,8 +52,9 @@ services:
       DB_HOST: db        # Nom du service PostgreSQL défini ci-dessus
       DB_PORT: 5432
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
-      # REDIS_URL: redis://redis:6379/0  # Décommenter si les tests en ont besoin
+      REDIS_URL: redis://redis:6379/0  # Redis de test pour les WebSockets
     depends_on:
       - db
+      - redis
     # Pas de ports exposés — les tests n'ont pas besoin d'être accessibles
     # Pas de volumes — on teste l'image telle quelle, sans montage de code
