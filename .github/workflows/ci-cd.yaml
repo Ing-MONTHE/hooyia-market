@@ -1,6 +1,6 @@
 name: CI/CD — Hooyia Market
 
-# declancheur : à chaque push sur la branche main, on lance le pipeline CI/CD
+# Declancheur
 on:
   push:
     branches: [main]
@@ -8,10 +8,12 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Nom de l'image sur GitHub Container Registry (ghcr.io)
+  # On utilise github.repository (format owner/repo) qui est toujours en minuscules
+  # contrairement à github.repository_owner qui peut contenir des majuscules
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hooyia-market # Nom de l'image sur GitHub Container Registry (ghcr.io)
-
-  # Arrete le papeline et relance le job en cours si un nouveau push arrive pendant l'execution du pipeline
+  # Arrete le job en cour et relance le nouveau job a chaque nouveau push sur la branche main.
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
