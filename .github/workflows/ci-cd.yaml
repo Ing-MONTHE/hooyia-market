@@ -79,9 +79,7 @@ jobs:
       # sache quelle image tirer depuis ghcr.io
       - name: 🧪 Tests Django dans l'image buildée
         run: |
-          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm \
-            web sh -c "python manage.py migrate --noinput && python manage.py test --verbosity=2" \
-            | tee test_output.log
+          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm web             | tee test_output.log
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
