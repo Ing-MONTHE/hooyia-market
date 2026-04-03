@@ -32,6 +32,10 @@ services:
     # L'image est injectée par le pipeline via la variable IMAGE_NAME et github.sha
     # ex: ghcr.io/ing-monthe/hooyia-market:5cafc3e
     image: ${IMAGE_NAME}:${IMAGE_TAG}
+    # On bypasse entrypoint.sh qui démarre Daphne — sinon le conteneur
+    # reste en "listening" indéfiniment et bloque le pipeline
+    entrypoint: [""]
+    command: sh -c "python manage.py migrate --noinput && python manage.py test --verbosity=2"
     environment:
       SECRET_KEY: "test-secret-key-not-used-in-production"
       DEBUG: "True"
