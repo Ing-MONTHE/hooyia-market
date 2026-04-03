@@ -1,0 +1,48 @@
+# ==============================================================
+# HOOYIA MARKET — Docker Compose Tests
+# Utilisé uniquement par le pipeline CI/CD (Job 2 — build)
+# Lance les tests Django dans l'image déjà buildée sur ghcr.io
+# pour s'assurer que l'image qui part en prod est fonctionnelle
+# ==============================================================
+# Commande utilisée par le pipeline :
+#   docker compose -f docker-compose.test.yml run --rm web python manage.py test
+# ==============================================================
+
+services:
+
+  # ════════════════════════════════════════════════════════════
+  # BASE DE DONNÉES — PostgreSQL de test
+  # Identique au dev mais avec des credentials de test
+  # ════════════════════════════════════════════════════════════
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hooyia_test
+      POSTGRES_USER: hooyia
+      POSTGRES_PASSWORD: hooyia_test_password
+    # Pas de volume — la base est détruite après les tests
+    # Pas de ports exposés — seul le réseau interne est utilisé
+
+  # ════════════════════════════════════════════════════════════
+  # APPLICATION — Utilise l'image déjà buildée sur ghcr.io
+  # Pas de build: ici — on tire l'image du registry
+  # Pas de Celery ni Redis — inutiles pour les tests Django
+  # ════════════════════════════════════════════════════════════
+  web:
+    # L'image est injectée par le pipeline via la variable IMAGE_NAME et github.sha
+    # ex: ghcr.io/ing-monthe/hooyia-market:5cafc3e
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    environment:
+      SECRET_KEY: "test-secret-key-not-used-in-production"
+      DEBUG: "True"
+      DB_NAME: hooyia_test
+      DB_USER: hooyia
+      DB_PASSWORD: hooyia_test_password
+      DB_HOST: db        # Nom du service PostgreSQL défini ci-dessus
+      DB_PORT: 5432
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      # REDIS_URL: redis://redis:6379/0  # Décommenter si les tests en ont besoin
+    depends_on:
+      - db
+    # Pas de ports exposés — les tests n'ont pas besoin d'être accessibles
+    # Pas de volumes — on teste l'image telle quelle, sans montage de code

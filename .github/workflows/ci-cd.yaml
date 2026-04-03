@@ -17,138 +17,12 @@ concurrency:
 jobs:
 
   # ════════════════════════════════════════════════════════════
-  # JOB 1 — TESTS (CI)
-  # Lance les tests Django dans un environnement propre
-  # ════════════════════════════════════════════════════════════
-  tests:
-    name: Tests Django
-    runs-on: ubuntu-latest
-
-    # Services pour les tests (PostgreSQL + Redis)
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: hooyia_test
-          POSTGRES_USER: hooyia
-          POSTGRES_PASSWORD: hooyia_test_password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
-      # redis:
-      #   image: redis:7-alpine
-      #   ports:
-      #     - 6379:6379
-      #   options: >-
-      #     --health-cmd "redis-cli ping"
-      #     --health-interval 5s
-      #     --health-timeout 5s
-      #     --health-retries 5
-
-    # Variables d'environnement pour les tests
-    env:
-      SECRET_KEY: "test-secret-key-not-used-in-production"
-      DEBUG: "True"
-      DB_NAME: hooyia_test
-      DB_USER: hooyia
-      DB_PASSWORD: hooyia_test_password
-      DB_HOST: localhost
-      DB_PORT: 5432
-      # REDIS_URL: redis://localhost:6379/0
-      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
-
-    steps:
-      # 1. Récupère le code source
-      - name: Checkout du code
-        uses: actions/checkout@v4.2.2
-
-      # 2. Installe Python
-      - name: Installation de Python 3.12
-        uses: actions/setup-python@v5.6.0
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      # 3. Installe les dépendances
-      - name: Installation des dependances
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install virtualenv
-          virtualenv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Attendre que postgres soit pret
-        run: |
-          until pg_isready -h localhost -p 5432; do
-            echo "Attente de PostgreSQL..."
-            sleep 5
-          done
-
-      # - name: attendre que redis soit pret
-      #   run: |
-      #     until redis-cli -h localhost -p 6379 ping | grep PONG; do
-      #       echo "Attente de Redis..."
-      #       sleep 5
-      #     done
-
-      - name: 🛠️ Preparation de la base de données
-        run: |
-          source venv/bin/activate
-          python manage.py migrate --noinput # Applique les migrations sans interaction
-          python manage.py collectstatic --noinput -v 0  # Collecte les fichiers statiques sans interaction et sans verbosité
-
-      # 5. Lance les tests Django
-      - name: 🧪 Lancement des tests
-        run: |
-          source venv/bin/activate
-          python manage.py test --verbosity=2 | tee test_output.log # Affiche les résultats des tests et les enregistre dans un fichier
-
-      # 6. Affiche les resultats des tests en cas d'echecs
-      - name: Affichage des resultats en cas d'echec
-        if: failure()
-        run: |
-          echo "❌ Certains tests ont échoué. Voici les détails :"
-          cat test_output.log
-          exit 1
-
-      - name: Notification succes des tests
-        if: success()
-        run: echo "✅ Tous les tests ont réussi ! Prêt pour le build."
-
-      - name: Email en cas d'echec des tests
-        if: failure()
-        uses: dawidd6/action-send-mail@v4
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "❌ Échec des tests sur Hooyia Market"
-          to: "monthejunior45@gmail.com"
-          from: "CI/CD Hooyia Market"
-          body: |
-            Bonjour,
-
-            Les tests automatisés pour le projet Hooyia Market ont échoué. Veuillez consulter les logs pour plus de détails.
-
-            Cordialement,
-            Votre equipe Hooyia Market
-          attachments: test_output.log
-
-  # ════════════════════════════════════════════════════════════
-  # JOB 2 — BUILD & PUSH (nouvelle étape)
-  # Construit l'image Docker et la pousse sur GitHub Container
-  # Registry (ghcr.io). Si le build échoue, on n'arrive jamais
-  # en prod — la prod ne tombe plus à cause d'un Dockerfile cassé.
+  # JOB 1 — BUILD, TESTS & PUSH (CI)
+  # Construit l'image Docker, lance les tests Django dedans,
+  # puis pousse l'image sur ghcr.io uniquement si tout passe.
+  # Si le build ou les tests échouent → la prod n'est pas touchée.
   # ════════════════════════════════════════════════════════════
   build:
-    needs: tests  # Lance uniquement si les tests passent
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
@@ -199,6 +73,27 @@ jobs:
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
 
+      # Lance les tests Django dans l'image qui vient d'être buildée
+      # C'est ici qu'on valide que l'image est fonctionnelle avant de déployer
+      # IMAGE_NAME et IMAGE_TAG sont injectées pour que docker-compose.test.yml
+      # sache quelle image tirer depuis ghcr.io
+      - name: 🧪 Tests Django dans l'image buildée
+        run: |
+          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm \
+            web sh -c "python manage.py migrate --noinput && python manage.py test --verbosity=2" \
+            | tee test_output.log
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+
+      # Affiche les logs des tests en cas d'échec
+      - name: Affichage des resultats des tests en cas d'echec
+        if: failure()
+        run: |
+          echo "❌ Les tests ont échoué dans l'image buildée. Voici les détails :"
+          cat test_output.log
+          docker compose -f docker-compose.test.yml logs  # Affiche aussi les logs des conteneurs
+          exit 1
+
       - name: Email en cas d'echec du build
         if: failure()
         uses: dawidd6/action-send-mail@v4
@@ -220,12 +115,12 @@ jobs:
             Votre Equipe Hooyia Market
 
   # ════════════════════════════════════════════════════════════
-  # JOB 3 — DÉPLOIEMENT (CD)
+  # JOB 2 — DÉPLOIEMENT (CD)
   # Se connecte au VPS et tire l'image déjà buildée depuis ghcr.io
   # Plus de build sur le VPS — juste un docker pull + restart
   # ════════════════════════════════════════════════════════════
   deploy:
-    needs: build  # Lance uniquement si le build a réussi
+    needs: build  # Lance uniquement si le build et les tests ont réussi
     name: Déploiement sur Linode
     runs-on: ubuntu-latest
 
