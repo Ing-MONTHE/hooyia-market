@@ -1,85 +1,18 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% comment %} ═══════════════════════════════════════════════════════════════
-   HooYia Market — orders/checkout.html
-   Page de finalisation de commande (tunnel d'achat — étape 2/2)
-
-   STRUCTURE DE LA PAGE :
-     [ Barre de progression tunnel ]  ← étapes visuelles Panier → Livraison → Confirmation
-     [ Colonne principale 2/3 ]       [ Récapitulatif sticky 1/3 ]
-       ├── Adresses enregistrées        ├── Liste articles panier (loadRecap)
-       ├── Formulaire adresse           ├── Sous-total / Livraison gratuite / Total
-       ├── Mode de paiement Mobile      └── CTA "Payer maintenant" (btn-primary unique)
-       │     ├── Orange Money (actif)
-       │     └── MTN MoMo (actif)
-       └── Champ numéro Mobile Money (conditionnel selon mode)
-
-   RÈGLE D'OR : 1 seul .btn-primary sur cette page → "Payer maintenant"
-   Tous les autres boutons utilisent .btn-secondary ou .btn-ghost.
-
-   PAIEMENT MOBILE MONEY (via PayUnit) :
-     - Plus de paiement à la livraison — uniquement Mobile Money
-     - Orange Money (cm.orange) et MTN MoMo (cm.mtn) actifs
-     - Livraison toujours GRATUITE (frais = 0 FCFA)
-     - Champ #telephone-paiement : numéro qui reçoit la demande USSD
-     - passerCommande() POST → /api/commandes/creer/ → reçoit authorization_url
-     - Redirection vers PayUnit pour confirmation USSD sur le téléphone
-     - Retour via /commandes/paiement/retour/?ref=<uuid> → polling statut
-
-   ICÔNES : Lucide Icons — SVG inline, stroke="currentColor"
-     - MapPin        → section adresse de livraison
-     - Phone         → champ téléphone livraison
-     - User          → champ nom complet
-     - Smartphone    → champ numéro Mobile Money
-     - CreditCard    → section mode de paiement
-     - Clock         → Orange Money (cercle + aiguilles)
-     - CreditCard    → MTN Mobile Money
-     - Truck         → livraison gratuite
-     - Package       → en-tête récapitulatif
-     - ShieldCheck   → bouton payer (sécurité + confiance)
-     - ChevronDown   → select adresses enregistrées
-     - ArrowLeft     → retour panier
-     - Lock          → note sécurité PayUnit
-     - Check         → badge "Disponible" sur les modes de paiement
-
-   VARIABLES DJANGO UTILISÉES :
-     {{ user }}              — utilisateur connecté (prenom, nom, telephone)
-     {{ user.adresses.all }} — adresses de livraison enregistrées
-     {{ adresses }}          — adresses triées par défaut (depuis la vue checkout)
-     {{ request }}           — état de connexion
-
-   JAVASCRIPT (bloc extra_scripts) :
-     CHECKOUT_I18N           — dictionnaire de traductions pour le JS
-     formatFCFA(n)           — formate un nombre → "X XXX FCFA"
-     loadRecap()             — GET /api/panier/ → peuple #recap-items + pré-remplit les champs
-     onChangePaiement(radio) — met à jour le label #label-telephone-paiement selon OM ou MoMo
-     switchAddrTab(mode)     — bascule entre onglets "Mes adresses" / "Nouvelle adresse"
-     selectionnerAdresse(r)  — injecte une adresse enregistrée dans les champs formulaire
-     passerCommande()        — valide les champs + POST /api/commandes/creer/
-                               + redirige vers authorization_url PayUnit
-
-   FLUX COMPLET :
-     1. loadRecap()          → charge panier, pré-remplit nom/tel depuis le profil
-     2. Client remplit adresse + choisit OM ou MoMo + saisit numéro Mobile
-     3. passerCommande()     → POST /api/commandes/creer/ { adresse, mode, telephone_paiement }
-     4. API retourne         → { commande: {...}, authorization_url: "https://pay.payunit.co/..." }
-     5. Redirection          → PayUnit (client confirme sur téléphone via USSD)
-     6. Retour               → /commandes/paiement/retour/?ref=<uuid> (polling JS)
-     7. Webhook PayUnit     → /api/commandes/webhook/payunit/ → commande.confirmer()
-     8. Polling détecte REUSSI → redirect /commandes/<pk>/ (page confirmation)
-{% endcomment %}
-
 {% block title %}{% trans 'Finaliser ma commande' %} — HooYia Market{% endblock %}
 {% block meta_description %}{% trans 'Finalisez votre commande sur HooYia Market — Livraison rapide au Cameroun' %}{% endblock %}
 
 {% block content %}
 
 <style>
+  /* ── Barre de progression ── */
   .step-bar { display: flex; align-items: center; }
   .step-item {
     display: flex; align-items: center; gap: 8px;
     font-size: 0.82rem; font-weight: 500; color: var(--text-muted);
+    transition: color 0.3s;
   }
   .step-item.active { color: var(--brand-600); }
   .step-item.done   { color: #16a34a; }
@@ -88,39 +21,50 @@
     border: 2px solid currentColor;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
-    background: transparent; transition: background 0.2s, color 0.2s;
+    background: transparent; transition: background 0.3s, color 0.3s, border-color 0.3s;
   }
   .step-item.active .step-circle { background: var(--brand-600); border-color: var(--brand-600); color: white; }
   .step-item.done   .step-circle { background: #16a34a;          border-color: #16a34a;          color: white; }
-  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; max-width: 60px; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; max-width: 60px; transition: background 0.3s; }
   .step-line.done { background: #16a34a; }
 
-  /* Options de paiement */
-  .payment-option {
-    border: 2px solid var(--border); border-radius: 12px;
-    padding: 14px 16px; cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    display: flex; align-items: center; gap: 14px;
+  /* ── Transitions entre étapes ── */
+  .checkout-page.page-hidden { display: none; }
+  .checkout-page.page-enter  { animation: pageSlideIn 0.35s ease forwards; }
+  @keyframes pageSlideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
   }
-  .payment-option:hover { border-color: var(--brand-500); background: var(--brand-50); }
-  .payment-option:has(input[type="radio"]:checked) { border-color: var(--brand-500); background: var(--brand-50); }
-  .payment-option input[type="radio"] { accent-color: var(--brand-500); width: 18px; height: 18px; flex-shrink: 0; }
 
-  /* Champ téléphone Mobile Money — apparaît selon le mode choisi */
-  #bloc-telephone-paiement {
-    transition: opacity 0.25s, max-height 0.3s;
-    overflow: hidden;
+  /* ── Résumé adresse (étape 2) ── */
+  .addr-summary {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
   }
-  #bloc-telephone-paiement.hidden-smooth { max-height: 0; opacity: 0; pointer-events: none; }
+  .addr-summary-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--brand-50); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .addr-change-btn {
+    font-size: 0.78rem; color: var(--brand-500); font-weight: 600;
+    background: none; border: none; cursor: pointer; padding: 0;
+    text-decoration: underline; margin-top: 4px;
+  }
+  .addr-change-btn:hover { color: var(--brand-600); }
+
+  /* ── Téléphone Mobile Money ── */
+  #bloc-telephone-paiement { transition: opacity 0.25s, max-height 0.3s; overflow: hidden; }
+  #bloc-telephone-paiement.hidden-smooth  { max-height: 0;     opacity: 0; pointer-events: none; }
   #bloc-telephone-paiement.visible-smooth { max-height: 120px; opacity: 1; }
 
-  /* Récapitulatif */
+  /* ── Récapitulatif ── */
   .recap-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
   .recap-item + .recap-item { border-top: 1px solid var(--border); }
   .recap-item-img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
   .recap-item-placeholder {
-    width: 44px; height: 44px; border-radius: 8px;
-    background: var(--surface-2); flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 8px; background: var(--surface-2); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; color: var(--text-muted);
   }
   .qty-badge {
@@ -130,15 +74,13 @@
     font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
   }
   .shipping-free {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; background: #f0fdf4;
-    border: 1px solid #bbf7d0; border-radius: 8px;
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
     font-size: 0.8rem; color: #166534; font-weight: 500;
   }
   .security-note {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.75rem; color: var(--text-secondary);
-    justify-content: center; margin-top: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px; font-size: 0.75rem;
+    color: var(--text-secondary); justify-content: center; margin-top: 12px; font-weight: 500;
   }
   @keyframes shimmer {
     0%   { background-position: -400px 0; }
@@ -147,8 +89,7 @@
   .skeleton {
     border-radius: 6px;
     background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
-    background-size: 400px 100%;
-    animation: shimmer 1.4s infinite;
+    background-size: 400px 100%; animation: shimmer 1.4s infinite;
   }
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .spinner { animation: spin 1s linear infinite; }
@@ -159,13 +100,33 @@
 
   <div class="mb-8 lg:mb-10">
     <h1 class="text-2xl lg:text-3xl font-bold text-brand-600">{% trans "Finaliser ma commande" %}</h1>
-    <p class="text-sm text-text-secondary mt-1">{% trans "Renseignez votre adresse de livraison et choisissez votre mode de paiement." %}</p>
+    <p class="text-sm text-text-secondary mt-1" id="page-subtitle">{% trans "Renseignez votre adresse de livraison." %}</p>
+  </div>
+
+  {# ── Barre de progression ── #}
+  <div class="step-bar mb-8">
+    <div class="step-item active" id="step-1-item">
+      <div class="step-circle" id="step-1-circle">1</div>
+      <span>{% trans "Adresse" %}</span>
+    </div>
+    <div class="step-line" id="step-line-1"></div>
+    <div class="step-item" id="step-2-item">
+      <div class="step-circle" id="step-2-circle">2</div>
+      <span>{% trans "Paiement" %}</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item" id="step-3-item">
+      <div class="step-circle">3</div>
+      <span>{% trans "Confirmation" %}</span>
+    </div>
   </div>
 
   <div class="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-    <div class="lg:col-span-2 space-y-5">
 
-      {# ── SECTION 1 : Adresse de livraison ── #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  ÉTAPE 1 — ADRESSE                                           #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <div class="lg:col-span-2 space-y-5 checkout-page" id="step-1-panel">
       <div class="card p-6">
         <div class="flex items-center gap-3 mb-5 pb-4 border-b border-cream-border">
           <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
@@ -247,8 +208,7 @@
             <div class="relative">
               <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-muted">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
               <input type="text" id="nom" placeholder="{% trans 'Ex : Jean-Pierre Nkomo' %}"
@@ -301,9 +261,43 @@
                    class="input-field bg-surface-2 text-text-secondary" autocomplete="country-name" />
           </div>
         </div>
+
+        {# Bouton continuer #}
+        <button onclick="validerAdresse()" class="btn btn-primary w-full mt-6">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+          <span>{% trans "Continuer vers le paiement" %}</span>
+        </button>
+      </div>
+    </div>
+
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  ÉTAPE 2 — PAIEMENT (masquée au départ)                      #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <div class="lg:col-span-2 space-y-5 checkout-page page-hidden" id="step-2-panel">
+
+      {# Résumé adresse + lien modifier #}
+      <div class="addr-summary">
+        <div class="addr-summary-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-500">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">{% trans "Livraison à" %}</p>
+          <p id="addr-summary-name"  class="text-sm font-semibold text-ink"></p>
+          <p id="addr-summary-ligne" class="text-xs text-text-muted mt-0.5"></p>
+          <button class="addr-change-btn" onclick="retourAdresse()">
+            ← {% trans "Modifier l'adresse" %}
+          </button>
+        </div>
       </div>
 
-      {# ── SECTION 2 : Mode de paiement Mobile Money ── #}
+      {# Mode de paiement #}
       <div class="card p-6">
         <div class="flex items-center gap-3 mb-5 pb-4 border-b border-cream-border">
           <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
@@ -319,13 +313,9 @@
           </div>
         </div>
 
-        {# Boutons de sélection du mode de paiement — extensible pour futurs moyens #}
-        {# Chaque bouton est cliquable, le sélectionné a une bordure brand + fond léger #}
         <input type="hidden" id="select-paiement" value="" />
 
-        <div class="space-y-3" id="paiement-options">
-
-          {# Option Orange Money #}
+        <div class="space-y-3">
           <div id="btn-om" onclick="choisirPaiement('orange_money')"
                style="border:2px solid var(--border); background:transparent; border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:all 0.2s;">
             <img src="{% static 'img/Orange money.png' %}" alt="Orange Money"
@@ -340,7 +330,6 @@
             </span>
           </div>
 
-          {# Option MTN MoMo #}
           <div id="btn-mtn" onclick="choisirPaiement('mtn_momo')"
                style="border:2px solid var(--border); background:transparent; border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; gap:14px; transition:all 0.2s;">
             <img src="{% static 'img/MTN Mobile Money.png' %}" alt="MTN MoMo"
@@ -354,10 +343,8 @@
               {% trans "Sélectionné" %}
             </span>
           </div>
-
         </div>
 
-        {# Champ numéro Mobile Money — apparaît dès qu'un mode est sélectionné #}
         <div id="bloc-telephone-paiement" class="mt-4 hidden-smooth">
           <label for="telephone-paiement" class="block text-sm font-medium text-ink mb-1.5">
             <span id="label-telephone-paiement">{% trans "Numéro Orange Money" %}</span>
@@ -371,21 +358,19 @@
                 <path d="M12 18h.01"/>
               </svg>
             </div>
-            <input type="tel" id="telephone-paiement"
-                   placeholder="+237 6XX XXX XXX"
-                   class="input-field" style="padding-left:2.5rem;"
-                   autocomplete="tel" />
+            <input type="tel" id="telephone-paiement" placeholder="+237 6XX XXX XXX"
+                   class="input-field" style="padding-left:2.5rem;" autocomplete="tel" />
           </div>
           <p class="text-xs text-text-muted mt-1.5">
             {% trans "Vous recevrez une demande de confirmation USSD sur ce numéro." %}
           </p>
         </div>
-
       </div>
-
     </div>
 
-    {# ── RÉCAPITULATIF STICKY ── #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  RÉCAPITULATIF STICKY (commun aux 2 étapes)                  #}
+    {# ══════════════════════════════════════════════════════════════ #}
     <div class="lg:col-span-1">
       <div class="card p-5 sticky top-24">
 
@@ -436,7 +421,9 @@
           </div>
         </div>
 
-        <button onclick="passerCommande()" id="btn-commande" class="btn btn-primary w-full mt-5">
+        {# Bouton payer — visible uniquement à l'étape 2 #}
+        <button onclick="passerCommande()" id="btn-commande"
+                class="btn btn-primary w-full mt-5" style="display:none;">
           <svg id="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -445,7 +432,7 @@
           <span id="btn-label">{% trans "Payer maintenant" %}</span>
         </button>
 
-        <div class="security-note">
+        <div class="security-note" id="security-note" style="display:none;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
@@ -475,14 +462,15 @@
 {% block extra_scripts %}
 <script>
 var CHECKOUT_I18N = {
-  parUnite:               '{% trans "/ unité" %}',
-  champObligatoires:      '{% trans "Veuillez remplir tous les champs obligatoires (*)." %}',
-  traitementEnCours:      '{% trans "Traitement en cours…" %}',
-  redirectionPaiement:    '{% trans "Redirection vers le paiement…" %}',
-  payerMaintenant:        '{% trans "Payer maintenant" %}',
-  erreurPanier:           '{% trans "Impossible de charger le panier. Actualisez la page." %}',
-  erreurGenerique:        '{% trans "Une erreur est survenue. Veuillez réessayer." %}',
-  numeroPaiementRequis:   '{% trans "Veuillez saisir votre numéro Mobile Money." %}',
+  parUnite:             '{% trans "/ unité" %}',
+  champObligatoires:    '{% trans "Veuillez remplir tous les champs obligatoires (*)." %}',
+  traitementEnCours:    '{% trans "Traitement en cours…" %}',
+  redirectionPaiement:  '{% trans "Redirection vers le paiement…" %}',
+  payerMaintenant:      '{% trans "Payer maintenant" %}',
+  erreurPanier:         '{% trans "Impossible de charger le panier. Actualisez la page." %}',
+  erreurGenerique:      '{% trans "Une erreur est survenue. Veuillez réessayer." %}',
+  numeroPaiementRequis: '{% trans "Veuillez saisir votre numéro Mobile Money." %}',
+  modePaiementRequis:   '{% trans "Veuillez choisir un mode de paiement." %}',
   numeroPaiementLabel: {
     orange_money: '{% trans "Numéro Orange Money" %}',
     mtn_momo:     '{% trans "Numéro MTN MoMo" %}',
@@ -490,29 +478,15 @@ var CHECKOUT_I18N = {
 };
 </script>
 <script>
-// ════════════════════════════════════════════════════════════════════════════
-// JAVASCRIPT — checkout.html (Mobile Money via PayUnit)
-//
-// formatFCFA(n)           — formate un nombre → "X XXX FCFA"
-// loadRecap()             — GET /api/panier/ → peuple récapitulatif + pré-remplit champs
-// onChangePaiement(radio) — met à jour le label du champ numéro selon OM ou MoMo
-// switchAddrTab(mode)     — bascule entre onglets "Mes adresses" / "Nouvelle adresse"
-// selectionnerAdresse(r)  — injecte une adresse enregistrée dans les champs formulaire
-// passerCommande()        — valide + POST /api/commandes/creer/ + redirect PayUnit
-// ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// JAVASCRIPT — checkout.html — Tunnel 2 étapes
+// ═══════════════════════════════════════════════════════════════════
 
-// ── Utilitaire : formatage FCFA ──────────────────────────────────────────────
-// Ex : 15000 → "15 000 FCFA"
-function formatFCFA(montant) {
-  return parseInt(montant).toLocaleString('fr-FR') + ' FCFA';
+function formatFCFA(n) {
+  return parseInt(n).toLocaleString('fr-FR') + ' FCFA';
 }
 
-// ── Chargement du récapitulatif panier ───────────────────────────────────────
-// 1. Vérifie que le panier n'est pas vide (redirige vers /panier/ si oui)
-// 2. Pré-remplit nom et téléphone depuis le profil Django (valeurs template)
-// 3. Pré-remplit depuis l'adresse par défaut si le select existe
-// 4. Peuple #recap-items avec image miniature, nom, quantité, prix
-// 5. Met à jour #recap-sous-total et #recap-total
+// ── Chargement récapitulatif ─────────────────────────────────────
 async function loadRecap() {
   try {
     const data = await API.get('/api/panier/');
@@ -526,30 +500,26 @@ async function loadRecap() {
     const defaultRadio = document.querySelector('input[name="adresse-choice"]:checked');
     if (defaultRadio) selectionnerAdresse(defaultRadio);
 
-    const items = data.items || [];
-    const itemsHTML = items.map(item => {
+    const itemsHTML = (data.items || []).map(item => {
       const imgHTML = item.image_principale
         ? `<img src="${item.image_principale}" alt="${item.produit_nom}" class="recap-item-img" loading="lazy" />`
         : `<div class="recap-item-placeholder">
-             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-               <circle cx="9" cy="9" r="2"/>
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
              </svg>
            </div>`;
-      return `
-        <div class="recap-item">
-          ${imgHTML}
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-ink line-clamp-1">${item.produit_nom}</p>
-            <p class="text-xs text-text-muted mt-0.5">${formatFCFA(item.prix_snapshot)} ${CHECKOUT_I18N.parUnite}</p>
-          </div>
-          <div class="flex flex-col items-end gap-1 flex-shrink-0">
-            <span class="qty-badge">×${item.quantite}</span>
-            <span class="text-sm font-semibold text-ink">${formatFCFA(item.sous_total)}</span>
-          </div>
-        </div>`;
+      return `<div class="recap-item">
+        ${imgHTML}
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-ink line-clamp-1">${item.produit_nom}</p>
+          <p class="text-xs text-text-muted mt-0.5">${formatFCFA(item.prix_snapshot)} ${CHECKOUT_I18N.parUnite}</p>
+        </div>
+        <div class="flex flex-col items-end gap-1 flex-shrink-0">
+          <span class="qty-badge">×${item.quantite}</span>
+          <span class="text-sm font-semibold text-ink">${formatFCFA(item.sous_total)}</span>
+        </div>
+      </div>`;
     }).join('');
 
     document.getElementById('recap-items').innerHTML = itemsHTML;
@@ -567,47 +537,99 @@ async function loadRecap() {
   }
 }
 
-// ── Sélection du mode de paiement (boutons cards) ───────────────────────────
-// Met à jour visuellement le bouton sélectionné + le label du champ numéro
+// ── ÉTAPE 1 → 2 : Valider l'adresse ─────────────────────────────
+function validerAdresse() {
+  const nom      = document.getElementById('nom').value.trim();
+  const telephone= document.getElementById('telephone').value.trim();
+  const adresse  = document.getElementById('adresse').value.trim();
+  const ville    = document.getElementById('ville').value.trim();
+  const region   = document.getElementById('region').value.trim();
+
+  const manquants = Object.entries({ nom, telephone, adresse, ville, region })
+    .filter(([, v]) => !v).map(([k]) => k);
+
+  if (manquants.length) {
+    window.toast && window.toast(CHECKOUT_I18N.champObligatoires, 'error');
+    manquants.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.borderColor = '#dc2626'; setTimeout(() => { el.style.borderColor = ''; }, 3000); }
+    });
+    return;
+  }
+
+  // Remplir le bloc résumé adresse
+  const pays = document.getElementById('pays').value.trim() || 'Cameroun';
+  document.getElementById('addr-summary-name').textContent  = nom + ' — ' + telephone;
+  document.getElementById('addr-summary-ligne').textContent = adresse + ', ' + ville + ', ' + region + ' — ' + pays;
+
+  // Afficher l'étape 2
+  const p1 = document.getElementById('step-1-panel');
+  const p2 = document.getElementById('step-2-panel');
+  p1.classList.add('page-hidden');
+  p2.classList.remove('page-hidden');
+  p2.classList.add('page-enter');
+  setTimeout(() => p2.classList.remove('page-enter'), 400);
+
+  // Progression
+  const s1 = document.getElementById('step-1-item');
+  s1.classList.remove('active'); s1.classList.add('done');
+  document.getElementById('step-1-circle').innerHTML =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.getElementById('step-line-1').classList.add('done');
+  document.getElementById('step-2-item').classList.add('active');
+  document.getElementById('page-subtitle').textContent = '{% trans "Choisissez votre mode de paiement Mobile Money." %}';
+
+  // Afficher bouton payer + sécurité
+  document.getElementById('btn-commande').style.display  = '';
+  document.getElementById('security-note').style.display = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── ÉTAPE 2 → 1 : Retour à l'adresse ────────────────────────────
+function retourAdresse() {
+  document.getElementById('step-2-panel').classList.add('page-hidden');
+  document.getElementById('step-1-panel').classList.remove('page-hidden');
+
+  const s1 = document.getElementById('step-1-item');
+  s1.classList.add('active'); s1.classList.remove('done');
+  document.getElementById('step-1-circle').textContent = '1';
+  document.getElementById('step-line-1').classList.remove('done');
+  document.getElementById('step-2-item').classList.remove('active');
+  document.getElementById('page-subtitle').textContent = '{% trans "Renseignez votre adresse de livraison." %}';
+
+  document.getElementById('btn-commande').style.display  = 'none';
+  document.getElementById('security-note').style.display = 'none';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Choisir le mode de paiement ──────────────────────────────────
 function choisirPaiement(val) {
-  // Stocker la valeur dans le champ hidden
   document.getElementById('select-paiement').value = val;
 
-  // Styles bouton Orange Money
   const btnOM  = document.getElementById('btn-om');
   const btnMTN = document.getElementById('btn-mtn');
   const chkOM  = document.getElementById('check-om');
   const chkMTN = document.getElementById('check-mtn');
 
   if (val === 'orange_money') {
-    btnOM.style.border     = '2px solid var(--brand-500)';
-    btnOM.style.background = 'var(--brand-50)';
-    btnMTN.style.border    = '2px solid var(--border)';
-    btnMTN.style.background = 'transparent';
-    chkOM.style.display    = 'inline-flex';
-    chkMTN.style.display   = 'none';
+    btnOM.style.border  = '2px solid var(--brand-500)'; btnOM.style.background  = 'var(--brand-50)';
+    btnMTN.style.border = '2px solid var(--border)';    btnMTN.style.background = 'transparent';
+    chkOM.style.display = 'inline-flex'; chkMTN.style.display = 'none';
   } else {
-    btnMTN.style.border    = '2px solid var(--brand-500)';
-    btnMTN.style.background = 'var(--brand-50)';
-    btnOM.style.border     = '2px solid var(--border)';
-    btnOM.style.background = 'transparent';
-    chkMTN.style.display   = 'inline-flex';
-    chkOM.style.display    = 'none';
+    btnMTN.style.border = '2px solid var(--brand-500)'; btnMTN.style.background = 'var(--brand-50)';
+    btnOM.style.border  = '2px solid var(--border)';    btnOM.style.background  = 'transparent';
+    chkMTN.style.display = 'inline-flex'; chkOM.style.display = 'none';
   }
 
-  // Afficher le champ numéro Mobile Money dès qu'un mode est choisi
-  const bloc = document.getElementById('bloc-telephone-paiement');
+  const bloc  = document.getElementById('bloc-telephone-paiement');
   if (bloc) bloc.className = 'mt-4 visible-smooth';
-
-  // Label du champ numéro Mobile Money
   const label = document.getElementById('label-telephone-paiement');
   if (label) label.textContent = CHECKOUT_I18N.numeroPaiementLabel[val] || '';
 }
 
-// ── Switch entre onglets : "Mes adresses" / "Nouvelle adresse" ──────────────
-// Gère l'affichage des 2 panneaux et le style des onglets.
-// En mode "saved" : les champs formulaire sont remplis depuis la carte sélectionnée
-// En mode "new"   : les champs sont vidés pour saisie manuelle
+// ── Onglets adresses enregistrées ────────────────────────────────
 function switchAddrTab(mode) {
   const tabSaved   = document.getElementById('tab-saved');
   const tabNew     = document.getElementById('tab-new');
@@ -626,16 +648,13 @@ function switchAddrTab(mode) {
     tabSaved.style.background = 'white';             tabSaved.style.color = 'var(--text-secondary)';
     panelNew.classList.remove('hidden'); panelSaved.classList.add('hidden');
     ['nom','telephone','adresse','ville','region'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
+      const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('nom').focus();
   }
 }
 
-// ── Sélectionner une adresse enregistrée (via carte radio) ───────────────────
-// Déclenché onchange sur chaque radio input dans les cartes d'adresses.
-// Injecte les data-* dans les champs du formulaire + feedback visuel sur les cartes.
+// ── Sélectionner une adresse enregistrée ─────────────────────────
 function selectionnerAdresse(radio) {
   document.querySelectorAll('input[name="adresse-choice"]').forEach(r => {
     const card = document.getElementById('adr-card-' + r.value);
@@ -644,50 +663,30 @@ function selectionnerAdresse(radio) {
   const card = document.getElementById('adr-card-' + radio.value);
   if (card) card.style.borderColor = 'var(--brand-500)';
 
-  const champs = {
+  Object.entries({
     nom: radio.dataset.nom, telephone: radio.dataset.telephone,
     adresse: radio.dataset.adresse, ville: radio.dataset.ville,
     region: radio.dataset.region, pays: radio.dataset.pays
-  };
-  Object.entries(champs).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el && val) el.value = val;
+  }).forEach(([id, val]) => {
+    const el = document.getElementById(id); if (el && val) el.value = val;
   });
 }
 
-// ── Valider et passer la commande + redirection PayUnit ─────────────────────
-// 1. Lit les valeurs du formulaire (adresse + mode paiement + numéro Mobile)
-// 2. Vérifie que les champs obligatoires sont remplis (flash rouge si manquants)
-// 3. Vérifie que le numéro Mobile Money est saisi
-// 4. Désactive le bouton et affiche un spinner pendant le traitement
-// 5. POST vers /api/commandes/creer/ via API.post()
-// 6. Succès → reçoit authorization_url → redirige vers PayUnit
-// 7. Erreur → réactive le bouton et affiche le message d'erreur via window.toast
+// ── ÉTAPE 2 : Passer la commande ─────────────────────────────────
 async function passerCommande() {
-  const nom              = document.getElementById('nom').value.trim();
-  const telephone        = document.getElementById('telephone').value.trim();
-  const adresse          = document.getElementById('adresse').value.trim();
-  const ville            = document.getElementById('ville').value.trim();
-  const region           = document.getElementById('region').value.trim();
-  const pays             = document.getElementById('pays').value.trim();
-  const modePaiement     = document.getElementById('select-paiement')?.value || 'orange_money';
-  const telPaiement      = document.getElementById('telephone-paiement').value.trim();
+  const nom          = document.getElementById('nom').value.trim();
+  const telephone    = document.getElementById('telephone').value.trim();
+  const adresse      = document.getElementById('adresse').value.trim();
+  const ville        = document.getElementById('ville').value.trim();
+  const region       = document.getElementById('region').value.trim();
+  const pays         = document.getElementById('pays').value.trim();
+  const modePaiement = document.getElementById('select-paiement')?.value || '';
+  const telPaiement  = document.getElementById('telephone-paiement').value.trim();
 
-  // ── Validation ──────────────────────────────────────────────────────────
-  const requis = { nom, telephone, adresse, ville, region };
-  const manquants = Object.keys(requis).filter(k => !requis[k]);
-  if (manquants.length) {
-    window.toast && window.toast(CHECKOUT_I18N.champObligatoires, 'error');
-    manquants.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.borderColor = '#dc2626';
-        setTimeout(() => { el.style.borderColor = ''; }, 3000);
-      }
-    });
+  if (!modePaiement) {
+    window.toast && window.toast(CHECKOUT_I18N.modePaiementRequis, 'error');
     return;
   }
-
   if (!telPaiement) {
     window.toast && window.toast(CHECKOUT_I18N.numeroPaiementRequis, 'error');
     const el = document.getElementById('telephone-paiement');
@@ -695,37 +694,26 @@ async function passerCommande() {
     return;
   }
 
-  // ── Validation préfixe opérateur ────────────────────────────────────────
-  // Normalise le numéro : retire +237, espaces, tirets
   const numNormalise = telPaiement.replace(/^\+?237/, '').replace(/[\s\-]/g, '');
-
-  // Préfixes Cameroun par opérateur
   const PREFIXES = {
-    orange_money: ['69', '655', '656', '657', '658', '659'],
-    mtn_momo:     ['67', '650', '651', '652', '653', '654', '68'],
+    orange_money: ['69','655','656','657','658','659'],
+    mtn_momo:     ['67','650','651','652','653','654','68'],
   };
-
-  const prefixesValides = PREFIXES[modePaiement] || [];
-  const prefixeOK = prefixesValides.some(p => numNormalise.startsWith(p));
-
+  const prefixeOK = (PREFIXES[modePaiement] || []).some(p => numNormalise.startsWith(p));
   if (!prefixeOK) {
-    const nomOperateur = modePaiement === 'orange_money' ? 'Orange Money (69x, 65x)' : 'MTN MoMo (67x, 68x, 65x)';
-    window.toast && window.toast(`Ce numéro n'est pas un numéro ${nomOperateur}.`, 'error');
+    const nomOp = modePaiement === 'orange_money' ? 'Orange Money (69x, 65x)' : 'MTN MoMo (67x, 68x, 65x)';
+    window.toast && window.toast(`Ce numéro n'est pas un numéro ${nomOp}.`, 'error');
     const el = document.getElementById('telephone-paiement');
     if (el) { el.style.borderColor = '#dc2626'; el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 3000); }
     return;
   }
 
-  // ── UI : spinner ────────────────────────────────────────────────────────
   const btn   = document.getElementById('btn-commande');
   const label = document.getElementById('btn-label');
   const icon  = document.getElementById('btn-icon');
-  btn.disabled      = true;
-  label.textContent  = CHECKOUT_I18N.traitementEnCours;
-  icon.classList.add('spinner');
+  btn.disabled = true; label.textContent = CHECKOUT_I18N.traitementEnCours; icon.classList.add('spinner');
 
   try {
-    // ── POST : créer la commande ─────────────────────────────────────────
     const data = await API.post('/api/commandes/creer/', {
       adresse_livraison_nom       : nom,
       adresse_livraison_telephone : telephone,
@@ -738,26 +726,16 @@ async function passerCommande() {
       telephone_paiement          : telPaiement,
     }, { silentError: true });
 
-    // ── Redirection vers PayUnit ────────────────────────────────────────
-    // L'API retourne authorization_url → on redirige le client vers PayUnit
     label.textContent = CHECKOUT_I18N.redirectionPaiement;
-    if (data.authorization_url) {
-      window.location.href = data.authorization_url;
-    } else {
-      // Cas improbable : pas d'URL → page de confirmation directe
-      window.location.href = `/commandes/${data.commande.id}/`;
-    }
+    window.location.href = data.authorization_url || `/commandes/${data.commande.id}/`;
 
   } catch (e) {
-    btn.disabled      = false;
-    label.textContent  = CHECKOUT_I18N.payerMaintenant;
-    icon.classList.remove('spinner');
-    const msg = (e && e.message) ? e.message : CHECKOUT_I18N.erreurGenerique;
-    window.toast && window.toast(msg, 'error');
+    btn.disabled = false; label.textContent = CHECKOUT_I18N.payerMaintenant; icon.classList.remove('spinner');
+    window.toast && window.toast((e && e.message) ? e.message : CHECKOUT_I18N.erreurGenerique, 'error');
   }
 }
 
-// ── Initialisation ───────────────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────────────
 loadRecap();
 </script>
 {% endblock %}
