@@ -216,7 +216,7 @@
   .info-divider { height: 1px; background: #E2E8F0; margin: .25rem 0 1.25rem; }
 
   /* Ligne quantité + bouton panier */
-  .info-action-row { display: flex; align-items: stretch; gap: .75rem; margin-bottom: .875rem; }
+  .info-action-row { display: flex; align-items: stretch; gap: .75rem; margin-bottom: .875rem; max-width: 480px; }
 
   /* Sélecteur de quantité */
   .qty-picker {
@@ -564,11 +564,13 @@
         {% comment %} Quantité + CTA — masqués pour admins/vendeurs {% endcomment %}
         {% if not user.is_staff and not user.is_admin and not user.is_vendeur %}
         <div class="info-action-row">
+          {% if user.is_authenticated %}
           <div class="qty-picker" role="group" aria-label="{% trans 'Quantité' %}">
             <button class="qty-btn" type="button" onclick="changeQty(-1)" aria-label="{% trans 'Diminuer' %}">-</button>
             <input  type="number" id="qty-input" class="qty-input" value="1" min="1" />
             <button class="qty-btn" type="button" onclick="changeQty(1)"  aria-label="{% trans 'Augmenter' %}">+</button>
           </div>
+          {% endif %}
           {% comment %} * BOUTON ORANGE UNIQUE * {% endcomment %}
           <button id="btn-add-cart" class="btn-add-cart" type="button" onclick="ajouterAuPanier()">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"

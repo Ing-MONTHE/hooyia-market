@@ -3,10 +3,6 @@
 # Utilisé uniquement par le pipeline CI/CD (Job 2 — build)
 # Lance les tests Django dans l'image déjà buildée sur ghcr.io
 # pour s'assurer que l'image qui part en prod est fonctionnelle
-# ==============================================================
-# Commande utilisée par le pipeline :
-#   docker compose -f docker-compose.test.yml run --rm web python manage.py test
-# ==============================================================
 
 services:
 
@@ -53,8 +49,6 @@ services:
       DB_PORT: 5432
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       REDIS_URL: redis://redis:6379/0  # Redis de test pour les WebSockets
-    depends_on:
+    depends_on: # Assure que la base de données et Redis sont prêts avant de lancer les tests
       - db
       - redis
-    # Pas de ports exposés — les tests n'ont pas besoin d'être accessibles
-    # Pas de volumes — on teste l'image telle quelle, sans montage de code
