@@ -167,7 +167,7 @@ jobs:
 
             echo "🔄 Redémarrage des conteneurs avec la nouvelle image..."
             # IMAGE_TAG est lue par docker-compose.prod.yml (voir note ci-dessous)
-            IMAGE_TAG=\${IMAGE_TAG} docker compose -f docker-compose.prod.yml up -d
+            IMAGE_TAG=\${IMAGE_TAG} docker compose -f docker-compose.prod.yml up -d --force-recreate --pull always
 
             echo "🧹 Nettoyage des images Docker inutilisées..."
             docker image prune -f
