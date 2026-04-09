@@ -47,9 +47,7 @@ services:
   # APPLICATION — Django via Daphne (HTTP + WebSocket)
   # ════════════════════════════════════════════════════════════
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
     restart: always
     env_file:
       - .env.prod
