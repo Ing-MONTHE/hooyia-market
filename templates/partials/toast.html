@@ -44,16 +44,7 @@
 
 {# Conteneur fixe — reçoit les toasts injectés par JS #}
 <div id="toast-container"
-     style="position:fixed;
-            bottom:1.5rem;
-            right:1.5rem;
-            z-index:9999;
-            display:flex;
-            flex-direction:column;
-            gap:0.5rem;
-            max-width:360px;
-            width:calc(100% - 2rem);
-            pointer-events:none;">
+     class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 max-w-[360px] w-[calc(100%-2rem)] pointer-events-none">
   {# Les toasts sont injectés ici dynamiquement par window.toast() #}
 </div>
 
@@ -157,29 +148,15 @@ window.toast = function(message, type = 'info', duration = 4000) {
 
   // ── Contenu HTML du toast ──
   toastEl.innerHTML = `
-    <span style="flex-shrink:0;margin-top:1px;line-height:1;">
+    <span class="shrink-0 mt-px leading-none">
       ${icons[type] || icons.info}
     </span>
-    <p style="font-size:0.8125rem;
-              font-weight:500;
-              color:${colors.text};
-              flex:1;
-              line-height:1.5;
-              font-family:'Poppins',sans-serif;
-              margin:0;">
+    <p style="font-size:0.8125rem;font-weight:500;color:${colors.text};flex:1;line-height:1.5;font-family:'Poppins',sans-serif;margin:0;">
       ${message}
     </p>
     <button
       onclick="closeToast(this.closest('div'))"
-      style="flex-shrink:0;
-             background:none;
-             border:none;
-             cursor:pointer;
-             color:${colors.close};
-             padding:2px;
-             transition:color 150ms;
-             line-height:1;
-             border-radius:4px;"
+      style="flex-shrink:0;background:none;border:none;cursor:pointer;color:${colors.close};padding:2px;transition:color 150ms;line-height:1;border-radius:4px;"
       onmouseover="this.style.color='${colors.closeHover}'"
       onmouseout="this.style.color='${colors.close}'"
       aria-label="${TOAST_I18N.fermer}">
@@ -196,8 +173,6 @@ window.toast = function(message, type = 'info', duration = 4000) {
   container.appendChild(toastEl);
 
   // ── Limite à 5 toasts simultanés ──
-  // Supprime le plus ancien si on dépasse la limite,
-  // pour éviter un empilement excessif sur l'écran.
   const allToasts = container.querySelectorAll('div');
   if (allToasts.length > 5) {
     closeToast(allToasts[0]);
@@ -213,9 +188,8 @@ window.toast = function(message, type = 'info', duration = 4000) {
  * @param {HTMLElement} el - L'élément toast à fermer
  */
 function closeToast(el) {
-  if (!el || !el.isConnected) return; // Déjà supprimé
+  if (!el || !el.isConnected) return;
   el.style.animation = 'toastOut 0.25s ease forwards';
-  // Suppression du DOM après la fin de l'animation (250ms)
   setTimeout(() => el.remove(), 250);
 }
 </script>

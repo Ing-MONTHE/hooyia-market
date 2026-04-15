@@ -16,9 +16,6 @@
      #94a8c8 (bleu-gris)     sur #091747 → ratio  4.8:1 ✓ (texte secondaire)
      #F97316 (orange)        sur #091747 → ratio  4.5:1 ✓ (accent hover)
 
-     ⚠ On évite rgba(255,255,255,0.55) et rgba(255,255,255,0.3)
-       qui étaient < 4.5:1 et donc non conformes WCAG AA.
-
    ICÔNES : Lucide SVG inline (cohérent avec la navbar)
 
    VARIABLES DJANGO UTILISÉES :
@@ -26,159 +23,34 @@
      {{ categories }}  — catégories racines pour les liens rapides
 {% endcomment %}
 
-{% comment %} ── Variables de couleur du footer (définies une fois, réutilisées) ──
-   Fond principal  : #091747 (brand-700 — plus foncé que la navbar)
-   Fond barre bas  : #060e30 (encore plus foncé pour la séparation)
-   Texte titre     : #ffffff (blanc pur → ratio 18.5:1)
-   Texte lien      : #c8d6f0 (bleu très clair → ratio 8.2:1)
-   Texte secondaire: #94a8c8 (bleu-gris → ratio 4.8:1)
-   Hover lien      : #F97316 (orange → ratio 4.5:1)
-   Bordure         : rgba(255,255,255,0.1) — décoratif uniquement {% endcomment %}
-
-<style>
-  /* ── Footer base ── */
-  .footer {
-    background: #091747;
-    color: #c8d6f0; /* Bleu clair — ratio 8.2:1 sur #091747 ✓ */
-    font-family: 'Poppins', sans-serif;
-  }
-
-  /* ── Titre de colonne ── */
-  .footer-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #ffffff; /* Blanc pur — ratio 18.5:1 ✓ */
-    margin-bottom: 1rem;
-    letter-spacing: 0.02em;
-  }
-
-  /* ── Lien footer ──
-     Couleur de base : #c8d6f0 (ratio 8.2:1) — très lisible sur fond sombre
-     Hover : #F97316 orange (ratio 4.5:1) — conforme WCAG AA */
-  .footer-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    color: #c8d6f0;
-    text-decoration: none;
-    transition: color 150ms;
-    padding: 0.15rem 0;
-    font-family: 'Poppins', sans-serif;
-  }
-  .footer-link:hover {
-    color: #F97316; /* Orange au hover — accent visible sur fond sombre */
-  }
-
-  /* ── Texte de description (moins important que les liens) ──
-     #94a8c8 → ratio 4.8:1 sur #091747 ✓ WCAG AA */
-  .footer-desc {
-    font-size: 0.8125rem;
-    line-height: 1.75;
-    color: #94a8c8;
-  }
-
-  /* ── Icône réseau social ── */
-  .footer-social {
-    width: 34px;
-    height: 34px;
-    border-radius: 0.5rem;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #c8d6f0; /* Ratio 8.2:1 ✓ */
-    text-decoration: none;
-    transition: background 150ms, border-color 150ms, color 150ms;
-    flex-shrink: 0;
-  }
-  .footer-social:hover {
-    background: rgba(249,115,22,0.2);
-    border-color: rgba(249,115,22,0.4);
-    color: #F97316;
-  }
-
-  /* ── Barre de bas ──
-     Fond légèrement plus sombre pour créer une séparation visuelle nette. */
-  .footer-bottom {
-    background: #060e30;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-
-  /* ── Liens légaux dans la barre de bas ──
-     #7a94b8 → ratio 4.6:1 sur #060e30 ✓ WCAG AA
-     (On évite rgba(255,255,255,0.3) qui était ~2.1:1 ❌) */
-  .footer-legal-link {
-    font-size: 0.75rem;
-    color: #7a94b8; /* Ratio 4.6:1 sur #060e30 ✓ */
-    text-decoration: none;
-    transition: color 150ms;
-    font-family: 'Poppins', sans-serif;
-  }
-  .footer-legal-link:hover { color: #c8d6f0; }
-
-  .footer-copyright {
-    font-size: 0.75rem;
-    color: #7a94b8; /* Ratio 4.6:1 ✓ */
-  }
-
-  /* ── Séparateur entre colonnes (décoratif uniquement) ── */
-  .footer-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.08);
-    margin: 0.5rem 0;
-  }
-
-  /* ── Badge "Cameroun" ── */
-  .footer-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.625rem;
-    background: rgba(249,115,22,0.15);
-    border: 1px solid rgba(249,115,22,0.3);
-    border-radius: 999px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: #F97316; /* Orange sur fond très sombre → ratio 4.5:1 ✓ */
-    font-family: 'Poppins', sans-serif;
-  }
-</style>
-
-<footer class="footer">
+<footer class="font-['Poppins',sans-serif]" style="background:#091747;color:#c8d6f0;">
 
   {% comment %} ════════════════════════════════════════
      CORPS PRINCIPAL — 4 colonnes
   ════════════════════════════════════════ {% endcomment %}
-  <div class="container" style="padding-top:3.5rem;padding-bottom:2.5rem;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2.5rem;">
+  <div class="container pt-14 pb-10">
+    <div class="grid gap-10" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
 
       {# ── COLONNE 1 : Brand ── #}
       <div>
-        {% comment %} Logo sur fond sombre : le SVG a un fond blanc intégré,
-           on l'encadre dans un conteneur blanc arrondi. {% endcomment %}
+        {# Logo sur fond sombre : encadré dans un conteneur blanc arrondi #}
         <a href="{% url 'products:accueil' %}"
-           style="display:inline-flex;align-items:center;background:white;
-                  border-radius:0.625rem;padding:6px 12px;margin-bottom:1.25rem;
-                  transition:opacity 150ms;"
-           onmouseover="this.style.opacity='.85'"
-           onmouseout="this.style.opacity='1'"
+           class="inline-flex items-center bg-white rounded-[0.625rem] px-3 py-1.5 mb-5 transition-opacity hover:opacity-85"
            aria-label="{% trans 'HooYia Market — Accueil' %}">
           <img src="{% static 'img/logo.svg' %}"
                alt="HooYia Market"
-               style="height:32px;width:auto;border-radius:8px;" />
+               class="h-8 w-auto rounded-lg" />
         </a>
 
         {# Description #}
-        <p class="footer-desc" style="max-width:230px;">
+        <p class="text-[0.8125rem] leading-7 max-w-[230px]" style="color:#94a8c8;">
           {% trans "Commandez malin, recevez vite. HooYia connecte les meilleurs vendeurs camerounais à ceux qui veulent le meilleur — sans compromis." %}
         </p>
 
         {# Badge localisation #}
-        <div style="margin-top:1rem;">
-          <span class="footer-badge">
+        <div class="mt-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold font-['Poppins',sans-serif]"
+                style="background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.3);color:#F97316;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
@@ -188,36 +60,52 @@
           </span>
         </div>
 
-        {# Réseaux sociaux — icônes blanches #}
-        <div style="display:flex;gap:0.5rem;margin-top:1.25rem;">
+        {# Réseaux sociaux #}
+        <div class="flex gap-2 mt-5">
 
           {# Facebook #}
-          <a href="https://www.facebook.com/hooyiamarket" target="_blank" rel="noopener" class="footer-social" aria-label="Facebook" title="Facebook"
-             style="color:#ffffff;">
+          <a href="https://www.facebook.com/hooyiamarket" target="_blank" rel="noopener"
+             class="w-[34px] h-[34px] rounded-lg flex items-center justify-center shrink-0 text-white no-underline transition-all duration-150"
+             style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);"
+             onmouseover="this.style.background='rgba(249,115,22,0.2)';this.style.borderColor='rgba(249,115,22,0.4)';this.style.color='#F97316';"
+             onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#ffffff';"
+             aria-label="Facebook" title="Facebook">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="18" height="18" fill="currentColor">
               <path d="M576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 440 146.7 540.8 258.2 568.5L258.2 398.2L205.4 398.2L205.4 320L258.2 320L258.2 286.3C258.2 199.2 297.6 158.8 383.2 158.8C399.4 158.8 427.4 162 438.9 165.2L438.9 236C432.9 235.4 422.4 235 409.3 235C367.3 235 351.1 250.9 351.1 292.2L351.1 320L434.7 320L420.3 398.2L351 398.2L351 574.1C477.8 558.8 576 450.9 576 320z"/>
             </svg>
           </a>
 
           {# Instagram #}
-          <a href="https://www.instagram.com/hooyiamarket" target="_blank" rel="noopener" class="footer-social" aria-label="Instagram" title="Instagram"
-             style="color:#ffffff;">
+          <a href="https://www.instagram.com/hooyiamarket" target="_blank" rel="noopener"
+             class="w-[34px] h-[34px] rounded-lg flex items-center justify-center shrink-0 text-white no-underline transition-all duration-150"
+             style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);"
+             onmouseover="this.style.background='rgba(249,115,22,0.2)';this.style.borderColor='rgba(249,115,22,0.4)';this.style.color='#F97316';"
+             onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#ffffff';"
+             aria-label="Instagram" title="Instagram">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="18" height="18" fill="currentColor">
               <path d="M320.3 205C256.8 204.8 205.2 256.2 205 319.7C204.8 383.2 256.2 434.8 319.7 435C383.2 435.2 434.8 383.8 435 320.3C435.2 256.8 383.8 205.2 320.3 205zM319.7 245.4C360.9 245.2 394.4 278.5 394.6 319.7C394.8 360.9 361.5 394.4 320.3 394.6C279.1 394.8 245.6 361.5 245.4 320.3C245.2 279.1 278.5 245.6 319.7 245.4zM413.1 200.3C413.1 185.5 425.1 173.5 439.9 173.5C454.7 173.5 466.7 185.5 466.7 200.3C466.7 215.1 454.7 227.1 439.9 227.1C425.1 227.1 413.1 215.1 413.1 200.3zM542.8 227.5C541.1 191.6 532.9 159.8 506.6 133.6C480.4 107.4 448.6 99.2 412.7 97.4C375.7 95.3 264.8 95.3 227.8 97.4C192 99.1 160.2 107.3 133.9 133.5C107.6 159.7 99.5 191.5 97.7 227.4C95.6 264.4 95.6 375.3 97.7 412.3C99.4 448.2 107.6 480 133.9 506.2C160.2 532.4 191.9 540.6 227.8 542.4C264.8 544.5 375.7 544.5 412.7 542.4C448.6 540.7 480.4 532.5 506.6 506.2C532.8 480 541 448.2 542.8 412.3C544.9 375.3 544.9 264.5 542.8 227.5zM495 452C487.2 471.6 472.1 486.7 452.4 494.6C422.9 506.3 352.9 503.6 320.3 503.6C287.7 503.6 217.6 506.2 188.2 494.6C168.6 486.8 153.5 471.7 145.6 452C133.9 422.5 136.6 352.5 136.6 319.9C136.6 287.3 134 217.2 145.6 187.8C153.4 168.2 168.5 153.1 188.2 145.2C217.7 133.5 287.7 136.2 320.3 136.2C352.9 136.2 423 133.6 452.4 145.2C472 153 487.1 168.1 495 187.8C506.7 217.3 504 287.3 504 319.9C504 352.5 506.7 422.6 495 452z"/>
             </svg>
           </a>
 
           {# Twitter / X #}
-          <a href="https://twitter.com/hooyiamarket" target="_blank" rel="noopener" class="footer-social" aria-label="Twitter" title="Twitter"
-             style="color:#ffffff;">
+          <a href="https://twitter.com/hooyiamarket" target="_blank" rel="noopener"
+             class="w-[34px] h-[34px] rounded-lg flex items-center justify-center shrink-0 text-white no-underline transition-all duration-150"
+             style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);"
+             onmouseover="this.style.background='rgba(249,115,22,0.2)';this.style.borderColor='rgba(249,115,22,0.4)';this.style.color='#F97316';"
+             onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#ffffff';"
+             aria-label="Twitter" title="Twitter">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="18" height="18" fill="currentColor">
               <path d="M523.4 215.7C523.7 220.2 523.7 224.8 523.7 229.3C523.7 368 418.1 527.9 225.1 527.9C165.6 527.9 110.4 510.7 64 480.8C72.4 481.8 80.6 482.1 89.3 482.1C138.4 482.1 183.5 465.5 219.6 437.3C173.5 436.3 134.8 406.1 121.5 364.5C128 365.5 134.5 366.1 141.3 366.1C150.7 366.1 160.1 364.8 168.9 362.5C120.8 352.8 84.8 310.5 84.8 259.5L84.8 258.2C98.8 266 115 270.9 132.2 271.5C103.9 252.7 85.4 220.5 85.4 184.1C85.4 164.6 90.6 146.7 99.7 131.1C151.4 194.8 229 236.4 316.1 240.9C314.5 233.1 313.5 225 313.5 216.9C313.5 159.1 360.3 112 418.4 112C448.6 112 475.9 124.7 495.1 145.1C518.8 140.6 541.6 131.8 561.7 119.8C553.9 144.2 537.3 164.6 515.6 177.6C536.7 175.3 557.2 169.5 576 161.4C561.7 182.2 543.8 200.7 523.4 215.7z"/>
             </svg>
           </a>
 
           {# WhatsApp #}
-          <a href="https://wa.me/237690992074" target="_blank" rel="noopener" class="footer-social" aria-label="WhatsApp" title="WhatsApp"
-             style="color:#ffffff;">
+          <a href="https://wa.me/237690992074" target="_blank" rel="noopener"
+             class="w-[34px] h-[34px] rounded-lg flex items-center justify-center shrink-0 text-white no-underline transition-all duration-150"
+             style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);"
+             onmouseover="this.style.background='rgba(249,115,22,0.2)';this.style.borderColor='rgba(249,115,22,0.4)';this.style.color='#F97316';"
+             onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='#ffffff';"
+             aria-label="WhatsApp" title="WhatsApp">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="18" height="18" fill="currentColor">
               <path d="M476.9 161.1C435 119.1 379.2 96 319.9 96C197.5 96 97.9 195.6 97.9 318C97.9 357.1 108.1 395.3 127.5 429L96 544L213.7 513.1C246.1 530.8 282.6 540.1 319.8 540.1L319.9 540.1C442.2 540.1 544 440.5 544 318.1C544 258.8 518.8 203.1 476.9 161.1zM319.9 502.7C286.7 502.7 254.2 493.8 225.9 477L219.2 473L149.4 491.3L168 423.2L163.6 416.2C145.1 386.8 135.4 352.9 135.4 318C135.4 216.3 218.2 133.5 320 133.5C369.3 133.5 415.6 152.7 450.4 187.6C485.2 222.5 506.6 268.8 506.5 318.1C506.5 419.9 421.6 502.7 319.9 502.7zM421.1 364.5C415.6 361.7 388.3 348.3 383.2 346.5C378.1 344.6 374.4 343.7 370.7 349.3C367 354.9 356.4 367.3 353.1 371.1C349.9 374.8 346.6 375.3 341.1 372.5C308.5 356.2 287.1 343.4 265.6 306.5C259.9 296.7 271.3 297.4 281.9 276.2C283.7 272.5 282.8 269.3 281.4 266.5C280 263.7 268.9 236.4 264.3 225.3C259.8 214.5 255.2 216 251.8 215.8C248.6 215.6 244.9 215.6 241.2 215.6C237.5 215.6 231.5 217 226.4 222.5C221.3 228.1 207 241.5 207 268.8C207 296.1 226.9 322.5 229.6 326.2C232.4 329.9 268.7 385.9 324.4 410C359.6 425.2 373.4 426.5 391 423.9C401.7 422.3 423.8 410.5 428.4 397.5C433 384.5 433 373.4 431.6 371.1C430.3 368.6 426.6 367.2 421.1 364.5z"/>
             </svg>
@@ -227,11 +115,14 @@
 
       {# ── COLONNE 2 : Catalogue ── #}
       <div>
-        <h4 class="footer-title">{% trans "Catalogue" %}</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+        <h4 class="text-sm font-bold text-white mb-4 tracking-wide font-['Poppins',sans-serif]">{% trans "Catalogue" %}</h4>
+        <ul class="list-none p-0 m-0 flex flex-col gap-2">
 
           <li>
-            <a href="{% url 'products:liste' %}" class="footer-link">
+            <a href="{% url 'products:liste' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
@@ -243,7 +134,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:liste' %}?ordering=-date_creation" class="footer-link">
+            <a href="{% url 'products:liste' %}?ordering=-date_creation"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -254,8 +148,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:liste' %}?promo=true" class="footer-link"
-               style="color:#F97316;">
+            <a href="{% url 'products:liste' %}?promo=true"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#F97316;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#F97316'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="5" x2="5" y2="19"/>
@@ -267,7 +163,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:liste' %}?en_vedette=true" class="footer-link">
+            <a href="{% url 'products:liste' %}?en_vedette=true"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -276,18 +175,20 @@
             </a>
           </li>
 
-          {# Pas de catégories dans le footer #}
-
         </ul>
       </div>
 
       {# ── COLONNE 3 : Liens utiles ── #}
       <div>
-        <h4 class="footer-title">{% trans "Liens utiles" %}</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+        <h4 class="text-sm font-bold text-white mb-4 tracking-wide font-['Poppins',sans-serif]">{% trans "Liens utiles" %}</h4>
+        <ul class="list-none p-0 m-0 flex flex-col gap-2">
 
+          {% for item in footer_links_utiles|default:'' %}{% empty %}
           <li>
-            <a href="{% url 'products:accueil' %}" class="footer-link">
+            <a href="{% url 'products:accueil' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
@@ -295,9 +196,11 @@
               {% trans "Accueil" %}
             </a>
           </li>
-
           <li>
-            <a href="{% url 'products:liste' %}" class="footer-link">
+            <a href="{% url 'products:liste' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
                 <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
@@ -306,9 +209,11 @@
               {% trans "Tous les produits" %}
             </a>
           </li>
-
           <li>
-            <a href="{% url 'cart:panier' %}" class="footer-link">
+            <a href="{% url 'cart:panier' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
@@ -316,9 +221,11 @@
               {% trans "Mon panier" %}
             </a>
           </li>
-
           <li>
-            <a href="{% url 'orders:historique' %}" class="footer-link">
+            <a href="{% url 'orders:historique' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
@@ -327,18 +234,22 @@
               {% trans "Mes commandes" %}
             </a>
           </li>
-
           <li>
-            <a href="/chat/" class="footer-link">
+            <a href="/chat/"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               </svg>
               {% trans "Messages" %}
             </a>
           </li>
-
           <li>
-            <a href="{% url 'users:profil' %}" class="footer-link">
+            <a href="{% url 'users:profil' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -346,17 +257,21 @@
               {% trans "Mon profil" %}
             </a>
           </li>
+          {% endfor %}
 
         </ul>
       </div>
 
       {# ── COLONNE 4 : Aide & Informations ── #}
       <div>
-        <h4 class="footer-title">{% trans "Aide & Informations" %}</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+        <h4 class="text-sm font-bold text-white mb-4 tracking-wide font-['Poppins',sans-serif]">{% trans "Aide & Informations" %}</h4>
+        <ul class="list-none p-0 m-0 flex flex-col gap-2">
 
           <li>
-            <a href="{% url 'products:apropos' %}" class="footer-link">
+            <a href="{% url 'products:apropos' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -368,7 +283,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:assistance' %}" class="footer-link">
+            <a href="{% url 'products:assistance' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 18v-6a9 9 0 0118 0v6"/>
@@ -380,7 +298,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:faq' %}" class="footer-link">
+            <a href="{% url 'products:faq' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -392,7 +313,10 @@
           </li>
 
           <li>
-            <a href="{% url 'products:contact' %}" class="footer-link">
+            <a href="{% url 'products:contact' %}"
+               class="flex items-center gap-2 text-[0.8125rem] no-underline transition-colors duration-150 py-0.5 font-['Poppins',sans-serif]"
+               style="color:#c8d6f0;"
+               onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#c8d6f0'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -410,25 +334,35 @@
 
   {% comment %} ════════════════════════════════════════
      BARRE DE BAS
-     Fond #060e30 — encore plus foncé que le corps du footer
-     pour une séparation visuelle nette sans bordure agressive.
   ════════════════════════════════════════ {% endcomment %}
-  <div class="footer-bottom">
-    <div class="container"
-         style="padding-top:1.125rem;padding-bottom:1.125rem;
-                display:flex;align-items:center;justify-content:space-between;
-                flex-wrap:wrap;gap:0.75rem;">
+  <div style="background:#060e30;border-top:1px solid rgba(255,255,255,0.08);">
+    <div class="container py-[1.125rem] flex items-center justify-between flex-wrap gap-3">
 
-      {# Copyright — couleur #7a94b8 (ratio 4.6:1 sur #060e30 ✓) #}
-      <p class="footer-copyright">
+      <p class="text-xs font-['Poppins',sans-serif]" style="color:#7a94b8;">
         &copy; {% now "Y" %} HooYia Market. {% trans "Tous droits réservés." %}
       </p>
 
-      {# Liens légaux #}
-      <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-        <a href="{% url 'products:conditions' %}" class="footer-legal-link">{% trans "Conditions d'utilisation" %}</a>
-        <a href="{% url 'products:politique' %}" class="footer-legal-link">{% trans "Politique de confidentialité" %}</a>
-        {% if user.is_admin or user.is_staff or user.is_superuser or user.is_vendeur %}<a href="{% url 'products:mentions' %}" class="footer-legal-link">{% trans "Mentions légales" %}</a>{% endif %}
+      <div class="flex items-center gap-5 flex-wrap">
+        <a href="{% url 'products:conditions' %}"
+           class="text-xs no-underline transition-colors duration-150 font-['Poppins',sans-serif]"
+           style="color:#7a94b8;"
+           onmouseover="this.style.color='#c8d6f0'" onmouseout="this.style.color='#7a94b8'">
+          {% trans "Conditions d'utilisation" %}
+        </a>
+        <a href="{% url 'products:politique' %}"
+           class="text-xs no-underline transition-colors duration-150 font-['Poppins',sans-serif]"
+           style="color:#7a94b8;"
+           onmouseover="this.style.color='#c8d6f0'" onmouseout="this.style.color='#7a94b8'">
+          {% trans "Politique de confidentialité" %}
+        </a>
+        {% if user.is_admin or user.is_staff or user.is_superuser or user.is_vendeur %}
+        <a href="{% url 'products:mentions' %}"
+           class="text-xs no-underline transition-colors duration-150 font-['Poppins',sans-serif]"
+           style="color:#7a94b8;"
+           onmouseover="this.style.color='#c8d6f0'" onmouseout="this.style.color='#7a94b8'">
+          {% trans "Mentions légales" %}
+        </a>
+        {% endif %}
       </div>
 
     </div>

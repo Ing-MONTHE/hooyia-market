@@ -11,64 +11,15 @@
      Connecté     → Compte ▼ (Profil, Mes commandes, Déconnexion)
      Non connecté → Bouton Connexion + Bouton Inscription (orange)
 
-   ICÔNES : Lucide Icons via CDN SVG inline
-     On utilise les SVG inline pour éviter une dépendance JS externe
-     et pour permettre le contrôle couleur via CSS (stroke="currentColor").
-
-   VARIABLES DE CONTEXTE DJANGO UTILISÉES :
-     {{ user }}          — utilisateur Django courant
-     {{ categories }}    — QuerySet des catégories racines (parent=None)
-     {{ cart_count }}    — nombre d'articles dans le panier (context processor)
-     {{ notif_count }}   — nombre de notifications non lues (context processor)
-     {{ request }}       — pour détecter la page active (request.resolver_match)
-
-   DROPDOWNS :
-     Gérés en CSS pur (group/peer Tailwind) → pas de JS pour l'ouverture.
-     Exception : mobile menu toggle via JS léger en bas de fichier.
-
    RESPONSIVE :
      Desktop (lg+) : barre complète horizontale
      Mobile (<lg)  : burger menu → tiroir vertical
 {% endcomment %}
 
-{% comment %} ── Style spécifique à la navbar ──
-   On garde un <style> dédié pour les comportements impossibles
-   avec Tailwind seul (dropdown hover, transitions complexes). {% endcomment %}
+{% comment %} ── Style réduit au strict minimum non-faisable en Tailwind ──
+   Uniquement : pseudo-éléments (::after), :focus-within, états JS (.open, .scrolled, .menu-open) {% endcomment %}
 <style>
-  /* ── Navbar sticky avec ombre subtile ──
-     L'ombre n'apparaît que lorsqu'on scroll (géré via JS en bas). */
-  .navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--nav-bg, #ffffff);
-    border-bottom: 1px solid var(--nav-border, #E2E8F0);
-    transition: box-shadow 200ms ease, background 200ms, border-color 200ms;
-  }
-  /* Classe ajoutée par JS quand on scroll vers le bas */
-  .navbar.scrolled {
-    box-shadow: 0 2px 12px rgba(13, 31, 92, 0.08);
-  }
-
-  /* ── Lien de navigation de base ── */
-  .nav-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.5rem;
-    padding-bottom: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--nav-text, #0D1F5C);
-    text-decoration: none;
-    white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    position: relative;
-  }
+  /* Underline animé sur les liens nav */
   .nav-link::after {
     content: '';
     position: absolute;
@@ -81,39 +32,14 @@
     border-radius: 2px;
   }
   .nav-link:hover::after,
-  .nav-link.active::after {
-    left: 0.5rem;
-    right: 0.5rem;
-  }
-  .nav-link:hover { color: #1E3A8A; background: transparent; }
-  .nav-link.active {
-    font-weight: 600;
-    color: #1E3A8A;
-  }
+  .nav-link.active::after { left: 0.5rem; right: 0.5rem; }
 
-  /* ── Dropdown générique ── */
-  .nav-dropdown-wrap {
-    position: relative;
-  }
+  /* Dropdown hover/focus-within (impossible en Tailwind sans JS) */
   .nav-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    min-width: 220px;
-    background: var(--nav-dropdown-bg, #ffffff);
-    border: 1px solid var(--nav-border, #E2E8F0);
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 32px rgba(13, 31, 92, 0.13);
-    padding: 0.375rem;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-6px) scale(0.97);
     transition: opacity 150ms ease, transform 150ms ease, visibility 150ms;
-    z-index: 200;
-  }
-  .nav-dropdown-menu.align-right {
-    left: auto;
-    right: 0;
   }
   .nav-dropdown-wrap:hover .nav-dropdown-menu,
   .nav-dropdown-wrap:focus-within .nav-dropdown-menu {
@@ -122,373 +48,26 @@
     transform: translateY(0) scale(1);
   }
 
-  /* ── Item de dropdown ── */
-  .nav-dd-item {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--nav-dd-text, #4A5568);
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background 100ms, color 100ms;
-    cursor: pointer;
-    width: 100%;
-    background: transparent;
-    border: none;
-    text-align: left;
-    font-family: 'Poppins', sans-serif;
-  }
-  .nav-dd-item:hover {
-    background: var(--nav-dd-hover, #f9fafb);
-    color: var(--nav-dd-text-hover, #0F1923);
-  }
-  .nav-dd-item.danger:hover {
-    background: #fef2f2;
-    color: #991b1b;
-  }
-  .nav-dd-divider {
-    height: 1px;
-    background: var(--nav-border, #E2E8F0);
-    margin: 0.25rem 0.375rem;
-  }
-
-  /* ── Badge panier / notifications ── */
-  .nav-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    min-width: 16px;
-    height: 16px;
-    background: #F97316;
-    color: white;
-    font-size: 0.625rem;
-    font-weight: 700;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 3px;
-    font-family: 'Poppins', sans-serif;
-    border: 2px solid var(--nav-bg, white);
-    line-height: 1;
-  }
-
-  /* ── Barre de recherche ── */
-  .nav-search-wrap {
-    display: flex;
-    align-items: center;
-    background: var(--nav-search-bg, #F4F7FC);
-    border: 1.5px solid var(--nav-border, #E2E8F0);
-    border-radius: 999px;
-    padding: 0 0.3rem 0 1rem;
-    transition: border-color 180ms, box-shadow 180ms, background 180ms;
-    height: 40px;
-    gap: 0.25rem;
-  }
+  /* Barre de recherche focus-within */
   .nav-search-wrap:focus-within {
     border-color: #1E3A8A;
     box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.10);
     background: var(--nav-search-focus-bg, #ffffff);
   }
-  .nav-search-input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.8125rem;
-    color: var(--nav-text, #0F1923);
-    flex: 1;
-    min-width: 0;
-  }
-  .nav-search-input::placeholder { color: var(--nav-placeholder, #8898AA); }
-  .nav-search-icon { color: var(--nav-placeholder, #8898AA); flex-shrink: 0; }
-  .nav-search-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    background: #1E3A8A;
-    border: none;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 150ms;
-    color: white;
-  }
-  .nav-search-btn:hover { background: #0D1F5C; }
 
-  /* ── Autocomplete dropdown ── */
-  .nav-autocomplete {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: var(--nav-dropdown-bg, #FFFFFF);
-    border: 1px solid var(--nav-border, #E2E8F0);
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 24px rgba(13,31,92,0.12);
-    z-index: 9999;
-    overflow: hidden;
-  }
-  .nav-ac-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 1.25rem;
-    color: var(--nav-placeholder, #8898AA);
-    font-size: 0.875rem;
-    font-family: 'Poppins', sans-serif;
-  }
-  .nav-ac-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 1rem;
-    text-decoration: none;
-    color: var(--nav-dd-text-hover, #0F1923);
-    transition: background 120ms;
-    border-bottom: 1px solid var(--nav-search-bg, #F4F7FC);
-  }
-  .nav-ac-item:last-of-type { border-bottom: none; }
-  .nav-ac-item:hover { background: var(--nav-search-bg, #F4F7FC); }
-  .nav-ac-img {
-    width: 44px;
-    height: 44px;
-    object-fit: cover;
-    border-radius: 0.5rem;
-    flex-shrink: 0;
-    border: 1px solid var(--nav-border, #E2E8F0);
-  }
-  .nav-ac-img-ph {
-    width: 44px;
-    height: 44px;
-    border-radius: 0.5rem;
-    flex-shrink: 0;
-    background: var(--nav-search-bg, #F4F7FC);
-    border: 1px solid var(--nav-border, #E2E8F0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .nav-ac-name {
-    flex: 1;
-    font-size: 0.875rem;
-    font-weight: 500;
-    font-family: 'Poppins', sans-serif;
-    color: var(--nav-dd-text-hover, #0F1923);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .nav-ac-price {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    color: #F97316;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .nav-ac-footer {
-    display: block;
-    padding: 0.625rem 1rem;
-    text-align: center;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    color: #1E3A8A;
-    text-decoration: none;
-    background: var(--nav-search-bg, #F4F7FC);
-    border-top: 1px solid var(--nav-border, #E2E8F0);
-    transition: background 120ms;
-  }
-  .nav-ac-footer:hover { background: var(--nav-dd-hover, #eff4ff); }
+  /* Ombre scroll (ajoutée par JS) */
+  .navbar.scrolled { box-shadow: 0 2px 12px rgba(13, 31, 92, 0.08); }
 
-  /* ── Boutons icône ── */
-  .nav-icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 0.5rem;
-    border: none;
-    background: transparent;
-    color: var(--nav-icon, #0D1F5C);
-    cursor: pointer;
-    transition: background 150ms, color 150ms;
-    flex-shrink: 0;
-  }
-  .nav-icon-btn:hover {
-    background: var(--nav-icon-hover-bg, #eff4ff);
-    color: #1E3A8A;
-  }
-
-  /* ── Avatar utilisateur ── */
-  .nav-avatar-img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--brand-200, #b8d0fb);
-    flex-shrink: 0;
-  }
-  .nav-avatar-initial {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--brand-600, #0D1F5C);
-    color: white;
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    letter-spacing: 0;
-  }
-  #cart-badge {
-    display: flex !important;
-    min-width: 16px;
-  }
-
-  /* ── Cart tooltip ── */
-  .nav-cart-btn { position: relative; }
-  .nav-cart-tooltip {
-    position: absolute;
-    bottom: -26px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #0D1F5C;
-    color: white;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    padding: 3px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 150ms;
-    z-index: 999;
-  }
-  .nav-cart-btn:hover .nav-cart-tooltip { opacity: 1; }
-
-  /* ── Boutons Connexion / Inscription ── */
-  .nav-btn-login {
-    padding: 0.4rem 0.875rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    border-radius: 0.5rem;
-    border: 1.5px solid #1E3A8A;
-    color: var(--nav-btn-login-color, #1E3A8A);
-    background: transparent;
-    text-decoration: none;
-    transition: all 150ms;
-    white-space: nowrap;
-  }
-  .nav-btn-login:hover {
-    background: var(--nav-btn-login-hover, #eff4ff);
-  }
-  .nav-btn-register {
-    padding: 0.4rem 0.875rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    border-radius: 0.5rem;
-    border: 1.5px solid #F97316;
-    color: #ffffff;
-    background: #F97316;
-    text-decoration: none;
-    transition: all 150ms;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(249,115,22,0.3);
-  }
-  .nav-btn-register:hover {
-    background: #ea6000;
-    border-color: #ea6000;
-  }
-
-  /* ── Responsive navbar ── */
-  .nav-desktop-links,
-  .nav-desktop-search,
-  .nav-desktop-actions { display: none; }
-  .nav-mobile-burger   { display: flex; margin-left: auto; }
-
-  @media (min-width: 1024px) {
-    .nav-center-group    { display: flex; align-items: center; flex: 1; justify-content: center; gap: 0.75rem; }
-    .nav-desktop-links   { display: flex; align-items: center; gap: 0.125rem; flex-shrink: 0; }
-    .nav-desktop-search  { display: flex; max-width: 380px; width: 100%; }
-    .nav-desktop-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; margin-left: 0; }
-    .nav-mobile-burger   { display: none; }
-  }
-
-  /* ── Menu mobile ── */
-  .mobile-menu {
-    display: none;
-    flex-direction: column;
-    border-top: 1px solid var(--nav-border, #E2E8F0);
-    background: var(--nav-bg, #ffffff);
-    padding: 0.75rem;
-    gap: 0.25rem;
-    /* Menu scrollable si contenu trop long */
-    overflow-y: auto;
-    max-height: calc(100vh - 64px);
-    overscroll-behavior: contain;
-  }
+  /* Mobile menu — état open géré par JS */
+  .mobile-menu { display: none; }
   .mobile-menu.open { display: flex; }
-  /* Quand menu ouvert : navbar fixed pour que la page reste figée */
-  .navbar.menu-open {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-  }
-  /* Compense le saut de layout quand navbar passe en fixed */
-  body.mobile-menu-open {
-    overflow: hidden;
-  }
+  .navbar.menu-open { position: fixed; top: 0; left: 0; right: 0; }
+  body.mobile-menu-open { overflow: hidden; }
 
-  .mobile-link {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.625rem 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    font-family: 'Poppins', sans-serif;
-    color: var(--nav-text, #0D1F5C);
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background 100ms, color 100ms;
-  }
-  .mobile-link:hover { background: var(--nav-dd-hover, #eff4ff); }
-  .mobile-link.danger { color: #991b1b; }
-  .mobile-link.danger:hover { background: #fef2f2; }
-  .mobile-link.accent { color: #F97316; font-weight: 600; }
+  /* Cart badge forcé visible */
+  #cart-badge { display: flex !important; min-width: 16px; }
 
-  .mobile-section-title {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-    color: var(--nav-placeholder, #8898AA);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.5rem 0.75rem 0.25rem;
-  }
-  .mobile-divider {
-    height: 1px;
-    background: var(--nav-border, #E2E8F0);
-    margin: 0.375rem 0;
-  }
-
-  /* ── Dark mode — variables navbar ── */
+  /* Dark mode variables */
   html.dark {
     --nav-bg:              #1A1D27;
     --nav-border:          #2E3350;
@@ -505,270 +84,289 @@
     --nav-btn-login-color: #93B4FF;
     --nav-btn-login-hover: #22263A;
   }
-  html.dark .navbar.scrolled {
-    box-shadow: 0 2px 12px rgba(0,0,0,0.35);
-  }
-  /* Texte "Tous les produits" dans le dropdown categories */
-  html.dark .nav-dropdown-menu [style*="color:#0F1923"],
-  html.dark .nav-dropdown-menu [style*="font-weight:600;color:#0F1923"] {
-    color: var(--nav-dd-text-hover) !important;
-  }
-  /* En-tête dropdown profil */
+  html.dark .navbar.scrolled { box-shadow: 0 2px 12px rgba(0,0,0,0.35); }
   html.dark .nav-dropdown-menu [style*="color:#0F1923"],
   html.dark .nav-dropdown-menu [style*="border-bottom:1px solid #E2E8F0"] {
     border-color: var(--nav-border) !important;
     color: var(--nav-text) !important;
   }
-  html.dark .nav-dropdown-menu [style*="color:#8898AA"] {
-    color: var(--nav-placeholder) !important;
-  }
+  html.dark .nav-dropdown-menu [style*="color:#8898AA"] { color: var(--nav-placeholder) !important; }
   html.dark .nav-dropdown-menu [style*="border-bottom:1px solid #E2E8F0"],
-  html.dark .nav-dropdown-menu [style*="border-top:1px solid #E2E8F0"] {
-    border-color: var(--nav-border) !important;
-  }
-  /* Bouton "Administration" et liens colorés */
+  html.dark .nav-dropdown-menu [style*="border-top:1px solid #E2E8F0"] { border-color: var(--nav-border) !important; }
   html.dark .nav-dd-item[style*="color:#1E3A8A"] { color: #93B4FF !important; }
 </style>
 
 {% comment %} ════════════════════════════════════════
    NAVBAR PRINCIPALE
 ════════════════════════════════════════ {% endcomment %}
-<header class="navbar" id="main-navbar">
+<header class="navbar sticky top-0 z-[100] transition-[box-shadow,background,border-color] duration-200 ease-in-out"
+        id="main-navbar"
+        style="background:var(--nav-bg,#ffffff);border-bottom:1px solid var(--nav-border,#E2E8F0);">
   <div class="container">
-    <nav style="display:flex;align-items:center;height:64px;gap:0.5rem;">
+    <nav class="flex items-center h-16 gap-2">
 
-      {% comment %} ── LOGO ──
-         Lien vers l'accueil (même fonctionnalité que le bouton Accueil).
-         Le SVG a un fond blanc donc il s'intègre naturellement dans la navbar blanche. {% endcomment %}
+      {% comment %} ── LOGO ── {% endcomment %}
       <a href="{% url 'products:accueil' %}"
-         class="flex-shrink-0" style="margin-right:0.5rem;"
+         class="shrink-0 mr-2"
          aria-label="{% trans 'HooYia Market — Accueil' %}">
         <img src="{% static 'img/logo.svg' %}"
              alt="HooYia Market"
-             style="height:46px;width:auto;display:block;border-radius:10px;" />
+             class="h-[46px] w-auto block rounded-[10px]" />
       </a>
 
-      {# ── GROUPE CENTRAL : liens + recherche — centré dans la navbar ── #}
-      <div class="nav-center-group">
-      {# ── LIENS DE NAVIGATION (desktop uniquement) ── #}
-      <div class="nav-desktop-links">
+      {# ── GROUPE CENTRAL : liens + recherche ── #}
+      <div class="nav-center-group hidden lg:flex items-center flex-1 justify-center gap-3">
 
-        {# Accueil #}
-        <a href="{% url 'products:accueil' %}"
-           class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">
-          {% trans "Accueil" %}
-        </a>
+        {# ── LIENS DE NAVIGATION (desktop) ── #}
+        <div class="flex items-center gap-0.5 shrink-0">
 
-        {% comment %} ── Catégories (dropdown) ──
-           Les catégories racines sont injectées via le context processor
-           ou passées directement par les vues dans {{ categories }}. {% endcomment %}
-        <div class="nav-dropdown-wrap">
-          <button class="nav-link" aria-haspopup="true" aria-expanded="false">
-            {% trans "Catégories" %}
-            {# Lucide : ChevronDown #}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
+          {# Accueil #}
+          <a href="{% url 'products:accueil' %}"
+             class="nav-link inline-flex items-center gap-1.5 px-2 pb-1 pt-1.5 text-sm font-medium no-underline whitespace-nowrap font-['Poppins',sans-serif] cursor-pointer relative"
+             style="color:var(--nav-text,#0D1F5C);"
+             {% if request.resolver_match.url_name == 'accueil' %}data-active="true"{% endif %}>
+            {% trans "Accueil" %}
+          </a>
+
+          {# Catégories dropdown #}
+          <div class="nav-dropdown-wrap relative">
+            <button class="nav-link inline-flex items-center gap-1.5 px-2 pb-1 pt-1.5 text-sm font-medium whitespace-nowrap font-['Poppins',sans-serif] cursor-pointer relative bg-transparent border-none rounded-none"
+                    style="color:var(--nav-text,#0D1F5C);"
+                    aria-haspopup="true" aria-expanded="false">
+              {% trans "Catégories" %}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+
+            <div class="nav-dropdown-menu absolute top-[calc(100%+6px)] left-0 min-w-[220px] rounded-xl p-1.5 z-[200]"
+                 style="background:var(--nav-dropdown-bg,#ffffff);border:1px solid var(--nav-border,#E2E8F0);box-shadow:0 8px 32px rgba(13,31,92,0.13);"
+                 role="menu">
+              <a href="{% url 'products:liste' %}"
+                 class="nav-dd-item flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 cursor-pointer w-full font-['Poppins',sans-serif]"
+                 style="color:var(--nav-dd-text,#4A5568);"
+                 onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';this.style.color='var(--nav-dd-text-hover,#0F1923)';"
+                 onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+                 role="menuitem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                  <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+                  <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                <span class="font-semibold" style="color:#0F1923;">{% trans "Tous les produits" %}</span>
+              </a>
+              <div class="h-px my-1 mx-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
+              {% for cat in categories %}
+              <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
+                 class="nav-dd-item flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+                 style="color:var(--nav-dd-text,#4A5568);"
+                 onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';this.style.color='var(--nav-dd-text-hover,#0F1923)';"
+                 onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+                 role="menuitem">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                  <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+                {{ cat.nom }}
+              </a>
+              {% empty %}
+              <span class="nav-dd-item flex px-3 py-2 text-[0.8125rem] font-['Poppins',sans-serif] cursor-default"
+                    style="color:#8898AA;">
+                {% trans "Aucune catégorie disponible" %}
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# Promotions #}
+          <a href="{% url 'products:liste' %}?promo=true"
+             class="nav-link inline-flex items-center gap-1.5 px-2 pb-1 pt-1.5 text-sm font-medium no-underline whitespace-nowrap font-['Poppins',sans-serif] cursor-pointer relative"
+             style="color:#F97316;"
+             {% if request.GET.promo %}data-active="true"{% endif %}>
+            {% trans "Promotions" %}
+          </a>
+        </div>
+
+        {# ── BARRE DE RECHERCHE (desktop) ── #}
+        <div class="flex max-w-[380px] w-full">
+          <div class="nav-search-wrap flex items-center w-full max-w-[420px] relative rounded-full px-4 pr-1.5 transition-all duration-180 h-10 gap-1"
+               style="background:var(--nav-search-bg,#F4F7FC);border:1.5px solid var(--nav-border,#E2E8F0);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 class="shrink-0" style="color:var(--nav-placeholder,#8898AA);"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-          </button>
-
-          <div class="nav-dropdown-menu" role="menu">
-            {# Lien vers tout le catalogue #}
-            <a href="{% url 'products:liste' %}" class="nav-dd-item" role="menuitem">
-              {# Lucide : List #}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="8" y1="6" x2="21" y2="6"/>
-                <line x1="8" y1="12" x2="21" y2="12"/>
-                <line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3.01" y2="6"/>
-                <line x1="3" y1="12" x2="3.01" y2="12"/>
-                <line x1="3" y1="18" x2="3.01" y2="18"/>
+            <input type="search"
+                   id="nav-search-input"
+                   class="border-none bg-transparent outline-none font-['Poppins',sans-serif] text-[0.8125rem] flex-1 min-w-0 ml-2"
+                   style="color:var(--nav-text,#0F1923);"
+                   placeholder="{% trans 'Rechercher un produit…' %}"
+                   autocomplete="off"
+                   aria-label="{% trans 'Rechercher' %}" />
+            <button onclick="navSearch()"
+                    class="flex items-center justify-center w-[30px] h-[30px] rounded-full border-none cursor-pointer shrink-0 transition-colors duration-150"
+                    style="background:#1E3A8A;color:white;"
+                    onmouseover="this.style.background='#0D1F5C'" onmouseout="this.style.background='#1E3A8A'"
+                    aria-label="{% trans 'Lancer la recherche' %}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
               </svg>
-              <span style="font-weight:600;color:#0F1923;">{% trans "Tous les produits" %}</span>
-            </a>
-            <div class="nav-dd-divider"></div>
-            {# Catégories racines injectées par Django #}
-            {% for cat in categories %}
-            <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
-               class="nav-dd-item" role="menuitem">
-              {# Lucide : Tag #}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
-                <line x1="7" y1="7" x2="7.01" y2="7"/>
-              </svg>
-              {{ cat.nom }}
-            </a>
-            {% empty %}
-            {# Fallback si aucune catégorie en base #}
-            <span class="nav-dd-item" style="color:#8898AA;cursor:default;">
-              {% trans "Aucune catégorie disponible" %}
-            </span>
-            {% endfor %}
+            </button>
+            <div id="nav-autocomplete"
+                 class="absolute top-[calc(100%+6px)] left-0 right-0 rounded-xl z-[9999] overflow-hidden"
+                 style="display:none;background:var(--nav-dropdown-bg,#FFFFFF);border:1px solid var(--nav-border,#E2E8F0);box-shadow:0 8px 24px rgba(13,31,92,0.12);"></div>
           </div>
         </div>
-
-        {# Promotions #}
-        <a href="{% url 'products:liste' %}?promo=true"
-           class="nav-link {% if request.GET.promo %}active{% endif %}"
-           style="color:#F97316;">
-          {% trans "Promotions" %}
-        </a>
-
-      </div>{# fin liens desktop #}
-
-      {# ── BARRE DE RECHERCHE (desktop) ── #}
-      <div class="nav-desktop-search">
-        <div class="nav-search-wrap w-full" style="max-width:420px;position:relative;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="nav-search-icon"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               style="flex-shrink:0;">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="search"
-                 id="nav-search-input"
-                 class="nav-search-input ml-2"
-                 placeholder="{% trans 'Rechercher un produit…' %}"
-                 autocomplete="off"
-                 aria-label="{% trans 'Rechercher' %}" />
-          <button onclick="navSearch()"
-                  class="nav-search-btn"
-                  aria-label="{% trans 'Lancer la recherche' %}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white"
-                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </button>
-          <div id="nav-autocomplete" class="nav-autocomplete" style="display:none;"></div>
-        </div>
-      </div>
       </div>{# fin nav-center-group #}
 
-            {# ── ACTIONS DROITE (desktop) ── #}
-      <div class="nav-desktop-actions">
+      {# ── ACTIONS DROITE (desktop) ── #}
+      <div class="hidden lg:flex items-center gap-3 shrink-0">
 
         {% comment %} ── Cloche Notifications ── {% endcomment %}
         {% if user.is_authenticated %}
-        <div class="nav-dropdown-wrap" id="notif-wrap">
-          <button class="nav-icon-btn" id="notif-btn" aria-label="{% trans 'Notifications' %}" style="position:relative;">
+        <div class="nav-dropdown-wrap relative" id="notif-wrap">
+          <button class="flex items-center justify-center w-[34px] h-[34px] rounded-lg border-none bg-transparent cursor-pointer shrink-0 transition-colors duration-150 relative"
+                  style="color:var(--nav-icon,#0D1F5C);"
+                  onmouseover="this.style.background='var(--nav-icon-hover-bg,#eff4ff)';this.style.color='#1E3A8A';"
+                  onmouseout="this.style.background='transparent';this.style.color='var(--nav-icon,#0D1F5C)';"
+                  id="notif-btn"
+                  aria-label="{% trans 'Notifications' %}">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
-            <span class="nav-badge" id="notif-badge" style="{% if not notif_count or notif_count == 0 %}display:none;{% endif %}">{{ notif_count|default:0 }}</span>
+            <span class="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5 text-[0.625rem] font-bold leading-none font-['Poppins',sans-serif]"
+                  id="notif-badge"
+                  style="background:#F97316;color:white;border:2px solid var(--nav-bg,white);{% if not notif_count or notif_count == 0 %}display:none;{% endif %}">
+              {{ notif_count|default:0 }}
+            </span>
           </button>
-          <div class="nav-dropdown-menu align-right" id="notif-dropdown" style="min-width:320px;max-width:360px;padding:0;">
-            <div style="padding:12px 16px 10px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:#0D1F5C;">{% trans "Notifications" %}</span>
-              <button onclick="marquerToutesLues()" style="font-size:11px;color:#F97316;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;">{% trans "Tout marquer lu" %}</button>
+          <div class="nav-dropdown-menu absolute top-[calc(100%+6px)] right-0 rounded-xl z-[200] p-0 min-w-[320px] max-w-[360px]"
+               id="notif-dropdown"
+               style="background:var(--nav-dropdown-bg,#ffffff);border:1px solid var(--nav-border,#E2E8F0);box-shadow:0 8px 32px rgba(13,31,92,0.13);">
+            <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #E2E8F0;">
+              <span class="font-bold text-[13px] font-['Sora',sans-serif]" style="color:#0D1F5C;">{% trans "Notifications" %}</span>
+              <button onclick="marquerToutesLues()" class="text-[11px] font-semibold bg-none border-none cursor-pointer font-['Plus Jakarta Sans',sans-serif]" style="color:#F97316;background:none;">{% trans "Tout marquer lu" %}</button>
             </div>
-            <div id="notif-list" style="max-height:320px;overflow-y:auto;">
-              <div style="padding:24px 16px;text-align:center;color:#8898AA;font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" style="margin:0 auto 8px;display:block;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <div id="notif-list" class="max-h-[320px] overflow-y-auto">
+              <div class="px-4 py-6 text-center text-[12.5px] font-['Plus Jakarta Sans',sans-serif]" style="color:#8898AA;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" class="mx-auto mb-2 block"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                 {% trans "Chargement…" %}
               </div>
             </div>
-            <div style="padding:10px 16px;border-top:1px solid #E2E8F0;text-align:center;">
-              <a href="/notifications/" style="font-size:12px;color:#1E3A8A;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-decoration:none;">{% trans "Voir toutes les notifications" %} →</a>
+            <div class="px-4 py-2.5 text-center" style="border-top:1px solid #E2E8F0;">
+              <a href="/notifications/" class="text-xs font-semibold no-underline font-['Plus Jakarta Sans',sans-serif]" style="color:#1E3A8A;">{% trans "Voir toutes les notifications" %} →</a>
             </div>
           </div>
         </div>
         {% endif %}
 
-        {% comment %} ── Panier ──
-           Visible pour tous (connecté ou non).
-           Caché pour les admins/vendeurs qui ne font pas d'achats. {% endcomment %}
+        {% comment %} ── Panier ── {% endcomment %}
         {% if not user.is_staff and not user.is_vendeur %}
         <a href="{% url 'cart:panier' %}"
-           class="nav-icon-btn nav-cart-btn"
+           class="nav-cart-btn flex items-center justify-center w-[34px] h-[34px] rounded-lg border-none bg-transparent cursor-pointer shrink-0 transition-colors duration-150 relative no-underline"
+           style="color:var(--nav-icon,#0D1F5C);"
+           onmouseover="this.style.background='var(--nav-icon-hover-bg,#eff4ff)';this.style.color='#1E3A8A';"
+           onmouseout="this.style.background='transparent';this.style.color='var(--nav-icon,#0D1F5C)';"
            aria-label="{% trans 'Panier' %} ({{ cart_count }})">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
           </svg>
-          <span class="nav-badge" id="cart-badge">{{ cart_count|default:"0" }}</span>
-          <span class="nav-cart-tooltip">{% trans "Panier" %}</span>
+          <span class="nav-badge absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5 text-[0.625rem] font-bold leading-none font-['Poppins',sans-serif]"
+                id="cart-badge"
+                style="background:#F97316;color:white;border:2px solid var(--nav-bg,white);">
+            {{ cart_count|default:"0" }}
+          </span>
+          <span class="absolute -bottom-[26px] left-1/2 -translate-x-1/2 text-[0.6875rem] font-semibold font-['Poppins',sans-serif] px-2 py-0.5 rounded whitespace-nowrap pointer-events-none opacity-0 transition-opacity duration-150 z-[999]"
+                style="background:#0D1F5C;color:white;">
+            {% trans "Panier" %}
+          </span>
         </a>
         {% endif %}
 
-        {% comment %} ── Sélecteur de langue — branché sur set_language Django ── {% endcomment %}
+        {% comment %} ── Sélecteur de langue ── {% endcomment %}
         {% get_current_language as CURRENT_LANG %}
-        <div class="nav-dropdown-wrap">
-          <button class="nav-icon-btn" title="{% trans 'Langue' %}" aria-label="{% trans 'Changer la langue' %}">
-            {# Lucide : Globe #}
+        <div class="nav-dropdown-wrap relative">
+          <button class="flex items-center justify-center w-[34px] h-[34px] rounded-lg border-none bg-transparent cursor-pointer shrink-0 transition-colors duration-150"
+                  style="color:var(--nav-icon,#0D1F5C);"
+                  onmouseover="this.style.background='var(--nav-icon-hover-bg,#eff4ff)';this.style.color='#1E3A8A';"
+                  onmouseout="this.style.background='transparent';this.style.color='var(--nav-icon,#0D1F5C)';"
+                  title="{% trans 'Langue' %}" aria-label="{% trans 'Changer la langue' %}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="2" y1="12" x2="22" y2="12"/>
               <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
             </svg>
-            {# Indicateur de la langue active #}
-            <span style="font-size:14px;margin-left:2px;">{% if CURRENT_LANG == 'en' %}🇬🇧{% else %}🇫🇷{% endif %}</span>
+            <span class="text-sm ml-0.5">{% if CURRENT_LANG == 'en' %}🇬🇧{% else %}🇫🇷{% endif %}</span>
           </button>
-          <div class="nav-dropdown-menu align-right" style="min-width:150px;">
+          <div class="nav-dropdown-menu absolute top-[calc(100%+6px)] right-0 rounded-xl z-[200] p-1.5 min-w-[150px]"
+               style="background:var(--nav-dropdown-bg,#ffffff);border:1px solid var(--nav-border,#E2E8F0);box-shadow:0 8px 32px rgba(13,31,92,0.13);">
 
-            {# ── Français ── #}
-            <form id="lang-form-fr" action="{% url 'set_language' %}" method="post" style="margin:0;">
+            <form id="lang-form-fr" action="{% url 'set_language' %}" method="post" class="m-0">
               {% csrf_token %}
               <input type="hidden" name="language" value="fr">
               <input type="hidden" name="next" id="lang-next-fr" value="/">
-              <button type="submit" class="nav-dd-item" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;{% if CURRENT_LANG == 'fr' %}font-weight:700;color:#0F1923;{% else %}color:#8898AA;{% endif %}">
+              <button type="submit"
+                      class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] rounded-lg transition-colors duration-100 cursor-pointer w-full text-left bg-none border-none font-['Poppins',sans-serif]"
+                      style="{% if CURRENT_LANG == 'fr' %}font-weight:700;color:#0F1923;{% else %}color:#8898AA;{% endif %}"
+                      onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';"
+                      onmouseout="this.style.background='transparent';">
                 🇫🇷 {% trans "Français" %}
-                {% if CURRENT_LANG == 'fr' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+                {% if CURRENT_LANG == 'fr' %}<span class="ml-auto" style="color:#4F8EF7;">✓</span>{% endif %}
               </button>
             </form>
 
-            {# ── English ── #}
-            <form id="lang-form-en" action="{% url 'set_language' %}" method="post" style="margin:0;">
+            <form id="lang-form-en" action="{% url 'set_language' %}" method="post" class="m-0">
               {% csrf_token %}
               <input type="hidden" name="language" value="en">
               <input type="hidden" name="next" id="lang-next-en" value="/en/">
-              <button type="submit" class="nav-dd-item" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;{% if CURRENT_LANG == 'en' %}font-weight:700;color:#0F1923;{% else %}color:#8898AA;{% endif %}">
+              <button type="submit"
+                      class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] rounded-lg transition-colors duration-100 cursor-pointer w-full text-left bg-none border-none font-['Poppins',sans-serif]"
+                      style="{% if CURRENT_LANG == 'en' %}font-weight:700;color:#0F1923;{% else %}color:#8898AA;{% endif %}"
+                      onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';"
+                      onmouseout="this.style.background='transparent';">
                 🇬🇧 English
-                {% if CURRENT_LANG == 'en' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+                {% if CURRENT_LANG == 'en' %}<span class="ml-auto" style="color:#4F8EF7;">✓</span>{% endif %}
               </button>
             </form>
-
           </div>
         </div>
         <script>
-        // Calcule le bon "next" en retirant le préfixe de langue courant de l'URL
         (function() {
           var path = window.location.pathname;
-          // Retire les préfixes /en/, /fr/ pour obtenir le chemin brut
           var stripped = path.replace(/^\/(en|fr)\//, '/').replace(/^\/(en|fr)$/, '/');
-
-          // Pour FR (pas de préfixe) → chemin brut
           var nextFr = document.getElementById('lang-next-fr');
           if (nextFr) nextFr.value = stripped + window.location.search;
-
-          // Pour EN → /en/ + chemin brut sans le slash initial
           var nextEn = document.getElementById('lang-next-en');
           if (nextEn) nextEn.value = '/en' + (stripped.startsWith('/') ? stripped : '/' + stripped) + window.location.search;
         })();
         </script>
 
-        {% comment %} ── Toggle Dark Mode ──
-           La fonctionnalité dark mode sera implémentée ultérieurement.
-           L'icône bascule entre soleil (mode clair) et lune (mode sombre). {% endcomment %}
-        <button class="nav-icon-btn"
+        {% comment %} ── Toggle Dark Mode ── {% endcomment %}
+        <button class="flex items-center justify-center w-[34px] h-[34px] rounded-lg border-none bg-transparent cursor-pointer shrink-0 transition-colors duration-150"
+                style="color:var(--nav-icon,#0D1F5C);"
+                onmouseover="this.style.background='var(--nav-icon-hover-bg,#eff4ff)';this.style.color='#1E3A8A';"
+                onmouseout="this.style.background='transparent';this.style.color='var(--nav-icon,#0D1F5C)';"
                 onclick="toggleDarkMode()"
                 id="dark-mode-btn"
                 title="{% trans 'Mode sombre' %}"
                 aria-label="{% trans 'Basculer le mode sombre' %}">
-          {# Lucide : Moon (affiché en mode clair) #}
           <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
           </svg>
-          {# Lucide : Sun (affiché en mode sombre) — caché par défaut #}
           <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               style="display:none;">
+               class="hidden">
             <circle cx="12" cy="12" r="5"/>
             <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
@@ -779,46 +377,48 @@
           </svg>
         </button>
 
-
-        {# ── Compte (connecté) ou Connexion/Inscription (non connecté) ── #}
+        {# ── Compte (connecté) ou Connexion/Inscription ── #}
         {% if user.is_authenticated %}
-
-        {# Compte ▼ — dropdown profil #}
-        <div class="nav-dropdown-wrap">
-          <button class="nav-link nav-user-btn" aria-haspopup="true" aria-expanded="false">
-            {# Avatar : photo de profil si disponible, sinon initiale sur fond brand #}
+        <div class="nav-dropdown-wrap relative">
+          <button class="nav-link inline-flex items-center gap-1.5 px-2 pb-1 pt-1.5 text-sm font-medium whitespace-nowrap font-['Poppins',sans-serif] cursor-pointer relative bg-transparent border-none rounded-none"
+                  style="color:var(--nav-text,#0D1F5C);"
+                  aria-haspopup="true" aria-expanded="false">
             {% if user.photo_profil %}
             <img src="{{ user.photo_profil.url }}"
                  alt="{{ user.prenom|default:user.username }}"
-                 class="nav-avatar-img" />
+                 class="w-7 h-7 rounded-full object-cover shrink-0"
+                 style="border:2px solid var(--brand-200,#b8d0fb);" />
             {% else %}
-            <span class="nav-avatar-initial">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold font-['Poppins',sans-serif]"
+                  style="background:var(--brand-600,#0D1F5C);">
               {{ user.prenom|default:user.username|first|upper }}
             </span>
             {% endif %}
-            {# Lucide : ChevronDown #}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </button>
 
-          <div class="nav-dropdown-menu align-right" role="menu"
-               style="min-width:200px;">
+          <div class="nav-dropdown-menu absolute top-[calc(100%+6px)] right-0 rounded-xl z-[200] p-1.5 min-w-[200px]"
+               style="background:var(--nav-dropdown-bg,#ffffff);border:1px solid var(--nav-border,#E2E8F0);box-shadow:0 8px 32px rgba(13,31,92,0.13);"
+               role="menu">
 
-            {# En-tête avec info utilisateur #}
-            <div style="padding:0.625rem 0.75rem 0.5rem;border-bottom:1px solid #E2E8F0;margin-bottom:0.25rem;">
-              <p style="font-size:0.8125rem;font-weight:600;color:#0F1923;font-family:'Poppins',sans-serif;">
+            <div class="px-3 pb-2 pt-2.5 mb-1" style="border-bottom:1px solid #E2E8F0;">
+              <p class="text-[0.8125rem] font-semibold font-['Poppins',sans-serif] m-0" style="color:#0F1923;">
                 {{ user.get_full_name|default:user.username }}
               </p>
-              <p style="font-size:0.75rem;color:#8898AA;font-family:'Poppins',sans-serif;margin-top:1px;">
+              <p class="text-xs font-['Poppins',sans-serif] mt-px m-0" style="color:#8898AA;">
                 {{ user.email }}
               </p>
             </div>
 
-            {# Profil #}
-            <a href="{% url 'users:profil' %}" class="nav-dd-item" role="menuitem">
-              {# Lucide : User #}
+            <a href="{% url 'users:profil' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:var(--nav-dd-text,#4A5568);"
+               onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';this.style.color='var(--nav-dd-text-hover,#0F1923)';"
+               onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -827,10 +427,13 @@
               {% trans "Mon profil" %}
             </a>
 
-            {# Mes commandes (uniquement pour les acheteurs, pas les admins/vendeurs) #}
             {% if not user.is_staff %}
-            <a href="{% url 'orders:historique' %}" class="nav-dd-item" role="menuitem">
-              {# Lucide : ShoppingBag #}
+            <a href="{% url 'orders:historique' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:var(--nav-dd-text,#4A5568);"
+               onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';this.style.color='var(--nav-dd-text-hover,#0F1923)';"
+               onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
@@ -841,8 +444,12 @@
             </a>
             {% endif %}
 
-            {# Messages — pour tous les utilisateurs connectés #}
-           <a href="{% url 'chat:chat-liste' %}" class="nav-dd-item" role="menuitem">
+            <a href="{% url 'chat:chat-liste' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:var(--nav-dd-text,#4A5568);"
+               onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';this.style.color='var(--nav-dd-text-hover,#0F1923)';"
+               onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -850,11 +457,13 @@
               {% trans "Messages" %}
             </a>
 
-            {# Dashboard vendeur (uniquement pour les vendeurs non-staff) #}
             {% if user.is_vendeur and not user.is_staff %}
-            <a href="{% url 'products:vendeur_dashboard' %}" class="nav-dd-item" role="menuitem"
-               style="color:var(--brand-500);font-weight:600;">
-              {# Lucide : Store #}
+            <a href="{% url 'products:vendeur_dashboard' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-semibold rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:var(--brand-500);"
+               onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';"
+               onmouseout="this.style.background='transparent';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -864,11 +473,13 @@
             </a>
             {% endif %}
 
-            {# Dashboard admin (uniquement pour le staff) #}
             {% if user.is_staff %}
-            <a href="{% url 'products:admin_dashboard' %}" class="nav-dd-item" role="menuitem"
-               style="color:#1E3A8A;font-weight:600;">
-              {# Lucide : LayoutDashboard #}
+            <a href="{% url 'products:admin_dashboard' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-semibold rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:#1E3A8A;"
+               onmouseover="this.style.background='var(--nav-dd-hover,#f9fafb)';"
+               onmouseout="this.style.background='transparent';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
@@ -876,15 +487,17 @@
               </svg>
               {% trans "Administration" %}
             </a>
-            <div class="nav-dd-divider"></div>
+            <div class="h-px my-1 mx-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
             {% endif %}
 
-            {# Séparateur avant déconnexion #}
-            {% if not user.is_staff %}<div class="nav-dd-divider"></div>{% endif %}
+            {% if not user.is_staff %}<div class="h-px my-1 mx-1.5" style="background:var(--nav-border,#E2E8F0);"></div>{% endif %}
 
-            {# Déconnexion #}
-            <a href="{% url 'users:deconnexion' %}" class="nav-dd-item danger" role="menuitem">
-              {# Lucide : LogOut #}
+            <a href="{% url 'users:deconnexion' %}"
+               class="flex items-center gap-2.5 px-3 py-2 text-[0.8125rem] font-medium rounded-lg no-underline transition-colors duration-100 font-['Poppins',sans-serif]"
+               style="color:var(--nav-dd-text,#4A5568);"
+               onmouseover="this.style.background='#fef2f2';this.style.color='#991b1b';"
+               onmouseout="this.style.background='transparent';this.style.color='var(--nav-dd-text,#4A5568)';"
+               role="menuitem">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -897,24 +510,29 @@
         </div>
 
         {% else %}
-
-        {# Non connecté : Connexion + Inscription #}
-        <a href="{% url 'users:connexion' %}" class="nav-btn-login">
-          {# Lucide : LogIn #}
+        {# Non connecté #}
+        <a href="{% url 'users:connexion' %}"
+           class="inline-flex items-center px-3.5 py-1.5 text-[0.8125rem] font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-all duration-150 whitespace-nowrap"
+           style="border:1.5px solid #1E3A8A;color:var(--nav-btn-login-color,#1E3A8A);background:transparent;"
+           onmouseover="this.style.background='var(--nav-btn-login-hover,#eff4ff)';"
+           onmouseout="this.style.background='transparent';">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:middle;margin-right:4px;">
+               class="inline align-middle mr-1">
             <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
             <polyline points="10 17 15 12 10 7"/>
             <line x1="15" y1="12" x2="3" y2="12"/>
           </svg>
           {% trans "Connexion" %}
         </a>
-        <a href="{% url 'users:inscription' %}" class="nav-btn-register">
-          {# Lucide : UserPlus #}
+        <a href="{% url 'users:inscription' %}"
+           class="inline-flex items-center px-3.5 py-1.5 text-[0.8125rem] font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-all duration-150 whitespace-nowrap text-white"
+           style="background:#F97316;border:1.5px solid #F97316;box-shadow:0 2px 8px rgba(249,115,22,0.3);"
+           onmouseover="this.style.background='#ea6000';this.style.borderColor='#ea6000';"
+           onmouseout="this.style.background='#F97316';this.style.borderColor='#F97316';">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               style="display:inline;vertical-align:middle;margin-right:4px;">
+               class="inline align-middle mr-1">
             <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <line x1="19" y1="8" x2="19" y2="14"/>
@@ -922,67 +540,74 @@
           </svg>
           {% trans "S'inscrire" %}
         </a>
-
         {% endif %}
 
       </div>{# fin actions droite desktop #}
 
-      {% comment %} ── BURGER (mobile uniquement) ──
-         Apparaît sur les écrans < lg (1024px).
-         Toggle le menu mobile via JS. {% endcomment %}
-      <button class="nav-mobile-burger nav-icon-btn"
+      {% comment %} ── BURGER (mobile) ── {% endcomment %}
+      <button class="flex lg:hidden ml-auto items-center justify-center w-[34px] h-[34px] rounded-lg border-none bg-transparent cursor-pointer shrink-0 transition-colors duration-150"
+              style="color:var(--nav-icon,#0D1F5C);"
+              onmouseover="this.style.background='var(--nav-icon-hover-bg,#eff4ff)';"
+              onmouseout="this.style.background='transparent';"
               onclick="toggleMobileMenu()"
               id="burger-btn"
               aria-label="{% trans 'Menu' %}"
               aria-expanded="false">
-        {# Lucide : Menu #}
         <svg id="burger-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
-        {# Lucide : X (affiché quand menu ouvert) #}
         <svg id="burger-icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             style="display:none;">
+             class="hidden">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
 
     </nav>
-  </div>{# fin .container #}
+  </div>
 
   {% comment %} ════════════════════════════════════════
      MENU MOBILE
-     Tiroir vertical qui s'affiche sous la navbar sur mobile.
-     Contient tous les liens de navigation + recherche.
   ════════════════════════════════════════ {% endcomment %}
-  <div id="mobile-menu" class="mobile-menu" role="navigation" aria-label="{% trans 'Menu mobile' %}">
+  <div id="mobile-menu"
+       class="mobile-menu flex-col gap-1 p-3 overflow-y-auto overscroll-contain"
+       style="border-top:1px solid var(--nav-border,#E2E8F0);background:var(--nav-bg,#ffffff);max-height:calc(100vh - 64px);"
+       role="navigation"
+       aria-label="{% trans 'Menu mobile' %}">
 
-    {# Barre de recherche mobile #}
-    <div style="padding:0.25rem 0.25rem 0.5rem;">
-      <div class="nav-search-wrap" style="height:40px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="nav-search-icon"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+    {# Recherche mobile #}
+    <div class="px-1 pb-2 pt-1">
+      <div class="nav-search-wrap flex items-center h-10 rounded-full px-4 pr-1.5 gap-1"
+           style="background:var(--nav-search-bg,#F4F7FC);border:1.5px solid var(--nav-border,#E2E8F0);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             class="shrink-0" style="color:var(--nav-placeholder,#8898AA);"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input type="search"
                id="nav-search-mobile"
-               class="nav-search-input ml-2 flex-1"
+               class="border-none bg-transparent outline-none font-['Poppins',sans-serif] text-[0.8125rem] flex-1 min-w-0 ml-2 w-full"
+               style="color:var(--nav-text,#0F1923);"
                placeholder="{% trans 'Rechercher…' %}"
-               onkeydown="if(event.key==='Enter') navSearchMobile()"
-               style="width:100%;" />
+               onkeydown="if(event.key==='Enter') navSearchMobile()" />
       </div>
     </div>
 
-    <div class="mobile-divider"></div>
+    <div class="h-px my-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
 
-    {# Navigation principale #}
-    <p class="mobile-section-title">{% trans "Navigation" %}</p>
-    <a href="{% url 'products:accueil' %}" class="mobile-link">
+    {# Navigation principale mobile #}
+    <p class="text-[0.6875rem] font-bold font-['Poppins',sans-serif] uppercase tracking-[0.06em] px-3 pt-2 pb-1"
+       style="color:var(--nav-placeholder,#8898AA);">{% trans "Navigation" %}</p>
+
+    <a href="{% url 'products:accueil' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
@@ -990,7 +615,10 @@
       </svg>
       {% trans "Accueil" %}
     </a>
-    <a href="{% url 'products:liste' %}" class="mobile-link">
+    <a href="{% url 'products:liste' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -998,7 +626,10 @@
       </svg>
       {% trans "Catalogue" %}
     </a>
-    <a href="{% url 'products:liste' %}?promo=true" class="mobile-link accent">
+    <a href="{% url 'products:liste' %}?promo=true"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:#F97316;"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="5" x2="5" y2="19"/>
@@ -1010,10 +641,14 @@
 
     {# Catégories mobile #}
     {% if categories %}
-    <div class="mobile-divider"></div>
-    <p class="mobile-section-title">{% trans "Catégories" %}</p>
+    <div class="h-px my-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
+    <p class="text-[0.6875rem] font-bold font-['Poppins',sans-serif] uppercase tracking-[0.06em] px-3 pt-2 pb-1"
+       style="color:var(--nav-placeholder,#8898AA);">{% trans "Catégories" %}</p>
     {% for cat in categories %}
-    <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}" class="mobile-link">
+    <a href="{% url 'products:liste' %}?categorie={{ cat.slug }}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
@@ -1024,12 +659,16 @@
     {% endfor %}
     {% endif %}
 
-    <div class="mobile-divider"></div>
+    <div class="h-px my-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
 
     {# Compte mobile #}
     {% if user.is_authenticated %}
-    <p class="mobile-section-title">{% trans "Mon compte" %}</p>
-    <a href="{% url 'users:profil' %}" class="mobile-link">
+    <p class="text-[0.6875rem] font-bold font-['Poppins',sans-serif] uppercase tracking-[0.06em] px-3 pt-2 pb-1"
+       style="color:var(--nav-placeholder,#8898AA);">{% trans "Mon compte" %}</p>
+    <a href="{% url 'users:profil' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -1038,7 +677,10 @@
       {% trans "Mon profil" %}
     </a>
     {% if not user.is_staff and not user.is_vendeur %}
-    <a href="{% url 'orders:historique' %}" class="mobile-link">
+    <a href="{% url 'orders:historique' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
@@ -1047,17 +689,27 @@
       </svg>
       {% trans "Mes commandes" %}
     </a>
-    <a href="{% url 'cart:panier' %}" class="mobile-link">
+    <a href="{% url 'cart:panier' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
         <path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/>
       </svg>
-      {% trans "Panier" %} {% if cart_count > 0 %}<span class="nav-badge" style="position:static;margin-left:4px;border:none;">{{ cart_count }}</span>{% endif %}
+      {% trans "Panier" %}
+      {% if cart_count > 0 %}
+      <span class="ml-1 min-w-[16px] h-4 rounded-full flex items-center justify-center px-0.5 text-[0.625rem] font-bold leading-none font-['Poppins',sans-serif]"
+            style="background:#F97316;color:white;position:static;border:none;">{{ cart_count }}</span>
+      {% endif %}
     </a>
     {% endif %}
     {% if user.is_vendeur and not user.is_staff %}
-    <a href="{% url 'products:vendeur_dashboard' %}" class="mobile-link" style="color:var(--brand-500);font-weight:600;">
+    <a href="{% url 'products:vendeur_dashboard' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--brand-500);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -1067,7 +719,10 @@
     </a>
     {% endif %}
     {% if user.is_staff %}
-    <a href="{% url 'products:admin_dashboard' %}" class="mobile-link" style="color:#1E3A8A;font-weight:600;">
+    <a href="{% url 'products:admin_dashboard' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:#1E3A8A;"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
@@ -1076,8 +731,11 @@
       {% trans "Administration" %}
     </a>
     {% endif %}
-    <div class="mobile-divider"></div>
-    <a href="{% url 'users:deconnexion' %}" class="mobile-link danger">
+    <div class="h-px my-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
+    <a href="{% url 'users:deconnexion' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:#991b1b;"
+       onmouseover="this.style.background='#fef2f2';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
@@ -1087,9 +745,12 @@
       {% trans "Déconnexion" %}
     </a>
     {% else %}
-    {# Non connecté — mobile #}
-    <p class="mobile-section-title">{% trans "Compte" %}</p>
-    <a href="{% url 'users:connexion' %}" class="mobile-link">
+    <p class="text-[0.6875rem] font-bold font-['Poppins',sans-serif] uppercase tracking-[0.06em] px-3 pt-2 pb-1"
+       style="color:var(--nav-placeholder,#8898AA);">{% trans "Compte" %}</p>
+    <a href="{% url 'users:connexion' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:var(--nav-text,#0D1F5C);"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
@@ -1098,7 +759,10 @@
       </svg>
       {% trans "Connexion" %}
     </a>
-    <a href="{% url 'users:inscription' %}" class="mobile-link accent">
+    <a href="{% url 'users:inscription' %}"
+       class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold font-['Poppins',sans-serif] rounded-lg no-underline transition-colors duration-100"
+       style="color:#F97316;"
+       onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
@@ -1110,17 +774,21 @@
     </a>
     {% endif %}
 
+    {# Préférences mobile #}
+    <div class="h-px my-1.5" style="background:var(--nav-border,#E2E8F0);"></div>
+    <p class="text-[0.6875rem] font-bold font-['Poppins',sans-serif] uppercase tracking-[0.06em] px-3 pt-2 pb-1"
+       style="color:var(--nav-placeholder,#8898AA);">{% trans "Préférences" %}</p>
 
-    {# ── Préférences : Dark mode + Langue ── #}
-    <div class="mobile-divider"></div>
-    <p class="mobile-section-title">{% trans "Préférences" %}</p>
-
-    {# Dark mode #}
-    <button onclick="toggleDarkMode()" class="mobile-link" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;" id="mobile-dark-btn">
+    {# Dark mode mobile #}
+    <button onclick="toggleDarkMode()"
+            class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg transition-colors duration-100 w-full text-left bg-transparent border-none cursor-pointer"
+            style="color:var(--nav-text,#0D1F5C);"
+            onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';"
+            id="mobile-dark-btn">
       <svg id="mobile-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
       </svg>
-      <svg id="mobile-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+      <svg id="mobile-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
         <circle cx="12" cy="12" r="5"/>
         <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
         <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
@@ -1130,38 +798,43 @@
       <span id="mobile-dark-label">{% trans "Mode sombre" %}</span>
     </button>
 
-    {# Langue FR #}
+    {# Langue FR mobile #}
     {% get_current_language as CURRENT_LANG %}
-    <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+    <form method="post" action="{% url 'set_language' %}" class="m-0">
       {% csrf_token %}
       <input type="hidden" name="language" value="fr">
       <input type="hidden" name="next" id="mobile-next-fr" value="/">
-      <button type="submit" class="mobile-link{% if CURRENT_LANG == 'fr' %} active{% endif %}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;{% if CURRENT_LANG == 'fr' %}font-weight:700;{% endif %}">
+      <button type="submit"
+              class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg transition-colors duration-100 w-full text-left bg-transparent border-none cursor-pointer {% if CURRENT_LANG == 'fr' %}font-bold{% endif %}"
+              style="color:var(--nav-text,#0D1F5C);"
+              onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
-        🇫🇷 Français {% if CURRENT_LANG == 'fr' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+        🇫🇷 Français {% if CURRENT_LANG == 'fr' %}<span class="ml-auto" style="color:#4F8EF7;">✓</span>{% endif %}
       </button>
     </form>
 
-    {# Langue EN #}
-    <form method="post" action="{% url 'set_language' %}" style="margin:0;">
+    {# Langue EN mobile #}
+    <form method="post" action="{% url 'set_language' %}" class="m-0">
       {% csrf_token %}
       <input type="hidden" name="language" value="en">
       <input type="hidden" name="next" id="mobile-next-en" value="/en/">
-      <button type="submit" class="mobile-link{% if CURRENT_LANG == 'en' %} active{% endif %}" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;{% if CURRENT_LANG == 'en' %}font-weight:700;{% endif %}">
+      <button type="submit"
+              class="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium font-['Poppins',sans-serif] rounded-lg transition-colors duration-100 w-full text-left bg-transparent border-none cursor-pointer {% if CURRENT_LANG == 'en' %}font-bold{% endif %}"
+              style="color:var(--nav-text,#0D1F5C);"
+              onmouseover="this.style.background='var(--nav-dd-hover,#eff4ff)';" onmouseout="this.style.background='transparent';">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
-        🇬🇧 English {% if CURRENT_LANG == 'en' %}<span style="margin-left:auto;color:#4F8EF7;">✓</span>{% endif %}
+        🇬🇧 English {% if CURRENT_LANG == 'en' %}<span class="ml-auto" style="color:#4F8EF7;">✓</span>{% endif %}
       </button>
     </form>
 
     <script>
       (function() {
-        /* Sync icônes dark mode mobile */
         function syncMobileDark() {
           var isDark = document.documentElement.classList.contains('dark');
           var moon = document.getElementById('mobile-icon-moon');
@@ -1174,7 +847,6 @@
         document.addEventListener('DOMContentLoaded', syncMobileDark);
         var origToggle = window.toggleDarkMode;
         window.toggleDarkMode = function() { if(origToggle) origToggle(); syncMobileDark(); };
-        /* next URLs langue */
         var path = window.location.pathname.replace(/^\/en\//, '/');
         var frEl = document.getElementById('mobile-next-fr');
         var enEl = document.getElementById('mobile-next-en');
@@ -1215,14 +887,16 @@
         .then(function(r){return r.json();})
         .then(function(d){
           if (!d.results||!d.results.length) {
-            box.innerHTML = '<div class="nav-ac-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8898AA" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>&nbsp;'+NAV_I18N.aucunProduit+'</div>';
+            box.innerHTML = '<div class="flex items-center justify-center gap-2 px-5 py-4 text-sm font-[\'Poppins\',sans-serif]" style="color:var(--nav-placeholder,#8898AA);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8898AA" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>&nbsp;'+NAV_I18N.aucunProduit+'</div>';
           } else {
             var h = '';
             d.results.forEach(function(p){
-              var img = p.image ? '<img class="nav-ac-img" src="'+p.image+'" alt="" loading="lazy">' : '<div class="nav-ac-img-ph"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8898AA" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
-              h += '<a href="/produits/'+p.slug+'/" class="nav-ac-item">'+img+'<span class="nav-ac-name">'+p.nom+'</span><span class="nav-ac-price">'+parseFloat(p.prix).toLocaleString('fr-FR')+' FCFA</span></a>';
+              var img = p.image
+                ? '<img src="'+p.image+'" alt="" loading="lazy" class="w-11 h-11 object-cover rounded-lg shrink-0" style="border:1px solid var(--nav-border,#E2E8F0);">'
+                : '<div class="w-11 h-11 rounded-lg shrink-0 flex items-center justify-center" style="background:var(--nav-search-bg,#F4F7FC);border:1px solid var(--nav-border,#E2E8F0);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8898AA" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+              h += '<a href="/produits/'+p.slug+'/" class="flex items-center gap-3 px-4 py-2.5 no-underline transition-colors duration-150" style="color:var(--nav-dd-text-hover,#0F1923);border-bottom:1px solid var(--nav-search-bg,#F4F7FC);" onmouseover="this.style.background=\'var(--nav-search-bg,#F4F7FC)\';" onmouseout="this.style.background=\'transparent\';">'+img+'<span class="flex-1 text-sm font-medium font-[\'Poppins\',sans-serif] whitespace-nowrap overflow-hidden text-ellipsis">'+p.nom+'</span><span class="text-[0.8125rem] font-semibold font-[\'Poppins\',sans-serif] whitespace-nowrap shrink-0" style="color:#F97316;">'+parseFloat(p.prix).toLocaleString('fr-FR')+' FCFA</span></a>';
             });
-            h += '<a href="/produits/?search='+encodeURIComponent(q)+'" class="nav-ac-footer">'+NAV_I18N.voirResultats+' →</a>';
+            h += '<a href="/produits/?search='+encodeURIComponent(q)+'" class="block px-4 py-2.5 text-center text-[0.8125rem] font-semibold font-[\'Poppins\',sans-serif] no-underline transition-colors duration-150" style="color:#1E3A8A;background:var(--nav-search-bg,#F4F7FC);border-top:1px solid var(--nav-border,#E2E8F0);" onmouseover="this.style.background=\'var(--nav-dd-hover,#eff4ff)\';" onmouseout="this.style.background=\'var(--nav-search-bg,#F4F7FC)\';">'+NAV_I18N.voirResultats+' →</a>';
             box.innerHTML = h;
           }
           box.style.display = 'block';
@@ -1248,10 +922,7 @@
     var oi = document.getElementById('burger-icon-open');
     var ci = document.getElementById('burger-icon-close');
     var op = m.classList.contains('open');
-
     if (!op) {
-      /* --- Ouverture --- */
-      /* Mémorise la position de scroll actuelle et compense */
       var scrollY = window.scrollY;
       document.body.style.top = '-' + scrollY + 'px';
       document.body.classList.add('mobile-menu-open');
@@ -1261,14 +932,11 @@
       bb.setAttribute('aria-expanded', 'true');
       oi.style.display = 'none';
       ci.style.display = 'block';
-      /* Ajuste max-height selon hauteur réelle de la navbar */
       m.style.maxHeight = 'calc(100vh - ' + nb.offsetHeight + 'px)';
     } else {
-      /* --- Fermeture --- */
       _closeMobileMenu();
     }
   }
-
   function _closeMobileMenu() {
     var m  = document.getElementById('mobile-menu');
     var nb = document.getElementById('main-navbar');
@@ -1276,26 +944,20 @@
     var oi = document.getElementById('burger-icon-open');
     var ci = document.getElementById('burger-icon-close');
     if (!m || !m.classList.contains('open')) return;
-
-    /* Restaure la position de scroll */
     var scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
     document.body.classList.remove('mobile-menu-open');
     document.body.style.top = '';
     nb.classList.remove('menu-open');
     window.scrollTo(0, scrollY);
-
     m.classList.remove('open');
     bb.setAttribute('aria-expanded', 'false');
     if (oi) oi.style.display = 'block';
     if (ci) ci.style.display = 'none';
   }
-
   document.addEventListener('click', function(e) {
     var nb = document.getElementById('main-navbar');
     var m  = document.getElementById('mobile-menu');
-    if (m && m.classList.contains('open') && !nb.contains(e.target)) {
-      _closeMobileMenu();
-    }
+    if (m && m.classList.contains('open') && !nb.contains(e.target)) { _closeMobileMenu(); }
   });
   function toggleDarkMode() {
     var isDark = document.documentElement.classList.toggle('dark');
@@ -1304,16 +966,13 @@
   }
   function _syncDarkIcons() {
     var isDark = document.documentElement.classList.contains('dark');
-    /* Navbar */
     var moon = document.getElementById('icon-moon'), sun = document.getElementById('icon-sun');
     if(moon) moon.style.display = isDark ? 'none' : 'block';
     if(sun)  sun.style.display  = isDark ? 'block' : 'none';
-    /* Dashboard */
     var dmoon = document.getElementById('dash-icon-moon'), dsun = document.getElementById('dash-icon-sun');
     if(dmoon) dmoon.style.display = isDark ? 'none' : 'block';
     if(dsun)  dsun.style.display  = isDark ? 'block' : 'none';
   }
-  /* Init au chargement */
   (function(){ _syncDarkIcons(); })();
 
   // ── Notifications dropdown ──
@@ -1321,16 +980,8 @@
     var loaded = false;
     var wrap = document.getElementById('notif-wrap');
     if (!wrap) return;
-    wrap.addEventListener('mouseenter', function(){
-      if (loaded) return;
-      loaded = true;
-      loadNotifs();
-    });
-    wrap.addEventListener('focusin', function(){
-      if (loaded) return;
-      loaded = true;
-      loadNotifs();
-    });
+    wrap.addEventListener('mouseenter', function(){ if (loaded) return; loaded = true; loadNotifs(); });
+    wrap.addEventListener('focusin',    function(){ if (loaded) return; loaded = true; loadNotifs(); });
   })();
 
   async function loadNotifs() {
@@ -1341,7 +992,7 @@
       var list = document.getElementById('notif-list');
       if (!list) return;
       if (!items.length) {
-        list.innerHTML = '<div style="padding:24px 16px;text-align:center;color:#8898AA;font-size:12.5px;font-family:\'Plus Jakarta Sans\',sans-serif;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" style="margin:0 auto 8px;display:block;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>'+NAV_I18N.aucuneNotif+'</div>';
+        list.innerHTML = '<div class="px-4 py-6 text-center text-[12.5px] font-[\'Plus Jakarta Sans\',sans-serif]" style="color:#8898AA;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E0" stroke-width="1.5" class="mx-auto mb-2 block"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>'+NAV_I18N.aucuneNotif+'</div>';
         return;
       }
       var ICONS = { commande:'🛒', avis:'⭐', stock:'⚠️', systeme:'🔔' };
@@ -1349,9 +1000,8 @@
         var icon = ICONS[n.type_notif] || '🔔';
         var rel  = timeAgo(n.date_creation);
         var bg   = n.is_read ? '' : 'background:#f8f9ff;border-left:3px solid #F97316;';
-        return '<a href="'+(n.lien||'#')+'" onclick="marquerLue('+n.id+',this)" style="display:flex;align-items:flex-start;gap:10px;padding:11px 16px;text-decoration:none;transition:background .12s;'+bg+'" onmouseover="this.style.background=\'#f4f7fc\'" onmouseout="this.style.background=\''+(n.is_read?'':'#f8f9ff')+'\'"><span style="font-size:16px;flex-shrink:0;margin-top:1px;">'+icon+'</span><div style="flex:1;min-width:0;"><p style="font-size:12.5px;font-weight:'+(n.is_read?'500':'600')+';color:#0F1923;font-family:\'Plus Jakarta Sans\',sans-serif;margin:0;line-height:1.4;white-space:normal;">'+escapeHtml(n.titre)+'</p><p style="font-size:11.5px;color:#8898AA;margin:2px 0 0;font-family:\'Plus Jakarta Sans\',sans-serif;line-height:1.4;white-space:normal;">'+escapeHtml(n.message.substring(0,80))+(n.message.length>80?'…':'')+'</p><p style="font-size:10.5px;color:#CBD5E0;margin-top:3px;font-family:\'Plus Jakarta Sans\',sans-serif;">'+rel+'</p></div></a>';
+        return '<a href="'+(n.lien||'#')+'" onclick="marquerLue('+n.id+',this)" class="flex items-start gap-2.5 px-4 py-3 no-underline transition-colors duration-150" style="'+bg+'" onmouseover="this.style.background=\'#f4f7fc\';" onmouseout="this.style.background=\''+(n.is_read?'transparent':'#f8f9ff')+'\';"><span style="font-size:16px;flex-shrink:0;margin-top:1px;">'+icon+'</span><div class="flex-1 min-w-0"><p class="text-[12.5px] m-0 leading-snug" style="font-weight:'+(n.is_read?'500':'600')+';color:#0F1923;font-family:\'Plus Jakarta Sans\',sans-serif;white-space:normal;">'+escapeHtml(n.titre)+'</p><p class="text-[11.5px] m-0 mt-0.5 leading-snug" style="color:#8898AA;font-family:\'Plus Jakarta Sans\',sans-serif;white-space:normal;">'+escapeHtml(n.message.substring(0,80))+(n.message.length>80?'…':'')+'</p><p class="text-[10.5px] mt-1 m-0" style="color:#CBD5E0;font-family:\'Plus Jakarta Sans\',sans-serif;">'+rel+'</p></div></a>';
       }).join('');
-      // Mettre à jour le badge
       var nonLues = items.filter(function(n){ return !n.is_read; }).length;
       var badge = document.getElementById('notif-badge');
       if (badge) { badge.textContent = nonLues; badge.style.display = nonLues > 0 ? 'flex' : 'none'; }
@@ -1373,16 +1023,16 @@
 
   {# ── Chaînes traduites pour le JS ── #}
   var NAV_I18N = {
-    aucunProduit: '{% trans "Aucun produit trouvé" %}',
+    aucunProduit:  '{% trans "Aucun produit trouvé" %}',
     voirResultats: '{% trans "Voir tous les résultats" %}',
-    aucuneNotif: '{% trans "Aucune notification" %}',
-    aLInstant: "{% trans 'À l\'instant' %}"
+    aucuneNotif:   '{% trans "Aucune notification" %}',
+    aLInstant:     "{% trans 'À l\'instant' %}"
   };
   function timeAgo(iso) {
     var d = new Date(iso), now = new Date(), diff = now - d;
-    if (diff < 60000) return NAV_I18N.aLInstant;
+    if (diff < 60000)   return NAV_I18N.aLInstant;
     if (diff < 3600000) return Math.floor(diff/60000)+' min';
-    if (diff < 86400000) return Math.floor(diff/3600000)+'h';
+    if (diff < 86400000)  return Math.floor(diff/3600000)+'h';
     if (diff < 604800000) return Math.floor(diff/86400000)+'j';
     return d.toLocaleDateString(document.documentElement.lang||'fr', {day:'numeric',month:'short'});
   }
