@@ -399,6 +399,18 @@
   .mt-px {
     margin-top: 1px;
   }
+  .container {
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    @media (min-width: 768px) {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
   }
@@ -1929,20 +1941,6 @@
     height: 1px;
     background: var(--color-line);
     margin: 1.25rem 0;
-  }
-  .container {
-    width: 100%;
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-  }
-  @media (min-width: 768px) {
-    .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
   }
   .section-title {
     font-family: 'Poppins', sans-serif;
