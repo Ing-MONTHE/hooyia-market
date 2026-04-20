@@ -2,7 +2,7 @@ name: CI/CD — Hooyia Market
 
 on:
   push:
-    branches: [feature/docker-configuration]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -77,9 +77,10 @@ jobs:
       - name: Tests Django dans l'image buildée
         run: |
           set -o pipefail
-          IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm web | tee test_output.log
+          docker compose -f docker-compose.test.yml run --rm web | tee test_output.log
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
 
       - name: Logs des tests en cas d'échec
         if: failure()
