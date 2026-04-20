@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "HooYia Market — Design System Build",
   "scripts": {
-    "tw:dev": "@tailwindcss/cli -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --watch",
-    "tw:build": "@tailwindcss/cli -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --minify"
+    "tw:dev":   "tailwindcss -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --watch",
+    "tw:build": "tailwindcss -i ./static/css/tailwind.src.css -o ./static/css/tailwind.css --minify"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.2.2",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^3.4.0"
   }
 }
