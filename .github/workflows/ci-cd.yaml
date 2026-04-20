@@ -1,15 +1,15 @@
 name: CI/CD — Hooyia Market
 
-# Declancheur
 on:
   push:
+    branches: [feature/docker-configuration]
+  pull_request:
     branches: [main]
-
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-  # Arrete le job en cour et relance le nouveau job a chaque nouveau push sur la branche main.
+# Annule le run précédent sur la même branche dès qu'un nouveau push arrive
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
@@ -18,15 +18,11 @@ jobs:
 
   # ════════════════════════════════════════════════════════════
   # JOB 1 — BUILD, TESTS & PUSH (CI)
-  # Construit l'image Docker, lance les tests Django dedans,
-  # puis pousse l'image sur ghcr.io uniquement si tout passe.
-  # Si le build ou les tests échouent → la prod n'est pas touchée.
   # ════════════════════════════════════════════════════════════
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
-    # Permission d'écriture sur ghcr.io via le token GitHub automatique
     permissions:
       contents: read
       packages: write
@@ -35,21 +31,29 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4.2.2
 
-      # Calcule IMAGE_NAME en minuscules via bash
-      # ghcr.io exige que le nom du repository soit entièrement en minuscules
-      # github.repository peut contenir des majuscules (ex: Ing-MONTHE/hooyia-market)
-      # On utilise ${VAR,,} (bash) pour forcer le lowercase avant injection dans GITHUB_ENV
-      - name: Definition de IMAGE_NAME en minuscules
+      # ── Tailwind CSS ──────────────────────────────────────────
+      # Cache npm pour éviter de retélécharger node_modules à chaque run
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Compilation Tailwind CSS (production)
+        run: |
+          npm ci
+          npm run tw:build
+
+      # ── Docker ───────────────────────────────────────────────
+      - name: Définition de IMAGE_NAME en minuscules
         run: |
           IMAGE_NAME="ghcr.io/${{ github.repository }}"
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> $GITHUB_ENV
 
-      # Active BuildKit (builder avancé : cache, multi-stage plus rapide)
       - name: Configuration de Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Connexion à GitHub Container Registry avec le token automatique
-      # Pas besoin de secret supplémentaire — GITHUB_TOKEN suffit
       - name: Connexion à GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -57,45 +61,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build l'image et la pousse sur ghcr.io
-      # On tague avec le SHA du commit pour tracer exactement quelle version est déployée
-      # + le tag "latest" pour que le VPS puisse toujours tirer la dernière version
       - name: Build et Push de l'image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: true
+          # Push uniquement sur push main, pas sur les PR
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          # Cache BuildKit sur ghcr.io pour accélérer les builds suivants
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-      # Lance les tests Django dans l'image qui vient d'être buildée
-      # C'est ici qu'on valide que l'image est fonctionnelle avant de déployer
-      # IMAGE_NAME et IMAGE_TAG sont injectées pour que docker-compose.test.yml
-      # sache quelle image tirer depuis ghcr.io
-      - name: 🧪 Tests Django dans l'image buildée
+      - name: Tests Django dans l'image buildée
         run: |
-          # set -o pipefail : force le pipeline à échouer si les tests échouent
-          # sans ça, "tee" absorbe le code de sortie et le pipeline déploie quand même
           set -o pipefail
           IMAGE_TAG=${{ github.sha }} docker compose -f docker-compose.test.yml run --rm web | tee test_output.log
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
-      # Affiche les logs des tests en cas d'échec
-      - name: Affichage des resultats des tests en cas d'echec
+      - name: Logs des tests en cas d'échec
         if: failure()
         run: |
-          echo "❌ Les tests ont échoué dans l'image buildée. Voici les détails :"
+          echo "❌ Les tests ont échoué. Détails :"
           cat test_output.log
-          docker compose -f docker-compose.test.yml logs  # Affiche aussi les logs des conteneurs
+          docker compose -f docker-compose.test.yml logs
           exit 1
 
-      - name: Email en cas d'echec du build
+      - name: Email — Échec du build
         if: failure()
         uses: dawidd6/action-send-mail@v4
         with:
@@ -103,34 +97,28 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "❌ Échec du build Docker sur Hooyia Market"
+          subject: "❌ Échec du build Docker — Hooyia Market"
           to: "monthejunior45@gmail.com"
           from: "CI/CD Hooyia Market"
           body: |
-            Bonjour,
-
             Le build de l'image Docker a échoué. La production n'a pas été affectée.
-            Veuillez consulter les logs du pipeline pour plus de détails.
-
-            Cordialement,
-            Votre Equipe Hooyia Market
+            Consultez les logs du pipeline pour plus de détails.
 
   # ════════════════════════════════════════════════════════════
   # JOB 2 — DÉPLOIEMENT (CD)
-  # Se connecte au VPS et tire l'image déjà buildée depuis ghcr.io
-  # Plus de build sur le VPS — juste un docker pull + restart
+  # Uniquement sur push main (jamais sur PR)
   # ════════════════════════════════════════════════════════════
   deploy:
-    needs: build  # Lance uniquement si le build et les tests ont réussi
+    needs: build
     name: Déploiement sur Linode
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4.2.2
 
-      # Même logique que dans le job build — IMAGE_NAME forcé en minuscules
-      - name: Definition de IMAGE_NAME en minuscules
+      - name: Définition de IMAGE_NAME en minuscules
         run: |
           IMAGE_NAME="ghcr.io/${{ github.repository }}"
           echo "IMAGE_NAME=${IMAGE_NAME,,}" >> $GITHUB_ENV
@@ -140,42 +128,38 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts # Ajoute le VPS à la liste des hôtes connus pour éviter les prompts de confirmation
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploiement sur le VPS
+      # Copie uniquement le fichier compose — plus de git pull sur le VPS
+      - name: Envoi du docker-compose.prod.yml sur le VPS
         run: |
-          echo "🚀 Déploiement en cours sur le VPS..."
+          scp -o StrictHostKeyChecking=no docker-compose.prod.yml \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PROJECT_PATH }}/
+
+      - name: Déploiement sur le VPS
+        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
             set -e
-
-            echo "📁 Accès au dossier du projet..."
             cd ${{ secrets.VPS_PROJECT_PATH }}
 
-            echo "⬇️  Récupération du dernier code..."
-            git pull origin main
-
-            # Connexion à ghcr.io pour pouvoir tirer l'image privée
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # On injecte le SHA du commit pour que le VPS tire exactement
-            # la même image que celle buildée par le job précédent
             export IMAGE_TAG=${{ github.sha }}
             export IMAGE_NAME=${{ env.IMAGE_NAME }}
 
-            echo "⬇️  Téléchargement de la nouvelle image depuis ghcr.io..."
+            echo "⬇️  Pull de la nouvelle image..."
             docker pull \${IMAGE_NAME}:\${IMAGE_TAG}
 
-            echo "🔄 Redémarrage des conteneurs avec la nouvelle image..."
-            # IMAGE_TAG est lue par docker-compose.prod.yml (voir note ci-dessous)
+            echo "🔄 Redémarrage des conteneurs..."
             IMAGE_TAG=\${IMAGE_TAG} docker compose -f docker-compose.prod.yml up -d --force-recreate --pull always
 
-            echo "🧹 Nettoyage des images Docker inutilisées..."
+            echo "🧹 Nettoyage des images obsolètes..."
             docker image prune -f
 
             echo "✅ Déploiement terminé !"
           EOF
 
-      - name: Email en cas d'echec du deploiement
+      - name: Email — Échec du déploiement
         if: failure()
         uses: dawidd6/action-send-mail@v4
         with:
@@ -183,19 +167,13 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "❌ Échec du déploiement sur Hooyia Market"
+          subject: "❌ Échec du déploiement — Hooyia Market"
           to: "monthejunior45@gmail.com"
           from: "CI/CD Hooyia Market"
           body: |
-            Bonjour,
+            Le déploiement a échoué. Vérifiez les logs du pipeline.
 
-            Le déploiement de la dernière version de Hooyia Market sur le VPS a échoué.
-            Veuillez vérifier les logs du pipeline pour plus de détails.
-
-            Cordialement,
-            Votre Equipe Hooyia Market
-
-      - name: Email en cas de succes du deploiement
+      - name: Email — Déploiement réussi
         if: success()
         uses: dawidd6/action-send-mail@v4
         with:
@@ -203,14 +181,8 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "✅ Déploiement réussi sur Hooyia Market"
+          subject: "✅ Déploiement réussi — Hooyia Market"
           to: "monthejunior45@gmail.com"
           from: "CI/CD Hooyia Market"
           body: |
-            Bonjour,
-
-            Le déploiement de la dernière version de Hooyia Market sur le VPS a été effectué avec succès.
-            La nouvelle version est maintenant en ligne !
-
-            Cordialement,
-            Votre Equipe Hooyia Market
+            La nouvelle version de Hooyia Market est en ligne !

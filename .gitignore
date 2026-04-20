@@ -1,13 +1,7 @@
-# Crée le fichier .gitignore à la racine
-touch .gitignore
-```
-
-**Contenu du `.gitignore` :**
-```
 # Environnement virtuel
 venv/
 
-# Fichier sensible
+# Fichiers sensibles
 .env
 .env.dev
 .env.prod
@@ -24,7 +18,12 @@ __pycache__/
 media/
 staticfiles/
 db.sqlite3
+
+# Node
 node_modules/
+
+# Tailwind — fichier généré (compilé en CI/local via npm run tw:build)
+static/css/tailwind.css
 
 # IDE
 .vscode/

@@ -15,8 +15,12 @@ __pycache__
 *.pyd
 .Python
 
-# Node
+# Node (tailwind.css est compilé avant le build Docker dans le CI)
 node_modules/
+package.json
+package-lock.json
+tailwind.config.js
+static/css/tailwind.src.css
 
 # Médias locaux
 media/
@@ -25,3 +29,7 @@ mediafiles/
 # Docker
 Dockerfile
 docker-compose*.yml
+
+# Dev only
+requirements-dev.txt
+.pre-commit-config.yaml

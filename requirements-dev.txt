@@ -1,0 +1,8 @@
+# Dépendances de développement uniquement (jamais installées en prod/Docker)
+-r requirements.txt
+
+coverage==7.13.4
+django-debug-toolbar==6.2.0
+django-extensions==4.1
+pip-chill==1.0.3
+pre_commit==4.5.1
