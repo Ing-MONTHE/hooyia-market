@@ -2,7 +2,7 @@ name: CI/CD — Hooyia Market
 
 on:
   push:
-    branches: [main]
+    branches: [feature/docker-configuration]
   pull_request:
     branches: [main]
 
